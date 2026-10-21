@@ -7,6 +7,7 @@ on:
     paths:
       - 'Zikra_AndroidTV_Project_New_Logo.zip'
       - '.github/workflows/build-apk.yml'
+      - 'B6DF84EE-56EC-4C48-A78B-9C7DA71CB97E.png'
 
 permissions:
   contents: read
@@ -21,6 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check ZIP file
+        shell: bash
         run: |
           test -f Zikra_AndroidTV_Project_New_Logo.zip || {
             echo "ERROR: Project ZIP not found"
@@ -44,6 +46,64 @@ jobs:
 
           echo "PROJECT_ROOT=$ROOT" >> "$GITHUB_ENV"
           echo "Project found at: $ROOT"
+
+      - name: Add app logo
+        shell: bash
+        run: |
+          LOGO="B6DF84EE-56EC-4C48-A78B-9C7DA71CB97E.png"
+
+          if [ ! -f "$LOGO" ]; then
+            echo "ERROR: Logo file not found: $LOGO"
+            ls -la
+            exit 1
+          fi
+
+          python3 -m pip install --quiet Pillow
+
+          python3 - "$PROJECT_ROOT" "$LOGO" <<'PY'
+          import sys
+          from pathlib import Path
+          from PIL import Image
+
+          root = Path(sys.argv[1])
+          logo_path = Path(sys.argv[2])
+          res = root / "app" / "src" / "main" / "res"
+
+          if not res.is_dir():
+              raise SystemExit(f"ERROR: Android res directory not found: {res}")
+
+          image = Image.open(logo_path).convert("RGBA")
+
+          # Generate launcher icons for standard Android densities.
+          sizes = {
+              "mipmap-mdpi": 48,
+              "mipmap-hdpi": 72,
+              "mipmap-xhdpi": 96,
+              "mipmap-xxhdpi": 144,
+              "mipmap-xxxhdpi": 192,
+          }
+
+          for folder, size in sizes.items():
+              target_dir = res / folder
+              target_dir.mkdir(parents=True, exist_ok=True)
+              icon = image.resize((size, size), Image.Resampling.LANCZOS)
+              icon.save(target_dir / "ic_launcher.png")
+              icon.save(target_dir / "ic_launcher_round.png")
+
+          # Replace adaptive-icon foreground if the project already uses it.
+          for name in ("ic_launcher_foreground.png",):
+              for folder in sizes:
+                  target = res / folder / name
+                  if target.exists():
+                      icon = image.resize((sizes[folder], sizes[folder]), Image.Resampling.LANCZOS)
+                      icon.save(target)
+
+          print("Generated launcher icons in Android mipmap folders.")
+          PY
+
+          echo "Checking launcher icon references..."
+          grep -R "android:icon\|android:roundIcon" \
+            "$PROJECT_ROOT/app/src/main/AndroidManifest.xml" || true
 
       - name: Add scrolling adhkar ticker
         shell: bash
