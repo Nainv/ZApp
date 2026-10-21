@@ -8,24 +8,42 @@ on:
       - 'Zikra_AndroidTV_Project_New_Logo.zip'
       - '.github/workflows/build-apk.yml'
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract Android project
+      - name: Check ZIP file
         run: |
-          unzip -o Zikra_AndroidTV_Project_New_Logo.zip -d extracted
-          ROOT="$(dirname "$(find extracted -name settings.gradle -type f | head -n 1)")"
-          if [ -z "$ROOT" ] || [ ! -f "$ROOT/app/build.gradle" ]; then
-            echo "Android project structure not found in ZIP"
-            find extracted -maxdepth 5 -type f
+          test -f Zikra_AndroidTV_Project_New_Logo.zip || {
+            echo "ERROR: Project ZIP not found"
+            ls -la
+            exit 1
+          }
+
+      - name: Extract Android project
+        shell: bash
+        run: |
+          mkdir extracted
+          unzip -q Zikra_AndroidTV_Project_New_Logo.zip -d extracted
+
+          ROOT="$(dirname "$(find extracted -type f \( -name settings.gradle -o -name settings.gradle.kts \) -print -quit)")"
+
+          if [ -z "$ROOT" ] || [ ! -f "$ROOT/app/build.gradle" -a ! -f "$ROOT/app/build.gradle.kts" ]; then
+            echo "ERROR: Android Gradle project not found in ZIP"
+            find extracted -maxdepth 5 -type f | head -200
             exit 1
           fi
+
           echo "PROJECT_ROOT=$ROOT" >> "$GITHUB_ENV"
+          echo "Project found at: $ROOT"
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -38,14 +56,33 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK packages
+      - name: Prepare Android SDK
+        shell: bash
         run: |
-          sdkmanager --sdk_root="$ANDROID_HOME" "platforms;android-35" "build-tools;35.0.0"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager 2>/dev/null | head -1)"
+          fi
+
+          if [ -z "$SDKMANAGER" ] || [ ! -x "$SDKMANAGER" ]; then
+            echo "ERROR: sdkmanager not found"
+            find "$ANDROID_HOME" -maxdepth 4 -type f -name sdkmanager
+            exit 1
+          fi
+
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses || true
+
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
 
       - name: Build APK
+        shell: bash
         run: |
           cd "$PROJECT_ROOT"
           gradle --no-daemon assembleDebug
@@ -54,5 +91,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Zikra-Android-TV-APK
-          path: '**/build/outputs/apk/debug/*.apk'
+          path: ${{ env.PROJECT_ROOT }}/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
