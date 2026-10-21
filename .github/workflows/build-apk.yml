@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,11 +19,10 @@ jobs:
       - name: Extract Android project
         run: |
           unzip -o Zikra_AndroidTV_Project_New_Logo.zip -d extracted
-          find extracted -name gradlew -type f
           ROOT="$(dirname "$(find extracted -name settings.gradle -type f | head -n 1)")"
           if [ -z "$ROOT" ] || [ ! -f "$ROOT/app/build.gradle" ]; then
             echo "Android project structure not found in ZIP"
-            find extracted -maxdepth 4 -type f
+            find extracted -maxdepth 5 -type f
             exit 1
           fi
           echo "PROJECT_ROOT=$ROOT" >> "$GITHUB_ENV"
@@ -41,8 +41,11 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
+
       - name: Install Android SDK packages
-        run: yes | sdkmanager --licenses && sdkmanager "platforms;android-35" "build-tools;35.0.0"
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Build APK
         run: |
