@@ -177,10 +177,12 @@ window.handleAndroidMediaKey=function(command){
       case "toggle": toggleAudio(); break;
       case "stop": audio.pause(); try{audio.currentTime=0;}catch(e){} updatePlayButton(); break;
       case "next":
-        if(times.length)jump(1); else if(currentSurahNum<114)loadSurahAndShow(currentSurahNum+1);
+        if(currentSurahNum<114) loadSurahAndShow(currentSurahNum+1);
+        else qmsg(lang==="ar"?"هذه آخر سورة في القرآن الكريم.":lang==="de"?"Das ist die letzte Sure.":"This is the last surah.");
         break;
       case "previous":
-        if(times.length)jump(-1); else if(currentSurahNum>1)loadSurahAndShow(currentSurahNum-1);
+        if(currentSurahNum>1) loadSurahAndShow(currentSurahNum-1);
+        else qmsg(lang==="ar"?"هذه أول سورة في القرآن الكريم.":lang==="de"?"Das ist die erste Sure.":"This is the first surah.");
         break;
     }
   }catch(e){console.error("Android media key:",e);}
@@ -254,21 +256,22 @@ $("exitModal").addEventListener("click",e=>{if(e.target===$("exitModal"))hideExi
 document.addEventListener("keydown",function(event){
   const key=event.key;
   if(["Escape","Backspace","BrowserBack","GoBack"].includes(key)||event.keyCode===4){event.preventDefault();event.stopImmediatePropagation();handleBack();return}
-  const modal=document.querySelector(".modal-backdrop.open");
-  if(modal){
-    if(["ArrowDown","ArrowUp","ArrowRight","ArrowLeft"].includes(key)){
-      const controls=Array.from(modal.querySelectorAll('button:not(:disabled),select,input,.surah-item,[tabindex="0"]')).filter(el=>el.offsetWidth>0&&el.offsetHeight>0);
-      if(!controls.length)return;
-      if(document.activeElement===$("reciterSearch")&&(key==="ArrowLeft"||key==="ArrowRight"))return;
-      event.preventDefault();let i=controls.indexOf(document.activeElement);
-      if(i<0)i=0;else i=(i+((key==="ArrowDown"||key==="ArrowLeft")?1:controls.length-1))%controls.length;
-      controls[i].focus();if(controls[i].classList.contains("surah-item"))controls[i].scrollIntoView({block:"nearest"});return;
-    }
+
+  // Fallback for remotes whose DPAD/media keys reach the WebView instead of Java.
+  const dpad={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down"};
+  if(dpad[key]){
+    event.preventDefault();event.stopImmediatePropagation();
+    if(typeof window.handleAndroidDpad==="function") window.handleAndroidDpad(dpad[key]);
     return;
   }
-  const controls=Array.from(document.querySelectorAll(".topbar button,.topbar select,.tiles button,.player button,.now-reading")).filter(el=>!el.disabled&&el.offsetWidth>0&&el.offsetHeight>0);
-  if(!["ArrowDown","ArrowRight","ArrowUp","ArrowLeft"].includes(key)||!controls.length)return;
-  event.preventDefault();let i=controls.indexOf(document.activeElement);if(i<0)i=0;else i=(i+((key==="ArrowDown"||key==="ArrowLeft")?1:controls.length-1))%controls.length;controls[i].focus();
+
+  const mediaKeys={
+    MediaPlay:"play", MediaPause:"pause", MediaPlayPause:"toggle",
+    MediaStop:"stop", MediaTrackNext:"next", MediaTrackPrevious:"previous",
+    FastForward:"next", Rewind:"previous"
+  };
+  const command=mediaKeys[key];
+  if(command){event.preventDefault();event.stopImmediatePropagation();window.handleAndroidMediaKey(command);}
 },true);
 
 /* تحديث بيانات الصلاة والطقس فقط؛ لا يمسّ مشغل الصوت أو اللغة أو علامة القراءة. */

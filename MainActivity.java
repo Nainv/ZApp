@@ -121,6 +121,10 @@ public class MainActivity extends Activity {
                 case KeyEvent.KEYCODE_MEDIA_STOP:
                 case KeyEvent.KEYCODE_MEDIA_NEXT:
                 case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
                 case KeyEvent.KEYCODE_HEADSETHOOK:
                     return true;
                 default:
@@ -165,9 +169,11 @@ public class MainActivity extends Activity {
             case KeyEvent.KEYCODE_MEDIA_STOP:
                 sendMediaCommand("stop"); return true;
             case KeyEvent.KEYCODE_MEDIA_NEXT:
+            case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                 sendMediaCommand("next"); return true;
             case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
             case KeyEvent.KEYCODE_MEDIA_REWIND:
                 sendMediaCommand("previous"); return true;
             default:
