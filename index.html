@@ -13,37 +13,38 @@ body{background:radial-gradient(ellipse at 50% 70%,#e3e9d8,transparent 48%),line
 button,select{font:inherit}button{cursor:pointer;touch-action:manipulation}
 button:focus-visible,select:focus-visible,.brand-mark:focus-visible,.now-reading:focus-visible{outline:3px solid #89a27c;outline-offset:2px}
 
-.app{width:100%;max-width:1500px;height:100vh;height:100dvh;margin:auto;padding:clamp(4px,1vh,10px) clamp(10px,2vw,30px);display:flex;flex-direction:column;justify-content:space-between}
+.app{width:100%;max-width:1500px;height:100vh;height:100dvh;margin:auto;padding:clamp(6px,1.2vh,12px) clamp(10px,2vw,30px);display:flex;flex-direction:column;justify-content:space-between}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.brand{display:flex;align-items:center;gap:10px}.brand-mark{width:40px;height:40px;display:grid;place-items:center;border:1px solid #d4c18e;border-radius:12px;background:#fffdf4;color:var(--green);font-size:24px;cursor:pointer;user-select:none}.brand-mark:active{transform:scale(0.92)}
-.brand h1{margin:0;font-size:clamp(18px,2vw,24px)}.brand p{margin:1px 0 0;font-size:11px;color:var(--muted)}
-.tools{display:flex;gap:7px}.icon-btn,#language{height:36px;border:1px solid #d9ddca;background:#fffdf4;border-radius:10px;color:var(--dark)}.icon-btn{width:36px;font-size:16px}#language{width:95px;padding:4px;direction:ltr;font-size:12px}
+.brand{display:flex;align-items:center;gap:10px}.brand-mark{width:42px;height:42px;display:grid;place-items:center;border:1px solid #d4c18e;border-radius:12px;background:#fffdf4;color:var(--green);font-size:25px;cursor:pointer;user-select:none}.brand-mark:active{transform:scale(0.92)}
+.brand h1{margin:0;font-size:clamp(18px,2.2vw,26px)}.brand p{margin:1px 0 0;font-size:11px;color:var(--muted)}
+.tools{display:flex;gap:7px}.icon-btn,#language{height:38px;border:1px solid #d9ddca;background:#fffdf4;border-radius:10px;color:var(--dark)}.icon-btn{width:38px;font-size:16px}#language{width:98px;padding:4px;direction:ltr;font-size:12px}
 
-.date-panel{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:3px 0;padding:4px 14px;background:#ffffff70;border:1px solid #e2dfce;border-radius:12px}
-.clock{font-size:clamp(22px,3.5vw,36px);line-height:1;font-weight:700;font-variant-numeric:tabular-nums;color:var(--dark)}
+.date-panel{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:3px 0;padding:5px 16px;background:#ffffff70;border:1px solid #e2dfce;border-radius:12px}
+.clock{font-size:clamp(22px,3.5vw,38px);line-height:1;font-weight:700;font-variant-numeric:tabular-nums;color:var(--dark)}
 .date-info{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
 .date-text{font-size:11px;color:var(--muted)}.hijri{font-size:12px;color:var(--green);font-weight:700}.city-label{font-size:10px;color:var(--muted)}
 
-.prayer-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:5px 4px;border:1px solid #e2dfce;border-radius:13px;background:#ffffffc9}
+.prayer-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:6px 4px;border:1px solid #e2dfce;border-radius:14px;background:#ffffffc9}
 .prayer{text-align:center;padding:1px;border-left:1px solid #e6e3d6}.prayer:last-child{border-left:0}.p-icon{display:block;font-size:13px;color:var(--gold)}.p-name{font-size:clamp(9px,0.9vw,11px);color:#798272}.p-time{font-size:clamp(10px,1.2vw,14px);font-weight:700}
 
-.tiles{display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,1.5vw,16px);width:min(100%,1100px);margin:4px auto}
-.tile{min-width:0;height:clamp(120px,24vh,190px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px;border:2px solid #e6e1cd;border-radius:18px;background:linear-gradient(145deg,#fffef9,#f1f0e4);box-shadow:0 6px 16px #374a3208;color:var(--dark);text-align:center;overflow:hidden}
+/* الشبكة الرئيسية: تبديل الأماكن وتعديل الحجم */
+.tiles{display:grid;grid-template-columns:1.3fr 1fr;gap:clamp(10px,1.8vw,20px);width:min(100%,1150px);margin:6px auto}
+.tile{min-width:0;height:clamp(130px,25vh,200px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid #e6e1cd;border-radius:18px;background:linear-gradient(145deg,#fffef9,#f1f0e4);box-shadow:0 6px 16px #374a3208;color:var(--dark);text-align:center;overflow:hidden}
 .tile:active{transform:scale(.985)}.tile.selected,.tile:focus-visible{outline:3px solid #89a27c;outline-offset:2px}
 
+.tile-memory{gap:6px;padding:12px;text-align:center}.tile-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:20px;background:#e6ecd9;color:var(--green);border:1px solid #d4c18e}.tile-title{font-size:clamp(12px,1.3vw,16px);font-weight:800}.memory-preview-text{font-size:clamp(12px,1.5vw,18px);font-weight:700;line-height:1.5;overflow-wrap:anywhere}.memory-preview-source{font-size:10px;color:#96783d}.memory-preview-benefit{font-size:11px;line-height:1.4;color:#52684d}
+
 .weather-tile{color:white;border:1px solid #ffffff65;background:linear-gradient(150deg,#83c9ed,#397bb6)}.weather-tile.cloudy{background:linear-gradient(150deg,#aebfcb,#536d81)}.weather-tile.rainy{background:linear-gradient(150deg,#536f91,#243954)}.weather-tile.snowy{background:linear-gradient(150deg,#d7e7ef,#7199b0);color:#243f52}.weather-tile.storm{background:linear-gradient(150deg,#665f7d,#292d48)}
-.weather-icon{font-size:clamp(22px,3.5vw,34px)}.weather-temp{font-size:clamp(24px,3.8vw,36px);font-weight:700}.weather-condition{font-size:clamp(10px,1.2vw,13px)}.weather-extra{font-size:9px;line-height:1.3}
+.weather-icon{font-size:clamp(22px,3.2vw,32px)}.weather-temp{font-size:clamp(24px,3.5vw,36px);font-weight:700}.weather-condition{font-size:clamp(10px,1.1vw,13px)}.weather-extra{font-size:9px;line-height:1.3}
 
-.tile-memory{gap:5px;padding:8px}.tile-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:#e6ecd9;color:var(--green);border:1px solid #d4c18e}.tile-title{font-size:clamp(11px,1.2vw,14px);font-weight:800}.memory-preview-text{font-size:clamp(11px,1.4vw,16px);font-weight:700;line-height:1.5;overflow-wrap:anywhere}.memory-preview-source{font-size:9px;color:#96783d}.memory-preview-benefit{font-size:10px;line-height:1.4;color:#52684d}
-
-.player{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.6fr) auto;align-items:center;gap:10px;padding:10px 14px;min-height:80px;border:1px solid #dce0d0;border-radius:16px;background:linear-gradient(110deg,#fffdf4ed,#edf0e4ed)}
+.player{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.6fr) auto;align-items:center;gap:10px;padding:10px 14px;min-height:82px;border:1px solid #dce0d0;border-radius:16px;background:linear-gradient(110deg,#fffdf4ed,#edf0e4ed)}
 .now-reading{display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer;padding:4px;border-radius:10px;transition:background 0.2s}.now-reading:hover{background:#e8eee0}
 .mini-mushaf{width:38px;height:40px;flex-shrink:0;border-radius:10px;background:linear-gradient(145deg,#dce6d2,#bacdaf);border:1px solid #bd9b52;display:grid;place-items:center;font-size:22px;color:var(--dark)}
 .now-reading strong{display:block;font-size:12px;color:var(--dark)}.now-reading small{display:block;font-size:10px;color:var(--green);font-weight:bold}
 .track-area{min-width:0}.verse-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:3px}.verse{font-size:12px;line-height:1.4;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ayah-number{flex-shrink:0;width:24px;height:24px;display:grid;place-items:center;border:1.5px solid var(--gold);border-radius:50%;background:#f8f0d9;font-size:10px;font-weight:800}.progress{height:4px;border-radius:20px;background:#dfe3d6;overflow:hidden}.progress-fill{height:100%;width:0;background:var(--green)}
 .controls{display:flex;align-items:center;justify-content:center;gap:5px}.control{border:0;background:#e9ecdf;border-radius:50%;width:34px;height:34px;color:var(--dark);font-size:13px}.control.main{width:40px;height:40px;color:white;background:var(--green);font-size:16px}
 
-.dua-bar{display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;margin-top:2px;padding:4px 10px;border:1px solid #e2dfce;border-radius:12px;background:#ffffffc9;color:#304b3a;font-size:clamp(11px,1.4vw,15px);font-weight:700}.dua-symbol{color:var(--gold);font-size:16px}.dua-text{flex:1;text-align:center}
+.dua-bar{display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;margin-top:2px;padding:4px 10px;border:1px solid #e2dfce;border-radius:12px;background:#ffffffc9;color:#304b3a;font-size:clamp(11px,1.4vw,15px);font-weight:700}.dua-symbol{color:var(--gold);font-size:16px}.dua-text{flex:1;text-align:center}
 .footer{margin-top:2px;padding:2px 8px;border-top:1px solid #d9ddca;display:flex;align-items:center;justify-content:space-between;color:#7f8976;font-size:8px}.directed{font-size:8px;color:var(--green);font-weight:600}
 
 .modal-backdrop{position:fixed;inset:0;background:#15251dba;z-index:100;display:none;align-items:center;justify-content:center;padding:10px}.modal-backdrop.open{display:flex}.modal{width:min(1000px,100%);max-height:94vh;max-height:94dvh;overflow:auto;border-radius:20px;padding:clamp(10px,2vw,20px);background:#f9f7ed;color:var(--dark);box-shadow:0 20px 70px #0003;overscroll-behavior:contain}.modal-backdrop:has(#quranModal.open){padding:0}.modal:has(#surahContainer){width:100%;height:100%;max-height:100dvh;border-radius:0;padding:clamp(10px,2vw,20px);display:flex;flex-direction:column}.modal:has(#surahContainer) #surahContainer{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
@@ -90,9 +91,10 @@ button:focus-visible,select:focus-visible,.brand-mark:focus-visible,.now-reading
   <div class="prayer"><span class="p-icon">☾</span><div class="p-name" data-ar="العشاء" data-en="Isha" data-de="Ischa">العشاء</div><div class="p-time" id="isha">--:--</div></div>
 </section>
 
+<!-- كروت الواجهة الرئيسية: ذِكرى على اليمين والطقس على اليسار -->
 <main class="tiles">
-  <button class="tile weather-tile" id="weatherCard" aria-label="تفاصيل الطقس"><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></button>
   <button class="tile tile-memory" id="memoryCard" aria-label="تبديل الذكرى"><span class="tile-icon">📜</span><span class="tile-title" id="memoryCardTitle">ذِكرى قرآنية ونبوية</span><span class="memory-preview-text" id="memoryPreviewText"></span><span class="memory-preview-source" id="memoryPreviewSource"></span><span class="memory-preview-benefit" id="memoryPreviewBenefit"></span></button>
+  <button class="tile weather-tile" id="weatherCard" aria-label="تفاصيل الطقس"><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></button>
 </main>
 
 <section class="player">
@@ -153,15 +155,25 @@ const $=id=>document.getElementById(id);
 let lang="ar",weatherData=null,city={name:"Erfurt",latitude:50.9848,longitude:11.0299};
 let previousFocus=null,backCount=0,backTimer=null;
 
-/* تنظيف الكاش والذاكرة بضغط الشعار */
-$("brandMarkBtn").addEventListener("click", () => {
+/* التطهير والتنظيف التام للكاش والأجزاء المخزنة */
+$("brandMarkBtn").addEventListener("click", async () => {
     $("brandMarkBtn").textContent = "🔄";
-    qmsg("جاري تنظيف الكاش والذاكرة...");
+    qmsg("جاري تطهير وتنظيف الكاش بالكامل...");
+    try {
+        localStorage.clear();
+        sessionStorage.clear();
+        if ('caches' in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+        }
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (let reg of registrations) await reg.unregister();
+        }
+    } catch(e){}
     setTimeout(() => {
-        localStorage.clear(); sessionStorage.clear();
-        if ('caches' in window) caches.keys().then(names => { for (let n of names) caches.delete(n); });
         window.location.reload(true);
-    }, 400);
+    }, 300);
 });
 
 const T={
@@ -187,20 +199,20 @@ function renderWeatherModal(){if(!weatherData)return;const d=weatherData,c=d.cur
 async function chooseCity(){const entered=prompt(T[lang].locationPrompt,city.name);if(!entered?.trim())return;try{const data=await fetchJSON("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(entered.trim())+"&count=1&language="+(lang==="ar"?"ar":lang==="de"?"de":"en")+"&format=json");if(!data.results?.length){alert(T[lang].cityNotFound);return}const f=data.results[0];city={name:f.name,latitude:f.latitude,longitude:f.longitude};updateCityLabel();await Promise.all([loadPrayerTimes(),loadWeather()])}catch(e){alert(T[lang].cityError)}}
 $("locationBtn").addEventListener("click",chooseCity);
 
-/* الذكريات */
+/* الذكريات - مع إمدادها بتفاصيل أوسع وقراءة مريحة */
 const memories=[
-{text:"﴿ فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ﴾",source:"سورة الشرح، الآية 5",en:"Surah Ash-Sharh, 94:5",de:"Sure Asch-Scharh, 94:5",benefit:"تذكّرنا الآية أن الشدة لا تدوم، وأن مع العسر تيسيراً من الله.",ben:"Hardship does not last forever; ease accompanies hardship.",bde:"Schwierigkeiten dauern nicht ewig; Erleichterung folgt."},
-{text:"«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ»",source:"صحيح البخاري، حديث 1؛ وصحيح مسلم، حديث 1907",en:"Sahih al-Bukhari 1; Sahih Muslim 1907",de:"Sahih al-Bukhari 1; Sahih Muslim 1907",benefit:"النية أساس العمل؛ فاحرص على إخلاص قصدك لله.",ben:"Intention is central to deeds. Seek sincerity in what you do.",bde:"Die Absicht ist entscheidend. Bemühe dich um Aufrichtigkeit."},
-{text:"﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",source:"سورة الرعد، الآية 28",en:"Surah Ar-Ra'd, 13:28",de:"Sure Ar-Ra'd, 13:28",benefit:"ذكر الله من أسباب سكينة القلب وطمأنينته.",ben:"Remembering God can bring calm and reassurance.",bde:"Das Gedenken an Gott kann Ruhe und Zuversicht schenken."},
-{text:"«مَنْ لَا يَرْحَمُ لَا يُرْحَمُ»",source:"صحيح البخاري، حديث 6013؛ وصحيح مسلم، حديث 2319",en:"Sahih al-Bukhari 6013; Sahih Muslim 2319",de:"Sahih al-Bukhari 6013; Sahih Muslim 2319",benefit:"الرحمة بالناس والرفق بهم من الأخلاق التي حثّ عليها النبي ﷺ.",ben:"Mercy and gentleness are virtues taught by the Prophet.",bde:"Barmherzigkeit und Sanftmut gehören zu den Lehren des Propheten."},
-{text:"﴿ وَقُلْ رَبِّ زِدْنِي عِلْمًا ﴾",source:"سورة طه، الآية 114",en:"Surah Ta-Ha, 20:114",de:"Sure Ta-Ha, 20:114",benefit:"اطلب من الله العلم النافع، وواصل التعلّم والتدبّر.",ben:"Ask God for beneficial knowledge and keep learning.",bde:"Bitte Gott um nützliches Wissen."}
+{text:"﴿ فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ﴾",source:"سورة الشرح، الآية 5",en:"Surah Ash-Sharh, 94:5",de:"Sure Asch-Scharh, 94:5",benefit:"تذكّرنا الآية الكريمة بأن كل عسر وتعب يتبعه يسر من الله تعالى، وأن الضيق لا يدوم.",ben:"Hardship does not last forever; ease accompanies hardship.",bde:"Schwierigkeiten dauern nicht ewig; Erleichterung folgt."},
+{text:"«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ»",source:"صحيح البخاري، حديث 1؛ وصحيح مسلم، حديث 1907",en:"Sahih al-Bukhari 1; Sahih Muslim 1907",de:"Sahih al-Bukhari 1; Sahih Muslim 1907",benefit:"النية الخالصة هي أساس قبول الأعمال؛ فاصدق مع الله يصدقك ويصلح لك شأنك.",ben:"Intention is central to deeds. Seek sincerity in what you do.",bde:"Die Absicht ist entscheidend. Bemühe dich um Aufrichtigkeit."},
+{text:"﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",source:"سورة الرعد، الآية 28",en:"Surah Ar-Ra'd, 13:28",de:"Sure Ar-Ra'd, 13:28",benefit:"ذكر الله تعالى هو الدواء الأعظم لراحة النفوس وسكينة القلوب وطمأنينتها.",ben:"Remembering God can bring calm and reassurance.",bde:"Das Gedenken an Gott kann Ruhe und Zuversicht schenken."},
+{text:"«مَنْ لَا يَرْحَمُ لَا يُرْحَمُ»",source:"صحيح البخاري، حديث 6013؛ وصحيح مسلم، حديث 2319",en:"Sahih al-Bukhari 6013; Sahih Muslim 2319",de:"Sahih al-Bukhari 6013; Sahih Muslim 2319",benefit:"الرحمة بالخلق سبب لرحمة الخالق؛ فكن رحيماً لمن حولك يرحمك الله.",ben:"Mercy and gentleness are virtues taught by the Prophet.",bde:"Barmherzigkeit und Sanftmut gehören zu den Lehren des Propheten."},
+{text:"﴿ وَقُلْ رَبِّ زِدْنِي عِلْمًا ﴾",source:"سورة طه، الآية 114",en:"Surah Ta-Ha, 20:114",de:"Sure Ta-Ha, 20:114",benefit:"اطلب العلم والتدبر واجعل حياتك زافرة بالتعلم والعمل الصالح الذي ينفعك.",ben:"Ask God for beneficial knowledge and keep learning.",bde:"Bitte Gott um nützliches Wissen."}
 ];
 let memoryIndex=0;
 function renderMemory(){const m=memories[memoryIndex];$("memoryPreviewText").textContent=m.text;$("memoryPreviewSource").textContent=(lang==="ar"?"المصدر: ":lang==="de"?"Quelle: ":"Source: ")+(lang==="ar"?m.source:lang==="de"?m.de:m.en);$("memoryPreviewBenefit").textContent=lang==="ar"?m.benefit:lang==="de"?m.bde:m.ben}
 function nextMemory(){memoryIndex=(memoryIndex+1)%memories.length;renderMemory()}
 $("memoryCard").addEventListener("click",nextMemory);renderMemory();setInterval(nextMemory,30000);
 
-/* أدعية متبدلة مع إيموجي */
+/* أدعية متبدلة مع إيموجيات ملونة */
 const duas=[
   "🤲 اللهم أعنّا على ذكرك وشكرك وحسن عبادتك",
   "🌸 رَبِّ زِدْنِي عِلْمًا ووفقني لكل خير",
@@ -214,7 +226,7 @@ const duas=[
 ];
 let duaIndex=0;setInterval(()=>{$("duaText").textContent=duas[++duaIndex%duas.length]},5000);
 
-/* القرآن الكريم */
+/* القرآن الكريم والفهرس */
 const API="https://mp3quran.net/api/v3",audio=$("audio"),versesBox=$("verses"),statusBox=$("quranStatus");
 let readers=[],times=[],read=null,loaded=false,currentSurahNum=1,surahListCache=[];
 
@@ -433,7 +445,7 @@ function changeLanguage(value){
 }
 $("language").addEventListener("change", e=>changeLanguage(e.target.value));
 
-/* نظام زر الرجوع */
+/* نظام زر الرجوع الذكي والمضبوط */
 function showExitDialog(){ previousFocus=document.activeElement; $("exitModal").classList.add("open"); $("confirmExit").focus(); }
 function hideExitDialog(){ $("exitModal").classList.remove("open"); backCount=0; clearTimeout(backTimer); if(previousFocus&&previousFocus.isConnected) previousFocus.focus(); }
 
@@ -472,7 +484,7 @@ $("confirmExit").addEventListener("click", ()=>{
   else hideExitDialog();
 });
 
-/* التنقل الشبكي بأسهم الريموت */
+/* التنقل بالأسهم والريموت */
 document.addEventListener("keydown", function(event){
   const key = event.key;
   const backKeys = ["Escape", "Backspace", "BrowserBack", "GoBack"];
