@@ -1,0 +1,74 @@
+
+name: Build Zikra Android TV APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Prepare Android project
+        run: |
+          mkdir -p app/src/main/java/com/zikra/tv
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/drawable-nodpi
+
+          if [ -f MainActivity.java ]; then
+            mv MainActivity.java app/src/main/java/com/zikra/tv/
+          fi
+
+          if [ -f AndroidManifest.xml ]; then
+            mv AndroidManifest.xml app/src/main/
+          fi
+
+          if [ -f styles.xml ]; then
+            mv styles.xml app/src/main/res/values/
+          fi
+
+          if [ -f zikra_logo.png ]; then
+            mv zikra_logo.png app/src/main/res/drawable-nodpi/
+          fi
+
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.zikra.tv'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.zikra.tv'
+                  minSdk 23
+                  targetSdk 28
+                  versionCode 1
+                  versionName '1.0.0'
+              }
+          }
+          EOF
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build APK
+        run: gradle assembleDebug
+
+      - name: Save APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: zikra-android-tv-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
