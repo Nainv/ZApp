@@ -36,19 +36,23 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 .weather-scene{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:20px;opacity:.9}
 .weather-scene.sunny{background:radial-gradient(circle at 78% 14%,#fff7b5 0,#ffda7b45 8%,transparent 25%),linear-gradient(145deg,#4daddb,#2872a9 50%,#1c4a75)}
 .weather-scene.cloudy{background:radial-gradient(ellipse at 70% 20%,#c7d3dc55,transparent 36%),linear-gradient(145deg,#879eaf,#536b83 55%,#34475e)}
-.weather-scene.rainy{background:repeating-linear-gradient(110deg,transparent 0 22px,#b8d9ee28 23px 25px),linear-gradient(145deg,#4e7190,#263f5c 65%,#172a42)}
+.weather-scene.rainy{background:radial-gradient(ellipse at 78% 8%,#a7cde52a,transparent 35%),linear-gradient(145deg,#4e7190,#263f5c 65%,#172a42)}
 .weather-scene.snowy{background:radial-gradient(circle at 80% 15%,#fff9 0 2px,transparent 3px),radial-gradient(circle at 60% 28%,#fff9 0 2px,transparent 3px),linear-gradient(145deg,#b9d8e8,#668da7 60%,#3b5e79)}
 .weather-scene.storm{background:radial-gradient(ellipse at 55% 0,#8c83b755,transparent 40%),linear-gradient(145deg,#514c70,#292d49 60%,#161b31)}
+.weather-scene .rain-drop{position:absolute;top:-18px;width:6px;height:10px;border-radius:55% 55% 65% 65%;background:linear-gradient(180deg,#eaf8ff 0%,#a9d7f2 54%,#63a4d4 100%);box-shadow:0 0 3px #b9e4ff65;opacity:.82;transform:rotate(17deg);animation:rain-fall var(--rain-duration,.85s) linear var(--rain-delay,0s) infinite;will-change:transform,top}
+.weather-scene.storm .rain-drop{height:13px;width:7px;opacity:.92;animation-duration:var(--rain-duration,.58s)}
+@keyframes rain-fall{from{top:-18px;transform:translate3d(0,0,0) rotate(17deg)}to{top:110%;transform:translate3d(-15px,0,0) rotate(17deg)}}
+@media(prefers-reduced-motion:reduce){.weather-scene .rain-drop{animation-duration:2.5s;opacity:.45}}
 .weather-scene.night{background:radial-gradient(circle at 78% 18%,#f8f0c9 0 2px,transparent 3px),radial-gradient(circle at 20% 26%,#fff 0 1px,transparent 2px),radial-gradient(circle at 34% 13%,#fff 0 1px,transparent 2px),radial-gradient(circle at 55% 30%,#fff 0 1px,transparent 2px),radial-gradient(circle at 90% 40%,#fff 0 1px,transparent 2px),radial-gradient(circle at 67% 9%,#fff 0 1px,transparent 2px),linear-gradient(160deg,#07152d,#10284a 55%,#172d4c)}
 .weather-modal-content{position:relative;z-index:1}.weather-modal-content .weather-temp{font-size:clamp(38px,5vw,58px);color:#fff}.weather-modal-content .weather-icon{font-size:42px}.weather-modal-content .section-title{color:#fff;font-size:14px;margin:12px 0 7px}
-.weather-days{display:flex;gap:8px;overflow-x:auto;padding:8px 3px 12px;scrollbar-width:thin;overscroll-behavior-x:contain}
+.weather-days{display:flex;direction:ltr;gap:8px;overflow-x:auto;padding:8px 4px 14px;scrollbar-width:thin;overscroll-behavior-x:contain;scroll-behavior:smooth;max-width:100%;touch-action:pan-x}
 .weather-day{flex:0 0 88px;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:1px solid #ffffff42;border-radius:15px;background:#ffffff18;color:#fff;padding:8px 5px;font-size:12px}
-.weather-day .day-icon{font-size:23px}.weather-day .day-range{font-size:11px;white-space:nowrap}.weather-day.selected,.weather-day:focus{outline:3px solid #fff0b4;outline-offset:1px;background:#ffffff35;border-color:#fff0b4}
+.weather-day .day-icon{font-size:23px}.weather-day .day-range{font-size:11px;white-space:nowrap}.weather-day.selected,.weather-day:focus{outline:3px solid #fff0b4;outline-offset:-3px;background:#ffffff40;border-color:#fff0b4;box-shadow:0 0 0 2px #132b45}.weather-day{cursor:pointer;flex-shrink:0;scroll-margin-inline:10px}
 .weather-selected-date{font-size:12px;color:#e7f2ff;margin:2px 0 8px}
 .weather-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{border:1px solid #ffffff38;background:#ffffff18;border-radius:13px;padding:10px;color:#fff;min-height:68px}.stat-label{font-size:11px;color:#d8e6f2}.stat-value{font-size:17px;font-weight:700;margin-top:4px}
-.hourly{display:flex;gap:7px;overflow-x:auto;padding:3px 1px 9px;overscroll-behavior-x:contain}.hour{flex:0 0 70px;text-align:center;padding:8px 4px;border-radius:12px;background:#ffffff18;border:1px solid #ffffff30;font-size:11px;color:#fff}.hour-icon{font-size:20px;margin:4px 0}.daily-list{display:none}
-.language-toggle{font-size:20px}.topbar{position:relative}
-.language-menu{position:absolute;z-index:150;top:44px;right:0;display:flex;flex-direction:column;gap:4px;padding:6px;min-width:125px;border:1px solid #d9ddca;border-radius:12px;background:#fffdf4;box-shadow:0 8px 25px #0002}
+.hourly{display:flex;direction:ltr;gap:7px;overflow-x:auto;padding:4px 3px 11px;overscroll-behavior-x:contain;scroll-behavior:smooth;max-width:100%}.hour{flex:0 0 70px;text-align:center;padding:8px 4px;border-radius:12px;background:#ffffff18;border:1px solid #ffffff30;font-size:11px;color:#fff}.hour-icon{font-size:20px;margin:4px 0}.hour:focus{outline:3px solid #fff0b4;outline-offset:-3px;background:#ffffff36;box-shadow:0 0 0 2px #132b45}.daily-list{display:none}
+.language-toggle{font-size:20px}.topbar{position:relative}.tools{position:relative}
+.language-menu{position:absolute;z-index:150;top:46px;right:0;display:flex;flex-direction:column;gap:4px;padding:6px;min-width:125px;border:1px solid #d9ddca;border-radius:12px;background:#fffdf4;box-shadow:0 8px 25px #0002}
 .language-menu[hidden]{display:none}.language-menu button{border:0;border-radius:8px;background:transparent;color:var(--dark);padding:9px 12px;text-align:center}.language-menu button:focus,.language-menu button.selected{outline:2px solid var(--green);background:#e6ecd9}
 @media(max-width:700px){.weather-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.weather-day{flex-basis:76px;min-height:94px}}
 @media(max-width:700px){.player{grid-template-columns:minmax(0,1fr) auto;gap:6px;padding:6px}.controls{grid-column:2;grid-row:1}.track-area{grid-column:1/-1;grid-row:2}.tiles{grid-template-columns:1fr}.surah-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.app{overflow:auto}.modal{max-height:96dvh}}
@@ -156,8 +160,22 @@ function weatherIcon(code){const c=condition(code),h=new Date().getHours();retur
 async function loadWeather(){ $("weatherCondition").textContent=T[lang].loading;try{weatherData=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=auto&forecast_days=14`);renderWeather()}catch(e){$("weatherCondition").textContent=T[lang].unavailable}}
 function renderWeather(){if(!weatherData)return;const d=weatherData,c=d.current,desc=condition(c.weather_code);$("weatherCard").className="tile weather-tile "+desc.cls;$("weatherIcon").textContent=weatherIcon(c.weather_code);$("weatherTemp").textContent=temp(c.temperature_2m);$("weatherCondition").textContent=desc.text;$("weatherExtra").textContent=`↑ ${temp(d.daily.temperature_2m_max[0])} ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;renderWeatherModal()}
 function weatherSceneClass(code,dateString){
-  const info=condition(code),today=new Date().toISOString().slice(0,10);
-  return dateString===today&&(new Date().getHours()>=20||new Date().getHours()<6)?"night":info.cls;
+  const info=condition(code),today=new Date().toISOString().slice(0,10),night=dateString===today&&(new Date().getHours()>=20||new Date().getHours()<6);
+  // Preserve rain/snow/storm animations even after dark.
+  return night&&!['rainy','snowy','storm'].includes(info.cls)?"night":info.cls;
+}
+function scrollWeatherDayIntoView(button){
+  if(!button)return;
+  const box=$("weatherDays");
+  const targetLeft=button.offsetLeft-box.offsetLeft-(box.clientWidth-button.offsetWidth)/2;
+  box.scrollTo({left:Math.max(0,Math.min(box.scrollWidth-box.clientWidth,targetLeft)),behavior:"smooth"});
+}
+function selectWeatherDay(index,focusButton=true){
+  if(!weatherData?.daily)return;
+  selectedWeatherDay=Math.max(0,Math.min(index,weatherData.daily.time.length-1));
+  renderWeatherModal();
+  const button=$("weatherDays").querySelector(`[data-day="${selectedWeatherDay}"]`);
+  if(focusButton){button?.focus({preventScroll:true});scrollWeatherDayIntoView(button);}
 }
 function renderWeatherDays(){
   if(!weatherData?.daily)return;
@@ -167,7 +185,7 @@ function renderWeatherDays(){
     const b=document.createElement("button");b.type="button";b.className="weather-day"+(i===selectedWeatherDay?" selected":"");b.dataset.day=String(i);b.setAttribute("role","option");b.setAttribute("aria-selected",String(i===selectedWeatherDay));
     const name=document.createElement("span");name.textContent=label;const icon=document.createElement("span");icon.className="day-icon";icon.textContent=condition(d.weather_code[i]).icon;
     const range=document.createElement("span");range.className="day-range";range.textContent=temp(d.temperature_2m_min[i])+" / "+temp(d.temperature_2m_max[i]);
-    b.append(name,icon,range);b.addEventListener("click",()=>{selectedWeatherDay=i;renderWeatherModal();$("weatherDays").querySelector(`[data-day="${i}"]`)?.focus();});box.append(b);
+    b.append(name,icon,range);b.addEventListener("click",()=>selectWeatherDay(i,true));box.append(b);
   });
 }
 function renderWeatherModal(){
@@ -181,7 +199,21 @@ function renderWeatherModal(){
   $("modalTemp").textContent=isToday?temp(c.temperature_2m):temp(daily.temperature_2m_max[idx]);
   $("modalCondition").textContent=desc.text;
   $("modalFeels").textContent=isToday?`${t.feels}: ${temp(c.apparent_temperature)}`:(lang==="ar"?"العظمى / الصغرى: ":lang==="de"?"Höchst-/Tiefstwert: ":"High / low: ")+temp(daily.temperature_2m_max[idx])+" / "+temp(daily.temperature_2m_min[idx]);
-  $("weatherScene").className="weather-scene "+weatherSceneClass(code,date);
+  const scene=$("weatherScene"),sceneClass="weather-scene "+weatherSceneClass(code,date);
+  if(scene.className!==sceneClass){
+    scene.className=sceneClass;scene.replaceChildren();
+    if(["rainy","storm"].includes(sceneClass.replace("weather-scene ",""))){
+      const count=sceneClass.endsWith("storm")?42:32;
+      for(let i=0;i<count;i++){
+        const drop=document.createElement("span");drop.className="rain-drop";
+        drop.style.left=((i*37+9)%100)+"%";
+        drop.style.setProperty("--rain-delay",(-((i*17)%29)/10)+"s");
+        drop.style.setProperty("--rain-duration",(sceneClass.endsWith("storm")?0.48:0.72)+((i*13)%42)/100+"s");
+        drop.style.opacity=String(.42+((i*7)%50)/100);
+        scene.append(drop);
+      }
+    }
+  }
   [["humidityLabel","humidity"],["windLabel","wind"],["maxLabel","max"],["minLabel","min"],["rainLabel","rain"],["uvLabel","uv"]].forEach(([id,k])=>$(id).textContent=t[k]);
   $("humidityValue").textContent=isToday?c.relative_humidity_2m+"%":"—";$("windValue").textContent=isToday?Math.round(c.wind_speed_10m)+" km/h":"—";
   $("maxValue").textContent=temp(daily.temperature_2m_max[idx]);$("minValue").textContent=temp(daily.temperature_2m_min[idx]);
@@ -190,11 +222,12 @@ function renderWeatherModal(){
   const h=d.hourly,now=new Date();let start=isToday?h.time.findIndex(x=>new Date(x)>=now):h.time.findIndex(x=>x.slice(0,10)===date);if(start<0)start=0;
   $("hourlyForecast").replaceChildren();
   for(let i=start;i<Math.min(start+(isToday?12:24),h.time.length)&&h.time[i].slice(0,10)===date;i++){
-    const item=document.createElement("div");item.className="hour";const tm=document.createElement("div");tm.textContent=new Intl.DateTimeFormat(lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",{hour:"2-digit",minute:"2-digit"}).format(new Date(h.time[i]));
+    const item=document.createElement("div");item.className="hour";item.tabIndex=0;item.setAttribute("role","group");
+    const tm=document.createElement("div");tm.textContent=new Intl.DateTimeFormat(lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",{hour:"2-digit",minute:"2-digit"}).format(new Date(h.time[i]));
     const ic=document.createElement("div");ic.className="hour-icon";ic.textContent=condition(h.weather_code[i]).icon;const te=document.createElement("strong");te.textContent=temp(h.temperature_2m[i]);const ra=document.createElement("div");ra.textContent=(h.precipitation_probability?.[i]??0)+"%";item.append(tm,ic,te,ra);$("hourlyForecast").append(item);
   }
 }
-function openModal(id){previousFocus=document.activeElement;$(id).classList.add("open");if(id==="quranModal"&&!loaded){$("surahIndexGrid").style.display="grid";$("versesView").style.display="none"}const first=$(id).querySelector("button:not(:disabled),select,input,.surah-item");first?.focus()}
+function openModal(id){previousFocus=document.activeElement;$(id).classList.add("open");if(id==="quranModal"&&!loaded){$("surahIndexGrid").style.display="grid";$("versesView").style.display="none"}if(id==="weatherModal"){const selected=$("weatherDays").querySelector(`[data-day="${selectedWeatherDay}"]`);if(selected){selected.focus({preventScroll:true});scrollWeatherDayIntoView(selected);return}}const first=$(id).querySelector("button:not(:disabled),select,input,.surah-item");first?.focus()}
 function closeModal(id){$(id).classList.remove("open");if(previousFocus?.isConnected)previousFocus.focus()}
 function openCityModal(){ $("cityInput").value=city.name;$("cityStatus").textContent="";openModal("cityModal")}
 async function geocodeCity(name){const data=await fetchJSON("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(name.trim())+"&count=1&language="+(lang==="ar"?"ar":lang==="de"?"de":"en")+"&format=json");if(!data.results?.length)throw Error(T[lang].cityNotFound);const f=data.results[0];city={name:f.name,latitude:f.latitude,longitude:f.longitude};localStorage.setItem("zikra_city",city.name);localStorage.setItem("zikra_lat",String(city.latitude));localStorage.setItem("zikra_lon",String(city.longitude));updateCityLabel();await Promise.all([loadPrayerTimes(),loadWeather()])}
@@ -404,11 +437,33 @@ document.addEventListener("keydown",function(event){
     return;
   }
 
-  if($("weatherModal").classList.contains("open") && document.activeElement?.classList.contains("weather-day")){
-    const dayButtons=Array.from($("weatherDays").querySelectorAll(".weather-day")),currentIndex=dayButtons.indexOf(document.activeElement);
+  if($("weatherModal").classList.contains("open") && key.startsWith("Arrow")){
+    event.preventDefault();event.stopImmediatePropagation();
+    const dayButtons=Array.from($("weatherDays").querySelectorAll(".weather-day"));
+    const hourCards=Array.from($("hourlyForecast").querySelectorAll(".hour"));
+    const current=document.activeElement,currentDayIndex=dayButtons.indexOf(current),currentHourIndex=hourCards.indexOf(current),close=$("closeWeather");
+    const focusDay=()=>{const selected=dayButtons[selectedWeatherDay]||dayButtons[0];selected?.focus({preventScroll:true});scrollWeatherDayIntoView(selected);};
+    const focusHour=index=>{const item=hourCards[index];if(item){item.focus({preventScroll:true});item.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});}};
     if(key==="ArrowLeft"||key==="ArrowRight"){
-      event.preventDefault();event.stopImmediatePropagation();const step=key==="ArrowRight"?1:-1;
-      dayButtons[Math.max(0,Math.min(dayButtons.length-1,currentIndex+step))]?.focus();return;
+      if(currentDayIndex>=0){
+        // Day buttons and hourly cards are LTR so physical arrows match visual order.
+        const next=currentDayIndex+(key==="ArrowRight"?1:-1);
+        if(next>=0&&next<dayButtons.length)selectWeatherDay(next,true);
+      }else if(currentHourIndex>=0){
+        const next=currentHourIndex+(key==="ArrowRight"?1:-1);
+        if(next>=0&&next<hourCards.length)focusHour(next);
+      }else if(current===close){focusDay();}
+      return;
+    }
+    if(key==="ArrowUp"){
+      if(currentDayIndex>=0)close.focus();
+      else if(currentHourIndex>=0)focusDay();
+      return;
+    }
+    if(key==="ArrowDown"){
+      if(current===close)focusDay();
+      else if(currentDayIndex>=0)focusHour(0);
+      return;
     }
   }
   const direction=ZIKRA_DPAD_KEYS[key];
@@ -436,8 +491,22 @@ document.addEventListener("keydown",function(event){
   }
 },true);
 
-/* تحديث بيانات الصلاة والطقس فقط؛ لا يمسّ مشغل الصوت أو اللغة أو علامة القراءة. */
-$("refreshBtn").addEventListener("click",async()=>{const btn=$("refreshBtn");btn.disabled=true;btn.textContent="⏳";try{await Promise.all([loadPrayerTimes(),loadWeather()])}finally{btn.textContent="🔄";btn.disabled=false}});
+/* زر التحديث يعيد تحميل صفحة التطبيق كاملة مع تجاوز كاش الصفحة، لتظهر نسخة index.html المنشورة حديثاً. */
+$("refreshBtn").addEventListener("click",()=>{
+  const btn=$("refreshBtn");
+  if(btn.dataset.reloading==="1") return;
+  btn.dataset.reloading="1";
+  btn.disabled=true;
+  btn.textContent="⏳";
+  try{
+    const url=new URL(window.location.href);
+    url.searchParams.set("_zikra_refresh",String(Date.now()));
+    url.hash="";
+    window.location.replace(url.toString());
+  }catch(e){
+    window.location.reload();
+  }
+});
 updateCityLabel();renderMemory();updatePlayButton();loadPrayerTimes();loadWeather();loadReaders();checkResumeBookmark();
 </script>
 
