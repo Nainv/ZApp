@@ -10,70 +10,237 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout project
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Locate Android project
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Prepare Android project
         shell: bash
         run: |
           set -euo pipefail
+
+          mkdir -p app/src/main/java/com/zikra/tv
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/drawable
+          mkdir -p app/src/main/res/drawable-nodpi
+          mkdir -p app/src/main/assets
+
+          if [ -f MainActivity.java ]; then
+            cp MainActivity.java app/src/main/java/com/zikra/tv/MainActivity.java
+          elif [ ! -s app/src/main/java/com/zikra/tv/MainActivity.java ]; then
+            echo "ERROR: MainActivity.java is missing"
+            exit 1
+          fi
 
           if [ -f AndroidManifest.xml ]; then
-            echo "PROJECT_DIR=." >> "$GITHUB_ENV"
-          elif [ -f app/src/main/AndroidManifest.xml ]; then
-            echo "PROJECT_DIR=." >> "$GITHUB_ENV"
-          else
-            echo "ERROR: AndroidManifest.xml not found in expected locations."
-            echo "Repository files:"
-            find . -maxdepth 4 -type f | sort | head -200
-            exit 1
+            cp AndroidManifest.xml app/src/main/AndroidManifest.xml
+          elif [ ! -s app/src/main/AndroidManifest.xml ]; then
+            cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+              <uses-feature android:name="android.software.leanback" android:required="false" />
+              <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+              <application
+                  android:label="ذِكرى"
+                  android:icon="@drawable/zikra_icon"
+                  android:banner="@drawable/zikra_banner"
+                  android:usesCleartextTraffic="true"
+                  android:allowBackup="false"
+                  android:hardwareAccelerated="true"
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:screenOrientation="landscape"
+                      android:configChanges="orientation|screenSize|keyboardHidden">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
           fi
 
-      - name: Build APK
+          if [ -f styles.xml ]; then
+            cp styles.xml app/src/main/res/values/styles.xml
+          fi
+
+          test -s app/src/main/java/com/zikra/tv/MainActivity.java
+          test -s app/src/main/AndroidManifest.xml
+          test -s zikra_icon.png
+          test -s zikra_banner.png
+          test -s index.html
+
+          cp zikra_icon.png app/src/main/res/drawable/zikra_icon.png
+          cp zikra_banner.png app/src/main/res/drawable-nodpi/zikra_banner.png
+          cp index.html app/src/main/assets/index.html
+
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = 'ZikraTV'
+          include ':app'
+          EOF
+
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.7.3' apply false
+          }
+          EOF
+
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.zikra.tv'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.zikra.tv'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 5
+                  versionName '1.0.5'
+              }
+
+              signingConfigs {
+                  release {
+                      def ks = System.getenv("ANDROID_KEYSTORE_FILE")
+                      if (!ks) {
+                          throw new GradleException("Signing keystore is missing")
+                      }
+                      storeFile file(ks)
+                      storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                      keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+                  }
+              }
+
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                  }
+              }
+          }
+          EOF
+
+          echo "Android project prepared."
+          echo "Manifest:"
+          cat app/src/main/AndroidManifest.xml
+
+      - name: Validate Android Manifest
         shell: bash
         run: |
           set -euo pipefail
-          echo "Checking project structure..."
-          find . -name AndroidManifest.xml -type f
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          ET.parse("app/src/main/AndroidManifest.xml")
+          print("AndroidManifest.xml is valid.")
+          PY
 
-          if [ -f gradlew ]; then
-            chmod +x gradlew
-            ./gradlew assembleRelease
-          elif [ -f build.gradle ] || [ -f build.gradle.kts ]; then
-            gradle assembleRelease
-          else
-            echo "ERROR: Gradle build files not found."
-            exit 1
-          fi
+      - name: Decode signing key
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
 
-      - name: Find generated APK
-        id: apk
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
+
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode \
+            > "$RUNNER_TEMP/zikra-release.jks"
+
+          test -s "$RUNNER_TEMP/zikra-release.jks"
+          echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/zikra-release.jks" >> "$GITHUB_ENV"
+
+      - name: Verify signing key
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          keytool -list \
+            -keystore "$ANDROID_KEYSTORE_FILE" \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" > /dev/null
+          echo "Signing key verified."
+
+      - name: Build signed APK
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ env.ANDROID_KEYSTORE_FILE }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          gradle --no-daemon assembleRelease --stacktrace
+
+      - name: Verify APK
         shell: bash
         run: |
           set -euo pipefail
-          APK_PATH="$(find . -type f -path '*/build/outputs/apk/*/*.apk' | head -1)"
-          if [ -z "$APK_PATH" ]; then
-            echo "ERROR: APK was not generated."
-            exit 1
-          fi
-          echo "path=$APK_PATH" >> "$GITHUB_OUTPUT"
+          APK="app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK"
+
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" \
+            -name apksigner -type f | sort -V | tail -n 1)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify "$APK"
+
+          echo "APK built and signature verified."
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: zikra-android-tv-apk
-          path: ${{ steps.apk.outputs.path }}
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
+          retention-days: 7
