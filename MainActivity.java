@@ -1,6 +1,15 @@
 package com.zikra.tv;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import org.json.JSONObject;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -22,6 +31,8 @@ public class MainActivity extends Activity {
     private TextView errorView;
     private static final String SITE_URL = "https://koukach91-hash.github.io/zikra-android-tv-new/";
     private boolean pageReady = false;
+    private boolean updateCheckStarted = false;
+    private static final String LATEST_RELEASE_API = "https://api.github.com/repos/koukach91-hash/zikra-android-tv-new/releases/latest";
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +57,15 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidTV");
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) { return false; }
-            @Override public void onPageFinished(WebView view, String url) { super.onPageFinished(view, url); pageReady = true; view.requestFocus(); }
+            @Override public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                pageReady = true;
+                view.requestFocus();
+                if (!updateCheckStarted) {
+                    updateCheckStarted = true;
+                    checkForUpdates();
+                }
+            }
             @Override public void onReceivedError(WebView view, WebResourceRequest request, android.webkit.WebResourceError error) {
                 super.onReceivedError(view, request, error); if (request.isForMainFrame()) showError();
             }
@@ -55,6 +74,77 @@ public class MainActivity extends Activity {
         setContentView(root);
         if (savedInstanceState == null) webView.loadUrl(SITE_URL); else webView.restoreState(savedInstanceState);
     }
+
+    private void checkForUpdates() {
+        new Thread(() -> {
+            HttpURLConnection connection = null;
+            try {
+                connection = (HttpURLConnection) new URL(LATEST_RELEASE_API).openConnection();
+                connection.setRequestMethod("GET");
+                connection.setConnectTimeout(7000);
+                connection.setReadTimeout(7000);
+                connection.setRequestProperty("Accept", "application/vnd.github+json");
+                connection.setRequestProperty("User-Agent", "Zikra-Android-TV");
+                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) return;
+                StringBuilder body = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) body.append(line);
+                }
+                JSONObject release = new JSONObject(body.toString());
+                String tag = release.optString("tag_name", "");
+                String latestVersion = tag.startsWith("v") ? tag.substring(1) : tag;
+                String downloadUrl = "";
+                org.json.JSONArray assets = release.optJSONArray("assets");
+                if (assets != null) {
+                    for (int i = 0; i < assets.length(); i++) {
+                        JSONObject asset = assets.optJSONObject(i);
+                        if (asset != null && "app-release.apk".equals(asset.optString("name"))) {
+                            downloadUrl = asset.optString("browser_download_url", "");
+                            break;
+                        }
+                    }
+                }
+                if (isNewerVersion(latestVersion, BuildConfig.VERSION_NAME) && !downloadUrl.isEmpty()) {
+                    final String finalUrl = downloadUrl;
+                    runOnUiThread(() -> showUpdateDialog(latestVersion, finalUrl));
+                }
+            } catch (Exception ignored) {
+                // Update checks are optional; keep the app working if the network is unavailable.
+            } finally {
+                if (connection != null) connection.disconnect();
+            }
+        }).start();
+    }
+
+    private boolean isNewerVersion(String latest, String current) {
+        try {
+            String[] a = latest.split("\\.");
+            String[] b = current.split("\\.");
+            for (int i = 0; i < Math.max(a.length, b.length); i++) {
+                int av = i < a.length ? Integer.parseInt(a[i].replaceAll("[^0-9].*$", "")) : 0;
+                int bv = i < b.length ? Integer.parseInt(b[i].replaceAll("[^0-9].*$", "")) : 0;
+                if (av != bv) return av > bv;
+            }
+        } catch (Exception ignored) { }
+        return false;
+    }
+
+    private void showUpdateDialog(String version, String downloadUrl) {
+        if (isFinishing()) return;
+        new AlertDialog.Builder(this)
+            .setTitle("تحديث جديد لذِكرى")
+            .setMessage("يتوفر إصدار جديد " + version + " من التطبيق. هل تريد تنزيله الآن؟")
+            .setPositiveButton("تنزيل التحديث", (dialog, which) -> {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl));
+                    startActivity(intent);
+                } catch (Exception ignored) { }
+            })
+            .setNegativeButton("لاحقاً", null)
+            .show();
+    }
+
     private void hideSystemBars() {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |

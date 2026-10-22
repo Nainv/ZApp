@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -17,7 +16,8 @@
 
     <application
         android:label="ذِكرى"
-        android:icon="@drawable/zikra_icon"
+        android:icon="@mipmap/zikra_icon"
+        android:roundIcon="@mipmap/zikra_icon"
         android:banner="@drawable/zikra_banner"
         android:usesCleartextTraffic="true"
         android:allowBackup="false"
