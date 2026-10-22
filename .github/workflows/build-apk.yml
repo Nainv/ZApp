@@ -29,24 +29,31 @@ jobs:
       - name: Prepare Android project
         shell: bash
         run: |
+          set -e
+
           mkdir -p app/src/main/java/com/zikra/tv
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/drawable-nodpi
 
           if [ -f MainActivity.java ]; then
-            mv MainActivity.java app/src/main/java/com/zikra/tv/
+            mv MainActivity.java app/src/main/java/com/zikra/tv/MainActivity.java
           fi
 
           if [ -f AndroidManifest.xml ]; then
-            mv AndroidManifest.xml app/src/main/
+            mv AndroidManifest.xml app/src/main/AndroidManifest.xml
           fi
 
           if [ -f styles.xml ]; then
-            mv styles.xml app/src/main/res/values/
+            mv styles.xml app/src/main/res/values/styles.xml
           fi
 
           if [ -f zikra_logo.png ]; then
-            mv zikra_logo.png app/src/main/res/drawable-nodpi/
+            mv zikra_logo.png app/src/main/res/drawable-nodpi/zikra_logo.png
+          fi
+
+          if [ ! -f app/src/main/AndroidManifest.xml ]; then
+            echo "ERROR: AndroidManifest.xml was not found!"
+            exit 1
           fi
 
           cat > settings.gradle <<'EOF'
@@ -57,6 +64,7 @@ jobs:
                   gradlePluginPortal()
               }
           }
+
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
               repositories {
@@ -64,6 +72,7 @@ jobs:
                   mavenCentral()
               }
           }
+
           rootProject.name = 'ZikraTV'
           include ':app'
           EOF
@@ -93,8 +102,30 @@ jobs:
           }
           EOF
 
+      - name: Validate Android Manifest
+        shell: bash
+        run: |
+          set -e
+
+          echo "=== Manifest location ==="
+          ls -la app/src/main/AndroidManifest.xml
+
+          echo "=== Manifest contents ==="
+          cat -n app/src/main/AndroidManifest.xml
+
+          echo "=== XML validation ==="
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+
+          path = "app/src/main/AndroidManifest.xml"
+          ET.parse(path)
+          print("SUCCESS: XML syntax is valid.")
+          PY
+
       - name: Build APK
-        run: gradle --no-daemon assembleDebug
+        shell: bash
+        run: |
+          gradle --no-daemon assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
