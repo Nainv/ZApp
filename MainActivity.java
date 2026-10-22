@@ -11,13 +11,13 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebResourceRequest;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.graphics.Color;
 import android.view.Gravity;
 
 public class MainActivity extends Activity {
-
     private WebView webView;
     private FrameLayout root;
     private TextView errorView;
@@ -64,33 +64,23 @@ public class MainActivity extends Activity {
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setWebChromeClient(new WebChromeClient());
 
-        // جسر بين صفحة ذِكرى وتطبيق Android
+        // يسمح لصفحة HTML بإغلاق التطبيق الأصلي بعد تأكيد المستخدم.
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidTV");
 
         webView.setWebViewClient(new WebViewClient() {
-
             @Override
             public boolean shouldOverrideUrlLoading(
                     WebView view,
-                    android.webkit.WebResourceRequest request
+                    WebResourceRequest request
             ) {
+                // إبقاء الموقع داخل التطبيق.
                 return false;
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-
-                view.evaluateJavascript(
-                    "document.documentElement.style.webkitTapHighlightColor='transparent';",
-                    null
-                );
             }
 
             @Override
             public void onReceivedError(
                     WebView view,
-                    android.webkit.WebResourceRequest request,
+                    WebResourceRequest request,
                     android.webkit.WebResourceError error
             ) {
                 super.onReceivedError(view, request, error);
@@ -119,7 +109,6 @@ public class MainActivity extends Activity {
     }
 
     private class AndroidBridge {
-
         @JavascriptInterface
         public void exitApp() {
             runOnUiThread(() -> finish());
@@ -160,37 +149,33 @@ public class MainActivity extends Activity {
             errorView = null;
         }
 
-        webView.loadUrl(SITE_URL);
+        if (webView != null) {
+            webView.loadUrl(SITE_URL);
+        }
     }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN
+                && (event.getKeyCode() == KeyEvent.KEYCODE_BACK
+                || event.getKeyCode() == KeyEvent.KEYCODE_ESCAPE)) {
 
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-
-            int key = event.getKeyCode();
-
-            if (key == KeyEvent.KEYCODE_BACK
-                    || key == KeyEvent.KEYCODE_ESCAPE) {
-
-                if (errorView != null) {
-                    retryLoading();
-                    return true;
-                }
-
-                if (webView != null) {
-                    webView.evaluateJavascript(
-                            "if(window.handleAndroidBack){" +
-                            "window.handleAndroidBack();" +
-                            "}else{" +
-                            "history.back();" +
-                            "}",
-                            null
-                    );
-                }
-
+            if (errorView != null) {
+                retryLoading();
                 return true;
             }
+
+            if (webView != null) {
+                webView.evaluateJavascript(
+                        "if (typeof window.handleAndroidBack === 'function') {" +
+                        "window.handleAndroidBack();" +
+                        "}",
+                        null
+                );
+            }
+
+            // لا نستخدم webView.goBack() حتى لا نرجع إلى صفحة قديمة.
+            return true;
         }
 
         return super.dispatchKeyEvent(event);
