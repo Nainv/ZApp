@@ -96,6 +96,82 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media(max-width:700px){.player{grid-template-columns:minmax(0,1fr) auto;gap:6px;padding:6px}.controls{grid-column:2;grid-row:1}.track-area{grid-column:1/-1;grid-row:2}.tiles{grid-template-columns:1fr}.surah-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.app{overflow:auto}.modal{max-height:96dvh}.date-panel{gap:7px;padding:7px;min-height:94px}.date-panel .date-weather-widget{min-width:0;width:auto;flex:1 1 auto;height:82px;padding:6px 8px 6px 72px;grid-template-columns:auto auto minmax(0,1fr);gap:0 5px}.date-panel .date-weather-widget .weather-icon{font-size:30px}.date-panel .date-weather-widget .weather-temp{font-size:23px}.date-panel .date-weather-widget .weather-condition{font-size:10px}.date-panel .date-weather-widget .weather-extra{font-size:8px}.date-panel .date-weather-widget .weather-tap-hint{left:5px;bottom:5px;font-size:7px;padding:3px 5px}.date-info{min-width:75px;flex-basis:110px}.date-text{font-size:9px}.city-label{font-size:8px}.clock{font-size:23px}.tile-memory{min-height:150px;padding:12px}}
 </style>
 
+
+<style id="zikraUnifiedWeatherAndMemoryV5">
+/* One unified weather/date/time surface. Viewport dimensions are unchanged on landscape displays. */
+.date-panel.weather-unified{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:clamp(10px,1.6vw,24px);margin:3px 0;padding:clamp(10px,1.4vh,16px) clamp(12px,2vw,28px);min-height:clamp(104px,15vh,130px);border:1px solid #ffffff78;border-radius:17px;background:linear-gradient(115deg,#15324dcc,#204e70d9),linear-gradient(120deg,#397aa5,#17334d);box-shadow:0 6px 18px #10243820;cursor:pointer;color:#fff;outline-offset:3px}
+.date-panel.weather-unified>*:not(.tile-weather-effects){position:relative;z-index:2}
+.date-panel.weather-unified .tile-weather-effects{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;border-radius:inherit}
+.date-panel.weather-unified.sunny{background:linear-gradient(110deg,#102c45d9 0%,#185176bb 48%,#25699aab 100%),linear-gradient(130deg,#53b3e8,#1a4e7b)}
+.date-panel.weather-unified.cloudy{background:linear-gradient(110deg,#172b40d9,#435b6fd1 55%,#697f8dbf),linear-gradient(145deg,#8ba9ba,#425c70)}
+.date-panel.weather-unified.rainy{background:linear-gradient(110deg,#0b2037d9,#1d3e5bd6 55%,#2b5170c7),linear-gradient(145deg,#416d8f,#142941)}
+.date-panel.weather-unified.snowy{background:linear-gradient(110deg,#173448e8,#315b77d9 58%,#507991c9),linear-gradient(145deg,#b1d1df,#527c94)}
+.date-panel.weather-unified.storm{background:linear-gradient(110deg,#141b36e8,#2c3152dc 55%,#474766c9),linear-gradient(145deg,#5b5978,#202a46)}
+.date-panel.weather-unified.night{background:linear-gradient(110deg,#06142bdc,#0d2747d9 55%,#153758d4),linear-gradient(145deg,#06152d,#18395d)}
+.date-panel.weather-unified.sunny:before{content:"";position:absolute;z-index:0;width:clamp(100px,15vw,210px);height:clamp(100px,15vw,210px);right:26%;top:-85%;border-radius:50%;background:radial-gradient(circle,#fff6bf55 0%,#ffdc7a30 30%,#ffb63810 58%,transparent 72%);animation:weather-sun-glow 4s ease-in-out infinite;pointer-events:none}
+@keyframes weather-sun-glow{0%,100%{transform:scale(.9);opacity:.68}50%{transform:scale(1.14);opacity:1}}
+.date-panel.weather-unified .clock{flex:0 0 auto;min-width:max-content;color:#fff;font-size:clamp(26px,3.8vw,46px);font-weight:800;letter-spacing:.01em;text-shadow:0 2px 8px #00101f8c;line-height:1.05;text-align:center;font-variant-numeric:tabular-nums}
+.date-panel.weather-unified .date-weather-widget{flex:1 1 auto;width:auto;min-width:0;max-width:none;height:auto;min-height:76px;margin:0;padding:4px clamp(8px,1.5vw,22px);display:grid;grid-template-columns:auto auto minmax(0,1fr);grid-template-rows:auto auto;align-items:center;justify-content:center;gap:2px clamp(8px,1.2vw,18px);border:0;border-radius:0;background:transparent;box-shadow:none;isolation:auto;text-align:right;color:#fff}
+.date-panel.weather-unified .weather-icon{grid-column:1;grid-row:1/3;font-size:clamp(34px,4.4vw,54px);line-height:1.1;filter:drop-shadow(0 2px 5px #00101f70)}
+.date-panel.weather-unified .weather-temp{grid-column:2;grid-row:1;font-size:clamp(28px,3.5vw,42px);font-weight:800;line-height:1.05;white-space:nowrap;color:#fff;text-shadow:0 2px 8px #00101f88}
+.date-panel.weather-unified .weather-condition{grid-column:3;grid-row:1;align-self:end;font-size:clamp(12px,1.4vw,17px);font-weight:800;white-space:normal;overflow-wrap:anywhere;color:#fff;text-shadow:0 1px 6px #00101f99}
+.date-panel.weather-unified .weather-extra{grid-column:2/4;grid-row:2;align-self:start;font-size:clamp(9px,.95vw,12px);line-height:1.35;white-space:normal;overflow-wrap:anywhere;color:#f4f9ff;text-shadow:0 1px 5px #00101f99;opacity:.98}
+.date-panel.weather-unified .date-info{flex:0 1 25%;min-width:0;max-width:280px;align-items:flex-end;gap:4px;color:#fff}
+.date-panel.weather-unified .date-text,.date-panel.weather-unified .hijri,.date-panel.weather-unified .city-label{color:#fff;text-shadow:0 1px 6px #00101f99}
+.date-panel.weather-unified .date-text{font-size:clamp(10px,1vw,13px);line-height:1.35}
+.date-panel.weather-unified .hijri{font-size:clamp(11px,1.05vw,13px);font-weight:800}
+.date-panel.weather-unified .city-label{font-size:clamp(9px,.85vw,11px)}
+.date-panel.weather-unified .tile-rain-drop{position:absolute;top:-14px;width:3px;height:10px;border-radius:60% 60% 70% 70%;background:linear-gradient(180deg,#f7fdff,#8ccdf3 65%,#d9f4ff);box-shadow:0 0 5px #c0e9ff8c;opacity:.85;transform:rotate(16deg);animation:tile-rain-fall var(--tile-rain-duration,.75s) linear var(--tile-rain-delay,0s) infinite;will-change:transform,top}
+.date-panel.weather-unified.storm .tile-rain-drop{width:4px;height:13px;opacity:.96}
+.date-panel.weather-unified .tile-snow-flake{position:absolute;top:-14px;color:#fff;font-size:clamp(10px,1.3vw,17px);line-height:1;text-shadow:0 0 7px #dff5ff;animation:tile-snow-fall var(--tile-snow-duration,3s) linear var(--tile-snow-delay,0s) infinite}
+.date-panel.weather-unified .tile-cloud{position:absolute;width:clamp(54px,8vw,100px);height:clamp(19px,2.6vw,30px);border-radius:999px;background:#eff8ff45;box-shadow:0 0 20px #d1eeff20;animation:tile-cloud-drift 7s ease-in-out infinite alternate;filter:blur(.3px)}
+.date-panel.weather-unified .tile-cloud:before,.date-panel.weather-unified .tile-cloud:after{content:"";position:absolute;bottom:4px;border-radius:50%;background:inherit}
+.date-panel.weather-unified .tile-cloud:before{width:55%;height:130%;left:12%}.date-panel.weather-unified .tile-cloud:after{width:62%;height:170%;left:40%}
+.date-panel.weather-unified .tile-star{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff8d9;box-shadow:0 0 7px #fff;animation:tile-star-twinkle 1.8s ease-in-out infinite alternate}
+.date-panel.weather-unified .tile-sun-glint{position:absolute;width:clamp(25px,4vw,60px);height:clamp(25px,4vw,60px);border-radius:50%;background:radial-gradient(circle,#fff7c530 0%,#fff2b80e 55%,transparent 72%);animation:weather-sun-glow 3.4s ease-in-out infinite}
+.date-panel.weather-unified:focus-visible{outline:3px solid #bd9b52;outline-offset:3px}
+/* Memory card: brand at right, verse centrally, source/benefit at left. */
+.tile.tile-memory{display:grid;grid-template-columns:minmax(130px,.85fr) minmax(0,2.15fr) minmax(150px,1fr);grid-template-areas:"brand verse source";align-items:stretch;justify-content:stretch;gap:clamp(10px,2vw,28px);height:clamp(145px,25vh,210px);min-height:0;padding:clamp(12px,2vh,22px) clamp(12px,2vw,28px);text-align:initial;direction:rtl}
+.tile-memory .memory-brand{grid-area:brand;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-width:0;text-align:center}
+.tile-memory .memory-brand .tile-icon{width:clamp(42px,4.5vw,58px);height:clamp(42px,4.5vw,58px);font-size:clamp(25px,2.6vw,34px);flex-shrink:0;border-radius:15px}
+.tile-memory .memory-brand .tile-title{font-size:clamp(13px,1.35vw,18px);line-height:1.4;overflow-wrap:anywhere}
+.tile-memory .memory-center{grid-area:verse;display:flex;align-items:center;justify-content:center;min-width:0;padding:0 clamp(4px,1vw,14px);text-align:center;border-right:1px solid #d7d1bd;border-left:1px solid #d7d1bd}
+.tile-memory .memory-preview-text{font-size:clamp(16px,1.8vw,25px);font-weight:800;line-height:1.75;max-width:100%;overflow-wrap:anywhere;text-wrap:pretty}
+.tile-memory .memory-source-side{grid-area:source;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;min-width:0;text-align:right}
+.tile-memory .memory-preview-source{font-size:clamp(10px,1.05vw,13px);font-weight:700;line-height:1.45;color:#81672f;overflow-wrap:anywhere}
+.tile-memory .memory-preview-benefit{font-size:clamp(11px,1.15vw,15px);line-height:1.6;color:#52684d;overflow-wrap:anywhere}
+/* Portrait/mobile: retain all sections, let the page scroll rather than crop. */
+@media(max-width:700px){
+  html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+  .app{height:auto;min-height:100dvh;overflow:visible;justify-content:flex-start;gap:10px;padding:8px 10px 14px}
+  .date-panel.weather-unified{flex-wrap:wrap;gap:7px 8px;padding:12px 12px;min-height:0;height:auto}
+  .date-panel.weather-unified .date-weather-widget{order:0;flex:1 1 100%;width:100%;min-height:78px;padding:4px 0 8px;grid-template-columns:auto auto minmax(0,1fr);gap:3px 8px;border-bottom:1px solid #ffffff45}
+  .date-panel.weather-unified .clock{order:1;flex:1 1 42%;font-size:clamp(25px,8vw,36px);text-align:right}
+  .date-panel.weather-unified .date-info{order:2;flex:1 1 48%;max-width:none;min-width:0;align-items:flex-start}
+  .date-panel.weather-unified .date-text{text-align:start;font-size:clamp(10px,2.8vw,12px)}
+  .date-panel.weather-unified .hijri{font-size:clamp(10px,2.9vw,12px)}
+  .date-panel.weather-unified .city-label{font-size:10px}
+  .tile.tile-memory{height:auto;min-height:245px;grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "verse" "source";gap:10px;padding:14px 14px}
+  .tile-memory .memory-brand{flex-direction:row;justify-content:center;gap:10px}
+  .tile-memory .memory-brand .tile-icon{width:38px;height:38px;font-size:23px}
+  .tile-memory .memory-brand .tile-title{font-size:15px}
+  .tile-memory .memory-center{border:0;border-top:1px solid #d7d1bd;border-bottom:1px solid #d7d1bd;padding:8px 3px}
+  .tile-memory .memory-preview-text{font-size:clamp(16px,4.4vw,21px);line-height:1.8}
+  .tile-memory .memory-source-side{align-items:center;text-align:center;gap:5px}
+  .tile-memory .memory-preview-source{font-size:11px}
+  .tile-memory .memory-preview-benefit{font-size:12px}
+}
+@media(max-height:560px) and (min-width:701px){
+  .app{gap:3px;padding-top:5px;padding-bottom:5px}
+  .date-panel.weather-unified{min-height:90px;padding-top:6px;padding-bottom:6px}
+  .tile.tile-memory{height:clamp(120px,22vh,155px)}
+  .tile-memory .memory-preview-text{font-size:clamp(14px,1.55vw,20px)}
+  .prayer-strip{padding:3px}
+  .player{min-height:65px;padding:6px 10px}
+}
+@media(prefers-reduced-motion:reduce){.date-panel.weather-unified .tile-rain-drop,.date-panel.weather-unified .tile-snow-flake,.date-panel.weather-unified .tile-cloud,.date-panel.weather-unified .tile-star,.date-panel.weather-unified .tile-sun-glint,.date-panel.weather-unified.sunny:before{animation-duration:8s}}
+</style>
+
 <style id="zikraSplashStyles">
 #zikraSplash{position:fixed;inset:0;z-index:99999;background:#001b18;display:flex;align-items:center;justify-content:center;opacity:1;visibility:visible;transition:opacity .65s ease,visibility .65s ease}#zikraSplash img{width:100%;height:100%;object-fit:contain;display:block}#zikraSplash.hide{opacity:0;visibility:hidden;pointer-events:none}@media(prefers-reduced-motion:reduce){#zikraSplash{transition:none}}
 </style>
@@ -114,7 +190,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
     <div id="languageMenu" class="language-menu" hidden><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button><button type="button" data-lang="de">Deutsch</button></div>
   </div>
 </header>
-<section class="date-panel"><div class="clock" id="clock">--:--</div><button class="tile weather-tile date-weather-widget sunny" id="weatherCard" aria-label="تفاصيل الطقس" title="افتح لوحة الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span><span class="weather-tap-hint" id="weatherTapHint">تفاصيل الطقس ↗</span></button><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">المدينة: إرفورت</div></div></section>
+<section class="date-panel weather-unified sunny" id="datePanel" role="button" tabindex="0" aria-label="فتح لوحة الطقس" title="فتح لوحة الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><div class="clock" id="clock">--:--</div><div class="date-weather-widget" id="weatherCard"><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></div><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">المدينة: إرفورت</div></div></section>
 <section class="prayer-strip">
   <div class="prayer" id="box-Fajr"><span class="p-icon">☾</span><div class="p-name" data-prayer="Fajr" data-ar="الفجر" data-en="Fajr" data-de="Fadschr">الفجر</div><div class="p-time" id="fajr">--:--</div><div class="p-countdown" id="cd-Fajr"></div></div>
   <div class="prayer" id="box-Sunrise"><span class="p-icon">☀</span><div class="p-name" data-prayer="Sunrise" data-ar="الشروق" data-en="Sunrise" data-de="Sonnenaufgang">الشروق</div><div class="p-time" id="sunrise">--:--</div><div class="p-countdown" id="cd-Sunrise"></div></div>
@@ -124,7 +200,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
   <div class="prayer" id="box-Isha"><span class="p-icon">☾</span><div class="p-name" data-prayer="Isha" data-ar="العشاء" data-en="Isha" data-de="Ischa">العشاء</div><div class="p-time" id="isha">--:--</div><div class="p-countdown" id="cd-Isha"></div></div>
 </section>
 <main class="tiles">
-  <button class="tile tile-memory" id="memoryCard" aria-label="تبديل الذكرى"><span class="tile-icon">📜</span><span class="tile-title" id="memoryCardTitle">ذِكرى قرآنية ونبوية</span><span class="memory-preview-text" id="memoryPreviewText"></span><span class="memory-preview-source" id="memoryPreviewSource"></span><span class="memory-preview-benefit" id="memoryPreviewBenefit"></span></button>
+  <button class="tile tile-memory" id="memoryCard" aria-label="تبديل الذكرى"><span class="memory-brand"><span class="tile-icon" aria-hidden="true">۞</span><span class="tile-title" id="memoryCardTitle">ذِكرى قرآنية ونبوية</span></span><span class="memory-center"><span class="memory-preview-text" id="memoryPreviewText"></span></span><span class="memory-source-side"><span class="memory-preview-source" id="memoryPreviewSource"></span><span class="memory-preview-benefit" id="memoryPreviewBenefit"></span></span></button>
 </main>
 <section class="player">
   <div class="now-reading focusable" id="openQuranFromPlayer" tabindex="0" role="button" aria-label="افتح فهرس القرآن"><div class="mini-mushaf">۞</div><div><strong id="miniSurah">اختر سورة من الفهرس</strong><small id="miniReader">اضغط هنا لفتح الفهرس 📖</small></div></div>
@@ -197,31 +273,34 @@ function weatherIcon(code){const c=condition(code),h=new Date().getHours();retur
 async function loadWeather(){ $("weatherCondition").textContent=T[lang].loading;try{weatherData=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=auto&forecast_days=14`);renderWeather()}catch(e){$("weatherCondition").textContent=T[lang].unavailable}}
 function renderWeather(){
   if(!weatherData)return;
-  const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard"),effects=$("weatherTileEffects"),hour=new Date().getHours();
+  const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard"),panel=$("datePanel"),effects=$("weatherTileEffects"),hour=new Date().getHours();
   const isNight=(hour>=20||hour<6)&&!['rainy','snowy','storm'].includes(desc.cls);
   const cardScene=isNight?'night':desc.cls;
-  card.className="tile weather-tile date-weather-widget "+cardScene;
+  panel.className="date-panel weather-unified "+cardScene;
+  panel.setAttribute("aria-label",lang==="ar"?"فتح لوحة الطقس":lang==="de"?"Wettervorhersage öffnen":"Open weather forecast");
+  card.className="date-weather-widget";
   effects.replaceChildren();
   if(['rainy','storm'].includes(cardScene)){
-    const count=cardScene==='storm'?34:25;
+    const count=cardScene==='storm'?56:42;
     for(let i=0;i<count;i++){
       const drop=document.createElement('span');drop.className='tile-rain-drop';
       drop.style.left=((i*43+7)%100)+'%';
-      drop.style.setProperty('--tile-rain-delay',(-((i*11)%24)/10)+'s');
-      drop.style.setProperty('--tile-rain-duration',(cardScene==='storm'?.48:.68)+((i*7)%36)/100+'s');
-      drop.style.opacity=String(.45+((i*13)%45)/100);effects.append(drop);
+      drop.style.setProperty('--tile-rain-delay',(-((i*11)%31)/10)+'s');
+      drop.style.setProperty('--tile-rain-duration',(cardScene==='storm'?.43:.67)+((i*7)%38)/100+'s');
+      drop.style.opacity=String(.42+((i*13)%48)/100);effects.append(drop);
     }
   }else if(cardScene==='snowy'){
-    for(let i=0;i<18;i++){const flake=document.createElement('span');flake.className='tile-snow-flake';flake.textContent='❄';flake.style.left=((i*29+5)%100)+'%';flake.style.setProperty('--tile-snow-delay',(-((i*7)%28)/10)+'s');flake.style.setProperty('--tile-snow-duration',(2.1+((i*5)%24)/10)+'s');effects.append(flake)}
+    for(let i=0;i<30;i++){const flake=document.createElement('span');flake.className='tile-snow-flake';flake.textContent='❄';flake.style.left=((i*29+5)%100)+'%';flake.style.setProperty('--tile-snow-delay',(-((i*7)%35)/10)+'s');flake.style.setProperty('--tile-snow-duration',(2.7+((i*5)%28)/10)+'s');effects.append(flake)}
   }else if(cardScene==='cloudy'){
-    for(let i=0;i<3;i++){const cloud=document.createElement('span');cloud.className='tile-cloud';cloud.style.left=(8+i*30)+'%';cloud.style.top=(12+(i%2)*28)+'%';cloud.style.opacity=String(.38+i*.14);cloud.style.animationDelay=(-i*1.6)+'s';effects.append(cloud)}
+    for(let i=0;i<6;i++){const cloud=document.createElement('span');cloud.className='tile-cloud';cloud.style.left=((i*19+4)%92)+'%';cloud.style.top=(8+(i%3)*31)+'%';cloud.style.opacity=String(.3+(i%4)*.12);cloud.style.animationDelay=(-i*1.6)+'s';effects.append(cloud)}
   }else if(cardScene==='night'){
-    for(let i=0;i<11;i++){const star=document.createElement('span');star.className='tile-star';star.style.left=((i*31+6)%96)+'%';star.style.top=((i*19+7)%74)+'%';star.style.animationDelay=(-i*.23)+'s';effects.append(star)}
+    for(let i=0;i<24;i++){const star=document.createElement('span');star.className='tile-star';star.style.left=((i*31+6)%98)+'%';star.style.top=((i*19+7)%84)+'%';star.style.animationDelay=(-i*.23)+'s';effects.append(star)}
+  }else if(cardScene==='sunny'){
+    for(let i=0;i<5;i++){const glint=document.createElement('span');glint.className='tile-sun-glint';glint.style.left=(60+i*7)+'%';glint.style.top=(10+(i%3)*22)+'%';glint.style.animationDelay=(-i*.45)+'s';effects.append(glint)}
   }
   $("weatherIcon").textContent=weatherIcon(c.weather_code);
   $("weatherTemp").textContent=temp(c.temperature_2m);
   $("weatherCondition").textContent=desc.text;
-  $("weatherTapHint").textContent=lang==="ar"?"تفاصيل الطقس ↗":lang==="de"?"Wetterdetails ↗":"Weather details ↗";
   $("weatherExtra").textContent=`↑ ${temp(d.daily.temperature_2m_max[0])} ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;
   renderWeatherModal()
 }
@@ -469,7 +548,8 @@ function moveDirectionalFocus(direction){
 
 window.handleAndroidDpad=moveDirectionalFocus;
 
-$("weatherCard").addEventListener("click",()=>openModal("weatherModal"));$("closeQuran").addEventListener("click",()=>closeModal("quranModal"));$("closeWeather").addEventListener("click",()=>closeModal("weatherModal"));
+$("datePanel").addEventListener("click",()=>openModal("weatherModal"));
+$("datePanel").addEventListener("keydown",ev=>{if(ev.target!==ev.currentTarget)return;if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();openModal("weatherModal")}});$("closeQuran").addEventListener("click",()=>closeModal("quranModal"));$("closeWeather").addEventListener("click",()=>closeModal("weatherModal"));
 function changeLanguage(value){lang=value;localStorage.setItem("zikra_language",value);document.documentElement.lang=value;document.documentElement.dir="rtl";const t=T[lang];$("appTitle").textContent=t.title;$("subtitle").textContent=t.subtitle;$("quranTitle").textContent=t.quranTitle;$("reciterLabel").textContent=t.reciterLabel;$("resumeLabel").textContent=t.resumeLabel;$("cityTitle").textContent=lang==="ar"?"الموقع والمدينة":lang==="de"?"Standort und Stadt":"Location and city";$("cityInputLabel").textContent=lang==="ar"?"اسم المدينة":lang==="de"?"Stadtname":"City name";$("cityHelp").textContent=lang==="ar"?"يمكنك تحديد موقع الجهاز أو كتابة اسم المدينة يدوياً.":lang==="de"?"Standort automatisch bestimmen oder den Stadtnamen eingeben.":"Use device location or enter a city name."; $("findLocationBtn").textContent=lang==="ar"?"📍 تحديد موقعي تلقائياً":lang==="de"?"📍 Meinen Standort bestimmen":"📍 Use my location";$("saveCityBtn").textContent=lang==="ar"?"حفظ المدينة":lang==="de"?"Stadt speichern":"Save city";$("backToIndex").textContent=lang==="ar"?"→ فهرس السور":lang==="de"?"→ Sure auswählen":"→ Surah index";$("reciterSearch").placeholder=lang==="ar"?"ابحث عن اسم الشيخ":lang==="de"?"Rezitator suchen":"Search reciter";$("exitTitle").textContent=lang==="ar"?"الخروج من التطبيق":lang==="de"?"App verlassen":"Exit app";$("exitMessage").textContent=lang==="ar"?"هل تريد الخروج من تطبيق ذِكرى؟":lang==="de"?"Möchtest du Zikra verlassen?":"Do you want to exit Zikra?";$("confirmExitBtn").textContent=lang==="ar"?"نعم، خروج":lang==="de"?"Ja, beenden":"Yes, exit";$("cancelExitBtn").textContent=lang==="ar"?"لا، إلغاء":lang==="de"?"Nein, abbrechen":"No, cancel";if(!loaded){$("miniSurah").textContent=t.defaultSurah;$("miniReader").textContent=t.openPrompt;$("miniVerse").textContent=t.startPrompt}document.querySelectorAll(".p-name").forEach(el=>{const p=el.dataset.prayer;if(p)el.textContent=el.dataset[lang]||el.dataset.ar});renderMemory();updateClock();updateCityLabel();loadPrayerTimes();checkResumeBookmark();$("footerRights").textContent=t.rights;if(weatherData)renderWeather();else loadWeather();if(surahListCache.length)renderSurahIndex()}
 function closeLanguageMenu(){const m=$("languageMenu");m.hidden=true;$("languageBtn").setAttribute("aria-expanded","false");}
 $("languageBtn").addEventListener("click",()=>{const m=$("languageMenu");m.hidden=!m.hidden;$("languageBtn").setAttribute("aria-expanded",String(!m.hidden));if(!m.hidden)m.querySelector(`[data-lang="${lang}"]`)?.focus();});
