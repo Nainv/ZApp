@@ -1,4 +1,3 @@
-
 package com.zikra.tv;
 
 import android.app.Activity;
@@ -22,8 +21,8 @@ public class MainActivity extends Activity {
     private WebView webView;
     private FrameLayout root;
     private TextView errorView;
-    private boolean backDialogRequested = false;
 
+    // رابط موقعك المحدث
     private static final String SITE_URL =
             "https://koukach91-hash.github.io/zikra-android-tv-new/";
 
@@ -59,6 +58,7 @@ public class MainActivity extends Activity {
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setWebChromeClient(new WebChromeClient());
 
+        // ربط الجسر البرمجي مع الجافاسكريפט
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidTV");
 
         webView.setWebViewClient(new WebViewClient() {
@@ -73,7 +73,6 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                backDialogRequested = false;
                 view.requestFocus();
             }
 
@@ -123,30 +122,18 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void exitApp() {
+            // إغلاق التطبيق نهائياً عند الضغط على زر "نعم"
             runOnUiThread(() -> finish());
         }
 
         @JavascriptInterface
         public void mediaKey(String action) {
+            // معالجة أوامر الميديا من الويب
             runOnUiThread(() -> {
                 if (webView == null) return;
-
-                String safeAction;
-                switch (action) {
-                    case "play":
-                    case "pause":
-                    case "playPause":
-                    case "next":
-                    case "previous":
-                        safeAction = action;
-                        break;
-                    default:
-                        return;
-                }
-
                 webView.evaluateJavascript(
                         "if (typeof window.handleMediaKey === 'function') {" +
-                        "window.handleMediaKey('" + safeAction + "');" +
+                        "window.handleMediaKey('" + action + "');" +
                         "}",
                         null
                 );
@@ -193,20 +180,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private boolean sendBackToHtml() {
-        if (webView == null || errorView != null) {
-            return false;
-        }
-
-        webView.evaluateJavascript(
-                "if (typeof window.handleAndroidBack === 'function') {" +
-                "window.handleAndroidBack();" +
-                "}",
-                null
-        );
-        return true;
-    }
-
+    // [إصلاح هام جداً]: معالجة زر الرجوع لكي يتم إرساله للـ WebView للتعامل مع النوافذ وخروج التطبيق
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -220,46 +194,47 @@ public class MainActivity extends Activity {
                     return true;
                 }
 
-                sendBackToHtml();
-                return true;
+                // إرسال أمر زر الرجوع مباشرة لملف الـ HTML لمعالجة إغلاق النوافذ أو إظهار خيار الخروج
+                if (webView != null && errorView == null) {
+                    webView.evaluateJavascript(
+                            "if (typeof window.handleAndroidBack === 'function') {" +
+                            "window.handleAndroidBack();" +
+                            "}",
+                            null
+                    );
+                    return true; // منع النظام من إغلاق التطبيق فجأة وإعطاء الصلاحية للـ JavaScript
+                }
             }
 
+            // التقاط أزرار الوسائط في الريموت وإرسالها لصفحة الويب
             if (webView != null && errorView == null) {
+                String mediaAction = null;
                 switch (code) {
                     case KeyEvent.KEYCODE_MEDIA_PLAY:
-                        webView.evaluateJavascript(
-                                "window.handleMediaKey && window.handleMediaKey('play');",
-                                null
-                        );
-                        return true;
-
+                        mediaAction = "play";
+                        break;
                     case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                        webView.evaluateJavascript(
-                                "window.handleMediaKey && window.handleMediaKey('pause');",
-                                null
-                        );
-                        return true;
-
+                        mediaAction = "pause";
+                        break;
                     case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                        webView.evaluateJavascript(
-                                "window.handleMediaKey && window.handleMediaKey('playPause');",
-                                null
-                        );
-                        return true;
-
+                        mediaAction = "playPause";
+                        break;
                     case KeyEvent.KEYCODE_MEDIA_NEXT:
-                        webView.evaluateJavascript(
-                                "window.handleMediaKey && window.handleMediaKey('next');",
-                                null
-                        );
-                        return true;
-
+                        mediaAction = "next";
+                        break;
                     case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                        webView.evaluateJavascript(
-                                "window.handleMediaKey && window.handleMediaKey('previous');",
-                                null
-                        );
-                        return true;
+                        mediaAction = "previous";
+                        break;
+                }
+
+                if (mediaAction != null) {
+                    webView.evaluateJavascript(
+                            "if (typeof window.handleMediaKey === 'function') {" +
+                            "window.handleMediaKey('" + mediaAction + "');" +
+                            "}",
+                            null
+                    );
+                    return true;
                 }
             }
         }
@@ -270,7 +245,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         if (webView != null) {
             webView.saveState(outState);
         }
@@ -280,7 +254,6 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         hideSystemBars();
-
         if (webView != null) {
             webView.onResume();
         }
@@ -291,7 +264,6 @@ public class MainActivity extends Activity {
         if (webView != null) {
             webView.onPause();
         }
-
         super.onPause();
     }
 
@@ -302,7 +274,6 @@ public class MainActivity extends Activity {
             webView.destroy();
             webView = null;
         }
-
         super.onDestroy();
     }
 }
