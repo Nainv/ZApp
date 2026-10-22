@@ -22,7 +22,6 @@ public class MainActivity extends Activity {
     private FrameLayout root;
     private TextView errorView;
 
-    // ضع رابط مشروعك على جيت هب هنا أو الرابط الذي تستخدمه
     private static final String SITE_URL =
             "https://koukach91-hash.github.io/zikra-android-tv-new/";
 
@@ -145,7 +144,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    /* التعديل الجذري هنا لالتقاط زر الرجوع وإرساله للجافاسكريبت داخل الـ HTML */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -163,7 +161,7 @@ public class MainActivity extends Activity {
                             "window.handleAndroidBack();" +
                             "}", null
                     );
-                    return true; // يمنع خروج التطبيق الافتراضي ويترك التحكم لملف الـ index.html
+                    return true;
                 }
             }
         }
