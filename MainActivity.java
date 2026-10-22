@@ -64,7 +64,6 @@ public class MainActivity extends Activity {
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setWebChromeClient(new WebChromeClient());
 
-        // يسمح لصفحة HTML بإغلاق التطبيق الأصلي بعد تأكيد المستخدم.
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidTV");
 
         webView.setWebViewClient(new WebViewClient() {
@@ -73,7 +72,6 @@ public class MainActivity extends Activity {
                     WebView view,
                     WebResourceRequest request
             ) {
-                // إبقاء الموقع داخل التطبيق.
                 return false;
             }
 
@@ -113,6 +111,30 @@ public class MainActivity extends Activity {
         public void exitApp() {
             runOnUiThread(() -> finish());
         }
+    }
+
+    private void sendMediaCommand(String command) {
+        if (webView == null) return;
+
+        String safeCommand;
+        switch (command) {
+            case "play":
+            case "pause":
+            case "playPause":
+            case "next":
+            case "previous":
+                safeCommand = command;
+                break;
+            default:
+                return;
+        }
+
+        String js =
+                "if (typeof window.handleMediaKey === 'function') {" +
+                "window.handleMediaKey('" + safeCommand + "');" +
+                "}";
+
+        webView.evaluateJavascript(js, null);
     }
 
     private void showError() {
@@ -156,26 +178,54 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN
-                && (event.getKeyCode() == KeyEvent.KEYCODE_BACK
-                || event.getKeyCode() == KeyEvent.KEYCODE_ESCAPE)) {
+        int key = event.getKeyCode();
 
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
             if (errorView != null) {
-                retryLoading();
-                return true;
+                if (key == KeyEvent.KEYCODE_DPAD_CENTER
+                        || key == KeyEvent.KEYCODE_ENTER) {
+                    retryLoading();
+                    return true;
+                }
             }
 
-            if (webView != null) {
-                webView.evaluateJavascript(
-                        "if (typeof window.handleAndroidBack === 'function') {" +
-                        "window.handleAndroidBack();" +
-                        "}",
-                        null
-                );
-            }
+            switch (key) {
+                case KeyEvent.KEYCODE_MEDIA_PLAY:
+                    sendMediaCommand("play");
+                    return true;
 
-            // لا نستخدم webView.goBack() حتى لا نرجع إلى صفحة قديمة.
-            return true;
+                case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                    sendMediaCommand("pause");
+                    return true;
+
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                    sendMediaCommand("playPause");
+                    return true;
+
+                case KeyEvent.KEYCODE_MEDIA_NEXT:
+                case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                    sendMediaCommand("next");
+                    return true;
+
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
+                    sendMediaCommand("previous");
+                    return true;
+
+                case KeyEvent.KEYCODE_BACK:
+                case KeyEvent.KEYCODE_ESCAPE:
+                    if (webView != null) {
+                        webView.evaluateJavascript(
+                                "if (typeof window.handleAndroidBack === 'function') {" +
+                                "window.handleAndroidBack();" +
+                                "}",
+                                null
+                        );
+                    }
+                    return true;
+            }
         }
 
         return super.dispatchKeyEvent(event);
