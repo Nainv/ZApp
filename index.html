@@ -1,196 +1,395 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#07111f">
-<title>ذِكرى — Nabil Koukach</title>
-<style>
-:root{--bg:#07111f;--panel:#0d1b30;--panel2:#10233b;--gold:#e6c477;--gold2:#f8e4ac;--text:#f4f6fa;--muted:#aebbd0;--line:#29405e;--focus:#ffe6a0}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:radial-gradient(ellipse at 50% 0,#172c49 0,var(--bg) 65%)}button,select{font:inherit}
-.app{height:100dvh;min-height:0;display:flex;flex-direction:column;padding:2vh 3vw 1.5vh;gap:1.3vh}
-header{display:flex;align-items:center;justify-content:space-between;gap:1vw;min-height:9vh}
-.brand{display:flex;align-items:center;gap:1vw;min-width:0}.logo{width:clamp(52px,6vw,84px);height:clamp(52px,6vw,84px);object-fit:contain;border:0;border-radius:0;display:block;background:transparent;box-shadow:none}.logo-button{appearance:none;border:0;background:transparent;padding:0;cursor:pointer;border-radius:12px;flex-shrink:0}.logo-button:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
-h1{font-size:clamp(22px,2.7vw,36px);margin:0;color:var(--gold2);letter-spacing:.02em}.byline{font-size:clamp(10px,1vw,14px);color:var(--muted);margin-top:.25vh}
-.header-right{display:flex;align-items:center;gap:1.2vw}.clock-mini{text-align:left;color:var(--gold2);font-variant-numeric:tabular-nums;font-size:clamp(15px,1.5vw,21px)}
-select{background:#10233b;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:.65em .8em;outline:none;max-width:28vw}
-.main-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:1.5vh 1.2vw}
-.tile{appearance:none;text-align:inherit;position:relative;min-width:0;min-height:0;border:1px solid #2c4261;border-radius:20px;background:linear-gradient(145deg,#112540,#0b192b);color:var(--text);padding:clamp(12px,1.5vw,24px);display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;cursor:pointer;transform:scale(1);transition:border-color .04s linear,box-shadow .04s linear,background .04s linear;outline:none}
-.tile::before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.75}.tile:focus,.tile.focused{transform:scale(1.005);border-color:var(--gold);box-shadow:0 10px 32px #0008,0 0 0 1px #e6c47750;background:linear-gradient(145deg,#183252,#0e1e33);z-index:2}
-.tile-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.tile-icon{font-size:clamp(25px,3vw,42px);filter:saturate(.8)}.tile-kicker{font-size:clamp(10px,1vw,14px);color:var(--gold);letter-spacing:.05em}.tile h2{font-size:clamp(18px,2vw,28px);margin:.5vh 0;color:var(--gold2)}.tile p{margin:0;color:var(--muted);font-size:clamp(12px,1.15vw,16px);line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.tile-footer{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:clamp(10px,1vw,13px);gap:8px;margin-top:1vh}.tile .value{font-size:clamp(20px,2.3vw,32px);font-weight:700;color:var(--gold2);font-variant-numeric:tabular-nums}
-footer{display:flex;align-items:center;gap:1vw;min-height:5vh;border-top:1px solid var(--line);padding-top:.8vh;color:var(--muted);font-size:clamp(10px,1vw,14px)}.ticker-label{color:var(--gold);white-space:nowrap}.ticker{overflow:hidden;white-space:nowrap;flex:1;position:relative;min-width:0;direction:ltr;text-align:left}.ticker span{display:inline-block;padding:0 2vw;font-size:clamp(23px,2.8vw,38px);font-weight:700;line-height:1.5;color:#fff2c9;animation:marquee-ltr 32s linear infinite;will-change:transform}@keyframes marquee-ltr{from{transform:translateX(-110%)}to{transform:translateX(110%)}}
-dialog{border:1px solid var(--gold);border-radius:20px;background:linear-gradient(145deg,#10233b,#07111f);color:var(--text);width:min(88vw,1100px);max-height:84vh;padding:0;box-shadow:0 25px 80px #000b}dialog::backdrop{background:#020712cc;backdrop-filter:blur(6px)}.dialog-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line)}.dialog-head h2{margin:0;color:var(--gold2);font-size:clamp(20px,2.2vw,30px)}.close{background:#152a45;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px 14px;cursor:pointer}.dialog-body{padding:20px 24px;overflow:auto;max-height:calc(84vh - 75px);line-height:1.65}.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.detail-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:#0b192a}.detail-card h3{color:var(--gold);margin:0 0 8px;font-size:1.05em}.detail-card p{margin:.3em 0;color:var(--muted)}.big{font-size:clamp(22px,2.4vw,34px);color:var(--gold2);font-weight:700}.control-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:12px 0}.control-row button,.control-row select{background:#142b47;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 13px}.quran-ar{font-family:"Noto Naskh Arabic",serif;font-size:clamp(22px,2.5vw,34px);line-height:1.9;color:#fff2c9;text-align:center}.translation{font-size:clamp(15px,1.5vw,20px);color:#d7e2f3;text-align:center;margin-top:8px}.status{color:var(--muted);font-size:.9em}.forecast-days{display:flex;gap:8px;overflow:auto;padding:6px 2px 12px}.forecast-days button{min-width:95px}.forecast-days button[aria-pressed=true]{border-color:var(--gold);color:var(--gold2)}.hours-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.hour{background:#0c1a2b;border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}.hour strong{display:block;color:var(--gold2)}.event-list{display:grid;gap:10px}.event{border-inline-start:3px solid var(--gold);padding:10px 14px;background:#0b192a;border-radius:8px}.event strong{color:var(--gold2)}
-.exit-dialog{width:min(90vw,500px)}.exit-dialog .dialog-body{text-align:center}.yesno{display:flex;justify-content:center;gap:12px}.yesno button{min-width:100px}
-@media(max-width:700px){.app{padding:1vh 2vw;gap:1vh}.main-grid{gap:1vh 1vw}.tile{padding:10px;border-radius:13px}.tile p{ -webkit-line-clamp:2}.detail-grid{grid-template-columns:1fr}.hours-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brand{gap:2vw}.header-right{gap:1vw}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}.ticker span{animation-duration:60s!important}}
-.logo-button img{width:100%;height:100%;object-fit:contain}
-#languageOptions{display:grid;grid-template-columns:1fr;gap:12px;padding:16px}#languageOptions button{font-size:clamp(18px,2vw,26px);padding:16px;text-align:start}
-button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-#quranAyahMeta{font-size:clamp(17px,1.8vw,24px);text-align:center;color:var(--gold2);margin-top:12px}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#304b3a">
+<title>ذِكرى | Zikra</title>
+
+<!-- أيقونة التطبيق -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23304b3a'/%3E%3Cpath d='M50 8 60 23 78 20 80 39 94 50 80 61 78 80 60 77 50 92 40 77 22 80 20 61 6 50 20 39 22 20 40 23Z' fill='%23f7f4e9' stroke='%23bd9b52' stroke-width='3'/%3E%3Cpath d='M50 38Q35 28 22 36V62Q37 56 50 68Q63 56 78 62V36Q65 28 50 38Z' fill='%23496d55' stroke='%23bd9b52' stroke-width='2'/%3E%3Cpath d='M50 38V68' stroke='%23bd9b52' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23304b3a'/%3E%3Ctext x='50' y='67' text-anchor='middle' font-size='60' fill='%23bd9b52'%3E۞%3C/text%3E%3C/svg%3E">
 
 <style>
-/* TV remote navigation: simple, low-latency focus */
-.logo-button:focus-visible{outline:4px solid var(--gold);outline-offset:5px}
-.tile{scroll-margin:0;transition:none!important}
-#mainGrid{contain:layout paint}
-#hijriDate{font-size:clamp(12px,1.25vw,17px);color:var(--gold2);white-space:nowrap}
-#locationFromLogo{margin:8px 16px 16px;width:calc(100% - 32px);font-size:clamp(18px,2vw,25px);padding:16px}
-#languageDialog .dialog-body{padding:10px 16px}
-#languageOptions button{min-height:58px}
-.prayer-inline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
-.prayer-chip{padding:7px 5px;background:#0b192a;border:1px solid var(--line);border-radius:10px;text-align:center;font-size:clamp(12px,1.2vw,16px)}
-.prayer-chip strong{display:block;color:var(--gold2);font-size:clamp(14px,1.4vw,19px)}
-@media(max-width:700px){.prayer-inline{grid-template-columns:repeat(2,minmax(0,1fr))}}
+:root{--green:#496d55;--dark:#304b3a;--gold:#bd9b52;--cream:#f7f4e9;--muted:#858d7d}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Arial,sans-serif;color:var(--dark);background:radial-gradient(ellipse at 50% 70%,#e3e9d8,transparent 48%),linear-gradient(#f9f6eb,#e9ecdd)}
+button,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,select:focus-visible{outline:3px solid #89a27c;outline-offset:4px}
+.app{max-width:1500px;min-height:100vh;margin:auto;padding:18px 4.5% 12px;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:50px;height:50px;display:grid;place-items:center;border:1px solid #d4c18e;border-radius:17px;background:#fffdf4;color:var(--green);font-size:29px}
+.brand h1{margin:0;font-size:27px}
+.brand p{margin:0;font-size:12px;color:var(--muted)}
+.tools{display:flex;gap:8px}
+.icon-btn,#language{height:43px;border:1px solid #d9ddca;background:#fffdf4;border-radius:12px}
+.icon-btn{width:43px;font-size:19px;color:var(--dark)}
+#language{width:110px;padding:5px;direction:ltr;color:var(--dark)}
+.date-panel{text-align:center;margin:10px 0 17px}
+.clock{font-size:clamp(36px,4.3vw,54px);line-height:1.3;font-weight:700;font-variant-numeric:tabular-nums}
+.date-text{font-size:14px;color:var(--muted)}
+.hijri{font-size:15px;color:var(--green);font-weight:700}
+.city-label{font-size:12px;color:var(--muted);margin-top:3px}
+.prayer-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;padding:10px;border:1px solid #e2dfce;border-radius:21px;background:#ffffffc9}
+.prayer{text-align:center;border-left:1px solid #e6e3d6;padding:2px 4px}
+.prayer:last-child{border-left:0}
+.p-icon{display:block;font-size:18px;margin-bottom:2px;color:var(--gold)}
+.p-name{font-size:12px;color:#798272}
+.p-time{font-size:clamp(13px,1.5vw,17px);font-weight:700}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2.2vw,28px);width:min(100%,1050px);margin:35px auto 26px}
+.tile{min-width:0;min-height:190px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px 8px;border:2px solid #e6e1cd;border-radius:27px;background:linear-gradient(145deg,#fffef9,#f1f0e4);box-shadow:0 12px 25px #374a3210;color:var(--dark)}
+.tile.selected,.tile:focus-visible{outline:3px solid #89a27c;outline-offset:3px}
+.quran-logo{display:block;width:100%;max-width:210px;height:auto;max-height:175px}
+.weather-tile{color:white;border:1px solid #ffffff65;background:linear-gradient(150deg,#83c9ed,#397bb6);text-shadow:0 1px 4px #173e5c30}
+.weather-icon{font-size:39px;line-height:1.1}
+.weather-temp{font-size:clamp(30px,3.5vw,43px);font-weight:700;line-height:1.2}
+.weather-condition{font-size:14px}
+.weather-extra{font-size:11px;line-height:1.8;text-align:center}
+.weather-tile.cloudy{background:linear-gradient(150deg,#aebfcb,#536d81)}
+.weather-tile.rainy{background:linear-gradient(150deg,#536f91,#243954)}
+.weather-tile.snowy{background:linear-gradient(150deg,#d7e7ef,#7199b0);color:#243f52;text-shadow:none}
+.weather-tile.storm{background:linear-gradient(150deg,#665f7d,#292d48)}
+.weather-tile.night{background:linear-gradient(150deg,#344b77,#151d36)}
+.tile-memory{justify-content:space-evenly;padding:16px 18px;gap:9px;min-height:250px}
+.tile-icon{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:#e6ecd9}
+.tile-title{font-size:clamp(13px,1.4vw,17px);font-weight:800;line-height:1.5;text-align:center}
+.memory-preview-text{font-size:clamp(15px,1.6vw,21px);font-weight:700;line-height:1.8;text-align:center;overflow-wrap:anywhere}
+.memory-preview-source{font-size:11px;color:#96783d;line-height:1.7;text-align:center}
+.memory-preview-benefit{font-size:12px;line-height:1.8;color:#52684d;text-align:center;overflow-wrap:anywhere}
+.player{display:grid;grid-template-columns:minmax(170px,1fr) minmax(180px,1.4fr) minmax(150px,1fr);align-items:center;gap:16px;padding:14px 20px;border:1px solid #dce0d0;border-radius:23px;background:linear-gradient(110deg,#fffdf4ed,#edf0e4ed)}
+.now-reading{display:flex;align-items:center;gap:12px;min-width:0}
+.mini-mushaf{width:53px;height:58px;flex-shrink:0;border-radius:15px;background:linear-gradient(145deg,#dce6d2,#bacdaf);display:grid;place-items:center;font-size:29px}
+.now-reading strong{display:block;font-size:15px}
+.now-reading small{display:block;font-size:12px;color:#858b7c}
+.track-area{min-width:0}
+.verse-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:7px}
+.verse{font-size:13px;line-height:1.8;text-align:center;color:#4a614c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ayah-number{flex-shrink:0;width:31px;height:31px;display:grid;place-items:center;border:2px solid var(--gold);border-radius:50%;outline:1px solid #bd9b5266;outline-offset:2px;background:#f8f0d9;font-size:12px;font-weight:800}
+.progress{height:5px;border-radius:20px;background:#dfe3d6;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#a58b4d,#587c57)}
+.controls{display:flex;align-items:center;justify-content:center;gap:10px}
+.control{border:0;background:#e9ecdf;border-radius:50%;width:39px;height:39px;font-size:18px;color:var(--dark)}
+.control.main{width:49px;height:49px;color:white;background:linear-gradient(145deg,#66866a,#3f6449);font-size:21px}
+.dua-bar{display:flex;align-items:center;gap:13px;min-height:57px;margin-top:12px;padding:8px 12px;color:#526b4d;font-size:clamp(15px,1.7vw,21px);font-weight:600;pointer-events:none}
+.dua-symbol{color:var(--gold);font-size:24px;flex-shrink:0}
+.dua-text{flex:1;text-align:center}
+.footer{margin-top:12px;padding:14px 8px 2px;border-top:1px solid #d9ddca;text-align:center;color:#7f8976;font-size:12px}
+.directed{font-size:14px;letter-spacing:.5px;color:var(--green);font-weight:700}
+.modal-backdrop{position:fixed;inset:0;background:#15251d99;z-index:10;display:none;align-items:center;justify-content:center;padding:18px}
+.modal-backdrop.open{display:flex}
+.modal{width:min(800px,100%);max-height:92vh;overflow:auto;border-radius:24px;padding:22px;background:#f9f7ed;box-shadow:0 20px 70px #0003;color:var(--dark)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.modal-head h2{margin:0;font-size:22px}
+.close-modal{width:42px;height:42px;border:0;border-radius:50%;background:#dfe8dc;font-size:23px;color:var(--dark)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal label{display:block;font-weight:bold;margin:12px 0 6px}
+.modal select,.action{width:100%;padding:12px;border-radius:10px;border:1px solid #bdbda7;margin:5px 0;background:#52765d;color:white}
+.modal select{background:white;color:var(--dark)}
+#quranStatus{white-space:pre-wrap;line-height:1.7;background:#edf1e8;padding:12px;border-radius:10px;margin:10px 0;font-size:13px;overflow-wrap:anywhere}
+#verses{font-family:serif;font-size:24px;line-height:2.3;text-align:justify;padding:12px 3px}
+.ayah{padding:3px;border-radius:6px}
+.ayah.active{background:#d7e9ce;color:#21492c;outline:1px solid #71936f}
+.waqf{display:inline-flex;vertical-align:middle;align-items:center;justify-content:center;width:1.55em;height:1.55em;margin:0 3px;border:1.5px solid #b49a60;border-radius:50%;font-size:.58em;line-height:1;color:#826b37;background:#fbf4df;white-space:nowrap}
+.quran-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quran-controls button{min-height:48px}
+audio{display:block;width:100%;margin-top:12px}
+.weather-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.stat{border:1px solid #dce4d8;background:#ffffffb5;border-radius:16px;padding:12px}
+.stat-label{font-size:12px;color:#788574}
+.stat-value{font-size:19px;font-weight:700;margin-top:3px}
+.section-title{font-size:15px;font-weight:800;margin:18px 0 8px}
+.hourly{display:flex;gap:10px;overflow-x:auto;padding:3px 2px 10px}
+.hour{flex:0 0 78px;text-align:center;padding:11px 5px;border-radius:15px;background:white;border:1px solid #e0e6dc;font-size:12px}
+.hour-icon{font-size:22px;margin:5px 0}
+.daily-list{display:grid;gap:7px}
+.day-row{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;padding:10px 12px;background:#ffffffa6;border-radius:12px;font-size:13px}
+.exit-dialog{max-width:430px;text-align:center}
+.exit-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+.exit-buttons .action{min-height:55px;margin:0}
+#cancelExit{background:#e4eadc;color:#304b3a}
+#confirmExit{background:#496d55}
+@media(max-width:700px){
+.app{padding:13px 12px}.brand-mark{width:42px;height:42px;font-size:24px}.brand h1{font-size:22px}.brand p{font-size:10px}
+.tools{gap:5px}.icon-btn{width:37px;height:38px;font-size:17px}#language{width:94px;height:38px;font-size:12px}
+.prayer-strip{padding:8px 3px;gap:1px;border-radius:16px}.p-name{font-size:10px}.p-icon{font-size:14px}.p-time{font-size:11px}
+.tiles{gap:8px;margin:30px auto 14px}.tile{min-height:150px;border-radius:18px;padding:9px 4px;gap:5px}
+.quran-logo{max-height:135px}.weather-temp{font-size:28px}.weather-icon{font-size:29px}.weather-condition{font-size:11px}.weather-extra{font-size:9px}
+.tile-memory{min-height:260px;padding:11px 7px;gap:7px}.tile-title{font-size:11px}.memory-preview-text{font-size:12px;line-height:1.75}.memory-preview-source{font-size:9px}.memory-preview-benefit{font-size:10px;line-height:1.65}
+.player{grid-template-columns:1fr auto;gap:10px;padding:12px}.now-reading{grid-column:1}.controls{grid-column:2;grid-row:1;gap:5px}.track-area{grid-column:1/-1;grid-row:2}
+.control{width:32px;height:32px;font-size:15px}.control.main{width:42px;height:42px}.verse{font-size:11px}.dua-bar{font-size:15px;min-height:50px}
+.modal{padding:14px}#verses{font-size:21px}.form-row{grid-template-columns:1fr}.exit-buttons{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 <div class="app">
-<header>
- <div class="brand"><button id="logoLanguageButton" class="logo-button" type="button" aria-label="الإعدادات" title="الإعدادات"><img class="logo" src="zikra_logo.png" alt="ذِكرى"></button></div>
- <div class="header-right"><div class="clock-mini"><div id="headerTime">--:--</div><div id="headerDate">—</div><div id="hijriDate">—</div></div></div>
+<header class="topbar">
+ <div class="brand"><div class="brand-mark">۞</div><div><h1>ذِكرى</h1><p id="subtitle">طمأنينةٌ للقلب في كل يوم</p></div></div>
+ <div class="tools"><button class="icon-btn" id="locationBtn" aria-label="اختيار المدينة">📍</button><select id="language" aria-label="Language"><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option></select></div>
 </header>
-<main class="main-grid" id="mainGrid">
-<button class="tile" data-tile="weather"><div class="tile-top"><span class="tile-icon" id="weatherIcon">☀️</span><span class="tile-kicker" data-i18n="weather">الطقس</span></div><div><h2 id="weatherSummary" data-i18n="weatherLoading">جارٍ تحميل الطقس…</h2><div class="value" id="weatherTemp">—°</div><p id="weatherDescription">Erfurt</p></div><div class="tile-footer"><span data-i18n="weatherRange">توقعات لأكثر من 10 أيام</span><span>›</span></div></button>
-<button class="tile" data-tile="history"><div class="tile-top"><span class="tile-icon">⌛</span><span class="tile-kicker" data-i18n="history">في مثل هذا اليوم</span></div><div><h2 data-i18n="historyTitle">من ذاكرة الأيام</h2><p id="historyPreview">—</p></div><div class="tile-footer"><span data-i18n="moreDetails">تفاصيل إضافية</span><span>›</span></div></button>
-<button class="tile" data-tile="prayer"><div class="tile-top"><span class="tile-icon">☾</span><span class="tile-kicker" data-i18n="prayer">مواقيت الصلاة</span></div><div><h2 id="nextPrayerName" data-i18n="prayerLoading">جارٍ حساب المواقيت…</h2><div class="value" id="tileTime">--:--</div><p id="prayerCountdown">—</p><div class="prayer-inline" id="prayerInline"></div></div><div class="tile-footer"><span id="tileDate">—</span><span>›</span></div></button>
-<button class="tile" data-tile="wisdom"><div class="tile-top"><span class="tile-icon">✧</span><span class="tile-kicker" data-i18n="wisdom">حكمة وذكر</span></div><div><h2 data-i18n="wisdomTitle">ومضة اليوم</h2><p id="wisdomPreview">—</p></div><div class="tile-footer"><span data-i18n="wisdomMore">اقرأ المزيد</span><span>›</span></div></button>
-<button class="tile" data-tile="quran" id="quranTile"><div class="tile-top"><span class="tile-icon">۞</span><span class="tile-kicker" data-i18n="quran">القرآن الكريم</span></div><div><h2 data-i18n="quranTitle">آيات تتلى</h2><p id="quranTileStatus" data-i18n="quranTap">افتح لاختيار القارئ والسورة والآية</p></div><div class="tile-footer"><span id="quranTileReciters" data-i18n="reciterCount">اختيار عدة قرّاء</span><span id="quranTileState">›</span></div></button>
-</main>
-<footer><span class="ticker-label" data-i18n="duaLabel">دعاء</span><div class="ticker"><span id="duaTicker">اللهم اجعل هذا اليوم خيراً وبركة</span></div><span class="byline">© Nabil Koukach</span></footer>
-</div>
-<dialog id="languageDialog" class="exit-dialog"><div class="dialog-head"><h2>🌐</h2><button class="close" id="languageClose" type="button" aria-label="إغلاق">✕</button></div><div class="dialog-body"><div id="languageOptions"><button class="close" data-lang="ar">العربية</button><button class="close" data-lang="de">Deutsch</button><button class="close" data-lang="en">English</button></div><button id="locationFromLogo" class="close" type="button">📍 اختيار المدينة</button></div></dialog>
-<dialog id="detailDialog"><div class="dialog-head"><h2 id="detailTitle">Details</h2><button class="close" id="detailClose" data-i18n="close">إغلاق</button></div><div class="dialog-body" id="detailBody"></div></dialog>
-<dialog id="exitDialog" class="exit-dialog"><div class="dialog-head"><h2 data-i18n="exitTitle">هل تريد الخروج من البرنامج؟</h2></div><div class="dialog-body"><p data-i18n="exitPrompt">هل تريد إغلاق التطبيق؟</p><div class="yesno"><button class="close" id="exitNo" data-i18n="no">لا</button><button class="close" id="exitYes" data-i18n="yes">نعم، خروج</button></div></div></dialog>
-<script>
-const $=s=>document.querySelector(s);
-const langDict={
- ar:{appName:"ذِكرى",developer:"تطوير",language:"اللغة",enableLocation:"تحديد الموقع",locationDenied:"لم يتم السماح بالموقع",locationLoading:"جارٍ تحديد الموقع…",locationUnavailable:"تعذر تحديد الموقع",cityUnknown:"مدينة غير معروفة",localTime:"الوقت المحلي",timeTitle:"الوقت في Erfurt",timezone:"التوقيت المحلي للمدينة",weather:"الطقس",weatherLoading:"جارٍ تحميل الطقس…",weatherRange:"توقعات لأكثر من 10 أيام",history:"في مثل هذا اليوم",historyTitle:"من ذاكرة الأيام",moreDetails:"تفاصيل إضافية",prayer:"مواقيت الصلاة",prayerLoading:"جارٍ حساب المواقيت…",prayerDetails:"مواقيت اليوم",wisdom:"حكمة وذكر",wisdomTitle:"ومضة اليوم",wisdomMore:"اقرأ المزيد",quran:"القرآن الكريم",quranTitle:"آيات تتلى",quranTap:"افتح لاختيار القارئ والسورة والآية",reciterCount:"اختيار عدة قرّاء",duaLabel:"دعاء",close:"إغلاق",exitTitle:"هل تريد الخروج من البرنامج؟",exitPrompt:"هل تريد إغلاق التطبيق؟",no:"لا",yes:"نعم، خروج",timeDetails:"الوقت والتاريخ",today:"اليوم",tomorrow:"غداً",forecast:"توقعات الطقس",selectDay:"اختر يوماً لرؤية التوقعات بالساعات",hour:"الساعة",temperature:"الحرارة",feels:"المحسوسة",wind:"الرياح",rain:"احتمال المطر",humidity:"الرطوبة",sunrise:"الشروق",sunset:"الغروب",prayerCalc:"المواقيت المحسوبة للموقع الحالي",nextPrayer:"الصلاة القادمة",date:"التاريخ",noWeather:"تعذر تحميل الطقس",events:"أحداث في هذا اليوم",wisdomSource:"المصدر",explanation:"شرح مختصر",reciters:"القرّاء",randomStart:"تشغيل الآية المختارة",stop:"إيقاف التلاوة",playing:"التلاوة تعمل",stopped:"التلاوة متوقفة",quranInfo:"اختر القارئ والسورة ورقم الآية، ثم اضغط تشغيل. لن يبدأ الصوت تلقائياً.",translationNote:"ترجمة معنى الآية",weatherCodes:["صحو","غائم غالباً","غائم","ضباب","رذاذ","مطر","ثلج","زخات","عاصفة رعدية"],days:["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],prayers:["الفجر","الشروق","الظهر","العصر","المغرب","العشاء"],dua:"اللهم اجعل هذا اليوم خيراً وبركة، واغفر لنا وارحمنا واهدنا إلى ما تحب وترضى."},
- de:{appName:"Zikra",developer:"Entwickelt von",language:"Sprache",enableLocation:"Standort erlauben",locationDenied:"Standortzugriff verweigert",locationLoading:"Standort wird ermittelt…",locationUnavailable:"Standort nicht verfügbar",cityUnknown:"Unbekannte Stadt",localTime:"Ortszeit",timeTitle:"Uhrzeit in Erfurt",timezone:"Lokale Zeit für Erfurt",weather:"Wetter",weatherLoading:"Wetter wird geladen…",weatherRange:"Vorhersage für mehr als 10 Tage",history:"Heute in der Geschichte",historyTitle:"Aus dem Gedächtnis der Zeit",moreDetails:"Weitere Details",prayer:"Gebetszeiten",prayerLoading:"Gebetszeiten werden berechnet…",prayerDetails:"Heutige Gebetszeiten",wisdom:"Weisheit & Gedenken",wisdomTitle:"Impuls des Tages",wisdomMore:"Mehr lesen",quran:"Koran",quranTitle:"Rezitation",quranTap:"Öffnen, um Rezitator, Sure und Vers auszuwählen",reciterCount:"Mehrere Rezitatoren auswählen",duaLabel:"Bittgebet",close:"Schließen",exitTitle:"Möchtest du das Programm beenden?",exitPrompt:"Möchtest du die App schließen?",no:"Nein",yes:"Ja, beenden",timeDetails:"Uhrzeit und Datum",today:"Heute",tomorrow:"Morgen",forecast:"Wettervorhersage",selectDay:"Wähle einen Tag für die Stundenübersicht",hour:"Uhrzeit",temperature:"Temperatur",feels:"Gefühlt",wind:"Wind",rain:"Regenwahrscheinlichkeit",humidity:"Luftfeuchtigkeit",sunrise:"Sonnenaufgang",sunset:"Sonnenuntergang",prayerCalc:"Berechnete Gebetszeiten",nextPrayer:"Nächstes Gebet",date:"Datum",noWeather:"Wetter konnte nicht geladen werden",events:"Ereignisse an diesem Tag",wisdomSource:"Quelle",explanation:"Kurze Erklärung",reciters:"Rezitatoren",randomStart:"Ausgewählten Vers abspielen",stop:"Rezitation stoppen",playing:"Rezitation läuft",stopped:"Rezitation angehalten",quranInfo:"Wähle Rezitator, Sure und Versnummer und drücke dann Wiedergabe. Es startet nichts automatisch.",translationNote:"Bedeutungsübersetzung des Verses",weatherCodes:["Klar","Überwiegend bewölkt","Bewölkt","Nebel","Nieselregen","Regen","Schnee","Schauer","Gewitter"],days:["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"],prayers:["Fadschr","Sonnenaufgang","Dhuhr","Asr","Maghrib","Ischa"],dua:"O Allah, schenke uns einen guten und gesegneten Tag, vergib uns, erbarme Dich unser und leite uns zu dem, was Dir gefällt."},
- en:{appName:"Zikra",developer:"Developed by",language:"Language",enableLocation:"Enable location",locationDenied:"Location permission denied",locationLoading:"Detecting location…",locationUnavailable:"Location unavailable",cityUnknown:"Unknown city",localTime:"Local time",timeTitle:"Time in Erfurt",timezone:"Local time for the city",weather:"Weather",weatherLoading:"Loading weather…",weatherRange:"Forecast for more than 10 days",history:"On this day",historyTitle:"From the memory of time",moreDetails:"More details",prayer:"Prayer times",prayerLoading:"Calculating prayer times…",prayerDetails:"Today's prayer times",wisdom:"Wisdom & remembrance",wisdomTitle:"Daily reflection",wisdomMore:"Read more",quran:"The Holy Quran",quranTitle:"Quran recitation",quranTap:"Open to choose reciter, surah and verse",reciterCount:"Choose multiple reciters",duaLabel:"Supplication",close:"Close",exitTitle:"Do you want to exit the program?",exitPrompt:"Do you want to close the app?",no:"No",yes:"Yes, exit",timeDetails:"Time and date",today:"Today",tomorrow:"Tomorrow",forecast:"Weather forecast",selectDay:"Choose a day to view hourly details",hour:"Hour",temperature:"Temperature",feels:"Feels like",wind:"Wind",rain:"Chance of rain",humidity:"Humidity",sunrise:"Sunrise",sunset:"Sunset",prayerCalc:"Calculated prayer times for your location",nextPrayer:"Next prayer",date:"Date",noWeather:"Unable to load weather",events:"Events on this day",wisdomSource:"Source",explanation:"Short explanation",reciters:"Reciters",randomStart:"Play selected verse",stop:"Stop recitation",playing:"Recitation playing",stopped:"Recitation stopped",quranInfo:"Choose a reciter, surah and verse number, then press Play. Nothing starts automatically.",translationNote:"Meaning of the verse",weatherCodes:["Clear","Mainly cloudy","Cloudy","Fog","Drizzle","Rain","Snow","Showers","Thunderstorm"],days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],prayers:["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"],dua:"O Allah, make this day good and blessed, forgive us, have mercy on us, and guide us to what pleases You."}
-};
-let lang=localStorage.getItem("zikra-language")||"ar";
-const t=k=>{let v=langDict[lang][k];return v===undefined?k:v};
-const duaPool = [
-"اللهم اغفر لنا وارحمنا واهدنا وعافنا وارزقنا.","اللهم إني أسألك العفو والعافية في الدنيا والآخرة.","ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار.","رب اشرح لي صدري ويسر لي أمري.","اللهم أعنا على ذكرك وشكرك وحسن عبادتك.","يا مقلب القلوب ثبت قلبي على دينك.","اللهم ارزقنا الإخلاص في القول والعمل.","اللهم اجعل القرآن ربيع قلوبنا ونور صدورنا.","ربنا لا تزغ قلوبنا بعد إذ هديتنا وهب لنا من لدنك رحمة.","اللهم إني أسألك الهدى والتقى والعفاف والغنى.","اللهم أصلح لنا ديننا ودنيانا وآخرتنا.","ربنا ظلمنا أنفسنا وإن لم تغفر لنا وترحمنا لنكونن من الخاسرين.","اللهم اجعل لنا من كل هم فرجاً ومن كل ضيق مخرجاً.","اللهم بارك لنا في أرزاقنا وأعمارنا وأهلينا.","اللهم احفظ أهلنا وأولادنا من كل سوء.","رب هب لي من لدنك ذرية طيبة إنك سميع الدعاء.","ربنا هب لنا من أزواجنا وذرياتنا قرة أعين.","اللهم اشف مرضانا ومرضى المسلمين.","اللهم فرج هم المهمومين ونفس كرب المكروبين.","اللهم اقض الدين عن المدينين وأغننا بفضلك عمن سواك.","اللهم اجعل عاقبة أمورنا خيراً.","اللهم إنا نسألك حسن الخاتمة.","اللهم توفنا وأنت راض عنا.","اللهم اجعلنا من أهل القرآن الذين هم أهلك وخاصتك.","اللهم ارزقنا قلباً سليماً ولساناً صادقاً وعملاً متقبلاً.","رب زدني علماً وارزقني فهماً.","اللهم علّمنا ما ينفعنا وانفعنا بما علمتنا وزدنا علماً.","اللهم إنا نعوذ بك من الهم والحزن والعجز والكسل.","اللهم إنا نعوذ بك من غلبة الدين وقهر الرجال.","اللهم اجعل هذا اليوم بداية خير وبركة.","اللهم اكتب لنا في هذا اليوم راحة البال وسعة الرزق.","اللهم ارزقنا راحةً في القلب ونوراً في الوجه وسعةً في الرزق.","اللهم اجعل بيوتنا عامرة بالإيمان والسكينة.","اللهم ألّف بين قلوبنا وأصلح ذات بيننا.","اللهم ارزقنا حسن الظن بك والتوكل عليك.","اللهم لا تكلنا إلى أنفسنا طرفة عين.","اللهم اجعلنا شاكرين لنعمك ذاكرين لفضلك.","اللهم ارزقنا الصبر عند البلاء والشكر عند الرخاء.","اللهم اجعلنا مفاتيح للخير مغاليق للشر.","اللهم طهر قلوبنا من النفاق وأعمالنا من الرياء.","اللهم ارزقنا محبة نبيك واتباع سنته.","اللهم صل وسلم على نبينا محمد.","سبحان الله وبحمده سبحان الله العظيم.","لا حول ولا قوة إلا بالله العلي العظيم.","حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم.","اللهم أنت ربي لا إله إلا أنت خلقتني وأنا عبدك.","اللهم إني أعوذ بك من زوال نعمتك وتحول عافيتك.","اللهم ارزقنا من واسع فضلك ورحمتك.","اللهم اجعلنا من التوابين واجعلنا من المتطهرين.","اللهم تقبل منا صالح الأعمال وتجاوز عن التقصير.","اللهم اهد شباب المسلمين وأصلح أحوالهم.","اللهم احفظ بلاد المسلمين وأدم عليها الأمن والسلام.","اللهم انصر المظلومين وفرج عن المستضعفين.","اللهم اجعل لنا نصيباً من كل خير تنزله.","اللهم اصرف عنا السوء والفحشاء والبلاء.","اللهم ارزقنا الطمأنينة والرضا والقناعة.","اللهم اجعل كلامنا طيباً وأفعالنا صالحة.","اللهم اجعلنا بارين بوالدينا وارحمهم كما ربونا صغاراً.","رب ارحمهما كما ربياني صغيراً.","اللهم اغفر للمؤمنين والمؤمنات الأحياء منهم والأموات.","اللهم ارزقنا صحبة الصالحين وحسن الختام.","اللهم اجعل لنا في كل خطوة سلامة وتوفيقاً.","اللهم يسر لنا الخير حيث كان ثم رضنا به.","اللهم جنبنا الفتن ما ظهر منها وما بطن.","اللهم اجعلنا ممن يستمعون القول فيتبعون أحسنه.","اللهم املأ قلوبنا نوراً وإيماناً ويقيناً.","اللهم ارزقنا رحمةً تغنينا بها عن رحمة من سواك.","اللهم اجعلنا من أهل الجنة بغير حساب ولا سابقة عذاب.","اللهم أجرنا من النار ومن كل عمل يقرب إليها.","اللهم أعذنا من شر أنفسنا ومن سيئات أعمالنا.","اللهم اجعل القرآن حجة لنا ولا تجعله حجة علينا.","اللهم افتح لنا أبواب رحمتك وفضلك.","اللهم ارزقنا رزقاً حلالاً طيباً مباركاً فيه.","اللهم بارك في وقتنا وأعمالنا وأيامنا.","اللهم اجعل لنا من لدنك سلطاناً نصيراً.","ربنا أفرغ علينا صبراً وثبت أقدامنا.","اللهم اجعلنا من عبادك المخلصين.","اللهم ارزقنا الحكمة والسداد في القول والعمل.","اللهم إنا نسألك الجنة وما قرب إليها من قول وعمل.","اللهم إنا نعوذ بك من النار وما قرب إليها من قول وعمل.","اللهم اجعل سريرتنا خيراً من علانيتنا.","اللهم اجعل آخر كلامنا من الدنيا لا إله إلا الله.","اللهم ارزقنا التوبة النصوح قبل الموت.","اللهم اجعل قبورنا روضة من رياض الجنة.","اللهم هون علينا سكرات الموت.","اللهم اجمعنا بأحبتنا في جنات النعيم.","اللهم ارزقنا فرحاً لا ينقطع ونعمة لا تزول.","اللهم لا تحرمنا لذة النظر إلى وجهك الكريم.","اللهم اجعلنا ممن رضيت عنهم ورضوا عنك.","اللهم ارزقنا صدق التوكل وحسن التفويض.","اللهم اكتب لنا الخير وبارك لنا فيما أعطيت.","اللهم اصرف عنا شر ما قضيت.","اللهم اجعلنا آمنين مطمئنين في أوطاننا.","اللهم ارزقنا سكينة النفس وهدوء القلب.","اللهم اجعلنا ممن إذا أحسنوا استبشروا وإذا أساؤوا استغفروا.","اللهم اغسل قلوبنا من الهموم والأحزان.","اللهم ارزقنا لساناً رطباً بذكرك.","اللهم اجعل أعمالنا خالصة لوجهك الكريم.","اللهم تقبل دعاءنا واغفر خطأنا وارحم ضعفنا.","اللهم لا تردنا خائبين وأنت أكرم الأكرمين.","اللهم اجعل لنا في كل يوم دعوة مستجابة.","اللهم اكتب لنا ولأهلينا السلامة والعافية.","اللهم ارزقنا الخير كله عاجله وآجله.","اللهم قنا شر أنفسنا وشر الشيطان وشركه.","اللهم اجعل لنا نوراً في قبورنا ونوراً على الصراط.","اللهم اجعلنا من أهل الذكر والشكر وحسن العبادة.","اللهم اجعل هذا الدعاء سبباً للخير والفرج والرحمة."
-];
-let duaIndex=0;
-function setDuaTicker(){const el=$("#duaTicker");if(!el)return;el.textContent=duaPool[duaIndex%duaPool.length];el.style.animation="none";void el.offsetWidth;el.style.animation="marquee-ltr 46s linear infinite";duaIndex=(duaIndex+1)%duaPool.length}
-setDuaTicker();setInterval(setDuaTicker,46000);
-function applyLanguage(){document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";document.querySelectorAll("[data-i18n]").forEach(el=>{let k=el.dataset.i18n;if(langDict[lang][k]!==undefined)el.textContent=t(k)});setDuaTicker();renderClock();renderWeatherTile();renderPrayerTile();renderWisdomTile();renderHistoryTile();if($("#detailDialog").open){let tile=$("#detailDialog").dataset.tile;if(tile)openDetails(tile,false)}}
-function chooseLanguage(next){if(!langDict[next])return;lang=next;localStorage.setItem("zikra-language",lang);applyLanguage();$("#languageDialog").close();$("#logoLanguageButton").focus()}
-$("#logoLanguageButton").addEventListener("click",()=>{$("#languageDialog").showModal();document.querySelector(`#languageOptions [data-lang="${lang}"]`)?.focus()});
-$("#languageClose").addEventListener("click",()=>{$("#languageDialog").close();$("#logoLanguageButton").focus()});
-document.querySelectorAll("#languageOptions [data-lang]").forEach(b=>b.addEventListener("click",()=>chooseLanguage(b.dataset.lang)));
-const fmtDate=(d,opts={weekday:"long",year:"numeric",month:"long",day:"numeric"})=>new Intl.DateTimeFormat(lang==="ar"?"ar-DE":lang==="de"?"de-DE":"en-GB",{timeZone:"Europe/Berlin",...opts}).format(d);
-function renderClock(){let d=new Date();let tm=new Intl.DateTimeFormat(lang==="ar"?"ar-DE":lang==="de"?"de-DE":"en-GB",{timeZone:"Europe/Berlin",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(d);const ht=$("#headerTime"),hd=$("#headerDate"),td=$("#tileTime"),tdate=$("#tileDate"),hijri=$("#hijriDate");if(ht)ht.textContent=tm;if(hd)hd.textContent=fmtDate(d,{weekday:"short",day:"2-digit",month:"short"});if(td)td.textContent=tm.slice(0,5);if(tdate)tdate.textContent=fmtDate(d);if(hijri){try{hijri.textContent=new Intl.DateTimeFormat(lang==="ar"?"ar-SA-u-ca-islamic-umalqura":lang==="de"?"de-DE-u-ca-islamic-umalqura":"en-GB-u-ca-islamic-umalqura",{timeZone:"Europe/Berlin",day:"numeric",month:"long",year:"numeric",calendar:"islamic-umalqura"}).format(d)}catch(e){hijri.textContent="التقويم الهجري"}}}
-setInterval(renderClock,1000);
-const weatherCodes={0:0,1:0,2:1,3:2,45:3,48:3,51:4,53:4,55:4,56:4,57:4,61:5,63:5,65:5,66:5,67:5,71:6,73:6,75:6,77:6,80:7,81:7,82:7,85:7,86:7,95:8,96:8,99:8};
-let weatherData=null,selectedWeatherDay=0;let userLocation={lat:null,lon:null,city:null,country:null};
-function weatherDesc(code){return t("weatherCodes")[weatherCodes[code]??1]||t("weather")}
-function renderWeatherTile(){if(!weatherData)return;let c=weatherData.current;$("#weatherTemp").textContent=Math.round(c.temperature_2m)+"°";$("#weatherSummary").textContent=weatherDesc(c.weather_code);$("#weatherDescription").textContent=`${t("feels")}: ${Math.round(c.apparent_temperature)}° · ${userLocation.city||t("cityUnknown")}`;$("#weatherIcon").textContent=(weatherCodes[c.weather_code]===5||weatherCodes[c.weather_code]===7)?"🌧️":weatherCodes[c.weather_code]===6?"❄️":weatherCodes[c.weather_code]===8?"⛈️":"☀️"}
-async function loadWeather(){try{if(userLocation.lat==null||userLocation.lon==null){$("#weatherSummary").textContent=t("locationUnavailable");return}const u=`https://api.open-meteo.com/v1/forecast?latitude=${userLocation.lat}&longitude=${userLocation.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max&timezone=auto&forecast_days=14`;let r=await fetch(u,{cache:"no-store"});if(!r.ok)throw Error();weatherData=await r.json();renderWeatherTile();}catch(e){$("#weatherSummary").textContent=t("noWeather")}}
-function weatherDetails(){if(!weatherData){return `<p>${t("weatherLoading")}</p>`}let d=weatherData.daily;let days=d.time.map((date,i)=>({date,i}));return `<p class="status">${t("forecast")} · ${userLocation.city||t("cityUnknown")} · 14 days</p><div class="forecast-days" id="forecastDays">${days.map(({date,i})=>`<button class="close day-button" data-day="${i}" aria-pressed="${i===selectedWeatherDay}">${fmtDate(new Date(date+"T12:00:00"),{weekday:"short",day:"2-digit",month:"short"})}<br><strong>${Math.round(d.temperature_2m_max[i])}° / ${Math.round(d.temperature_2m_min[i])}°</strong><br>${weatherDesc(d.weather_code[i])}</button>`).join("")}</div><div id="hoursPanel">${hoursHtml(selectedWeatherDay)}</div>`}
-function hoursHtml(day){let h=weatherData.hourly, date=weatherData.daily.time[day];let idx=[];h.time.forEach((v,i)=>{if(v.startsWith(date))idx.push(i)});return `<h3>${fmtDate(new Date(date+"T12:00:00"))}</h3><div class="hours-grid">${idx.map(i=>`<div class="hour" tabindex="0"><strong>${h.time[i].slice(11,16)}</strong>${weatherDesc(h.weather_code[i])}<p>${Math.round(h.temperature_2m[i])}°</p><p>${t("rain")}: ${h.precipitation_probability[i]??0}%</p><p>${t("wind")}: ${Math.round(h.wind_speed_10m[i])} km/h</p></div>`).join("")}</div><div class="detail-grid" style="margin-top:12px"><div class="detail-card"><h3>${t("sunrise")}</h3>${weatherData.daily.sunrise[day].slice(11,16)}</div><div class="detail-card"><h3>${t("sunset")}</h3>${weatherData.daily.sunset[day].slice(11,16)}</div></div>`}
-function bindWeather(){let root=$("#detailBody");root.querySelectorAll("[data-day]").forEach(b=>b.addEventListener("click",()=>{selectedWeatherDay=+b.dataset.day;root.querySelectorAll("[data-day]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));$("#hoursPanel").innerHTML=hoursHtml(selectedWeatherDay)}))}
-const events={ar:[["1929","تأسيس جمهورية الفاتيكان (دولة مدينة الفاتيكان)."],["1964","أُطلقت مركبة رينجر 7 نحو القمر."],["2001","إطلاق نظام التشغيل Windows XP."]],de:[["1929","Der Staat Vatikanstadt wird gegründet."],["1964","Die Raumsonde Ranger 7 startet zum Mond."],["2001","Windows XP wird veröffentlicht."]],en:[["1929","Vatican City is established as a sovereign state."],["1964","Ranger 7 launches toward the Moon."],["2001","Windows XP is released."]]};
-const wisdomItems=[
- {ar:"إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى.",de:"Taten werden nach den Absichten beurteilt; jedem Menschen steht zu, was er beabsichtigt hat.",en:"Actions are judged by intentions, and each person will have what they intended.",src:"صحيح البخاري ومسلم"},
- {ar:"تبسّمك في وجه أخيك لك صدقة.",de:"Ein Lächeln für deinen Mitmenschen ist eine gute Tat.",en:"Your smile to another person is an act of charity.",src:"حديث نبوي"},
- {ar:"لا تحزن، إن الله معنا.",de:"Sei nicht traurig; Allah ist mit uns.",en:"Do not grieve; indeed, Allah is with us.",src:"القرآن الكريم، التوبة 40"}
-];let wisdomIndex=(new Date().getDate())%wisdomItems.length;
-function renderWisdomTile(){let w=wisdomItems[wisdomIndex];$("#wisdomPreview").textContent=w[lang]}
-function renderHistoryTile(){let ev=events[lang];$("#historyPreview").textContent=ev[new Date().getDate()%ev.length][1]}
-const prayerTimes={};function calcPrayerTimes(){// lightweight approximate local schedule; displayed as an estimate, not an official timetable
- const now=new Date(),date=fmtISO(now),lat=userLocation.lat??50.9848,lon=userLocation.lon??11.0299;const day=Math.floor((Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())-Date.UTC(now.getFullYear(),0,0))/86400000);const decl=23.45*Math.sin(2*Math.PI*(284+day)/365)*Math.PI/180;const latr=lat*Math.PI/180;const ha=deg=>Math.acos(Math.max(-1,Math.min(1,(Math.sin(deg*Math.PI/180)-Math.sin(latr)*Math.sin(decl))/(Math.cos(latr)*Math.cos(decl)))))*180/Math.PI;const solarNoon=12-lon/15;const sunrise=solarNoon-ha(-0.833)/15;const sunset=solarNoon+ha(-0.833)/15;const asr=solarNoon+ha(Math.atan(1/(1+Math.tan(Math.abs(latr-decl))))*180/Math.PI)/15;return [sunrise-1.25/60, sunrise, solarNoon+0.15, asr, sunset, sunset+1.25/60].map((h,i)=>{h=(h+24)%24;let hr=Math.floor(h),mi=Math.round((h-hr)*60);if(mi===60){hr=(hr+1)%24;mi=0}return {name:t("prayers")[i],time:String(hr).padStart(2,"0")+":"+String(mi).padStart(2,"0")}})}
-function fmtISO(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-function prayerList(){let p=calcPrayerTimes();let now=new Date(),cur=now.getHours()*60+now.getMinutes();let next=p.find(x=>{let [h,m]=x.time.split(":").map(Number);return h*60+m>cur})||p[0];const nn=$("#nextPrayerName"),nt=$("#nextPrayerTime"),pc=$("#prayerCountdown"),pi=$("#prayerInline");if(nn)nn.textContent=next.name;if(nt)nt.textContent=next.time;if(pc)pc.textContent=t("nextPrayer")+": "+next.name;if(pi)pi.innerHTML=p.map(x=>`<div class="prayer-chip">${x.name}<strong>${x.time}</strong></div>`).join("")}
-function renderPrayerTile(){prayerList()}
-function openDetails(key,show=true){const body=$("#detailBody");$("#detailDialog").dataset.tile=key;let title="",content="";
-if(key==="weather"){title=t("weather");content=weatherDetails()}
-if(key==="history"){title=t("history");content=`<div class="event-list">${events[lang].map(([year,txt])=>`<div class="event"><strong>${year}</strong><p>${txt}</p></div>`).join("")}</div>`}
-if(key==="prayer"){title=t("prayer");content=`<p>${t("prayerCalc")}</p><div class="detail-grid">${calcPrayerTimes().map(p=>`<div class="detail-card"><h3>${p.name}</h3><div class="big">${p.time}</div></div>`).join("")}</div><p class="status">${lang==="ar"?"هذه مواقيت تقديرية؛ يُفضّل مطابقتها مع مصدر مسجدك المحلي.":lang==="de"?"Dies sind Näherungswerte; bitte mit dem örtlichen Gebetskalender abgleichen.":"These are approximate times; please compare with a local mosque timetable."}</p>`}
-if(key==="wisdom"){let w=wisdomItems[wisdomIndex];title=t("wisdom");content=`<div class="detail-card">${lang==="ar"?`<p class="quran-ar">${w.ar}</p><p>${w.de}</p><p>${w.en}</p>`:`<p>${w[lang]}</p><p class="status">${w.ar}</p>`}<p>${t("wisdomSource")}: ${w.src}</p></div><div class="control-row"><button id="nextWisdom">${lang==="ar"?"حكمة أخرى":lang==="de"?"Weitere Weisheit":"Another reflection"}</button></div>`}
-if(key==="quran"){title=t("quran");content=`<p>${t("quranInfo")}</p><div class="detail-card"><h3>${t("reciters")}</h3><div class="control-row"><select id="quranReciter" aria-label="Reciter">${reciters.map((r,i)=>`<option value="${i}" ${selectedReciter===i?"selected":""}>${r.label[lang]}</option>`).join("")}</select><label>${lang==="ar"?"السورة":lang==="de"?"Sure":"Surah"} <select id="quranSurah" aria-label="Surah">${surahNames.map((name,i)=>`<option value="${i+1}" ${chosenSurah===i+1?"selected":""}>${name}</option>`).join("")}</select></label><label>${lang==="ar"?"رقم الآية":lang==="de"?"Vers":"Ayah"} <input id="quranAyahNumber" type="number" min="1" max="286" value="${chosenAyah}" style="width:90px;background:#142b47;color:white;border:1px solid #29405e;border-radius:9px;padding:10px"></label></div><div class="control-row"><button id="quranPlay">${t("randomStart")}</button><button id="quranStop">${t("stop")}</button></div><div id="quranAyah" class="quran-ar"></div><div id="quranTranslation" class="translation"></div><div id="quranAyahMeta"></div><div id="quranStatus" class="status">${isPlaying?t("playing"):t("stopped")}</div></div>`}
-$("#detailTitle").textContent=title;body.innerHTML=content;
-if(key==="weather")bindWeather();
-if(key==="wisdom")$("#nextWisdom")?.addEventListener("click",()=>{wisdomIndex=(wisdomIndex+1)%wisdomItems.length;renderWisdomTile();openDetails("wisdom",false)});
-if(key==="quran"){$("#quranSurah")?.addEventListener("change",()=>{chosenSurah=+$("#quranSurah").value;chosenAyah=1;$("#quranAyahNumber").value="1"});$("#quranPlay")?.addEventListener("click",()=>{selectedReciter=+$("#quranReciter").value;chosenSurah=Math.max(1,Math.min(114,+$("#quranSurah").value||1));chosenAyah=Math.max(1,+$("#quranAyahNumber").value||1);startSelectedAyah()});$("#quranStop")?.addEventListener("click",stopQuran);if(currentAyah)showAyah(currentAyah)}
-if(show&&!$("#detailDialog").open)$("#detailDialog").showModal()}
-$("#detailClose").addEventListener("click",()=>{$("#detailDialog").close();focusHomeTile()});
-function chooseCityPrompt(){const city=prompt(lang==="ar"?"اكتب اسم المدينة لحساب مواقيت الصلاة والطقس (مثلاً Erfurt):":lang==="de"?"Stadt für Gebetszeiten und Wetter eingeben (z. B. Erfurt):":"Enter city for prayer times and weather (e.g. Erfurt):",userLocation.city||"Erfurt");if(city){lookupCity(city).then(ok=>{if(!ok)alert(lang==="ar"?"لم أجد المدينة. جرّب كتابتها بالألمانية أو الإنجليزية.":"City not found. Try another spelling.")})}}
-$("#locationFromLogo").addEventListener("click",()=>{ $("#languageDialog").close(); chooseCityPrompt(); });
-document.querySelectorAll(".tile").forEach(tile=>tile.addEventListener("click",()=>openDetails(tile.dataset.tile)));
-const reciters=[
- {id:"Alafasy_128kbps",label:{ar:"مشاري العفاسي",de:"Mishary Alafasy",en:"Mishary Alafasy"}},
- {id:"Abdurrahmaan_As-Sudais_192kbps",label:{ar:"عبدالرحمن السديس",de:"Abdurrahman As-Sudais",en:"Abdul Rahman Al-Sudais"}},
- {id:"Husary_128kbps",label:{ar:"محمود خليل الحصري",de:"Mahmoud Al-Husary",en:"Mahmoud Al-Husary"}},
- {id:"Minshawy_Murattal_128kbps",label:{ar:"محمد صديق المنشاوي — مرتل",de:"Mohamed Al-Minshawi (Murattal)",en:"Mohamed Al-Minshawi (Murattal)"}},
- {id:"Abdul_Basit_Murattal_192kbps",label:{ar:"عبد الباسط عبد الصمد — مرتل",de:"Abdul Basit (Murattal)",en:"Abdul Basit (Murattal)"}},
- {id:"Abdul_Basit_Mujawwad_128kbps",label:{ar:"عبد الباسط عبد الصمد — مجوّد",de:"Abdul Basit (Mujawwad)",en:"Abdul Basit (Mujawwad)"}},
- {id:"Abu_Bakr_Shaatree_128kbps",label:{ar:"أبو بكر الشاطري",de:"Abu Bakr Al-Shatri",en:"Abu Bakr Al-Shatri"}},
- {id:"Maher_AlMuaiqly_128kbps",label:{ar:"ماهر المعيقلي",de:"Maher Al-Muaiqly",en:"Maher Al-Muaiqly"}},
- {id:"Saood_ash-Shuraym_128kbps",label:{ar:"سعود الشريم",de:"Saud Al-Shuraim",en:"Saud Al-Shuraim"}},
- {id:"Hani_Rifai_192kbps",label:{ar:"هاني الرفاعي",de:"Hani Al-Rifai",en:"Hani Al-Rifai"}},
- {id:"Muhammad_Ayyoub_128kbps",label:{ar:"محمد أيوب",de:"Muhammad Ayyub",en:"Muhammad Ayyub"}},
- {id:"Muhammad_Jibreel_128kbps",label:{ar:"محمد جبريل",de:"Muhammad Jibreel",en:"Muhammad Jibreel"}},
- {id:"Abdullah_Basfar_192kbps",label:{ar:"عبد الله بصفر",de:"Abdullah Basfar",en:"Abdullah Basfar"}},
- {id:"Ghamadi_40kbps",label:{ar:"سعد الغامدي",de:"Saad Al-Ghamdi",en:"Saad Al-Ghamdi"}},
- {id:"Ibrahim_Akhdar_32kbps",label:{ar:"إبراهيم الأخضر",de:"Ibrahim Al-Akhdar",en:"Ibrahim Al-Akhdar"}}
-];
-const surahNames=["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];;let selectedReciter=0,chosenSurah=1,chosenAyah=1,isPlaying=false,audio=null,currentAyah=null;
-function startSelectedAyah(){stopQuran();const item={s:chosenSurah,a:chosenAyah,reciter:selectedReciter};currentAyah=item;isPlaying=true;$("#quranTileState").textContent="♪";$("#quranTileStatus").textContent=t("playing");const surah=String(item.s).padStart(3,"0"),ayah=String(item.a).padStart(3,"0"),r=reciters[item.reciter];audio=new Audio(`https://everyayah.com/data/${r.id}/${surah}${ayah}.mp3`);audio.onended=()=>{isPlaying=false;$("#quranTileState").textContent="›";$("#quranTileStatus").textContent=t("stopped");let st=$("#quranStatus");if(st)st.textContent=t("stopped")};audio.onerror=()=>{isPlaying=false;$("#quranTileStatus").textContent=t("stopped");let st=$("#quranStatus");if(st)st.textContent=t("locationUnavailable")};audio.play().then(()=>{let st=$("#quranStatus");if(st)st.textContent=t("playing")}).catch(()=>{isPlaying=false;$("#quranTileStatus").textContent=t("stopped");let st=$("#quranStatus");if(st)st.textContent="تعذر تشغيل الصوت؛ اضغط تشغيل مرة أخرى"});showAyah(item)}
-async function fetchAyahText(item){try{let res=await fetch(`https://api.alquran.cloud/v1/ayah/${item.s}:${item.a}/editions/quran-uthmani,en.sahih,de.aburida`);let j=await res.json();let ar=j.data.find(x=>x.edition.identifier==="quran-uthmani")?.text||"القرآن الكريم";let en=j.data.find(x=>x.edition.identifier==="en.sahih")?.text||"";let de=j.data.find(x=>x.edition.identifier==="de.aburida")?.text||"";return {ar,en,de,reference:`${item.s}:${item.a}`}}catch(e){return {ar:"",en:"",de:"",reference:`${item.s}:${item.a}`}}}
-function showAyah(item){fetchAyahText(item).then(x=>{let a=$("#quranAyah"),tr=$("#quranTranslation");if(a)a.textContent=x.ar;if(tr)tr.textContent=(lang==="ar"?x.en:lang==="de"?x.de:x.en);const meta=$("#quranAyahMeta");if(meta)meta.textContent=reciters[item.reciter].label[lang]+" — "+(surahNames[item.s-1]||"")})}
-function toggleQuran(){openDetails("quran")}
-function stopQuran(){isPlaying=false;if(audio){audio.pause();audio.currentTime=0}audio=null;$("#quranTileState").textContent="›";$("#quranTileStatus").textContent=t("quranTap");let st=$("#quranStatus");if(st)st.textContent=t("stopped")}
-async function lookupCity(cityName){
- const q=cityName.trim();if(!q)return false;
- try{const r=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=${lang}&format=json`,{cache:"no-store"});if(!r.ok)throw Error("geocode");const data=await r.json();const p=data.results?.[0];if(!p)return false;userLocation.lat=p.latitude;userLocation.lon=p.longitude;userLocation.city=p.name;userLocation.country=p.country||"";saveLocation();updateLocationLabel();loadWeather();renderPrayerTile();return true}catch(e){return false}
-}
-function saveLocation(){try{localStorage.setItem("zikra-location",JSON.stringify(userLocation))}catch(e){}}
-function restoreLocation(){try{const x=JSON.parse(localStorage.getItem("zikra-location")||"null");if(x&&Number.isFinite(x.lat)&&Number.isFinite(x.lon))userLocation=x}catch(e){}}
-function updateLocationLabel(){renderPrayerTile();renderWeatherTile()}
-async function detectLocation(){
- const btn=$("#locationFromLogo"),city=$("#hijriDate");
- if(!navigator.geolocation){city.textContent=t("locationUnavailable");const manual=prompt(lang==="ar"?"خدمة الموقع غير متاحة. اكتب اسم مدينتك لتحديد المواقيت والطقس:":"Location unavailable. Enter your city:",userLocation.city||"Erfurt");if(manual&&await lookupCity(manual))return;return}
- btn.disabled=true;city.textContent=t("locationLoading");
- navigator.geolocation.getCurrentPosition(async pos=>{
-  userLocation.lat=pos.coords.latitude;userLocation.lon=pos.coords.longitude;
-  try{const url=`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${userLocation.lat}&longitude=${userLocation.lon}&language=${lang}&format=json`;const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw Error();const data=await response.json();const place=data.results?.[0];userLocation.city=place?.name||place?.admin2||place?.admin1||"";userLocation.country=place?.country||""}catch(e){userLocation.city="";userLocation.country=""}
-  if(!userLocation.city){const manual=prompt(lang==="ar"?"تم تحديد الإحداثيات لكن تعذر معرفة اسم المدينة. اكتب اسم مدينتك:":"Coordinates found, but city name lookup failed. Enter your city:","Erfurt");if(manual)await lookupCity(manual)}
-  saveLocation();updateLocationLabel();btn.disabled=false;loadWeather();renderPrayerTile();
- },async err=>{
-  btn.disabled=false;city.textContent=err.code===1?t("locationDenied"):t("locationUnavailable");
-  const manual=prompt(lang==="ar"?"لم يسمح الجهاز بتحديد الموقع. اكتب اسم مدينتك يدوياً (مثلاً Erfurt):":lang==="de"?"Standort nicht verfügbar. Stadt manuell eingeben:":"Location unavailable. Enter your city:",userLocation.city||"Erfurt");
-  if(manual){city.textContent=t("locationLoading");const ok=await lookupCity(manual);if(!ok)city.textContent=t("cityUnknown")}
- },{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
-}
-function applyDynamic(){renderClock();renderPrayerTile();renderWeatherTile()}
-restoreLocation();if(userLocation.lat!=null){updateLocationLabel();loadWeather()}applyLanguage();renderClock();setInterval(()=>{renderClock();renderPrayerTile();renderWeatherTile()},60000);
 
-/* Rewritten TV remote control: one keydown handler, no duplicate Enter/click handling. */
-const mainGrid=$("#mainGrid");
-let lastHomeFocus=0;
-function homeTiles(){return [...document.querySelectorAll("#mainGrid .tile")];}
-function focusHomeTile(index=0){const tiles=homeTiles();if(!tiles.length)return;lastHomeFocus=Math.max(0,Math.min(index,tiles.length-1));tiles.forEach((tile,i)=>tile.classList.toggle("focused",i===lastHomeFocus));tiles[lastHomeFocus].focus({preventScroll:true});}
-function isBackKey(e){return ["Escape","Backspace","BrowserBack","GoBack","XF86Back","Go back","Back","Backspace"].includes(e.key)||[4,27,10009,461,166,8].includes(e.keyCode);}
-function activeDialog(){return [$("#languageDialog"),$("#detailDialog"),$("#exitDialog")].find(d=>d&&d.open)||null;}
-function closeTopLayer(){const d=activeDialog();if(d){d.close();if(d.id==="languageDialog")$("#logoLanguageButton").focus({preventScroll:true});else focusHomeTile(lastHomeFocus);return true;}focusHomeTile(lastHomeFocus);return true;}
-function moveFocus(e){const tiles=homeTiles();if(!tiles.length)return;let idx=tiles.indexOf(document.activeElement);if(idx<0)idx=lastHomeFocus;const cols=3;let next=idx;const rtl=document.documentElement.dir==="rtl";if(e.key==="ArrowRight")next+=rtl?-1:1;else if(e.key==="ArrowLeft")next+=rtl?1:-1;else if(e.key==="ArrowDown")next+=cols;else if(e.key==="ArrowUp")next-=cols;else return false;if(next<0||next>=tiles.length)return true; if((e.key==="ArrowRight"||e.key==="ArrowLeft")&&Math.floor(next/cols)!==Math.floor(idx/cols))return true;lastHomeFocus=next;tiles.forEach((tile,i)=>tile.classList.toggle("focused",i===next));tiles[next].focus({preventScroll:true});return true;}
-document.addEventListener("keydown",function(e){
- if(isBackKey(e)){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();closeTopLayer();return;}
- if(activeDialog())return;
- if(["ArrowRight","ArrowLeft","ArrowUp","ArrowDown"].includes(e.key)){const active=document.activeElement;if(active&&active.closest&&active.closest("#mainGrid")){e.preventDefault();e.stopPropagation();moveFocus(e);}return;}
- if(e.key==="Enter"||e.key===" "||[13,23,66].includes(e.keyCode)){const el=document.activeElement;if(el&&el.classList.contains("tile")){e.preventDefault();e.stopPropagation();lastHomeFocus=homeTiles().indexOf(el);openDetails(el.dataset.tile);}}
+<section class="date-panel">
+ <div class="clock" id="clock">--:--</div><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">المدينة: إرفورت</div>
+</section>
+
+<section class="prayer-strip">
+ <div class="prayer"><span class="p-icon">☾</span><div class="p-name" data-ar="الفجر" data-en="Fajr" data-de="Fadschr">الفجر</div><div class="p-time" id="fajr">--:--</div></div>
+ <div class="prayer"><span class="p-icon">☀</span><div class="p-name" data-ar="الشروق" data-en="Sunrise" data-de="Sonnenaufgang">الشروق</div><div class="p-time" id="sunrise">--:--</div></div>
+ <div class="prayer"><span class="p-icon">☀</span><div class="p-name" data-ar="الظهر" data-en="Dhuhr" data-de="Dhuhr">الظهر</div><div class="p-time" id="dhuhr">--:--</div></div>
+ <div class="prayer"><span class="p-icon">◒</span><div class="p-name" data-ar="العصر" data-en="Asr" data-de="Asr">العصر</div><div class="p-time" id="asr">--:--</div></div>
+ <div class="prayer"><span class="p-icon">◉</span><div class="p-name" data-ar="المغرب" data-en="Maghrib" data-de="Maghrib">المغرب</div><div class="p-time" id="maghrib">--:--</div></div>
+ <div class="prayer"><span class="p-icon">☾</span><div class="p-name" data-ar="العشاء" data-en="Isha" data-de="Ischa">العشاء</div><div class="p-time" id="isha">--:--</div></div>
+</section>
+
+<main class="tiles">
+<button class="tile" id="openQuran" aria-label="القرآن الكريم">
+<svg class="quran-logo" viewBox="0 0 220 180" role="img" aria-label="القرآن الكريم">
+<defs><linearGradient id="eg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#68866A"/><stop offset="1" stop-color="#304B3A"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#E2CA8C"/><stop offset="1" stop-color="#B18A40"/></linearGradient></defs>
+<path d="M110 7 L124 22 L145 17 L151 37 L171 43 L166 64 L184 78 L173 96 L182 116 L162 128 L158 149 L136 150 L122 168 L110 157 L98 168 L84 150 L62 149 L58 128 L38 116 L47 96 L36 78 L54 64 L49 43 L69 37 L75 17 L96 22 Z" fill="#F5F0DF" stroke="url(#gold)" stroke-width="2.5"/>
+<path d="M110 15 L121 29 L139 25 L145 42 L162 47 L158 65 L173 79 L164 96 L172 113 L155 124 L151 142 L132 143 L120 158 L110 149 L100 158 L88 143 L69 142 L65 124 L48 113 L56 96 L47 79 L62 65 L58 47 L75 42 L81 25 L99 29 Z" fill="none" stroke="#BD9B52"/>
+<path d="M108 69Q80 52 49 65V119Q80 109 108 129Z M112 69Q140 52 171 65V119Q140 109 112 129Z" fill="url(#eg)" stroke="#BD9B52" stroke-width="2"/>
+<path d="M108 73Q80 59 56 69V111Q80 104 108 122Z M112 73Q140 59 164 69V111Q140 104 112 122Z" fill="#FFFDF4" stroke="#D5C69A"/><path d="M110 71V126" stroke="#BD9B52" stroke-width="2"/>
+<g fill="none" stroke="#789171" stroke-width="1.5" stroke-linecap="round"><path d="M65 78Q81 72 99 81M64 87Q82 81 99 90M64 96Q82 90 99 99M64 105Q82 99 99 108M121 81Q139 72 155 78M121 90Q138 81 156 87M121 99Q138 90 156 96M121 108Q138 99 156 105"/></g>
+<path d="M110 35L115 44L125 45L118 53L120 62L110 57L100 62L102 53L95 45L105 44Z" fill="url(#gold)"/>
+<rect x="37" y="132" width="146" height="31" rx="10" fill="#304B3A" stroke="#BD9B52" stroke-width="1.7"/><text x="110" y="153" text-anchor="middle" font-size="21" font-weight="700" fill="#FFF7DF">القرآن الكريم</text>
+</svg>
+</button>
+
+<button class="tile weather-tile sunny" id="weatherCard" aria-label="تفاصيل الطقس">
+<span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span>
+</button>
+
+<button class="tile tile-memory" id="memoryCard" aria-label="تبديل الذكرى">
+<span class="tile-icon">🌿</span><span class="tile-title" id="memoryCardTitle">ذِكرى قرآنية ونبوية</span><span class="memory-preview-text" id="memoryPreviewText"></span><span class="memory-preview-source" id="memoryPreviewSource"></span><span class="memory-preview-benefit" id="memoryPreviewBenefit"></span>
+</button>
+</main>
+
+<section class="player">
+<div class="now-reading"><div class="mini-mushaf">۞</div><div><strong id="miniSurah">اختر سورة من مشغّل القرآن</strong><small id="miniReader">مشغّل القرآن</small></div></div>
+<div class="track-area"><div class="verse-row"><div class="verse" id="miniVerse">ستظهر الآية عند تحميل السورة</div><span class="ayah-number" id="miniAyah">١</span></div><div class="progress"><div class="progress-fill" id="progressFill"></div></div></div>
+<div class="controls"><button class="control" id="miniPrev" aria-label="الآية السابقة">⏮</button><button class="control main" id="miniPlay" aria-label="تشغيل">▶</button><button class="control" id="miniNext" aria-label="الآية التالية">⏭</button></div>
+</section>
+
+<div class="dua-bar"><span class="dua-symbol">✧</span><div class="dua-text" id="duaText">اللهم أعنّا على ذكرك وشكرك وحسن عبادتك</div><span class="dua-symbol">✧</span></div>
+<footer class="footer"><div class="directed">Directed by Nabil Koukash</div></footer>
+</div>
+
+<!-- مشغّل القرآن -->
+<div class="modal-backdrop" id="quranModal" role="dialog" aria-modal="true" aria-labelledby="quranTitle">
+<section class="modal">
+<div class="modal-head"><h2 id="quranTitle">ذِكرى — القرآن الكريم</h2><button class="close-modal" id="closeQuran" aria-label="إغلاق">×</button></div>
+<p>اختر القارئ والسورة، ثم حمّل التلاوة مع توقيت الآيات.</p>
+<div class="form-row"><div><label for="reciter">اختر الشيخ</label><select id="reciter"><option value="">جاري تحميل القرّاء...</option></select></div><div><label for="surah">اختر السورة</label><select id="surah"><option value="1">الفاتحة</option><option value="2">البقرة</option><option value="18">الكهف</option><option value="36">يس</option><option value="67">الملك</option><option value="112">الإخلاص</option></select></div></div>
+<button class="action" id="loadSurah">تحميل السورة والتوقيت</button>
+<div id="quranStatus">جاري تحميل قائمة القرّاء...</div><div id="verses">ستظهر الآيات هنا بعد التحميل.</div>
+<button class="action" id="playQuran" disabled>▶ تشغيل</button><div class="quran-controls"><button class="action" id="prevAyah" disabled>⏮ الآية السابقة</button><button class="action" id="nextAyah" disabled>الآية التالية ⏭</button></div><audio id="audio" controls preload="none"></audio>
+</section>
+</div>
+
+<!-- تفاصيل الطقس -->
+<div class="modal-backdrop" id="weatherModal" role="dialog" aria-modal="true" aria-labelledby="weatherTitle">
+<section class="modal">
+<div class="modal-head"><h2 id="weatherTitle">تفاصيل الطقس</h2><button class="close-modal" id="closeWeather" aria-label="إغلاق">×</button></div>
+<div style="text-align:center;padding:12px"><div class="weather-icon" id="modalIcon">🌤️</div><div class="weather-temp" style="color:var(--dark)" id="modalTemp">--°</div><div id="modalCondition"></div><div id="modalFeels"></div></div>
+<div class="weather-stats">
+<div class="stat"><div class="stat-label" id="humidityLabel">الرطوبة</div><div class="stat-value" id="humidityValue">--</div></div><div class="stat"><div class="stat-label" id="windLabel">سرعة الرياح</div><div class="stat-value" id="windValue">--</div></div>
+<div class="stat"><div class="stat-label" id="maxLabel">العظمى اليوم</div><div class="stat-value" id="maxValue">--</div></div><div class="stat"><div class="stat-label" id="minLabel">الصغرى اليوم</div><div class="stat-value" id="minValue">--</div></div>
+<div class="stat"><div class="stat-label" id="rainLabel">احتمال الهطول</div><div class="stat-value" id="rainValue">--</div></div><div class="stat"><div class="stat-label" id="uvLabel">مؤشر الأشعة فوق البنفسجية</div><div class="stat-value" id="uvValue">--</div></div>
+</div>
+<div class="section-title" id="hourlyTitle">توقعات الساعات القادمة</div><div class="hourly" id="hourlyForecast"></div><div class="section-title" id="dailyTitle">توقعات الأيام القادمة</div><div class="daily-list" id="dailyForecast"></div>
+</section>
+</div>
+
+<!-- تأكيد الخروج -->
+<div class="modal-backdrop" id="exitModal" role="dialog" aria-modal="true" aria-labelledby="exitTitle">
+<section class="modal exit-dialog">
+<div class="brand-mark" style="margin:0 auto 14px">۞</div>
+<h2 id="exitTitle">هل تريد إغلاق التطبيق؟</h2>
+<p>هل أنت متأكد أنك تريد الخروج من ذِكرى؟</p>
+<div class="exit-buttons"><button class="action" id="confirmExit">نعم</button><button class="action" id="cancelExit">لا</button></div>
+</section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let lang="ar",weatherData=null,city={name:"Erfurt",latitude:50.9848,longitude:11.0299};
+const T={
+ar:{subtitle:"طمأنينةٌ للقلب في كل يوم",city:"المدينة: ",loading:"جارٍ تحميل الطقس…",unavailable:"الطقس غير متاح حالياً",locationPrompt:"اكتب اسم المدينة:",cityNotFound:"لم يتم العثور على المدينة.",cityError:"تعذّر البحث عن المدينة. تحقق من الإنترنت.",details:"تفاصيل الطقس",feels:"الحرارة المحسوسة",humidity:"الرطوبة",wind:"سرعة الرياح",max:"العظمى اليوم",min:"الصغرى اليوم",rain:"احتمال الهطول",uv:"الأشعة فوق البنفسجية",hourly:"توقعات الساعات القادمة",daily:"توقعات الأيام القادمة",today:"اليوم",tomorrow:"غداً",conditions:{clear:"سماء صافية",mainly:"صحو غالباً",partly:"غائم جزئياً",cloudy:"غائم",fog:"ضباب",drizzle:"رذاذ",rain:"أمطار",snow:"ثلوج",storm:"عواصف رعدية",other:"حالة جو متغيرة"},days:["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"]},
+en:{subtitle:"Peace for the heart, every day",city:"City: ",loading:"Loading weather…",unavailable:"Weather unavailable",locationPrompt:"Enter city:",cityNotFound:"City not found.",cityError:"Could not search for the city. Check your internet connection.",details:"Weather details",feels:"Feels like",humidity:"Humidity",wind:"Wind speed",max:"Today's high",min:"Today's low",rain:"Precipitation chance",uv:"UV index",hourly:"Hourly forecast",daily:"Next few days",today:"Today",tomorrow:"Tomorrow",conditions:{clear:"Clear sky",mainly:"Mainly clear",partly:"Partly cloudy",cloudy:"Cloudy",fog:"Fog",drizzle:"Drizzle",rain:"Rain",snow:"Snow",storm:"Thunderstorms",other:"Changing conditions"},days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]},
+de:{subtitle:"Ruhe für das Herz, jeden Tag",city:"Stadt: ",loading:"Wetter wird geladen…",unavailable:"Wetter nicht verfügbar",locationPrompt:"Stadt eingeben:",cityNotFound:"Stadt nicht gefunden.",cityError:"Stadtsuche fehlgeschlagen. Bitte Internetverbindung prüfen.",details:"Wetterdetails",feels:"Gefühlt",humidity:"Luftfeuchtigkeit",wind:"Windgeschwindigkeit",max:"Tageshöchstwert",min:"Tagestiefstwert",rain:"Niederschlagswahrscheinlichkeit",uv:"UV-Index",hourly:"Stündliche Vorhersage",daily:"Vorhersage für die nächsten Tage",today:"Heute",tomorrow:"Morgen",conditions:{clear:"Klarer Himmel",mainly:"Überwiegend klar",partly:"Teilweise bewölkt",cloudy:"Bewölkt",fog:"Nebel",drizzle:"Nieselregen",rain:"Regen",snow:"Schnee",storm:"Gewitter",other:"Wechselhaft"},days:["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"]}};
+async function fetchJSON(url){const r=await fetch(url);if(!r.ok)throw Error("HTTP "+r.status);return r.json()}
+function updateClock(){const n=new Date(),locale=lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB";$("clock").textContent=new Intl.DateTimeFormat(locale,{hour:"2-digit",minute:"2-digit",hour12:false}).format(n);$("dateText").textContent=new Intl.DateTimeFormat(locale,{weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(n)}
+setInterval(updateClock,1000);updateClock();
+function updateCityLabel(){$("cityLabel").textContent=T[lang].city+city.name}
+async function loadPrayerTimes(){
+const n=new Date(),date=[String(n.getDate()).padStart(2,"0"),String(n.getMonth()+1).padStart(2,"0"),n.getFullYear()].join("-");
+try{const d=(await fetchJSON(`https://api.aladhan.com/v1/timings/${date}?latitude=${city.latitude}&longitude=${city.longitude}&method=3`)).data;
+["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"].forEach((k,i)=>$(["fajr","sunrise","dhuhr","asr","maghrib","isha"][i]).textContent=(d.timings[k]||"--:--").split(" ")[0]);
+const h=d.date.hijri;$("hijriText").textContent=lang==="ar"?`${h.day} ${h.month.ar||h.month.en} ${h.year} هـ`:`${h.day} ${h.month.en} ${h.year} AH`;
+}catch(e){$("hijriText").textContent=""}}
+function condition(code){const c=T[lang].conditions;
+if(code===0)return{text:c.clear,icon:"☀️",cls:"sunny"};
+if(code===1)return{text:c.mainly,icon:"🌤️",cls:"sunny"};
+if(code===2)return{text:c.partly,icon:"⛅",cls:"cloudy"};
+if(code===3)return{text:c.cloudy,icon:"☁️",cls:"cloudy"};
+if([45,48].includes(code))return{text:c.fog,icon:"🌫️",cls:"cloudy"};
+if([51,53,55,56,57].includes(code))return{text:c.drizzle,icon:"🌦️",cls:"rainy"};
+if([61,63,65,66,67,80,81,82].includes(code))return{text:c.rain,icon:"🌧️",cls:"rainy"};
+if([71,73,75,77,85,86].includes(code))return{text:c.snow,icon:"❄️",cls:"snowy"};
+if([95,96,99].includes(code))return{text:c.storm,icon:"⛈️",cls:"storm"};
+return{text:c.other,icon:"🌥️",cls:"cloudy"}}
+const temp=v=>v==null?"--":Math.round(v)+"°";
+function weatherIcon(code){const c=condition(code),h=new Date().getHours();return(h>=20||h<6)&&c.cls==="sunny"?"🌙":c.icon}
+async function loadWeather(){
+$("weatherCondition").textContent=T[lang].loading;
+try{weatherData=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=auto&forecast_days=5`);renderWeather()}
+catch(e){$("weatherCondition").textContent=T[lang].unavailable}}
+function renderWeather(){
+if(!weatherData)return;const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard");
+card.className="tile weather-tile "+desc.cls;
+if((new Date().getHours()>=20||new Date().getHours()<6)&&desc.cls==="sunny")card.classList.add("night");
+$("weatherIcon").textContent=weatherIcon(c.weather_code);$("weatherTemp").textContent=temp(c.temperature_2m);$("weatherCondition").textContent=desc.text;
+$("weatherExtra").textContent=`↑ ${temp(d.daily.temperature_2m_max[0])}  ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;
+renderWeatherModal()}
+function renderWeatherModal(){
+if(!weatherData)return;const d=weatherData,c=d.current,t=T[lang];
+$("weatherTitle").textContent=t.details;$("modalIcon").textContent=weatherIcon(c.weather_code);$("modalTemp").textContent=temp(c.temperature_2m);$("modalCondition").textContent=condition(c.weather_code).text;$("modalFeels").textContent=`${t.feels}: ${temp(c.apparent_temperature)}`;
+$("humidityLabel").textContent=t.humidity;$("humidityValue").textContent=c.relative_humidity_2m+"%";$("windLabel").textContent=t.wind;$("windValue").textContent=Math.round(c.wind_speed_10m)+" km/h";
+$("maxLabel").textContent=t.max;$("maxValue").textContent=temp(d.daily.temperature_2m_max[0]);$("minLabel").textContent=t.min;$("minValue").textContent=temp(d.daily.temperature_2m_min[0]);
+$("rainLabel").textContent=t.rain;$("rainValue").textContent=(d.daily.precipitation_probability_max?.[0]??0)+"%";$("uvLabel").textContent=t.uv;$("uvValue").textContent=d.daily.uv_index_max?.[0]??"--";
+$("hourlyTitle").textContent=t.hourly;$("dailyTitle").textContent=t.daily;
+const hours=d.hourly,now=new Date();let start=hours.time.findIndex(x=>new Date(x)>=now);if(start<0)start=0;$("hourlyForecast").replaceChildren();
+for(let i=start;i<Math.min(start+12,hours.time.length);i++){const item=document.createElement("div");item.className="hour";const tm=document.createElement("div");tm.textContent=new Intl.DateTimeFormat(lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",{hour:"2-digit",minute:"2-digit"}).format(new Date(hours.time[i]));const ic=document.createElement("div");ic.className="hour-icon";ic.textContent=condition(hours.weather_code[i]).icon;const te=document.createElement("strong");te.textContent=temp(hours.temperature_2m[i]);const ra=document.createElement("div");ra.textContent=(hours.precipitation_probability?.[i]??0)+"%";item.append(tm,ic,te,ra);$("hourlyForecast").append(item)}
+$("dailyForecast").replaceChildren();
+for(let i=0;i<d.daily.time.length;i++){const date=new Date(d.daily.time[i]+"T12:00:00"),item=document.createElement("div");item.className="day-row";const day=document.createElement("span");day.textContent=i===0?t.today:i===1?t.tomorrow:t.days[date.getDay()];const ic=document.createElement("span");ic.textContent=condition(d.daily.weather_code[i]).icon;const range=document.createElement("span");range.className="day-range";range.textContent=`${temp(d.daily.temperature_2m_min[i])} / ${temp(d.daily.temperature_2m_max[i])}`;item.append(day,ic,range);$("dailyForecast").append(item)}}
+async function chooseCity(){const entered=prompt(T[lang].locationPrompt,city.name);if(!entered?.trim())return;
+try{const data=await fetchJSON("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(entered.trim())+"&count=1&language="+(lang==="ar"?"ar":lang==="de"?"de":"en")+"&format=json");
+if(!data.results?.length){alert(T[lang].cityNotFound);return}const f=data.results[0];city={name:f.name,latitude:f.latitude,longitude:f.longitude};updateCityLabel();await Promise.all([loadPrayerTimes(),loadWeather()])}
+catch(e){alert(T[lang].cityError)}}
+$("locationBtn").onclick=chooseCity;
+$("weatherCard").onclick=()=>openModal("weatherModal");$("closeWeather").onclick=()=>closeModal("weatherModal");
+$("weatherModal").addEventListener("click",e=>{if(e.target===$("weatherModal"))closeModal("weatherModal")});
+
+/* الذكريات */
+const memories=[
+{text:"﴿ فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ﴾",source:"سورة الشرح، الآية 5",en:"Surah Ash-Sharh, 94:5",de:"Sure Asch-Scharh, 94:5",benefit:"تذكّرنا الآية أن الشدة لا تدوم، وأن مع العسر تيسيراً من الله.",ben:"Hardship does not last forever; ease accompanies hardship.",bde:"Schwierigkeiten dauern nicht ewig; Erleichterung folgt."},
+{text:"«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ»",source:"صحيح البخاري، حديث 1؛ وصحيح مسلم، حديث 1907",en:"Sahih al-Bukhari 1; Sahih Muslim 1907",de:"Sahih al-Bukhari 1; Sahih Muslim 1907",benefit:"النية أساس العمل؛ فاحرص على إخلاص قصدك لله.",ben:"Intention is central to deeds. Seek sincerity in what you do.",bde:"Die Absicht ist entscheidend. Bemühe dich um Aufrichtigkeit."},
+{text:"﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",source:"سورة الرعد، الآية 28",en:"Surah Ar-Ra'd, 13:28",de:"Sure Ar-Ra'd, 13:28",benefit:"ذكر الله من أسباب سكينة القلب وطمأنينته.",ben:"Remembering God can bring calm and reassurance.",bde:"Das Gedenken an Gott kann Ruhe und Zuversicht schenken."},
+{text:"«مَنْ لَا يَرْحَمُ لَا يُرْحَمُ»",source:"صحيح البخاري، حديث 6013؛ وصحيح مسلم، حديث 2319",en:"Sahih al-Bukhari 6013; Sahih Muslim 2319",de:"Sahih al-Bukhari 6013; Sahih Muslim 2319",benefit:"الرحمة بالناس والرفق بهم من الأخلاق التي حثّ عليها النبي ﷺ.",ben:"Mercy and gentleness are virtues taught by the Prophet.",bde:"Barmherzigkeit und Sanftmut gehören zu den Lehren des Propheten."},
+{text:"﴿ وَقُلْ رَبِّ زِدْنِي عِلْمًا ﴾",source:"سورة طه، الآية 114",en:"Surah Ta-Ha, 20:114",de:"Sure Ta-Ha, 20:114",benefit:"اطلب من الله العلم النافع، وواصل التعلّم والتدبّر.",ben:"Ask God for beneficial knowledge and keep learning.",bde:"Bitte Gott um nützliches Wissen und lerne weiter."}
+];
+let memoryIndex=0;
+function renderMemory(){const m=memories[memoryIndex];$("memoryPreviewText").textContent=m.text;$("memoryPreviewSource").textContent=(lang==="ar"?"المصدر: ":lang==="de"?"Quelle: ":"Source: ")+(lang==="ar"?m.source:lang==="de"?m.de:m.en);$("memoryPreviewBenefit").textContent=lang==="ar"?m.benefit:lang==="de"?m.bde:m.ben}
+function nextMemory(){memoryIndex=(memoryIndex+1)%memories.length;renderMemory()}
+$("memoryCard").onclick=nextMemory;renderMemory();setInterval(nextMemory,30000);
+
+/* أدعية متبدلة */
+const duas=[
+"اللهم أعنّا على ذكرك وشكرك وحسن عبادتك","رَبِّ زِدْنِي عِلْمًا","اللهم اجعل القرآن ربيع قلوبنا ونور صدورنا",
+"رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+"اللهم اغفر لنا ولوالدينا وللمؤمنين","اللهم اهدنا الصراط المستقيم","اللهم إنك عفو كريم تحب العفو فاعفُ عنا",
+"رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا","اللهم إني أسألك الهدى والتقى والعفاف والغنى",
+"اللهم إني أسألك العفو والعافية في الدنيا والآخرة","اللهم إني أسألك علماً نافعاً ورزقاً طيباً وعملاً متقبلاً",
+"اللهم إني أعوذ بك من الهم والحزن","اللهم إني أعوذ بك من العجز والكسل",
+"اللهم اغفر لي وارحمني واهدني وعافني وارزقني","رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي",
+"اللهم يا مقلب القلوب ثبت قلبي على دينك","اللهم ارزقني حسن الخاتمة",
+"اللهم اشفِ مرضانا ومرضى المسلمين","اللهم ارحم موتانا وموتى المسلمين",
+"اللهم فرّج هم المهمومين ونفّس كرب المكروبين","اللهم ارزقنا رزقاً حلالاً طيباً واسعاً مباركاً فيه",
+"اللهم افتح لنا أبواب رحمتك","اللهم يسّر لنا الخير حيث كان","اللهم لا تكلنا إلى أنفسنا طرفة عين",
+"اللهم املأ قلوبنا طمأنينة وسكينة","اللهم اجعل ألسنتنا عامرة بذكرك",
+"اللهم اجعل أعمالنا خالصة لوجهك الكريم","اللهم تقبل منا صالح الأعمال",
+"اللهم ارزقنا توبة نصوحاً قبل الموت","اللهم ارزقنا الإخلاص في القول والعمل",
+"اللهم اجعلنا من عبادك الصالحين","اللهم علّمنا من القرآن ما جهلنا وذكّرنا منه ما نُسّينا",
+"اللهم اجعل القرآن حجة لنا لا حجة علينا","اللهم احفظ أبناءنا وبناتنا من كل سوء",
+"رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ",
+"اللهم ألّف بين قلوبنا وأصلح ذات بيننا","اللهم ارزقنا حسن الخلق ولين الجانب",
+"اللهم اجعل عاقبة أمورنا خيراً","اللهم صل وسلم على نبينا محمد"
+];
+let duaIndex=0;$("duaText").textContent=duas[0];
+setInterval(()=>{duaIndex=(duaIndex+1)%duas.length;$("duaText").textContent=duas[duaIndex]},5000);
+
+/* مشغّل القرآن */
+const API="https://mp3quran.net/api/v3",audio=$("audio"),versesBox=$("verses"),statusBox=$("quranStatus");
+let readers=[],times=[],read=null,loaded=false;
+async function get(url){const r=await fetch(url);if(!r.ok)throw Error("خطأ اتصال: "+r.status);return r.json()}
+function qmsg(s){statusBox.textContent=s}
+function updatePlayButton(){$("playQuran").textContent=audio.paused?"▶ تشغيل":"⏸ إيقاف";$("miniPlay").textContent=audio.paused?"▶":"Ⅱ"}
+async function loadReaders(){try{const data=await get(API+"/ayat_timing/reads");if(!Array.isArray(data)||!data.length)throw Error("لم تصل قائمة القرّاء.");
+readers=data;$("reciter").replaceChildren();readers.forEach(r=>{const o=document.createElement("option");o.value=String(r.id);o.textContent=r.name+(r.rewaya?" — "+r.rewaya:"");$("reciter").append(o)});
+const preferred=readers.find(r=>Number(r.id)===5);if(preferred)$("reciter").value=String(preferred.id);qmsg("تم تحميل قائمة القرّاء. اختر الشيخ والسورة ثم اضغط تحميل.");
+}catch(e){$("reciter").innerHTML='<option value="">تعذّر تحميل القرّاء</option>';qmsg("تعذّر تحميل قائمة القرّاء:\n"+e.message)}}
+function renderVerses(ayahs){versesBox.replaceChildren();ayahs.forEach(v=>{const span=document.createElement("span");span.className="ayah";span.id="a"+v.numberInSurah;span.append(document.createTextNode(v.text+" "));const marker=document.createElement("span");marker.className="waqf";marker.textContent=v.numberInSurah;marker.setAttribute("aria-label","الآية "+v.numberInSurah);span.append(marker);versesBox.append(span)})}
+function mark(){if(!times.length)return;const ms=audio.currentTime*1000,timing=times.find(x=>ms>=Number(x.start_time)&&ms<Number(x.end_time));const active=document.querySelector(".ayah.active");if(timing&&active&&active.id==="a"+timing.ayah)return;if(active)active.classList.remove("active");
+if(timing){const v=$("a"+timing.ayah);if(v){v.classList.add("active");$("miniAyah").textContent=lang==="ar"?String(timing.ayah).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]):timing.ayah;$("miniVerse").textContent=v.firstChild?.textContent?.trim()||""}}
+if(audio.duration)$("progressFill").style.width=(audio.currentTime/audio.duration*100)+"%"}
+function jump(delta){if(!times.length)return;const ms=audio.currentTime*1000;let i=times.findIndex(x=>ms>=Number(x.start_time)&&ms<Number(x.end_time));if(i<0)i=0;i=Math.max(0,Math.min(times.length-1,i+delta));audio.currentTime=Number(times[i].start_time)/1000;audio.play().catch(()=>qmsg("تم تحديد الآية."))}
+$("loadSurah").onclick=async()=>{
+const surah=Number($("surah").value),readerId=Number($("reciter").value);read=readers.find(r=>Number(r.id)===readerId);if(!read){qmsg("اختر الشيخ أولاً.");return}
+$("loadSurah").disabled=true;loaded=false;times=[];audio.pause();audio.removeAttribute("src");audio.load();$("playQuran").disabled=$("prevAyah").disabled=$("nextAyah").disabled=true;versesBox.textContent="جاري تحميل الآيات...";qmsg("جاري تحميل الصوت وتوقيت الآيات...");
+try{const [timingData,quran]=await Promise.all([get(API+"/ayat_timing?surah="+surah+"&read="+readerId),get("https://api.alquran.cloud/v1/surah/"+surah)]);
+if(!Array.isArray(timingData))throw Error("استجابة توقيت الآيات غير متوقعة.");times=timingData.filter(x=>Number(x.ayah)>0&&Number.isFinite(Number(x.start_time))&&Number.isFinite(Number(x.end_time)));if(!times.length)throw Error("لا توجد توقيتات لهذه السورة مع هذا الشيخ.");
+renderVerses(quran.data.ayahs);if(!read.folder_url)throw Error("رابط الصوت غير متوفر لهذا القارئ.");audio.src=String(read.folder_url).replace(/\/?$/,"/")+String(surah).padStart(3,"0")+".mp3";audio.load();loaded=true;
+$("playQuran").disabled=$("prevAyah").disabled=$("nextAyah").disabled=false;$("miniSurah").textContent=quran.data.name;$("miniReader").textContent=read.name;$("miniVerse").textContent=quran.data.ayahs[0]?.text||"";$("miniAyah").textContent=lang==="ar"?"١":"1";$("progressFill").style.width="0%";qmsg("تم تحميل السورة.\nالقارئ: "+read.name+"\nعدد توقيتات الآيات: "+times.length);updatePlayButton();
+}catch(e){times=[];loaded=false;versesBox.textContent="تعذّر تحميل السورة أو التوقيتات.";qmsg("لم يكتمل التحميل:\n"+e.message)}
+finally{$("loadSurah").disabled=false}};
+function toggleAudio(){if(!loaded)return;if(audio.paused)audio.play().catch(()=>qmsg("تعذّر تشغيل الصوت. تحقق من اتصال الإنترنت."));else audio.pause()}
+$("playQuran").onclick=toggleAudio;$("miniPlay").onclick=()=>{if(!loaded){openModal("quranModal");$("reciter").focus();return}toggleAudio()};
+$("prevAyah").onclick=()=>jump(-1);$("nextAyah").onclick=()=>jump(1);
+$("miniPrev").onclick=()=>{if(!loaded)openModal("quranModal");else jump(-1)};$("miniNext").onclick=()=>{if(!loaded)openModal("quranModal");else jump(1)};
+audio.addEventListener("timeupdate",mark);audio.addEventListener("play",updatePlayButton);audio.addEventListener("pause",updatePlayButton);audio.addEventListener("ended",updatePlayButton);audio.addEventListener("error",()=>{if(loaded)qmsg("تعذّر تشغيل الملف الصوتي. جرّب سورة أخرى أو تحقق من الإنترنت.")});
+loadReaders();
+function openModal(id){previousFocus=document.activeElement;$(id).classList.add("open");const first=$(id).querySelector("button,select");if(first)first.focus()}
+function closeModal(id){$(id).classList.remove("open");if(previousFocus&&previousFocus.isConnected)previousFocus.focus()}
+$("openQuran").onclick=()=>openModal("quranModal");$("closeQuran").onclick=()=>closeModal("quranModal");
+$("quranModal").addEventListener("click",e=>{if(e.target===$("quranModal"))closeModal("quranModal")});
+
+function changeLanguage(value){lang=value;document.documentElement.lang=value;$("subtitle").textContent=T[lang].subtitle;document.querySelectorAll(".p-name").forEach(el=>el.textContent=el.dataset[lang]||el.dataset.ar);$("weatherTitle").textContent=T[lang].details;
+$("humidityLabel").textContent=T[lang].humidity;$("windLabel").textContent=T[lang].wind;$("maxLabel").textContent=T[lang].max;$("minLabel").textContent=T[lang].min;$("rainLabel").textContent=T[lang].rain;$("uvLabel").textContent=T[lang].uv;$("hourlyTitle").textContent=T[lang].hourly;$("dailyTitle").textContent=T[lang].daily;
+updateClock();updateCityLabel();renderMemory();loadPrayerTimes();if(weatherData)renderWeather();else loadWeather()}
+$("language").addEventListener("change",e=>changeLanguage(e.target.value));
+
+/* الرجوع: من النافذة إلى الرئيسية، ومن الرئيسية تأكيد الخروج عند الضغط مرتين */
+let backPressCount=0,backResetTimer=null,previousFocus=null;
+function showExitDialog(){previousFocus=document.activeElement;$("exitModal").classList.add("open");$("cancelExit").focus()}
+function hideExitDialog(){$("exitModal").classList.remove("open");backPressCount=0;clearTimeout(backResetTimer);if(previousFocus&&previousFocus.isConnected)previousFocus.focus()}
+function handleBack(){
+if($("exitModal").classList.contains("open")){hideExitDialog();return}
+if($("quranModal").classList.contains("open")){closeModal("quranModal");backPressCount=0;return}
+if($("weatherModal").classList.contains("open")){closeModal("weatherModal");backPressCount=0;return}
+backPressCount++;clearTimeout(backResetTimer);backResetTimer=setTimeout(()=>backPressCount=0,2500);
+if(backPressCount>=2){backPressCount=0;showExitDialog()}}
+$("cancelExit").onclick=hideExitDialog;
+$("exitModal").addEventListener("click",e=>{if(e.target===$("exitModal"))hideExitDialog()});
+$("confirmExit").onclick=()=>{
+hideExitDialog();
+/* صفحة الويب لا تستطيع فرض إغلاق نفسها على جميع أجهزة التلفزيون.
+   عند تغليفها كتطبيق Android TV، اربط هذا الزر بأمر الإغلاق الأصلي. */
+try{if(window.AndroidTV&&typeof window.AndroidTV.exitApp==="function"){window.AndroidTV.exitApp();return}}catch(e){}
+if(history.length>1)history.back();else $("openQuran").focus();
+};
+
+document.addEventListener("keydown",e=>{
+const isBack=["Escape","Backspace","BrowserBack","GoBack"].includes(e.key)||e.keyCode===4;
+if(isBack){e.preventDefault();e.stopPropagation();handleBack();return}
+const exitOpen=$("exitModal").classList.contains("open");
+if(exitOpen){
+const yes=$("confirmExit"),no=$("cancelExit");
+if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();(document.activeElement===yes?no:yes).focus()}
+if(e.key==="Enter"||e.key===" "){if(document.activeElement===yes||document.activeElement===no){e.preventDefault();document.activeElement.click()}}
+return}
+if(e.key==="Enter"&&document.activeElement?.matches("button")){document.activeElement.click();return}
+const keys=["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"];if(!keys.includes(e.key))return;
+const tiles=[...document.querySelectorAll(".tiles .tile")];
+if(!tiles.includes(document.activeElement))return;e.preventDefault();
+const i=tiles.indexOf(document.activeElement);
+const n=e.key==="ArrowLeft"?Math.min(2,i+1):e.key==="ArrowRight"?Math.max(0,i-1):(i+1)%3;
+tiles[n].focus();
 },true);
-document.addEventListener("keyup",function(e){if(isBackKey(e)){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();}},true);
-$("#logoLanguageButton").addEventListener("focus",()=>homeTiles().forEach(t=>t.classList.remove("focused")));
-homeTiles().forEach((tile,i)=>{tile.addEventListener("focus",()=>{lastHomeFocus=i;homeTiles().forEach((t,j)=>t.classList.toggle("focused",j===i));});});
-$("#detailDialog").addEventListener("click",e=>{if(e.target===$("#detailDialog")){ $("#detailDialog").close();focusHomeTile(lastHomeFocus); }});
-$("#languageDialog").addEventListener("click",e=>{if(e.target===$("#languageDialog")){ $("#languageDialog").close();$("#logoLanguageButton").focus({preventScroll:true}); }});
-focusHomeTile(0);
+
+updateCityLabel();loadPrayerTimes();loadWeather();
 </script>
 </body>
 </html>
