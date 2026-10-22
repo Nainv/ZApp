@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" as="image" href="zikra_logo.png">
-<!-- Zikra weather scenes build: 2026-10-23 -->
+<!-- Zikra weather scenes build: 2026-10-23 layout-v4 -->
 <title>ذِكرى | Zikra</title>
 <style>
 :root{--green:#496d55;--dark:#304b3a;--gold:#bd9b52;--cream:#f7f4e9;--muted:#858d7d}
@@ -23,9 +23,16 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 .app{width:100%;max-width:1500px;height:100vh;height:100dvh;margin:auto;padding:clamp(6px,1.2vh,12px) clamp(10px,2vw,30px);display:flex;flex-direction:column;justify-content:space-between;gap:5px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:10px}.brand-mark{width:42px;height:42px;display:grid;place-items:center;border:1px solid #d4c18e;border-radius:12px;background:#fffdf4;color:var(--green);font-size:25px}.brand h1{margin:0;font-size:clamp(18px,2.2vw,26px)}.brand p{margin:1px 0 0;font-size:11px;color:var(--muted)}
 .tools{display:flex;gap:7px;align-items:center}.icon-btn,#language{height:38px;border:1px solid #d9ddca;background:#fffdf4;border-radius:10px;color:var(--dark)}.icon-btn{width:38px;font-size:16px}#language{width:98px;padding:4px;direction:ltr;font-size:12px}
-.date-panel{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:3px 0;padding:5px 16px;background:#ffffff70;border:1px solid #e2dfce;border-radius:12px}.clock{font-size:clamp(22px,3.5vw,38px);line-height:1;font-weight:700;font-variant-numeric:tabular-nums;color:var(--dark)}.date-info{display:flex;flex-direction:column;align-items:flex-end;gap:1px}.date-text{font-size:11px;color:var(--muted)}.hijri{font-size:12px;color:var(--green);font-weight:700}.city-label{font-size:10px;color:var(--muted)}
+.date-panel{display:flex;align-items:center;justify-content:space-between;gap:clamp(8px,1.2vw,18px);margin:3px 0;padding:7px clamp(10px,1.5vw,20px);min-height:clamp(106px,16vh,130px);background:#ffffff70;border:1px solid #e2dfce;border-radius:16px}.clock{flex:0 0 auto;font-size:clamp(24px,3.8vw,42px);line-height:1;font-weight:700;font-variant-numeric:tabular-nums;color:var(--dark)}.date-info{display:flex;flex:0 1 240px;min-width:130px;flex-direction:column;align-items:flex-end;gap:2px}.date-text{font-size:clamp(10px,1.05vw,13px);color:var(--muted);text-align:right}.hijri{font-size:12px;color:var(--green);font-weight:700}.city-label{font-size:10px;color:var(--muted)}
+.date-panel .date-weather-widget{flex:1 1 48%;width:48%;min-width:240px;max-width:590px;height:clamp(88px,14vh,112px);min-height:0;margin:0;padding:8px 18px 8px 104px;display:grid;grid-template-columns:auto auto minmax(80px,1fr);grid-template-rows:1fr auto;align-items:center;justify-content:stretch;gap:0 12px;border-radius:14px;text-align:right;box-shadow:0 5px 16px #1c2e3b28;isolation:isolate}
+.date-panel .date-weather-widget .weather-icon{grid-column:1;grid-row:1/3;font-size:clamp(34px,4.5vw,50px);filter:drop-shadow(0 3px 4px #10243844)}
+.date-panel .date-weather-widget .weather-temp{grid-column:2;grid-row:1;font-size:clamp(28px,3.4vw,40px);line-height:1.05;white-space:nowrap}
+.date-panel .date-weather-widget .weather-condition{grid-column:3;grid-row:1;font-size:clamp(12px,1.45vw,17px);font-weight:800;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.date-panel .date-weather-widget .weather-extra{grid-column:2/4;grid-row:2;align-self:end;font-size:clamp(9px,.95vw,11px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;opacity:.94}
+.date-panel .date-weather-widget .weather-tap-hint{position:absolute;left:9px;bottom:7px;padding:4px 7px;border:1px solid #ffffff48;border-radius:999px;background:#05182d35;color:#fff;font-size:9px;font-weight:700;z-index:3;white-space:nowrap}
+.date-panel .date-weather-widget:focus-visible{outline:3px solid #bd9b52;outline-offset:2px}
 .prayer-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:6px 4px;border:1px solid #e2dfce;border-radius:14px;background:#ffffffc9}.prayer{text-align:center;padding:1px;border-left:1px solid #e6e3d6;position:relative}.prayer:last-child{border-left:0}.prayer.next-prayer{background:#e6ecd988;border-radius:8px;box-shadow:inset 0 0 0 1.5px var(--green)}.p-icon{display:block;font-size:13px;color:var(--gold)}.p-name{font-size:clamp(9px,.9vw,11px);color:#798272}.p-time{font-size:clamp(10px,1.2vw,14px);font-weight:700}.p-countdown{font-size:8px;color:var(--green);font-weight:bold;margin-top:1px}
-.tiles{display:grid;grid-template-columns:1.3fr 1fr;gap:clamp(10px,1.8vw,20px);width:min(100%,1150px);margin:6px auto}.tile{min-width:0;height:clamp(130px,25vh,200px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid #e6e1cd;border-radius:18px;background:linear-gradient(145deg,#fffef9,#f1f0e4);box-shadow:0 6px 16px #374a3208;color:var(--dark);text-align:center;overflow:hidden}.tile:active{transform:scale(.985)}.tile.selected{outline:3px solid #89a27c;outline-offset:2px}.tile-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:20px;background:#e6ecd9;color:var(--green);border:1px solid #d4c18e}.tile-title{font-size:clamp(12px,1.3vw,16px);font-weight:800}.memory-preview-text{font-size:clamp(12px,1.5vw,18px);font-weight:700;line-height:1.5;overflow-wrap:anywhere}.memory-preview-source{font-size:10px;color:#96783d}.memory-preview-benefit{font-size:11px;line-height:1.4;color:#52684d}
+.tiles{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(10px,1.8vw,20px);width:100%;margin:6px auto}.tile{min-width:0;height:clamp(145px,25vh,210px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid #e6e1cd;border-radius:18px;background:linear-gradient(145deg,#fffef9,#f1f0e4);box-shadow:0 6px 16px #374a3208;color:var(--dark);text-align:center;overflow:hidden}.tile:active{transform:scale(.985)}.tile.selected{outline:3px solid #89a27c;outline-offset:2px}.tile-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:20px;background:#e6ecd9;color:var(--green);border:1px solid #d4c18e}.tile-title{font-size:clamp(12px,1.3vw,16px);font-weight:800}.memory-preview-text{font-size:clamp(12px,1.5vw,18px);font-weight:700;line-height:1.5;overflow-wrap:anywhere}.memory-preview-source{font-size:10px;color:#96783d}.memory-preview-benefit{font-size:11px;line-height:1.4;color:#52684d}.tile-memory{width:100%;min-height:clamp(145px,25vh,210px);padding:clamp(12px,2vh,24px) clamp(18px,4vw,54px);gap:9px}.tile-memory .tile-icon{width:42px;height:42px;font-size:24px}.tile-memory .tile-title{font-size:clamp(16px,1.8vw,22px)}.tile-memory .memory-preview-text{font-size:clamp(15px,1.8vw,22px);max-width:100%}.tile-memory .memory-preview-source{font-size:clamp(10px,1.1vw,12px)}.tile-memory .memory-preview-benefit{font-size:clamp(11px,1.2vw,14px)}
 .weather-tile{color:white;border:1px solid #ffffff65;background:linear-gradient(150deg,#83c9ed,#397bb6);position:relative;isolation:isolate}
 .weather-tile>*:not(.tile-weather-effects){position:relative;z-index:2}
 .tile-weather-effects{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;border-radius:inherit}
@@ -86,7 +93,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 .language-menu{position:absolute;z-index:150;top:46px;right:0;display:flex;flex-direction:column;gap:4px;padding:6px;min-width:125px;border:1px solid #d9ddca;border-radius:12px;background:#fffdf4;box-shadow:0 8px 25px #0002}
 .language-menu[hidden]{display:none}.language-menu button{border:0;border-radius:8px;background:transparent;color:var(--dark);padding:9px 12px;text-align:center}.language-menu button:focus,.language-menu button.selected{outline:2px solid var(--green);background:#e6ecd9}
 @media(max-width:700px){.weather-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.weather-day{flex-basis:76px;min-height:94px}}
-@media(max-width:700px){.player{grid-template-columns:minmax(0,1fr) auto;gap:6px;padding:6px}.controls{grid-column:2;grid-row:1}.track-area{grid-column:1/-1;grid-row:2}.tiles{grid-template-columns:1fr}.surah-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.app{overflow:auto}.modal{max-height:96dvh}}
+@media(max-width:700px){.player{grid-template-columns:minmax(0,1fr) auto;gap:6px;padding:6px}.controls{grid-column:2;grid-row:1}.track-area{grid-column:1/-1;grid-row:2}.tiles{grid-template-columns:1fr}.surah-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.app{overflow:auto}.modal{max-height:96dvh}.date-panel{gap:7px;padding:7px;min-height:94px}.date-panel .date-weather-widget{min-width:0;width:auto;flex:1 1 auto;height:82px;padding:6px 8px 6px 72px;grid-template-columns:auto auto minmax(0,1fr);gap:0 5px}.date-panel .date-weather-widget .weather-icon{font-size:30px}.date-panel .date-weather-widget .weather-temp{font-size:23px}.date-panel .date-weather-widget .weather-condition{font-size:10px}.date-panel .date-weather-widget .weather-extra{font-size:8px}.date-panel .date-weather-widget .weather-tap-hint{left:5px;bottom:5px;font-size:7px;padding:3px 5px}.date-info{min-width:75px;flex-basis:110px}.date-text{font-size:9px}.city-label{font-size:8px}.clock{font-size:23px}.tile-memory{min-height:150px;padding:12px}}
 </style>
 
 <style id="zikraSplashStyles">
@@ -107,7 +114,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
     <div id="languageMenu" class="language-menu" hidden><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button><button type="button" data-lang="de">Deutsch</button></div>
   </div>
 </header>
-<section class="date-panel"><div class="clock" id="clock">--:--</div><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">المدينة: إرفورت</div></div></section>
+<section class="date-panel"><div class="clock" id="clock">--:--</div><button class="tile weather-tile date-weather-widget sunny" id="weatherCard" aria-label="تفاصيل الطقس" title="افتح لوحة الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span><span class="weather-tap-hint" id="weatherTapHint">تفاصيل الطقس ↗</span></button><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">المدينة: إرفورت</div></div></section>
 <section class="prayer-strip">
   <div class="prayer" id="box-Fajr"><span class="p-icon">☾</span><div class="p-name" data-prayer="Fajr" data-ar="الفجر" data-en="Fajr" data-de="Fadschr">الفجر</div><div class="p-time" id="fajr">--:--</div><div class="p-countdown" id="cd-Fajr"></div></div>
   <div class="prayer" id="box-Sunrise"><span class="p-icon">☀</span><div class="p-name" data-prayer="Sunrise" data-ar="الشروق" data-en="Sunrise" data-de="Sonnenaufgang">الشروق</div><div class="p-time" id="sunrise">--:--</div><div class="p-countdown" id="cd-Sunrise"></div></div>
@@ -118,7 +125,6 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 </section>
 <main class="tiles">
   <button class="tile tile-memory" id="memoryCard" aria-label="تبديل الذكرى"><span class="tile-icon">📜</span><span class="tile-title" id="memoryCardTitle">ذِكرى قرآنية ونبوية</span><span class="memory-preview-text" id="memoryPreviewText"></span><span class="memory-preview-source" id="memoryPreviewSource"></span><span class="memory-preview-benefit" id="memoryPreviewBenefit"></span></button>
-  <button class="tile weather-tile" id="weatherCard" aria-label="تفاصيل الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></button>
 </main>
 <section class="player">
   <div class="now-reading focusable" id="openQuranFromPlayer" tabindex="0" role="button" aria-label="افتح فهرس القرآن"><div class="mini-mushaf">۞</div><div><strong id="miniSurah">اختر سورة من الفهرس</strong><small id="miniReader">اضغط هنا لفتح الفهرس 📖</small></div></div>
@@ -194,7 +200,7 @@ function renderWeather(){
   const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard"),effects=$("weatherTileEffects"),hour=new Date().getHours();
   const isNight=(hour>=20||hour<6)&&!['rainy','snowy','storm'].includes(desc.cls);
   const cardScene=isNight?'night':desc.cls;
-  card.className="tile weather-tile "+cardScene;
+  card.className="tile weather-tile date-weather-widget "+cardScene;
   effects.replaceChildren();
   if(['rainy','storm'].includes(cardScene)){
     const count=cardScene==='storm'?34:25;
@@ -215,6 +221,7 @@ function renderWeather(){
   $("weatherIcon").textContent=weatherIcon(c.weather_code);
   $("weatherTemp").textContent=temp(c.temperature_2m);
   $("weatherCondition").textContent=desc.text;
+  $("weatherTapHint").textContent=lang==="ar"?"تفاصيل الطقس ↗":lang==="de"?"Wetterdetails ↗":"Weather details ↗";
   $("weatherExtra").textContent=`↑ ${temp(d.daily.temperature_2m_max[0])} ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;
   renderWeatherModal()
 }
