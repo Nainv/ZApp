@@ -79,11 +79,11 @@ jobs:
           cp zikra_icon.png app/src/main/res/drawable-nodpi/zikra_icon.png
           cp zikra_icon.png app/src/main/res/drawable-xhdpi/zikra_icon.png
 
-          cp zikra_icon.png app/src/main/res/mipmap-mdpi/ic_launcher.png
-          cp zikra_icon.png app/src/main/res/mipmap-hdpi/ic_launcher.png
-          cp zikra_icon.png app/src/main/res/mipmap-xhdpi/ic_launcher.png
-          cp zikra_icon.png app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-          cp zikra_icon.png app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          cp zikra_icon.png app/src/main/res/mipmap-mdpi/zikra_icon.png
+          cp zikra_icon.png app/src/main/res/mipmap-hdpi/zikra_icon.png
+          cp zikra_icon.png app/src/main/res/mipmap-xhdpi/zikra_icon.png
+          cp zikra_icon.png app/src/main/res/mipmap-xxhdpi/zikra_icon.png
+          cp zikra_icon.png app/src/main/res/mipmap-xxxhdpi/zikra_icon.png
 
           cp zikra_banner.png app/src/main/res/drawable-nodpi/zikra_banner.png
 
@@ -154,6 +154,51 @@ jobs:
           }
           EOF
 
+      - name: Fix Manifest XML header
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("app/src/main/AndroidManifest.xml")
+          content = path.read_text(encoding="utf-8-sig").lstrip()
+
+          if not content.startswith("<?xml"):
+              raise SystemExit("ERROR: XML declaration not found")
+
+          path.write_text(content, encoding="utf-8")
+          print("Manifest XML header fixed.")
+          PY
+
+      - name: Validate Android Manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+
+          ET.parse("app/src/main/AndroidManifest.xml")
+          print("Manifest XML is valid.")
+          PY
+
+      - name: Verify image resources
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -s app/src/main/res/drawable/zikra_icon.png
+          test -s app/src/main/res/drawable-nodpi/zikra_banner.png
+          test -s app/src/main/res/mipmap-mdpi/zikra_icon.png
+          test -s app/src/main/res/mipmap-hdpi/zikra_icon.png
+          test -s app/src/main/res/mipmap-xhdpi/zikra_icon.png
+          test -s app/src/main/res/mipmap-xxhdpi/zikra_icon.png
+          test -s app/src/main/res/mipmap-xxxhdpi/zikra_icon.png
+
+          echo "Icon and banner resources found."
+
       - name: Decode signing key
         shell: bash
         env:
@@ -192,47 +237,6 @@ jobs:
 
           echo "Signing key file prepared."
 
-      - name: Fix Manifest XML header
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path("app/src/main/AndroidManifest.xml")
-          content = path.read_text(encoding="utf-8-sig").lstrip()
-
-          if not content.startswith("<?xml"):
-              raise SystemExit("ERROR: XML declaration not found")
-
-          path.write_text(content, encoding="utf-8")
-          print("Manifest XML header fixed.")
-          PY
-
-      - name: Validate Android Manifest
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          python3 - <<'PY'
-          import xml.etree.ElementTree as ET
-
-          ET.parse("app/src/main/AndroidManifest.xml")
-          print("Manifest XML is valid.")
-          PY
-
-      - name: Verify image resources
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          test -s app/src/main/res/drawable/zikra_icon.png
-          test -s app/src/main/res/drawable-nodpi/zikra_banner.png
-          test -s app/src/main/res/mipmap-xhdpi/ic_launcher.png
-
-          echo "Icon and banner resources found."
-
       - name: Verify signing key
         shell: bash
         env:
@@ -267,8 +271,6 @@ jobs:
           APK="app/build/outputs/apk/release/app-release.apk"
 
           test -s "$APK"
-
-          echo "APK file exists."
 
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)"
 
