@@ -18,9 +18,11 @@ import android.graphics.Color;
 import android.view.Gravity;
 
 public class MainActivity extends Activity {
+
     private WebView webView;
     private FrameLayout root;
     private TextView errorView;
+    private boolean backDialogRequested = false;
 
     private static final String SITE_URL =
             "https://koukach91-hash.github.io/zikra-android-tv-new/";
@@ -34,14 +36,7 @@ public class MainActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
 
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        );
+        hideSystemBars();
 
         root = new FrameLayout(this);
         webView = new WebView(this);
@@ -76,6 +71,13 @@ public class MainActivity extends Activity {
             }
 
             @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                backDialogRequested = false;
+                view.requestFocus();
+            }
+
+            @Override
             public void onReceivedError(
                     WebView view,
                     WebResourceRequest request,
@@ -106,35 +108,50 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void hideSystemBars() {
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        );
+    }
+
     private class AndroidBridge {
+
         @JavascriptInterface
         public void exitApp() {
             runOnUiThread(() -> finish());
         }
-    }
 
-    private void sendMediaCommand(String command) {
-        if (webView == null) return;
+        @JavascriptInterface
+        public void mediaKey(String action) {
+            runOnUiThread(() -> {
+                if (webView == null) return;
 
-        String safeCommand;
-        switch (command) {
-            case "play":
-            case "pause":
-            case "playPause":
-            case "next":
-            case "previous":
-                safeCommand = command;
-                break;
-            default:
-                return;
+                String safeAction;
+                switch (action) {
+                    case "play":
+                    case "pause":
+                    case "playPause":
+                    case "next":
+                    case "previous":
+                        safeAction = action;
+                        break;
+                    default:
+                        return;
+                }
+
+                webView.evaluateJavascript(
+                        "if (typeof window.handleMediaKey === 'function') {" +
+                        "window.handleMediaKey('" + safeAction + "');" +
+                        "}",
+                        null
+                );
+            });
         }
-
-        String js =
-                "if (typeof window.handleMediaKey === 'function') {" +
-                "window.handleMediaKey('" + safeCommand + "');" +
-                "}";
-
-        webView.evaluateJavascript(js, null);
     }
 
     private void showError() {
@@ -176,55 +193,74 @@ public class MainActivity extends Activity {
         }
     }
 
+    private boolean sendBackToHtml() {
+        if (webView == null || errorView != null) {
+            return false;
+        }
+
+        webView.evaluateJavascript(
+                "if (typeof window.handleAndroidBack === 'function') {" +
+                "window.handleAndroidBack();" +
+                "}",
+                null
+        );
+        return true;
+    }
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        int key = event.getKeyCode();
-
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (errorView != null) {
-                if (key == KeyEvent.KEYCODE_DPAD_CENTER
-                        || key == KeyEvent.KEYCODE_ENTER) {
+            int code = event.getKeyCode();
+
+            if (code == KeyEvent.KEYCODE_BACK
+                    || code == KeyEvent.KEYCODE_ESCAPE) {
+
+                if (errorView != null) {
                     retryLoading();
                     return true;
                 }
+
+                sendBackToHtml();
+                return true;
             }
 
-            switch (key) {
-                case KeyEvent.KEYCODE_MEDIA_PLAY:
-                    sendMediaCommand("play");
-                    return true;
-
-                case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                    sendMediaCommand("pause");
-                    return true;
-
-                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                    sendMediaCommand("playPause");
-                    return true;
-
-                case KeyEvent.KEYCODE_MEDIA_NEXT:
-                case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
-                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                    sendMediaCommand("next");
-                    return true;
-
-                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
-                case KeyEvent.KEYCODE_MEDIA_REWIND:
-                    sendMediaCommand("previous");
-                    return true;
-
-                case KeyEvent.KEYCODE_BACK:
-                case KeyEvent.KEYCODE_ESCAPE:
-                    if (webView != null) {
+            if (webView != null && errorView == null) {
+                switch (code) {
+                    case KeyEvent.KEYCODE_MEDIA_PLAY:
                         webView.evaluateJavascript(
-                                "if (typeof window.handleAndroidBack === 'function') {" +
-                                "window.handleAndroidBack();" +
-                                "}",
+                                "window.handleMediaKey && window.handleMediaKey('play');",
                                 null
                         );
-                    }
-                    return true;
+                        return true;
+
+                    case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                        webView.evaluateJavascript(
+                                "window.handleMediaKey && window.handleMediaKey('pause');",
+                                null
+                        );
+                        return true;
+
+                    case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                        webView.evaluateJavascript(
+                                "window.handleMediaKey && window.handleMediaKey('playPause');",
+                                null
+                        );
+                        return true;
+
+                    case KeyEvent.KEYCODE_MEDIA_NEXT:
+                        webView.evaluateJavascript(
+                                "window.handleMediaKey && window.handleMediaKey('next');",
+                                null
+                        );
+                        return true;
+
+                    case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                        webView.evaluateJavascript(
+                                "window.handleMediaKey && window.handleMediaKey('previous');",
+                                null
+                        );
+                        return true;
+                }
             }
         }
 
@@ -238,6 +274,25 @@ public class MainActivity extends Activity {
         if (webView != null) {
             webView.saveState(outState);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        hideSystemBars();
+
+        if (webView != null) {
+            webView.onResume();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        if (webView != null) {
+            webView.onPause();
+        }
+
+        super.onPause();
     }
 
     @Override
