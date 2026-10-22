@@ -22,7 +22,6 @@ public class MainActivity extends Activity {
     private FrameLayout root;
     private TextView errorView;
 
-    // رابط موقعك المحدث
     private static final String SITE_URL =
             "https://koukach91-hash.github.io/zikra-android-tv-new/";
 
@@ -58,15 +57,11 @@ public class MainActivity extends Activity {
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
         webView.setWebChromeClient(new WebChromeClient());
 
-        // ربط الجسر البرمجي مع الجافاسكريפט
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidTV");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
-            public boolean shouldOverrideUrlLoading(
-                    WebView view,
-                    WebResourceRequest request
-            ) {
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return false;
             }
 
@@ -77,26 +72,18 @@ public class MainActivity extends Activity {
             }
 
             @Override
-            public void onReceivedError(
-                    WebView view,
-                    WebResourceRequest request,
-                    android.webkit.WebResourceError error
-            ) {
+            public void onReceivedError(WebView view, WebResourceRequest request, android.webkit.WebResourceError error) {
                 super.onReceivedError(view, request, error);
-
                 if (request.isForMainFrame()) {
                     showError();
                 }
             }
         });
 
-        root.addView(
-                webView,
-                new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT
-                )
-        );
+        root.addView(webView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+        ));
 
         setContentView(root);
 
@@ -119,23 +106,19 @@ public class MainActivity extends Activity {
     }
 
     private class AndroidBridge {
-
         @JavascriptInterface
         public void exitApp() {
-            // إغلاق التطبيق نهائياً عند الضغط على زر "نعم"
             runOnUiThread(() -> finish());
         }
 
         @JavascriptInterface
         public void mediaKey(String action) {
-            // معالجة أوامر الميديا من الويب
             runOnUiThread(() -> {
                 if (webView == null) return;
                 webView.evaluateJavascript(
                         "if (typeof window.handleMediaKey === 'function') {" +
                         "window.handleMediaKey('" + action + "');" +
-                        "}",
-                        null
+                        "}", null
                 );
             });
         }
@@ -145,10 +128,7 @@ public class MainActivity extends Activity {
         if (errorView != null) return;
 
         errorView = new TextView(this);
-        errorView.setText(
-                "تعذّر فتح ذِكرى.\n\n" +
-                "تأكد من اتصال الإنترنت ثم اضغط OK لإعادة المحاولة."
-        );
+        errorView.setText("تعذّر فتح ذِكرى.\n\nتأكد من اتصال الإنترنت ثم اضغط OK لإعادة المحاولة.");
         errorView.setTextColor(Color.WHITE);
         errorView.setTextSize(22);
         errorView.setGravity(Gravity.CENTER);
@@ -158,13 +138,10 @@ public class MainActivity extends Activity {
         errorView.setFocusableInTouchMode(true);
         errorView.setOnClickListener(v -> retryLoading());
 
-        root.addView(
-                errorView,
-                new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT
-                )
-        );
+        root.addView(errorView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+        ));
 
         errorView.requestFocus();
     }
@@ -174,96 +151,65 @@ public class MainActivity extends Activity {
             root.removeView(errorView);
             errorView = null;
         }
-
         if (webView != null) {
             webView.loadUrl(SITE_URL);
         }
     }
 
-    // [إصلاح هام جداً]: معالجة زر الرجوع لكي يتم إرساله للـ WebView للتعامل مع النوافذ وخروج التطبيق
+    /* إصلاح زر الرجوع: يمنع الخروج الافتراضي تماماً ويستدعي الجافاسكريپت */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             int code = event.getKeyCode();
 
-            if (code == KeyEvent.KEYCODE_BACK
-                    || code == KeyEvent.KEYCODE_ESCAPE) {
-
+            if (code == KeyEvent.KEYCODE_BACK || code == KeyEvent.KEYCODE_ESCAPE) {
                 if (errorView != null) {
                     retryLoading();
                     return true;
                 }
 
-                // إرسال أمر زر الرجوع مباشرة لملف الـ HTML لمعالجة إغلاق النوافذ أو إظهار خيار الخروج
-                if (webView != null && errorView == null) {
+                if (webView != null) {
                     webView.evaluateJavascript(
                             "if (typeof window.handleAndroidBack === 'function') {" +
                             "window.handleAndroidBack();" +
-                            "}",
-                            null
+                            "}", null
                     );
-                    return true; // منع النظام من إغلاق التطبيق فجأة وإعطاء الصلاحية للـ JavaScript
+                    return true; // يمنع إغلاق التطبيق نهائياً ويتركه للجافاسكريبت
                 }
             }
 
-            // التقاط أزرار الوسائط في الريموت وإرسالها لصفحة الويب
             if (webView != null && errorView == null) {
                 String mediaAction = null;
                 switch (code) {
-                    case KeyEvent.KEYCODE_MEDIA_PLAY:
-                        mediaAction = "play";
-                        break;
-                    case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                        mediaAction = "pause";
-                        break;
-                    case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                        mediaAction = "playPause";
-                        break;
-                    case KeyEvent.KEYCODE_MEDIA_NEXT:
-                        mediaAction = "next";
-                        break;
-                    case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                        mediaAction = "previous";
-                        break;
+                    case KeyEvent.KEYCODE_MEDIA_PLAY: mediaAction = "play"; break;
+                    case KeyEvent.KEYCODE_MEDIA_PAUSE: mediaAction = "pause"; break;
+                    case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE: mediaAction = "playPause"; break;
+                    case KeyEvent.KEYCODE_MEDIA_NEXT: mediaAction = "next"; break;
+                    case KeyEvent.KEYCODE_MEDIA_PREVIOUS: mediaAction = "previous"; break;
                 }
-
                 if (mediaAction != null) {
                     webView.evaluateJavascript(
                             "if (typeof window.handleMediaKey === 'function') {" +
                             "window.handleMediaKey('" + mediaAction + "');" +
-                            "}",
-                            null
+                            "}", null
                     );
                     return true;
                 }
             }
         }
-
         return super.dispatchKeyEvent(event);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (webView != null) {
-            webView.saveState(outState);
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         hideSystemBars();
-        if (webView != null) {
-            webView.onResume();
-        }
+        if (webView != null) webView.onResume();
     }
 
     @Override
     protected void onPause() {
-        if (webView != null) {
-            webView.onPause();
-        }
+        if (webView != null) webView.onPause();
         super.onPause();
     }
 
