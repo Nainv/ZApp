@@ -51,11 +51,6 @@ jobs:
             mv zikra_logo.png app/src/main/res/drawable-nodpi/zikra_logo.png
           fi
 
-          if [ ! -f app/src/main/AndroidManifest.xml ]; then
-            echo "ERROR: AndroidManifest.xml was not found!"
-            exit 1
-          fi
-
           cat > settings.gradle <<'EOF'
           pluginManagement {
               repositories {
@@ -102,6 +97,27 @@ jobs:
           }
           EOF
 
+      - name: Fix Manifest XML header
+        shell: bash
+        run: |
+          set -e
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("app/src/main/AndroidManifest.xml")
+          content = path.read_text(encoding="utf-8-sig")
+          content = content.lstrip()
+
+          if content.startswith('<?xml'):
+              path.write_text(content, encoding="utf-8")
+              print("Manifest XML header fixed.")
+          else:
+              raise SystemExit(
+                  "ERROR: XML declaration not found at the start of the manifest."
+              )
+          PY
+
       - name: Validate Android Manifest
         shell: bash
         run: |
@@ -117,8 +133,7 @@ jobs:
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
 
-          path = "app/src/main/AndroidManifest.xml"
-          ET.parse(path)
+          ET.parse("app/src/main/AndroidManifest.xml")
           print("SUCCESS: XML syntax is valid.")
           PY
 
