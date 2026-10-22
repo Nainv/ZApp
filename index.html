@@ -166,70 +166,136 @@ $("backToIndex").addEventListener("click",()=>{$("versesView").style.display="no
 audio.addEventListener("timeupdate",mark);audio.addEventListener("play",updatePlayButton);audio.addEventListener("pause",updatePlayButton);audio.addEventListener("ended",()=>{updatePlayButton();if(times.length)saveReadBookmark(currentSurahNum,read?.id,Number($("miniAyah").textContent)||1,audio.currentTime)});
 let autoNextInProgress=false;
 audio.addEventListener("ended",async()=>{if(autoNextInProgress)return;autoNextInProgress=true;try{if(currentSurahNum<114){await loadSurahAndShow(currentSurahNum+1)}else{qmsg(lang==="ar"?"انتهت تلاوة القرآن الكريم.":lang==="de"?"Die Koranrezitation ist beendet.":"Quran recitation completed.")}}finally{autoNextInProgress=false}});
+function changeSurahByRemote(delta){
+  if(!loaded||!read){
+    openModal("quranModal");
+    qmsg(lang==="ar"?"اختر القارئ والسورة أولاً.":lang==="de"?"Bitte zuerst Rezitator und Sure auswählen.":"Choose a reciter and surah first.");
+    return;
+  }
+  const target=currentSurahNum+delta;
+  if(target<1||target>114){
+    qmsg(lang==="ar"?"لا توجد سورة أخرى بهذا الاتجاه.":lang==="de"?"Keine weitere Sure in dieser Richtung.":"There is no more surah in that direction.");
+    return;
+  }
+  loadSurahAndShow(target);
+}
+
 window.handleAndroidMediaKey=function(command){
+  const action=String(command||"").toLowerCase();
   try{
-    switch(String(command).toLowerCase()){
+    switch(action){
       case "play":
-        if(loaded){audio.play().catch(()=>{qmsg(lang==="ar"?"اضغط OK لبدء التلاوة.":"Press OK to start playback.")});}
-        else openModal("quranModal");
+        if(loaded){audio.play().catch(()=>qmsg(lang==="ar"?"تعذّر التشغيل. اضغط OK ثم حاول مجدداً.":"Playback could not start. Press OK and try again."));}
+        else {openModal("quranModal");qmsg(lang==="ar"?"اختر القارئ والسورة لبدء التلاوة.":"Choose a reciter and surah to begin.");}
         break;
-      case "pause": audio.pause(); updatePlayButton(); break;
-      case "toggle": toggleAudio(); break;
-      case "stop": audio.pause(); try{audio.currentTime=0;}catch(e){} updatePlayButton(); break;
+      case "pause":
+        audio.pause();
+        updatePlayButton();
+        break;
+      case "toggle":
+        toggleAudio();
+        break;
+      case "stop":
+        audio.pause();
+        try{audio.currentTime=0;}catch(e){}
+        updatePlayButton();
+        break;
       case "next":
-        if(currentSurahNum<114) loadSurahAndShow(currentSurahNum+1);
-        else qmsg(lang==="ar"?"هذه آخر سورة في القرآن الكريم.":lang==="de"?"Das ist die letzte Sure.":"This is the last surah.");
+        changeSurahByRemote(1);
         break;
       case "previous":
-        if(currentSurahNum>1) loadSurahAndShow(currentSurahNum-1);
-        else qmsg(lang==="ar"?"هذه أول سورة في القرآن الكريم.":lang==="de"?"Das ist die erste Sure.":"This is the first surah.");
+        changeSurahByRemote(-1);
         break;
+      default:
+        console.debug("Zikra: unsupported media command",action);
     }
-  }catch(e){console.error("Android media key:",e);}
+  }catch(e){console.error("Zikra media command failed:",action,e);}
 };
-window.handleAndroidDpad=function(direction){
-  const modal=document.querySelector(".modal-backdrop.open");
-  const root=modal||document;
-  const selector='button:not(:disabled),select:not(:disabled),input:not(:disabled),.surah-item,[tabindex="0"]';
-  const controls=Array.from(root.querySelectorAll(selector)).filter(el=>{
-    const r=el.getBoundingClientRect();
-    return r.width>0&&r.height>0&&getComputedStyle(el).visibility!=="hidden"&&getComputedStyle(el).display!=="none";
+
+const ZIKRA_DPAD_KEYS={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down"};
+const ZIKRA_FOCUSABLE_SELECTOR='button:not(:disabled),select:not(:disabled),input:not(:disabled),textarea:not(:disabled),a[href],[tabindex]:not([tabindex="-1"])';
+
+function getVisibleFocusable(root){
+  return Array.from(root.querySelectorAll(ZIKRA_FOCUSABLE_SELECTOR)).filter(el=>{
+    if(el.disabled||el.getAttribute("aria-hidden")==="true"||el.closest('[aria-hidden="true"]'))return false;
+    const rect=el.getBoundingClientRect(),style=getComputedStyle(el);
+    return rect.width>0&&rect.height>0&&style.display!=="none"&&style.visibility!=="hidden";
   });
+}
+
+function moveDirectionalFocus(direction){
+  if(!Object.values(ZIKRA_DPAD_KEYS).includes(direction))return;
+  const openModals=Array.from(document.querySelectorAll(".modal-backdrop.open"));
+  const modal=openModals.length?openModals[openModals.length-1]:null;
+  const root=modal||document;
+  const controls=getVisibleFocusable(root);
   if(!controls.length)return;
-  let current=document.activeElement;
+
+  const current=document.activeElement;
   if(!controls.includes(current)){
-    const preferred=modal?(modal.querySelector("#closeQuran")||controls[0]):(document.querySelector("#quranBtn")||controls[0]);
-    preferred.focus(); return;
+    const preferred=modal?(controls.includes(modal.querySelector("#closeQuran"))?modal.querySelector("#closeQuran"):controls[0]):(controls.includes($("quranBtn"))?$("quranBtn"):controls[0]);
+    preferred?.focus();
+    return;
   }
-  // Let selects and text inputs retain native left/right behavior.
-  if((current.tagName==="SELECT"||current.tagName==="INPUT")&&(direction==="left"||direction==="right"))return;
-  const a=current.getBoundingClientRect(), ax=a.left+a.width/2, ay=a.top+a.height/2;
-  let best=null, bestScore=Infinity;
+
+  // Keep text editing usable when a search or city field is focused.
+  if(current instanceof HTMLInputElement && ["text","search","email","url","tel","password"].includes((current.type||"text").toLowerCase()) && (direction==="left"||direction==="right")){
+    const start=current.selectionStart,end=current.selectionEnd;
+    if(start!==null&&end!==null){
+      const next=direction==="left"?Math.max(0,start-1):Math.min(current.value.length,end+1);
+      current.setSelectionRange(next,next);
+    }
+    return;
+  }
+
+  // When a native select has focus, Up/Down changes its value instead of
+  // unexpectedly moving focus to another control.
+  if(current.tagName==="SELECT"&&(direction==="up"||direction==="down")){
+    const delta=direction==="down"?1:-1;
+    const next=Math.max(0,Math.min(current.options.length-1,current.selectedIndex+delta));
+    if(next!==current.selectedIndex&&current.options.length){
+      current.selectedIndex=next;
+      current.dispatchEvent(new Event("change",{bubbles:true}));
+    }
+    return;
+  }
+
+  const source=current.getBoundingClientRect();
+  const sx=source.left+source.width/2,sy=source.top+source.height/2;
+  const horizontal=direction==="left"||direction==="right";
+  const sign=(direction==="right"||direction==="down")?1:-1;
+  const candidates=[];
+
   for(const el of controls){
     if(el===current)continue;
-    const r=el.getBoundingClientRect(), x=r.left+r.width/2, y=r.top+r.height/2;
-    let primary, secondary;
-    if(direction==="right"){if(x<=ax+2)continue;primary=x-ax;secondary=Math.abs(y-ay);}
-    else if(direction==="left"){if(x>=ax-2)continue;primary=ax-x;secondary=Math.abs(y-ay);}
-    else if(direction==="down"){if(y<=ay+2)continue;primary=y-ay;secondary=Math.abs(x-ax);}
-    else if(direction==="up"){if(y>=ay-2)continue;primary=ay-y;secondary=Math.abs(x-ax);}
-    else return;
-    const score=primary+secondary*1.8;
-    if(score<bestScore){bestScore=score;best=el;}
+    const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+    const primary=horizontal?(cx-sx)*sign:(cy-sy)*sign;
+    if(primary<=2)continue; // Never select a target behind the requested direction.
+    const cross=horizontal?Math.abs(cy-sy):Math.abs(cx-sx);
+    const overlap=horizontal
+      ? Math.min(source.bottom,r.bottom)-Math.max(source.top,r.top)
+      : Math.min(source.right,r.right)-Math.max(source.left,r.left);
+    candidates.push({el,primary,cross,aligned:overlap>2,score:primary+cross*2.2});
   }
-  if(best){best.focus();best.scrollIntoView({block:"nearest",inline:"nearest"});}
-  else {
-    // At a row/column edge, move to the nearest sensible control in the requested direction.
-    const candidates=controls.filter(el=>el!==current);
-    candidates.sort((u,v)=>{
-      const ru=u.getBoundingClientRect(),rv=v.getBoundingClientRect();
-      const du=direction==="left"?Math.abs(ru.left-a.left):direction==="right"?Math.abs(ru.right-a.right):direction==="up"?Math.abs(ru.top-a.top):Math.abs(ru.bottom-a.bottom);
-      const dv=direction==="left"?Math.abs(rv.left-a.left):direction==="right"?Math.abs(rv.right-a.right):direction==="up"?Math.abs(rv.top-a.top):Math.abs(rv.bottom-a.bottom);
-      return du-dv;
-    });
-    if(candidates[0]){candidates[0].focus();candidates[0].scrollIntoView({block:"nearest",inline:"nearest"});}
-  }
-};
+
+  if(!candidates.length)return; // Stay put at an edge; don't jump randomly.
+
+  // First prefer controls whose rectangles overlap on the perpendicular axis
+  // (same visual row for Left/Right, same column for Up/Down).
+  const aligned=candidates.filter(c=>c.aligned);
+  const pool=aligned.length?aligned:candidates.filter(c=>c.cross<=Math.max(24,c.primary*1.15));
+  if(!pool.length)return;
+  pool.sort((a,b)=>{
+    if(aligned.length)return a.primary-b.primary||a.cross-b.cross;
+    return a.score-b.score||a.primary-b.primary;
+  });
+  const target=pool[0].el;
+  target.focus({preventScroll:true});
+  target.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});
+}
+
+window.handleAndroidDpad=moveDirectionalFocus;
+
 $("weatherCard").addEventListener("click",()=>openModal("weatherModal"));$("closeQuran").addEventListener("click",()=>closeModal("quranModal"));$("closeWeather").addEventListener("click",()=>closeModal("weatherModal"));
 function changeLanguage(value){lang=value;localStorage.setItem("zikra_language",value);document.documentElement.lang=value;document.documentElement.dir="rtl";const t=T[lang];$("appTitle").textContent=t.title;$("subtitle").textContent=t.subtitle;$("quranTitle").textContent=t.quranTitle;$("reciterLabel").textContent=t.reciterLabel;$("resumeLabel").textContent=t.resumeLabel;$("cityTitle").textContent=lang==="ar"?"الموقع والمدينة":lang==="de"?"Standort und Stadt":"Location and city";$("cityInputLabel").textContent=lang==="ar"?"اسم المدينة":lang==="de"?"Stadtname":"City name";$("cityHelp").textContent=lang==="ar"?"يمكنك تحديد موقع الجهاز أو كتابة اسم المدينة يدوياً.":lang==="de"?"Standort automatisch bestimmen oder den Stadtnamen eingeben.":"Use device location or enter a city name."; $("findLocationBtn").textContent=lang==="ar"?"📍 تحديد موقعي تلقائياً":lang==="de"?"📍 Meinen Standort bestimmen":"📍 Use my location";$("saveCityBtn").textContent=lang==="ar"?"حفظ المدينة":lang==="de"?"Stadt speichern":"Save city";$("backToIndex").textContent=lang==="ar"?"→ فهرس السور":lang==="de"?"→ Sure auswählen":"→ Surah index";$("reciterSearch").placeholder=lang==="ar"?"ابحث عن اسم الشيخ":lang==="de"?"Rezitator suchen":"Search reciter";$("exitTitle").textContent=lang==="ar"?"الخروج من التطبيق":lang==="de"?"App verlassen":"Exit app";$("exitMessage").textContent=lang==="ar"?"هل تريد الخروج من تطبيق ذِكرى؟":lang==="de"?"Möchtest du Zikra verlassen?":"Do you want to exit Zikra?";$("confirmExitBtn").textContent=lang==="ar"?"نعم، خروج":lang==="de"?"Ja, beenden":"Yes, exit";$("cancelExitBtn").textContent=lang==="ar"?"لا، إلغاء":lang==="de"?"Nein, abbrechen":"No, cancel";if(!loaded){$("miniSurah").textContent=t.defaultSurah;$("miniReader").textContent=t.openPrompt;$("miniVerse").textContent=t.startPrompt}document.querySelectorAll(".p-name").forEach(el=>{const p=el.dataset.prayer;if(p)el.textContent=el.dataset[lang]||el.dataset.ar});renderMemory();updateClock();updateCityLabel();loadPrayerTimes();checkResumeBookmark();$("footerRights").textContent=t.rights;if(weatherData)renderWeather();else loadWeather();if(surahListCache.length)renderSurahIndex()}
 $("language").value=lang;$("language").addEventListener("change",e=>changeLanguage(e.target.value));
@@ -255,23 +321,36 @@ window.handleAndroidBack=handleBack;
 $("exitModal").addEventListener("click",e=>{if(e.target===$("exitModal"))hideExitPrompt()});
 document.addEventListener("keydown",function(event){
   const key=event.key;
-  if(["Escape","Backspace","BrowserBack","GoBack"].includes(key)||event.keyCode===4){event.preventDefault();event.stopImmediatePropagation();handleBack();return}
-
-  // Fallback for remotes whose DPAD/media keys reach the WebView instead of Java.
-  const dpad={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down"};
-  if(dpad[key]){
-    event.preventDefault();event.stopImmediatePropagation();
-    if(typeof window.handleAndroidDpad==="function") window.handleAndroidDpad(dpad[key]);
+  if(["Escape","Backspace","BrowserBack","GoBack"].includes(key)||event.keyCode===4){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    handleBack();
     return;
   }
 
-  const mediaKeys={
-    MediaPlay:"play", MediaPause:"pause", MediaPlayPause:"toggle",
-    MediaStop:"stop", MediaTrackNext:"next", MediaTrackPrevious:"previous",
-    FastForward:"next", Rewind:"previous"
+  const direction=ZIKRA_DPAD_KEYS[key];
+  if(direction){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    moveDirectionalFocus(direction);
+    return;
+  }
+
+  // Fallback for remotes whose media buttons arrive as browser key events.
+  const mediaCommands={
+    MediaPlay:"play",
+    MediaPause:"pause",
+    MediaPlayPause:"toggle",
+    MediaStop:"stop",
+    MediaTrackNext:"next",
+    MediaTrackPrevious:"previous"
   };
-  const command=mediaKeys[key];
-  if(command){event.preventDefault();event.stopImmediatePropagation();window.handleAndroidMediaKey(command);}
+  const mediaCommand=mediaCommands[key];
+  if(mediaCommand){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.handleAndroidMediaKey(mediaCommand);
+  }
 },true);
 
 /* تحديث بيانات الصلاة والطقس فقط؛ لا يمسّ مشغل الصوت أو اللغة أو علامة القراءة. */

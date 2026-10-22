@@ -15,12 +15,14 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.graphics.Color;
 import android.view.Gravity;
+import android.util.Log;
 
 public class MainActivity extends Activity {
     private WebView webView;
     private FrameLayout root;
     private TextView errorView;
     private static final String SITE_URL = "https://koukach91-hash.github.io/zikra-android-tv-new/";
+    private static final String TAG = "ZikraRemote";
     private boolean pageReady = false;
 
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -88,23 +90,50 @@ public class MainActivity extends Activity {
         pageReady = false; if (webView != null) webView.loadUrl(SITE_URL);
     }
     private void sendDpadToWeb(String direction) {
-        if (webView == null || !pageReady) return;
+        if (webView == null || !pageReady) {
+            Log.w(TAG, "Ignoring DPAD " + direction + ": WebView page is not ready");
+            return;
+        }
         webView.evaluateJavascript(
-            "if (typeof window.handleAndroidDpad === 'function') { window.handleAndroidDpad('" + direction + "'); }",
-            null
+            "(function(){if(typeof window.handleAndroidDpad==='function'){window.handleAndroidDpad('" + direction + "');return 'handled';}return 'handler-missing';})()",
+            value -> { if ("\"handler-missing\"".equals(value)) Log.w(TAG, "HTML DPAD handler is missing"); }
         );
     }
 
     private void sendMediaCommand(String command) {
-        if (webView == null || !pageReady) return;
+        if (webView == null || !pageReady) {
+            Log.w(TAG, "Ignoring media command " + command + ": WebView page is not ready");
+            return;
+        }
         webView.evaluateJavascript(
-            "if (typeof window.handleAndroidMediaKey === 'function') { window.handleAndroidMediaKey('" + command + "'); }",
-            null
+            "(function(){if(typeof window.handleAndroidMediaKey==='function'){window.handleAndroidMediaKey('" + command + "');return 'handled';}return 'handler-missing';})()",
+            value -> { if ("\"handler-missing\"".equals(value)) Log.w(TAG, "HTML media-key handler is missing"); }
         );
+    }
+
+    private boolean isMediaCommandKey(int code) {
+        switch (code) {
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_STOP:
+            case KeyEvent.KEYCODE_MEDIA_NEXT:
+            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+            case KeyEvent.KEYCODE_MEDIA_REWIND:
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
         int code = event.getKeyCode();
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            Log.d(TAG, "Remote key: " + KeyEvent.keyCodeToString(code)
+                    + " (code=" + code + ", repeat=" + event.getRepeatCount() + ")");
+        }
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
             // Consume matching key-up events for keys handled below so WebView does not
             // receive a second, inconsistent navigation event.
@@ -121,8 +150,6 @@ public class MainActivity extends Activity {
                 case KeyEvent.KEYCODE_MEDIA_STOP:
                 case KeyEvent.KEYCODE_MEDIA_NEXT:
                 case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
-                case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
                 case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                 case KeyEvent.KEYCODE_MEDIA_REWIND:
                 case KeyEvent.KEYCODE_HEADSETHOOK:
@@ -140,6 +167,9 @@ public class MainActivity extends Activity {
             sendBackToWeb();
             return true;
         }
+
+        // Physical media buttons often auto-repeat when held. Process each press once.
+        if (event.getRepeatCount() > 0 && isMediaCommandKey(code)) return true;
 
         switch (code) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
@@ -169,11 +199,9 @@ public class MainActivity extends Activity {
             case KeyEvent.KEYCODE_MEDIA_STOP:
                 sendMediaCommand("stop"); return true;
             case KeyEvent.KEYCODE_MEDIA_NEXT:
-            case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                 sendMediaCommand("next"); return true;
             case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-            case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
             case KeyEvent.KEYCODE_MEDIA_REWIND:
                 sendMediaCommand("previous"); return true;
             default:
