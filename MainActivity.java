@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
     private FrameLayout root;
     private TextView errorView;
 
+    // ضع رابط مشروعك على جيت هب هنا أو الرابط الذي تستخدمه
     private static final String SITE_URL =
             "https://koukach91-hash.github.io/zikra-android-tv-new/";
 
@@ -110,25 +111,13 @@ public class MainActivity extends Activity {
         public void exitApp() {
             runOnUiThread(() -> finish());
         }
-
-        @JavascriptInterface
-        public void mediaKey(String action) {
-            runOnUiThread(() -> {
-                if (webView == null) return;
-                webView.evaluateJavascript(
-                        "if (typeof window.handleMediaKey === 'function') {" +
-                        "window.handleMediaKey('" + action + "');" +
-                        "}", null
-                );
-            });
-        }
     }
 
     private void showError() {
         if (errorView != null) return;
 
         errorView = new TextView(this);
-        errorView.setText("تعذّر فتح ذِكرى.\n\nتأكد من اتصال الإنترنت ثم اضغط OK لإعادة المحاولة.");
+        errorView.setText("يرجى الانتظار والمحاولة من جديد");
         errorView.setTextColor(Color.WHITE);
         errorView.setTextSize(22);
         errorView.setGravity(Gravity.CENTER);
@@ -156,7 +145,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    /* إصلاح زر الرجوع: يمنع الخروج الافتراضي تماماً ويستدعي الجافاسكريپت */
+    /* التعديل الجذري هنا لالتقاط زر الرجوع وإرساله للجافاسكريبت داخل الـ HTML */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -174,26 +163,7 @@ public class MainActivity extends Activity {
                             "window.handleAndroidBack();" +
                             "}", null
                     );
-                    return true; // يمنع إغلاق التطبيق نهائياً ويتركه للجافاسكريبت
-                }
-            }
-
-            if (webView != null && errorView == null) {
-                String mediaAction = null;
-                switch (code) {
-                    case KeyEvent.KEYCODE_MEDIA_PLAY: mediaAction = "play"; break;
-                    case KeyEvent.KEYCODE_MEDIA_PAUSE: mediaAction = "pause"; break;
-                    case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE: mediaAction = "playPause"; break;
-                    case KeyEvent.KEYCODE_MEDIA_NEXT: mediaAction = "next"; break;
-                    case KeyEvent.KEYCODE_MEDIA_PREVIOUS: mediaAction = "previous"; break;
-                }
-                if (mediaAction != null) {
-                    webView.evaluateJavascript(
-                            "if (typeof window.handleMediaKey === 'function') {" +
-                            "window.handleMediaKey('" + mediaAction + "');" +
-                            "}", null
-                    );
-                    return true;
+                    return true; // يمنع خروج التطبيق الافتراضي ويترك التحكم لملف الـ index.html
                 }
             }
         }
