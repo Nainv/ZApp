@@ -37,6 +37,11 @@ jobs:
           mkdir -p app/src/main/res/drawable
           mkdir -p app/src/main/res/drawable-nodpi
           mkdir -p app/src/main/res/drawable-xhdpi
+          mkdir -p app/src/main/res/mipmap-mdpi
+          mkdir -p app/src/main/res/mipmap-hdpi
+          mkdir -p app/src/main/res/mipmap-xhdpi
+          mkdir -p app/src/main/res/mipmap-xxhdpi
+          mkdir -p app/src/main/res/mipmap-xxxhdpi
 
           if [ -f MainActivity.java ]; then
             mv MainActivity.java app/src/main/java/com/zikra/tv/MainActivity.java
@@ -73,6 +78,13 @@ jobs:
           cp zikra_icon.png app/src/main/res/drawable/zikra_icon.png
           cp zikra_icon.png app/src/main/res/drawable-nodpi/zikra_icon.png
           cp zikra_icon.png app/src/main/res/drawable-xhdpi/zikra_icon.png
+
+          cp zikra_icon.png app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp zikra_icon.png app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp zikra_icon.png app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp zikra_icon.png app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp zikra_icon.png app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
           cp zikra_banner.png app/src/main/res/drawable-nodpi/zikra_banner.png
 
           cat > settings.gradle <<'EOF'
@@ -217,6 +229,7 @@ jobs:
 
           test -s app/src/main/res/drawable/zikra_icon.png
           test -s app/src/main/res/drawable-nodpi/zikra_banner.png
+          test -s app/src/main/res/mipmap-xhdpi/ic_launcher.png
 
           echo "Icon and banner resources found."
 
