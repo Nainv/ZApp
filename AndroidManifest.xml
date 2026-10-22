@@ -17,8 +17,8 @@
 
     <application
         android:label="ذِكرى"
-        android:icon="@drawable/zikra_logo"
-        android:banner="@drawable/zikra_logo"
+        android:icon="@drawable/zikra_icon"
+        android:banner="@drawable/zikra_banner"
         android:usesCleartextTraffic="true"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
