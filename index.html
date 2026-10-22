@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#304b3a">
 <title>ذِكرى | Zikra</title>
 <style>
@@ -15,15 +15,16 @@
   --focus-glow: #89a27c;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
-  margin: 0;
-  min-height: 100vh;
-  min-height: 100dvh;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: var(--dark);
   background: radial-gradient(ellipse at 50% 70%, #e3e9d8, transparent 48%), linear-gradient(#f9f6eb, #e9ecdd);
-  overflow-x: hidden;
+  user-select: none;
 }
 
 button, select { font: inherit; }
@@ -31,76 +32,86 @@ button { cursor: pointer; touch-action: manipulation; }
 button:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
   outline: 3px solid var(--focus-glow) !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 12px rgba(73, 109, 85, 0.4) !important;
+  box-shadow: 0 0 12px rgba(73, 109, 85, 0.5) !important;
 }
 
+/* تخطيط مرن يتكيف تماماً مع حجم الشاشة دون خروج عن الحدود */
 .app {
-  width: 100%;
-  max-width: 1500px;
-  min-height: 100vh;
-  min-height: 100dvh;
-  margin: auto;
-  padding: clamp(10px, 1.8vh, 22px) clamp(12px, 3vw, 45px);
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  padding: clamp(8px, 1.5vh, 20px) clamp(12px, 2.5vw, 35px);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: space-between;
+  gap: clamp(6px, 1.2vh, 14px);
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
-/* الترويسة */
-.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* الترويسة العليا */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand-mark {
-  width: 46px; height: 46px; display: grid; place-items: center;
-  border: 1px solid #d4c18e; border-radius: 15px;
-  background: #fffdf4; color: var(--green); font-size: 27px;
+  width: clamp(38px, 4.5vh, 48px);
+  height: clamp(38px, 4.5vh, 48px);
+  display: grid; place-items: center;
+  border: 1px solid #d4c18e; border-radius: 12px;
+  background: #fffdf4; color: var(--green); font-size: clamp(20px, 2.8vh, 28px);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-.brand h1 { margin: 0; font-size: clamp(20px, 2.2vw, 28px); }
-.brand p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.brand h1 { margin: 0; font-size: clamp(18px, 2.3vw, 26px); line-height: 1.1; }
+.brand p { margin: 2px 0 0; font-size: clamp(10px, 1vw, 13px); color: var(--muted); }
 .tools { display: flex; gap: 8px; }
 .icon-btn, #language {
-  height: 42px; border: 1px solid #d9ddca; background: #fffdf4;
-  border-radius: 12px; color: var(--dark); transition: background 0.2s;
+  height: clamp(36px, 4vh, 42px); border: 1px solid #d9ddca; background: #fffdf4;
+  border-radius: 10px; color: var(--dark); font-weight: 600;
 }
-.icon-btn { width: 42px; font-size: 18px; display: grid; place-items: center; }
-#language { width: 105px; padding: 5px; direction: ltr; font-weight: 600; }
+.icon-btn { width: clamp(36px, 4vh, 42px); font-size: 16px; display: grid; place-items: center; }
+#language { padding: 0 8px; direction: ltr; font-size: 12px; }
 
 /* لوحة التاريخ والوقت */
-.date-panel { text-align: center; margin: clamp(2px, 0.8vh, 8px) 0; }
-.clock { font-size: clamp(32px, 4.5vw, 54px); line-height: 1.1; font-weight: 700; font-variant-numeric: tabular-nums; }
-.date-text { font-size: 13px; color: var(--muted); margin-top: 2px; }
-.hijri { font-size: 14px; color: var(--green); font-weight: 700; margin-top: 2px; }
-.city-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.date-panel { text-align: center; flex-shrink: 0; margin: 0 auto; }
+.clock { font-size: clamp(28px, 4.8vh, 52px); line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
+.date-text { font-size: clamp(11px, 1.4vh, 14px); color: var(--muted); margin-top: 3px; }
+.hijri { font-size: clamp(12px, 1.5vh, 15px); color: var(--green); font-weight: 700; margin-top: 2px; }
+.city-label { font-size: clamp(10px, 1.2vh, 12px); color: var(--muted); margin-top: 1px; }
 
-/* أوقات الصلاة */
+/* شريط أوقات الصلاة */
 .prayer-strip {
-  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 6px; padding: 10px 6px; border: 1px solid #e2dfce;
-  border-radius: 18px; background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 4px 15px rgba(48, 75, 58, 0.04);
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  gap: 4px; padding: clamp(6px, 1vh, 10px); border: 1px solid #e2dfce;
+  border-radius: 16px; background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 15px rgba(48, 75, 58, 0.04); flex-shrink: 0;
 }
-.prayer { text-align: center; padding: 4px 2px; border-left: 1px solid #e6e3d6; }
+.prayer { text-align: center; padding: 2px; border-left: 1px solid #e6e3d6; }
 .prayer:last-child { border-left: 0; }
-.p-icon { display: block; font-size: 16px; color: var(--gold); }
-.p-name { font-size: clamp(10px, 1.1vw, 13px); color: #798272; font-weight: 600; }
-.p-time { font-size: clamp(11px, 1.4vw, 17px); font-weight: 800; color: var(--dark); margin-top: 2px; }
+.p-icon { display: block; font-size: clamp(13px, 1.8vh, 18px); color: var(--gold); }
+.p-name { font-size: clamp(10px, 1.2vw, 13px); color: #798272; font-weight: 600; }
+.p-time { font-size: clamp(12px, 1.8vw, 16px); font-weight: 800; color: var(--dark); margin-top: 1px; }
 
-/* مربعات المحتوى الرئيسية */
+/* المربعات التفاعلية الرئيسية */
 .tiles {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(8px, 1.8vw, 22px); width: min(100%, 1150px);
-  margin: clamp(6px, 1.5vh, 16px) auto 6px;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: clamp(8px, 1.8vw, 18px); width: 100%;
+  flex: 1; min-height: 0; align-items: center;
 }
 .tile {
-  min-width: 0; min-height: clamp(140px, 22vh, 220px);
+  height: 100%; max-height: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 8px; padding: 12px 10px; border: 2px solid #e6e1cd;
-  border-radius: 22px; background: linear-gradient(145deg, #fffef9, #f1f0e4);
-  box-shadow: 0 8px 20px rgba(55, 74, 50, 0.06); color: var(--dark);
-  text-align: center; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
+  gap: 6px; padding: 10px; border: 2px solid #e6e1cd;
+  border-radius: 20px; background: linear-gradient(145deg, #fffef9, #f1f0e4);
+  box-shadow: 0 6px 18px rgba(55, 74, 50, 0.06); color: var(--dark);
+  text-align: center; overflow: hidden; transition: transform 0.2s;
 }
 .tile:active { transform: scale(0.98); }
-.quran-logo { display: block; width: 100%; max-width: 190px; max-height: clamp(85px, 16vh, 140px); }
+.quran-logo { width: 100%; height: auto; max-height: 80%; }
 
 .weather-tile {
   color: white; border: 1px solid rgba(255, 255, 255, 0.4);
@@ -110,195 +121,157 @@ button:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
 .weather-tile.rainy { background: linear-gradient(150deg, #536f91, #243954); }
 .weather-tile.snowy { background: linear-gradient(150deg, #d7e7ef, #7199b0); color: #243f52; }
 .weather-tile.storm { background: linear-gradient(150deg, #665f7d, #292d48); }
-.weather-icon { font-size: clamp(28px, 4vw, 42px); }
-.weather-temp { font-size: clamp(26px, 4vw, 42px); font-weight: 800; }
-.weather-condition { font-size: clamp(11px, 1.4vw, 15px); font-weight: 600; }
-.weather-extra { font-size: 10px; line-height: 1.4; opacity: 0.95; }
+.weather-icon { font-size: clamp(24px, 3.5vh, 40px); }
+.weather-temp { font-size: clamp(24px, 4vh, 42px); font-weight: 800; }
+.weather-condition { font-size: clamp(11px, 1.4vw, 14px); font-weight: 600; }
+.weather-extra { font-size: clamp(9px, 1vw, 11px); opacity: 0.95; }
 
-.tile-memory { gap: 8px; padding: 12px 10px; }
-.tile-icon { width: 34px; height: 34px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; background: #e6ecd9; }
-.tile-title { font-size: clamp(11px, 1.3vw, 15px); font-weight: 800; color: var(--green); }
-.memory-preview-text { font-size: clamp(11px, 1.5vw, 18px); font-weight: 700; line-height: 1.6; overflow-wrap: anywhere; }
-.memory-preview-source { font-size: 11px; color: #96783d; font-weight: 600; }
-.memory-preview-benefit { font-size: 11px; line-height: 1.5; color: #52684d; }
+.tile-memory { padding: 10px; justify-content: center; }
+.tile-icon { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; font-size: 16px; background: #e6ecd9; }
+.tile-title { font-size: clamp(11px, 1.2vw, 14px); font-weight: 800; color: var(--green); }
+.memory-preview-text { font-size: clamp(11px, 1.4vw, 16px); font-weight: 700; line-height: 1.5; }
+.memory-preview-source { font-size: 10px; color: #96783d; font-weight: 600; }
+.memory-preview-benefit { font-size: 10px; line-height: 1.4; color: #52684d; }
 
-/* 2. تكبير وتوسيع مشغل القرآن الكريم السفلي */
+/* مشغل القرآن السفلي الموسّع */
 .player {
   display: grid;
-  grid-template-columns: minmax(200px, 1.2fr) minmax(250px, 2fr) auto;
+  grid-template-columns: minmax(160px, 1.2fr) minmax(200px, 2fr) auto;
   align-items: center;
-  gap: 16px;
-  min-height: 100px;
-  padding: 16px 22px;
+  gap: 12px;
+  padding: clamp(8px, 1.2vh, 14px) clamp(12px, 2vw, 20px);
   border: 1.5px solid #d5dbc7;
-  border-radius: 24px;
+  border-radius: 20px;
   background: linear-gradient(120deg, #ffffff, #f0f3e6);
-  box-shadow: 0 10px 25px rgba(48, 75, 58, 0.08);
-  margin-top: 4px;
+  box-shadow: 0 8px 20px rgba(48, 75, 58, 0.08);
+  flex-shrink: 0;
 }
-.now-reading { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.now-reading { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .mini-mushaf {
-  width: 50px; height: 52px; flex-shrink: 0; border-radius: 14px;
+  width: clamp(38px, 4.5vh, 48px); height: clamp(38px, 4.5vh, 48px); flex-shrink: 0; border-radius: 12px;
   background: linear-gradient(145deg, #dce6d2, #a1ba93);
-  display: grid; place-items: center; font-size: 28px; color: var(--dark);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  display: grid; place-items: center; font-size: 22px; color: var(--dark);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
 }
-.now-reading strong { display: block; font-size: 14px; color: var(--dark); }
-.now-reading small { display: block; font-size: 12px; color: #6b7562; margin-top: 2px; }
+.now-reading strong { display: block; font-size: clamp(12px, 1.3vw, 14px); color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.now-reading small { display: block; font-size: clamp(10px, 1.1vw, 12px); color: #6b7562; margin-top: 1px; }
 
-.track-area { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-.verse-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.track-area { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.verse-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .verse {
-  font-size: clamp(12px, 1.4vw, 16px); font-weight: 600; color: var(--dark);
+  font-size: clamp(11px, 1.3vw, 15px); font-weight: 600; color: var(--dark);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
 }
 .ayah-number {
-  flex-shrink: 0; width: 32px; height: 32px; display: grid; place-items: center;
-  border: 2px solid var(--gold); border-radius: 50%; background: #fbf6ea;
-  font-size: 13px; font-weight: 800; color: var(--dark);
+  flex-shrink: 0; width: 26px; height: 26px; display: grid; place-items: center;
+  border: 1.5px solid var(--gold); border-radius: 50%; background: #fbf6ea;
+  font-size: 11px; font-weight: 800; color: var(--dark);
 }
-.progress { height: 8px; border-radius: 20px; background: #e0e5d5; overflow: hidden; }
+.progress { height: 6px; border-radius: 12px; background: #e0e5d5; overflow: hidden; }
 .progress-fill { height: 100%; width: 0%; background: var(--green); transition: width 0.3s linear; }
 
-.controls { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.controls { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .control {
-  border: 0; background: #e2e7d7; border-radius: 50%; width: 42px; height: 42px;
-  color: var(--dark); font-size: 16px; display: grid; place-items: center; transition: background 0.2s;
+  border: 0; background: #e2e7d7; border-radius: 50%; width: clamp(34px, 4vh, 40px); height: clamp(34px, 4vh, 40px);
+  color: var(--dark); font-size: 14px; display: grid; place-items: center; transition: background 0.2s;
 }
-.control:hover { background: #d2dbc5; }
 .control.main {
-  width: 52px; height: 52px; color: white; background: var(--green); font-size: 22px;
-  box-shadow: 0 4px 12px rgba(73, 109, 85, 0.3);
+  width: clamp(42px, 5vh, 48px); height: clamp(42px, 5vh, 48px); color: white; background: var(--green); font-size: 18px;
+  box-shadow: 0 4px 10px rgba(73, 109, 85, 0.3);
 }
-.control.main:hover { background: #3c5a46; }
 
-/* 3. تطوير وتوسيع خلية الأدعية السفلى */
+/* خلية الأدعية الشاملة */
 .dua-box {
-  border: 1.5px solid #d5d9c8;
-  border-radius: 20px;
+  border: 1.5px solid #d5d9c8; border-radius: 16px;
   background: linear-gradient(135deg, #ffffff, #f4f7eb);
-  padding: 14px 20px;
-  box-shadow: 0 6px 18px rgba(48, 75, 58, 0.05);
-  margin-top: 4px;
+  padding: clamp(6px, 1vh, 10px) 16px;
+  box-shadow: 0 4px 12px rgba(48, 75, 58, 0.05); flex-shrink: 0;
 }
 .dua-bar {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  color: var(--dark); font-size: clamp(13px, 1.6vw, 18px); font-weight: 700;
-  line-height: 1.6; text-align: center;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  color: var(--dark); font-size: clamp(11px, 1.3vw, 15px); font-weight: 700; text-align: center;
 }
-.dua-symbol { color: var(--gold); font-size: 24px; flex-shrink: 0; }
-.dua-text { flex: 1; word-wrap: break-word; overflow-wrap: break-word; }
+.dua-symbol { color: var(--gold); font-size: 18px; flex-shrink: 0; }
+.dua-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* 4. الفوتر وحقوق النشر */
-.footer {
-  margin-top: auto; padding: 10px 8px 4px; border-top: 1px solid #d9ddca;
-  text-align: center; color: var(--muted); font-size: 11px;
-}
-.copyright { font-size: 12px; color: var(--dark); font-weight: 700; letter-spacing: 0.3px; }
+/* حقوق النشر */
+.footer { text-align: center; padding-top: 2px; flex-shrink: 0; }
+.copyright { font-size: clamp(10px, 1.1vh, 12px); color: var(--dark); font-weight: 700; opacity: 0.85; }
 
-/* النوافذ المنبثقة Modal */
+/* النوافذ المنبثقة (Modals) */
 .modal-backdrop {
-  position: fixed; inset: 0; background: rgba(21, 37, 29, 0.75);
+  position: fixed; inset: 0; background: rgba(21, 37, 29, 0.78);
   z-index: 100; display: none; align-items: center; justify-content: center;
   padding: 15px; backdrop-filter: blur(4px);
 }
 .modal-backdrop.open { display: flex; }
 .modal {
-  width: min(1000px, 100%); max-height: 90vh; max-height: 90dvh;
-  overflow-y: auto; border-radius: 24px; padding: clamp(16px, 2.5vw, 28px);
-  background: #f9f7ed; color: var(--dark); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  overscroll-behavior: contain;
+  width: min(900px, 95vw); max-height: 88vh; max-height: 88dvh;
+  overflow-y: auto; border-radius: 20px; padding: clamp(14px, 2vw, 24px);
+  background: #f9f7ed; color: var(--dark); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
-.modal-backdrop:has(#quranModal.open) { padding: 0; }
-.modal:has(#verses) {
-  width: 100%; height: 100%; max-height: 100dvh; border-radius: 0;
-  padding: clamp(12px, 2vw, 24px); display: flex; flex-direction: column;
-}
-.modal:has(#verses) #verses { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
-
-.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-.modal-head h2 { margin: 0; font-size: 22px; color: var(--dark); }
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.modal-head h2 { margin: 0; font-size: clamp(18px, 2vw, 22px); color: var(--dark); }
 .close-modal {
-  flex-shrink: 0; width: 42px; height: 42px; border: 0; border-radius: 50%;
-  background: #dfe8dc; font-size: 24px; color: var(--dark); display: grid; place-items: center;
+  width: 36px; height: 36px; border: 0; border-radius: 50%;
+  background: #dfe8dc; font-size: 20px; color: var(--dark); display: grid; place-items: center;
 }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.modal label { display: block; font-weight: bold; margin: 10px 0 4px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal label { display: block; font-weight: bold; margin: 6px 0 2px; font-size: 13px; }
 .modal select, .action {
-  width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #bdbda7; margin: 4px 0;
+  width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #bdbda7; margin: 4px 0;
 }
-.modal select { background: white; color: var(--dark); }
-.action { background: var(--green); color: white; border: 0; font-weight: 700; min-height: 46px; }
+.modal select { background: white; color: var(--dark); font-size: 14px; }
+.action { background: var(--green); color: white; border: 0; font-weight: 700; min-height: 42px; font-size: 14px; }
 .action:disabled { opacity: 0.5; }
 
 #quranStatus {
-  white-space: pre-wrap; line-height: 1.5; background: #edf1e8;
-  padding: 8px 12px; border-radius: 12px; margin: 8px 0; font-size: 12px;
+  white-space: pre-wrap; background: #edf1e8; padding: 8px 12px;
+  border-radius: 10px; margin: 8px 0; font-size: 12px;
 }
 #verses {
-  font-family: 'Amiri', 'Traditional Arabic', serif; font-size: clamp(18px, 2.3vw, 22px);
-  line-height: 2.2; text-align: justify; padding: 12px; background: #fffdf4;
-  border: 1px solid #e2d8bd; border-radius: 12px; direction: rtl;
+  font-family: 'Amiri', 'Traditional Arabic', serif; font-size: clamp(16px, 2vw, 20px);
+  line-height: 2.1; text-align: justify; padding: 12px; background: #fffdf4;
+  border: 1px solid #e2d8bd; border-radius: 10px; max-height: 50vh; overflow-y: auto;
 }
 .mushaf-page {
-  position: relative; max-width: 850px; min-height: 65vh; margin: 0 auto 16px;
-  padding: 20px 20px 35px; border: 1px solid #d8c99f; border-radius: 8px;
-  background: #fffdf4; box-shadow: 0 4px 15px rgba(81, 71, 42, 0.08); line-height: 2.2; text-align: justify;
+  position: relative; padding: 14px; border: 1px solid #d8c99f; border-radius: 6px;
+  background: #fffdf4; margin-bottom: 12px; line-height: 2.1;
 }
-.mushaf-page-number {
-  position: absolute; bottom: 8px; left: 0; right: 0; text-align: center;
-  font: 12px Arial; color: #98865a; font-weight: bold;
-}
-.ayah { padding: 2px 4px; border-radius: 6px; transition: background 0.2s; }
-.ayah.active { background: #d7e9ce; color: #1c3d24; box-shadow: 0 0 0 1px #9ebd8e; }
+.mushaf-page-number { text-align: center; font: 11px Arial; color: #98865a; font-weight: bold; margin-top: 6px; }
+.ayah { padding: 2px 3px; border-radius: 4px; }
+.ayah.active { background: #d7e9ce; color: #1c3d24; font-weight: bold; }
 .waqf {
-  display: inline-flex; vertical-align: middle; align-items: center; justify-content: center;
-  width: 1.6em; height: 1.6em; margin: 0 4px; border: 1.5px solid #b49a60;
-  border-radius: 50%; font-size: 0.6em; color: #826b37; background: #fbf4df; font-weight: bold;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.5em; height: 1.5em; margin: 0 3px; border: 1px solid #b49a60;
+  border-radius: 50%; font-size: 0.65em; color: #826b37; background: #fbf4df; font-weight: bold;
 }
 
-.quran-controls, #loadSurah, #playQuran, audio { display: none !important; }
-
-/* 5. إصلاح نافذة تفاصيل الطقس للتمرير التلقائي مع التحكم بالريموت */
-.weather-modal-content {
-  display: flex; flex-direction: column; gap: 14px;
-  max-height: 75vh; overflow-y: auto; padding-right: 4px;
-}
-.weather-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.stat { border: 1px solid #dce4d8; background: rgba(255, 255, 255, 0.8); border-radius: 14px; padding: 12px; }
-.stat-label { font-size: 12px; color: #788574; }
-.stat-value { font-size: 18px; font-weight: 800; margin-top: 4px; color: var(--dark); }
-.section-title { font-size: 16px; font-weight: 800; margin: 10px 0 6px; color: var(--dark); }
-.hourly { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; }
-.hour {
-  flex: 0 0 76px; text-align: center; padding: 10px 6px; border-radius: 14px;
-  background: white; border: 1px solid #e0e6dc; font-size: 12px;
-}
-.hour-icon { font-size: 22px; margin: 6px 0; }
-.daily-list { display: grid; gap: 8px; }
-.day-row {
-  display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center;
-  padding: 12px; background: rgba(255, 255, 255, 0.8); border-radius: 12px; font-size: 14px; font-weight: 600;
-}
+/* نافذة الطقس للتمرير بالريموت */
+.weather-modal-content { display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; padding-right: 4px; }
+.weather-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.stat { border: 1px solid #dce4d8; background: rgba(255, 255, 255, 0.8); border-radius: 10px; padding: 10px; }
+.stat-label { font-size: 11px; color: #788574; }
+.stat-value { font-size: 15px; font-weight: 800; margin-top: 2px; color: var(--dark); }
+.hourly { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px; }
+.hour { flex: 0 0 68px; text-align: center; padding: 8px 4px; border-radius: 10px; background: white; border: 1px solid #e0e6dc; font-size: 11px; }
+.daily-list { display: grid; gap: 6px; }
+.day-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; padding: 8px 12px; background: rgba(255, 255, 255, 0.8); border-radius: 10px; font-size: 13px; font-weight: 600; }
 
 /* نافذة الخروج */
-.exit-dialog { max-width: 420px; text-align: center; }
-.exit-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
+.exit-dialog { max-width: 380px; text-align: center; }
+.exit-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
 #cancelExit { background: #e4eadc; color: var(--dark); }
-#confirmExit { background: var(--green); color: white; }
 
-/* التجاوب والتكيف مع مختلف الشاشات */
 @media(max-width: 768px) {
-  .app { padding: 10px; gap: 8px; }
-  .tiles { gap: 8px; }
-  .player { grid-template-columns: 1fr auto; gap: 10px; padding: 12px; }
+  .player { grid-template-columns: 1fr auto; gap: 8px; }
   .track-area { grid-column: 1 / -1; grid-row: 2; }
-  .dua-bar { font-size: 13px; }
-  .dua-box { padding: 10px 14px; }
+  .form-row { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
+
 <div class="app">
   <!-- الترويسة العليا -->
   <header class="topbar">
@@ -319,7 +292,7 @@ button:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
     </div>
   </header>
 
-  <!-- لوحة التاريخ والوقت -->
+  <!-- التاريخ والوقت -->
   <section class="date-panel">
     <div class="clock" id="clock">--:--</div>
     <div class="date-text" id="dateText"></div>
@@ -340,12 +313,11 @@ button:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
   <!-- المربعات الرئيسية -->
   <main class="tiles">
     <button class="tile" id="openQuran" aria-label="القرآن الكريم" tabindex="0">
-      <svg class="quran-logo" viewBox="0 0 220 180" role="img" aria-label="القرآن الكريم">
+      <svg class="quran-logo" viewBox="0 0 220 180" role="img">
         <path d="M110 7 124 22 145 17 151 37 171 43 166 64 184 78 173 96 182 116 162 128 158 149 136 150 122 168 110 157 98 168 84 150 62 149 58 128 38 116 47 96 36 78 54 64 49 43 69 37 75 17 96 22Z" fill="#f5f0df" stroke="#bd9b52" stroke-width="2.5"/>
         <path d="M108 69Q80 52 49 65V119Q80 109 108 129ZM112 69Q140 52 171 65V119Q140 109 112 129Z" fill="#496d55" stroke="#bd9b52" stroke-width="2"/>
         <path d="M108 73Q80 59 56 69V111Q80 104 108 122ZM112 73Q140 59 164 69V111Q140 104 112 122Z" fill="#fffdf4" stroke="#d5c69a"/>
         <path d="M110 71V126" stroke="#bd9b52" stroke-width="2"/>
-        <g fill="none" stroke="#789171" stroke-width="1.5"><path d="M65 78Q81 72 99 81M64 87Q82 81 99 90M64 96Q82 90 99 99M64 105Q82 99 99 108M121 81Q139 72 155 78M121 90Q138 81 156 87M121 99Q138 90 156 96M121 108Q138 99 156 105"/></g>
         <rect x="28" y="136" width="164" height="29" rx="9" fill="#304b3a" stroke="#bd9b52" stroke-width="1.7"/>
         <text x="110" y="156" text-anchor="middle" font-size="20" font-weight="700" fill="#fff7df">القرآن الكريم</text>
       </svg>
@@ -365,7 +337,7 @@ button:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
     </button>
   </main>
 
-  <!-- 2. مشغّل القرآن الكريم السفلي الموسّع والمكبر -->
+  <!-- مشغل القرآن الكريم -->
   <section class="player">
     <div class="now-reading">
       <div class="mini-mushaf">۞</div>
@@ -388,7 +360,7 @@ button:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
     </div>
   </section>
 
-  <!-- 3. خلية الأدعية الشاملة مع إيموجي والديكور الإسلامي -->
+  <!-- خلية الأدعية الشاملة -->
   <div class="dua-box">
     <div class="dua-bar">
       <span class="dua-symbol">۞</span>
@@ -397,85 +369,72 @@ button:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
     </div>
   </div>
 
-  <!-- 4. الفوتر مع حقوق النشر المحدثة بالكامل -->
+  <!-- الفوتر وحقوق النشر -->
   <footer class="footer">
     <div class="copyright">© جميع الحقوق محفوظة لـ ذِكرى | Zikra — Directed by Nabil Koukach</div>
   </footer>
 </div>
 
-<!-- نافذة اختيار السورة والشيخ -->
-<div class="modal-backdrop" id="quranModal" role="dialog" aria-modal="true" aria-labelledby="quranTitle">
+<!-- نافذة القرآن الكريم (تضم جميع السور الـ 114) -->
+<div class="modal-backdrop" id="quranModal" role="dialog" aria-modal="true">
   <section class="modal">
     <div class="modal-head">
-      <h2 id="quranTitle">ذِكرى — القرآن الكريم</h2>
+      <h2>ذِكرى — القرآن الكريم</h2>
       <button class="close-modal" id="closeQuran" aria-label="إغلاق" tabindex="0">×</button>
     </div>
-    <p>اختر الشيخ والسورة، ثم اضغط زر التشغيل لبدء التلاوة مع التمييز التلقائي للآيات.</p>
     <div class="form-row">
       <div>
         <label for="reciter">اختر الشيخ</label>
         <select id="reciter" tabindex="0"><option value="">جاري تحميل القرّاء...</option></select>
       </div>
       <div>
-        <label for="surah">اختر السورة</label>
+        <label for="surah">اختر السورة (114 سورة)</label>
         <select id="surah" tabindex="0">
-          <option value="1">1. الفاتحة</option>
-          <option value="2">2. البقرة</option>
-          <option value="18">18. الكهف</option>
-          <option value="36">36. يس</option>
-          <option value="67">67. الملك</option>
-          <option value="112">112. الإخلاص</option>
+          <!-- 2. توليد 114 سورة بالكامل -->
         </select>
       </div>
     </div>
-    <button class="action" id="loadSurah" tabindex="-1" aria-hidden="true">تحميل السورة</button>
-    <div id="quranStatus">جاري تحميل قائمة القرّاء...</div>
-    <div id="verses">اختر الشيخ والسورة لعرض صفحات القرآن.</div>
-    <button class="action" id="playQuran" disabled tabindex="-1" aria-hidden="true">▶ تشغيل</button>
-    <div class="quran-controls">
-      <button class="action" id="prevAyah" disabled>⏮ الآية السابقة</button>
-      <button class="action" id="nextAyah" disabled>الآية التالية ⏭</button>
-    </div>
+    <div id="quranStatus">اختر الشيخ والسورة لبدء الاستماع والقراءة.</div>
+    <div id="verses">اختر السورة لعرض الآيات...</div>
+    <button class="action" id="playQuran" disabled style="margin-top:10px;" tabindex="0">▶ تشغيل التلاوة</button>
     <audio id="audio" preload="none"></audio>
   </section>
 </div>
 
-<!-- 5. نافذة الطقس القابلة للتمرير والعمل التام بالريموت -->
-<div class="modal-backdrop" id="weatherModal" role="dialog" aria-modal="true" aria-labelledby="weatherTitle">
+<!-- نافذة الطقس -->
+<div class="modal-backdrop" id="weatherModal" role="dialog" aria-modal="true">
   <section class="modal">
     <div class="modal-head">
-      <h2 id="weatherTitle">تفاصيل الطقس</h2>
+      <h2>تفاصيل الطقس</h2>
       <button class="close-modal" id="closeWeather" aria-label="إغلاق" tabindex="0">×</button>
     </div>
     <div class="weather-modal-content" id="weatherScrollArea" tabindex="0">
-      <div style="text-align:center;padding:10px">
+      <div style="text-align:center;padding:8px">
         <div class="weather-icon" id="modalIcon">🌤️</div>
         <div class="weather-temp" style="color:var(--dark)" id="modalTemp">--°</div>
         <div id="modalCondition" style="font-weight:700"></div>
-        <div id="modalFeels" style="color:var(--muted);font-size:13px"></div>
+        <div id="modalFeels" style="color:var(--muted);font-size:12px"></div>
       </div>
       <div class="weather-stats">
         <div class="stat"><div class="stat-label" id="humidityLabel">الرطوبة</div><div class="stat-value" id="humidityValue">--</div></div>
         <div class="stat"><div class="stat-label" id="windLabel">سرعة الرياح</div><div class="stat-value" id="windValue">--</div></div>
         <div class="stat"><div class="stat-label" id="maxLabel">العظمى اليوم</div><div class="stat-value" id="maxValue">--</div></div>
         <div class="stat"><div class="stat-label" id="minLabel">الصغرى اليوم</div><div class="stat-value" id="minValue">--</div></div>
-        <div class="stat"><div class="stat-label" id="rainLabel">احتمال الهطول</div><div class="stat-value" id="rainValue">--</div></div>
-        <div class="stat"><div class="stat-label" id="uvLabel">مؤشر الأشعة فوق البنفسجية</div><div class="stat-value" id="uvValue">--</div></div>
       </div>
-      <div class="section-title" id="hourlyTitle">توقعات الساعات القادمة</div>
+      <div style="font-weight:800;margin-top:8px" id="hourlyTitle">توقعات الساعات القادمة</div>
       <div class="hourly" id="hourlyForecast"></div>
-      <div class="section-title" id="dailyTitle">توقعات الأيام القادمة</div>
+      <div style="font-weight:800;margin-top:8px" id="dailyTitle">توقعات الأيام القادمة</div>
       <div class="daily-list" id="dailyForecast"></div>
     </div>
   </section>
 </div>
 
 <!-- نافذة تأكيد الخروج -->
-<div class="modal-backdrop" id="exitModal" role="dialog" aria-modal="true" aria-labelledby="exitTitle">
+<div class="modal-backdrop" id="exitModal" role="dialog" aria-modal="true">
   <section class="modal exit-dialog">
-    <div class="brand-mark" style="margin:0 auto 14px">۞</div>
-    <h2 id="exitTitle">هل تريد إغلاق التطبيق؟</h2>
-    <p>هل أنت متأكد أنك تريد الخروج من تطبيق ذِكرى؟</p>
+    <div class="brand-mark" style="margin:0 auto 12px">۞</div>
+    <h2>هل تريد إغلاق التطبيق؟</h2>
+    <p style="margin-top:6px;font-size:13px;color:var(--muted)">هل أنت متأكد أنك تريد الخروج من تطبيق ذِكرى؟</p>
     <div class="exit-buttons">
       <button class="action" id="confirmExit" tabindex="0">نعم</button>
       <button class="action" id="cancelExit" tabindex="0">لا</button>
@@ -487,12 +446,41 @@ button:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
 "use strict";
 const $ = id => document.getElementById(id);
 let lang = "ar", weatherData = null, city = { name: "Erfurt", latitude: 50.9848, longitude: 11.0299 };
-let previousFocus = null, backCount = 0, backTimer = null;
+let backPressCount = 0, backTimer = null;
+
+// أسماء سور القرآن الـ 114 بالكامل
+const surahNames = [
+  "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس",
+  "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه",
+  "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم",
+  "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر",
+  "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق",
+  "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة",
+  "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج",
+  "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس",
+  "التكوير", "الإنفطار", "المطففين", "الإنشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد",
+  "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات",
+  "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "المواعون", "الكوثر", "الكافرون", "النصر",
+  "المسد", "الإخلاص", "الفلق", "الناس"
+];
+
+// تعبئة قائمة السور الـ 114
+function populateSurahs() {
+  const select = $("surah");
+  select.innerHTML = "";
+  surahNames.forEach((name, index) => {
+    const opt = document.createElement("option");
+    opt.value = index + 1;
+    opt.textContent = `${index + 1}. ${name}`;
+    select.appendChild(opt);
+  });
+}
+populateSurahs();
 
 const T = {
-  ar: { subtitle: "طمأنينةٌ للقلب في كل يوم", city: "المدينة: ", loading: "جارٍ تحميل الطقس…", unavailable: "الطقس غير متاح حالياً", locationPrompt: "اكتب اسم المدينة:", cityNotFound: "لم يتم العثور على المدينة.", cityError: "تعذّر البحث عن المدينة.", details: "تفاصيل الطقس", feels: "الحرارة المحسوسة", humidity: "الرطوبة", wind: "سرعة الرياح", max: "العظمى اليوم", min: "الصغرى اليوم", rain: "احتمال الهطول", uv: "الأشعة فوق البنفسجية", hourly: "توقعات الساعات القادمة", daily: "توقعات الأيام القادمة", today: "اليوم", tomorrow: "غداً", conditions: { clear: "سماء صافية", mainly: "صحو غالباً", partly: "غائم جزئياً", cloudy: "غائم", fog: "ضباب", drizzle: "رذاذ", rain: "أمطار", snow: "ثلوج", storm: "عواصف رعدية", other: "حالة جو متغيرة" }, days: ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"] },
-  en: { subtitle: "Peace for the heart, every day", city: "City: ", loading: "Loading weather…", unavailable: "Weather unavailable", locationPrompt: "Enter city:", cityNotFound: "City not found.", cityError: "Could not search for the city.", details: "Weather details", feels: "Feels like", humidity: "Humidity", wind: "Wind speed", max: "Today's high", min: "Today's low", rain: "Precipitation chance", uv: "UV index", hourly: "Hourly forecast", daily: "Next few days", today: "Today", tomorrow: "Tomorrow", conditions: { clear: "Clear sky", mainly: "Mainly clear", partly: "Partly cloudy", cloudy: "Cloudy", fog: "Fog", drizzle: "Drizzle", rain: "Rain", snow: "Snow", storm: "Thunderstorms", other: "Changing conditions" }, days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] },
-  de: { subtitle: "Ruhe für das Herz, jeden Tag", city: "Stadt: ", loading: "Wetter wird geladen…", unavailable: "Wetter nicht verfügbar", locationPrompt: "Stadt eingeben:", cityNotFound: "Stadt nicht gefunden.", cityError: "Stadtsuche fehlgeschlagen.", details: "Wetterdetails", feels: "Gefühlt", humidity: "Luftfeuchtigkeit", wind: "Windgeschwindigkeit", max: "Tageshöchstwert", min: "Tagestiefstwert", rain: "Niederschlagswahrscheinlichkeit", uv: "UV-Index", hourly: "Stündliche Vorhersage", daily: "Vorhersage für die nächsten Tage", today: "Heute", tomorrow: "Morgen", conditions: { clear: "Klarer Himmel", mainly: "Überwiegend klar", partly: "Teilweise bewölkt", cloudy: "Bewölkt", fog: "Nebel", drizzle: "Nieselregen", rain: "Regen", snow: "Schnee", storm: "Gewitter", other: "Wechselhaft" }, days: ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"] }
+  ar: { subtitle: "طمأنينةٌ للقلب في كل يوم", city: "المدينة: ", loading: "جارٍ تحميل الطقس…", unavailable: "الطقس غير متاح حالياً", locationPrompt: "اكتب اسم المدينة:", cityNotFound: "لم يتم العثور على المدينة.", details: "تفاصيل الطقس", feels: "الحرارة المحسوسة", humidity: "الرطوبة", wind: "سرعة الرياح", max: "العظمى اليوم", min: "الصغرى اليوم", hourly: "توقعات الساعات القادمة", daily: "توقعات الأيام القادمة", today: "اليوم", tomorrow: "غداً", conditions: { clear: "سماء صافية", mainly: "صحو غالباً", partly: "غائم جزئياً", cloudy: "غائم", fog: "ضباب", drizzle: "رذاذ", rain: "أمطار", snow: "ثلوج", storm: "عواصف رعدية", other: "حالة جو متغيرة" }, days: ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"] },
+  en: { subtitle: "Peace for the heart, every day", city: "City: ", loading: "Loading weather…", unavailable: "Weather unavailable", locationPrompt: "Enter city:", cityNotFound: "City not found.", details: "Weather details", feels: "Feels like", humidity: "Humidity", wind: "Wind speed", max: "Today's high", min: "Today's low", hourly: "Hourly forecast", daily: "Next few days", today: "Today", tomorrow: "Tomorrow", conditions: { clear: "Clear sky", mainly: "Mainly clear", partly: "Partly cloudy", cloudy: "Cloudy", fog: "Fog", drizzle: "Drizzle", rain: "Rain", snow: "Snow", storm: "Thunderstorms", other: "Changing conditions" }, days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] },
+  de: { subtitle: "Ruhe für das Herz, jeden Tag", city: "Stadt: ", loading: "Wetter wird geladen…", unavailable: "Wetter nicht verfügbar", locationPrompt: "Stadt eingeben:", cityNotFound: "Stadt nicht gefunden.", details: "Wetterdetails", feels: "Gefühlt", humidity: "Luftfeuchtigkeit", wind: "Windgeschwindigkeit", max: "Tageshöchstwert", min: "Tagestiefstwert", hourly: "Stündliche Vorhersage", daily: "Vorhersage für die nächsten Tage", today: "Heute", tomorrow: "Morgen", conditions: { clear: "Klarer Himmel", mainly: "Überwiegend klar", partly: "Teilweise bewölkt", cloudy: "Bewölkt", fog: "Nebel", drizzle: "Nieselregen", rain: "Regen", snow: "Schnee", storm: "Gewitter", other: "Wechselhaft" }, days: ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"] }
 };
 
 async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw Error("HTTP " + r.status); return r.json(); }
@@ -530,11 +518,6 @@ function condition(code) {
   return { text: c.other, icon: "🌥️", cls: "cloudy" };
 }
 
-function weatherIcon(code) {
-  const c = condition(code), h = new Date().getHours();
-  return (h >= 20 || h < 6) && c.cls === "sunny" ? "🌙" : c.icon;
-}
-
 const temp = v => v == null ? "--" : Math.round(v) + "°";
 
 async function loadWeather() {
@@ -549,7 +532,7 @@ function renderWeather() {
   if (!weatherData) return;
   const d = weatherData, c = d.current, desc = condition(c.weather_code);
   $("weatherCard").className = "tile weather-tile " + desc.cls;
-  $("weatherIcon").textContent = weatherIcon(c.weather_code);
+  $("weatherIcon").textContent = desc.icon;
   $("weatherTemp").textContent = temp(c.temperature_2m);
   $("weatherCondition").textContent = desc.text;
   $("weatherExtra").textContent = `↑ ${temp(d.daily.temperature_2m_max[0])} ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;
@@ -559,8 +542,7 @@ function renderWeather() {
 function renderWeatherModal() {
   if (!weatherData) return;
   const d = weatherData, c = d.current, t = T[lang];
-  $("weatherTitle").textContent = t.details;
-  $("modalIcon").textContent = weatherIcon(c.weather_code);
+  $("modalIcon").textContent = condition(c.weather_code).icon;
   $("modalTemp").textContent = temp(c.temperature_2m);
   $("modalCondition").textContent = condition(c.weather_code).text;
   $("modalFeels").textContent = `${t.feels}: ${temp(c.apparent_temperature)}`;
@@ -568,22 +550,18 @@ function renderWeatherModal() {
   $("windLabel").textContent = t.wind; $("windValue").textContent = Math.round(c.wind_speed_10m) + " km/h";
   $("maxLabel").textContent = t.max; $("maxValue").textContent = temp(d.daily.temperature_2m_max[0]);
   $("minLabel").textContent = t.min; $("minValue").textContent = temp(d.daily.temperature_2m_min[0]);
-  $("rainLabel").textContent = t.rain; $("rainValue").textContent = (d.daily.precipitation_probability_max?.[0] ?? 0) + "%";
-  $("uvLabel").textContent = t.uv; $("uvValue").textContent = d.daily.uv_index_max?.[0] ?? "--";
-  $("hourlyTitle").textContent = t.hourly; $("dailyTitle").textContent = t.daily;
   
   const h = d.hourly, now = new Date();
   let start = h.time.findIndex(x => new Date(x) >= now);
   if (start < 0) start = 0;
   
   $("hourlyForecast").replaceChildren();
-  for (let i = start; i < Math.min(start + 12, h.time.length); i++) {
+  for (let i = start; i < Math.min(start + 10, h.time.length); i++) {
     const item = document.createElement("div"); item.className = "hour";
-    const tm = document.createElement("div"); tm.textContent = new Intl.DateTimeFormat(lang === "ar" ? "ar" : lang === "de" ? "de-DE" : "en-GB", { hour: "2-digit", minute: "2-digit" }).format(new Date(h.time[i]));
-    const ic = document.createElement("div"); ic.className = "hour-icon"; ic.textContent = condition(h.weather_code[i]).icon;
+    const tm = document.createElement("div"); tm.textContent = new Intl.DateTimeFormat(lang === "ar" ? "ar" : lang === "de" ? "de-DE" : "en-GB", { hour: "2-digit" }).format(new Date(h.time[i]));
+    const ic = document.createElement("div"); ic.style.fontSize = "18px"; ic.textContent = condition(h.weather_code[i]).icon;
     const te = document.createElement("strong"); te.textContent = temp(h.temperature_2m[i]);
-    const ra = document.createElement("div"); ra.textContent = (h.precipitation_probability?.[i] ?? 0) + "%";
-    item.append(tm, ic, te, ra); $("hourlyForecast").append(item);
+    item.append(tm, ic, te); $("hourlyForecast").append(item);
   }
   
   $("dailyForecast").replaceChildren();
@@ -601,7 +579,7 @@ async function chooseCity() {
   const entered = prompt(T[lang].locationPrompt, city.name);
   if (!entered?.trim()) return;
   try {
-    const data = await fetchJSON("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(entered.trim()) + "&count=1&language=" + (lang === "ar" ? "ar" : lang === "de" ? "de" : "en") + "&format=json");
+    const data = await fetchJSON("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(entered.trim()) + "&count=1&language=" + (lang === "ar" ? "ar" : "en") + "&format=json");
     if (!data.results?.length) { alert(T[lang].cityNotFound); return; }
     const f = data.results[0];
     city = { name: f.name, latitude: f.latitude, longitude: f.longitude };
@@ -614,33 +592,25 @@ $("locationBtn").addEventListener("click", chooseCity);
 /* الذكريات */
 const memories = [
   { text: "﴿ فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ﴾", source: "سورة الشرح، الآية 5", en: "Surah Ash-Sharh, 94:5", de: "Sure Asch-Scharh, 94:5", benefit: "تذكّرنا الآية أن الشدة لا تدوم، وأن مع العسر تيسيراً من الله.", ben: "Hardship does not last forever; ease accompanies hardship.", bde: "Schwierigkeiten dauern nicht ewig; Erleichterung folgt." },
-  { text: "«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ»", source: "صحيح البخاري، حديث 1؛ وصحيح مسلم، حديث 1907", en: "Sahih al-Bukhari 1; Sahih Muslim 1907", de: "Sahih al-Bukhari 1; Sahih Muslim 1907", benefit: "النية أساس العمل؛ فاحرص على إخلاص قصدك لله.", ben: "Intention is central to deeds. Seek sincerity in what you do.", bde: "Die Absicht ist entscheidend. Bemühe dich um Aufrichtigkeit." },
-  { text: "﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾", source: "سورة الرعد، الآية 28", en: "Surah Ar-Ra'd, 13:28", de: "Sure Ar-Ra'd, 13:28", benefit: "ذكر الله من أسباب سكينة القلب وطمأنينته.", ben: "Remembering God can bring calm and reassurance.", bde: "Das Gedenken an Gott kann Ruhe und Zuversicht schenken." },
-  { text: "«مَنْ لَا يَرْحَمُ لَا يُرْحَمُ»", source: "صحيح البخاري، حديث 6013؛ وصحيح مسلم، حديث 2319", en: "Sahih al-Bukhari 6013; Sahih Muslim 2319", de: "Sahih al-Bukhari 6013; Sahih Muslim 2319", benefit: "الرحمة بالناس والرفق بهم من الأخلاق التي حثّ عليها النبي ﷺ.", ben: "Mercy and gentleness are virtues taught by the Prophet.", bde: "Barmherzigkeit und Sanftmut gehören zu den Lehren des Propheten." },
-  { text: "﴿ وَقُلْ رَبِّ زِدْنِي عِلْمًا ﴾", source: "سورة طه، الآية 114", en: "Surah Ta-Ha, 20:114", de: "Sure Ta-Ha, 20:114", benefit: "اطلب من الله العلم النافع، وواصل التعلّم والتدبّر.", ben: "Ask God for beneficial knowledge and keep learning.", bde: "Bitte Gott um nützliches Wissen und lerne weiter." }
+  { text: "«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ»", source: "صحيح البخاري، حديث 1", en: "Sahih al-Bukhari 1", de: "Sahih al-Bukhari 1", benefit: "النية أساس العمل؛ فاحرص على إخلاص قصدك لله.", ben: "Intention is central to deeds. Seek sincerity in what you do.", bde: "Die Absicht ist entscheidend. Bemühe dich um Aufrichtigkeit." },
+  { text: "﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾", source: "سورة الرعد، الآية 28", en: "Surah Ar-Ra'd, 13:28", de: "Sure Ar-Ra'd, 13:28", benefit: "ذكر الله من أسباب سكينة القلب وطمأنينته.", ben: "Remembering God can bring calm and reassurance.", bde: "Das Gedenken an Gott kann Ruhe und Zuversicht schenken." }
 ];
 let memoryIndex = 0;
 function renderMemory() {
   const m = memories[memoryIndex];
   $("memoryPreviewText").textContent = m.text;
-  $("memoryPreviewSource").textContent = (lang === "ar" ? "المصدر: " : lang === "de" ? "Quelle: " : "Source: ") + (lang === "ar" ? m.source : lang === "de" ? m.de : m.en);
-  $("memoryPreviewBenefit").textContent = lang === "ar" ? m.benefit : lang === "de" ? m.bde : m.ben;
+  $("memoryPreviewSource").textContent = (lang === "ar" ? "المصدر: " : "Source: ") + (lang === "ar" ? m.source : m.en);
+  $("memoryPreviewBenefit").textContent = lang === "ar" ? m.benefit : m.ben;
 }
 function nextMemory() { memoryIndex = (memoryIndex + 1) % memories.length; renderMemory(); }
 $("memoryCard").addEventListener("click", nextMemory); renderMemory(); setInterval(nextMemory, 30000);
 
-/* 3. أدعية متبدلة ومطوّلة وشاملة مع إيموجي */
+/* أدعية متبدلة */
 const duas = [
   "🤲 اللهم إنك عفو تحب العفو فاعفُ عنا، واعفُ عن والدينا وللمؤمنين والمؤمنات الأحياء منهم والأموات",
-  "🌿 رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ، وَأَدْخِلْنَا الْجَنَّةَ مَعَ الْأَبْرَارِ",
-  "🤍 اللهم اجعل القرآن الكريم ربيع قلوبنا، ونور صدورنا، وجلاء أحزاننا، وذهاب همومنا وغمومنا، وقائدنا إلى جناتك",
-  "✨ اللهم إنا نسألك الهدى والتقى والعفاف والغنى، وأصلح لنا شأننا كله ولا تكلنا إلى أنفسنا طرفة عين",
-  "🌸 رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي وَاحْلُلْ عُقْدَةً مِّن لِّسَانِي يَفْقَهُوا قَوْلِي، وَوفِّقْنَا لِمَا تُحِبُّ وَتَرْضَى",
-  "🕊️ اللهم يا مقلب القلوب ثبت قلوبنا على دينك، ويا مصرف القلوب صرف قلوبنا إلى طاعتك ومرضاتك",
-  "💫 رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِن لَّدُنكَ رَحْمَةً ۚ إِنَّكَ أَنتَ الْوَهَّابُ",
-  "🌺 اللهم إنا نسألك من الخير كله عاجله وآجله ما علمنا منه وما لم نعلم، ونعوذ بك من الشر كله عاجله وآجله",
-  "☀️ اللهم اغفر لنا ولوالدينا، وارحمهما كما ربونا صغاراً، واجزهم عنا خير الجزاء في الدنيا والآخرة",
-  "🌙 اللهم إنا نسألك حسناً في الختام، وتوبة نصوحاً قبل الموت، وراحة عند الموت، ومغفرة ورحمة بعد الموت"
+  "🌿 رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+  "🤍 اللهم اجعل القرآن الكريم ربيع قلوبنا، ونور صدورنا، وجلاء أحزاننا، وذهاب همومنا",
+  "✨ اللهم إنا نسألك الهدى والتقى والعفاف والغنى، وأصلح لنا شأننا كله"
 ];
 let duaIndex = 0;
 setInterval(() => {
@@ -648,7 +618,7 @@ setInterval(() => {
   $("duaText").textContent = duas[duaIndex];
 }, 8000);
 
-/* 1. التحكم بالقرآن والصوت - منع التشغيل التلقائي */
+/* القرآن الكريم والقرّاء */
 const API = "https://mp3quran.net/api/v3", audio = $("audio"), versesBox = $("verses"), statusBox = $("quranStatus");
 let readers = [], times = [], read = null, loaded = false;
 
@@ -657,9 +627,8 @@ function qmsg(s) { statusBox.textContent = s; }
 
 function updatePlayButton() {
   const isPlaying = !audio.paused;
-  $("playQuran").textContent = isPlaying ? "⏸ إيقاف" : "▶ تشغيل";
+  $("playQuran").textContent = isPlaying ? "⏸ إيقاف التلاوة" : "▶ تشغيل التلاوة";
   $("miniPlay").textContent = isPlaying ? "Ⅱ" : "▶";
-  $("miniPlay").setAttribute("aria-label", isPlaying ? "إيقاف القرآن" : "تشغيل القرآن");
 }
 
 async function loadReaders() {
@@ -676,8 +645,8 @@ async function loadReaders() {
     });
     const preferred = readers.find(r => Number(r.id) === 5);
     if (preferred) $("reciter").value = String(preferred.id);
-    qmsg("تم تحميل قائمة القرّاء. اختر السورة ثم اضغط تشغيل لبدء التلاوة.");
-    loadSelectedSurah(false); // تحميل بدون تشغيل تلقائي
+    qmsg("تم تحميل قائمة القرّاء. اختر السورة ثم اضغط تشغيل.");
+    loadSelectedSurah(false);
   } catch (e) {
     $("reciter").innerHTML = '<option value="">تعذّر تحميل القرّاء</option>';
     qmsg("تعذّر تحميل قائمة القرّاء:\n" + e.message);
@@ -686,21 +655,14 @@ async function loadReaders() {
 
 function renderVerses(ayahs) {
   versesBox.replaceChildren();
-  let currentPage = null, pageBox = null;
+  let pageBox = document.createElement("div"); pageBox.className = "mushaf-page";
   ayahs.forEach(v => {
-    const pageNo = Number(v.page) || 1;
-    if (pageNo !== currentPage) {
-      currentPage = pageNo;
-      pageBox = document.createElement("div"); pageBox.className = "mushaf-page"; pageBox.dataset.page = String(pageNo);
-      const pageText = document.createElement("div"); pageText.className = "mushaf-page-text"; pageBox.append(pageText);
-      const pageLabel = document.createElement("div"); pageLabel.className = "mushaf-page-number"; pageLabel.textContent = "صفحة " + pageNo;
-      pageBox.append(pageLabel); versesBox.append(pageBox);
-    }
     const span = document.createElement("span"); span.className = "ayah"; span.id = "a" + v.numberInSurah;
     span.append(document.createTextNode(v.text + " "));
     const marker = document.createElement("span"); marker.className = "waqf"; marker.textContent = v.numberInSurah;
-    span.append(marker); pageBox.querySelector(".mushaf-page-text").append(span);
+    span.append(marker); pageBox.append(span);
   });
+  versesBox.append(pageBox);
 }
 
 function mark() {
@@ -716,268 +678,174 @@ function mark() {
     if (v) {
       v.classList.add("active");
       if ($("quranModal").classList.contains("open")) v.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      $("miniAyah").textContent = lang === "ar" ? String(timing.ayah).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]) : timing.ayah;
+      $("miniAyah").textContent = String(timing.ayah);
       $("miniVerse").textContent = v.firstChild?.textContent?.trim() || "";
     }
   }
   if (audio.duration) $("progressFill").style.width = (audio.currentTime / audio.duration * 100) + "%";
 }
 
-function jump(delta) {
-  if (!times.length) return;
-  const ms = audio.currentTime * 1000;
-  let i = times.findIndex(x => ms >= Number(x.start_time) && ms < Number(x.end_time));
-  if (i < 0) i = 0;
-  i = Math.max(0, Math.min(times.length - 1, i + delta));
-  audio.currentTime = Number(times[i].start_time) / 1000;
-  audio.play().catch(() => qmsg("تم تحديد الآية. اضغط زر التشغيل."));
-}
-
-/* 1. إيقاف التشغيل التلقائي صراحةً عند اختيار سورة أو قارئ */
 async function loadSelectedSurah(autoPlay = false) {
   const surah = Number($("surah").value), readerId = Number($("reciter").value);
   read = readers.find(r => Number(r.id) === readerId);
   if (!read) { qmsg("اختر الشيخ أولاً."); return; }
   
-  $("loadSurah").disabled = true; loaded = false; times = [];
+  loaded = false; times = [];
   audio.pause(); audio.removeAttribute("src"); audio.load();
-  $("playQuran").disabled = $("prevAyah").disabled = $("nextAyah").disabled = true;
+  $("playQuran").disabled = true;
   versesBox.textContent = "جاري تحميل الآيات...";
-  qmsg("جاري تحميل الصوت وتوقيت الآيات...");
+  qmsg("جاري تحميل التوقيت والصوت...");
   
   try {
     const [td, q] = await Promise.all([
       get(API + "/ayat_timing?surah=" + surah + "&read=" + readerId),
       get("https://api.alquran.cloud/v1/surah/" + surah)
     ]);
-    if (!Array.isArray(td)) throw Error("استجابة توقيت الآيات غير متوقعة.");
-    times = td.filter(x => Number(x.ayah) > 0 && Number.isFinite(Number(x.start_time)) && Number.isFinite(Number(x.end_time)));
-    if (!times.length) throw Error("لا توجد توقيتات لهذه السورة مع هذا الشيخ.");
-    
+    times = td.filter(x => Number(x.ayah) > 0 && Number.isFinite(Number(x.start_time)));
     renderVerses(q.data.ayahs);
-    if (!read.folder_url) throw Error("رابط الصوت غير متوفر لهذا القارئ.");
     
     audio.src = String(read.folder_url).replace(/\/?$/, "/") + String(surah).padStart(3, "0") + ".mp3";
     audio.load();
     loaded = true;
     
-    $("playQuran").disabled = $("prevAyah").disabled = $("nextAyah").disabled = false;
+    $("playQuran").disabled = false;
     $("miniSurah").textContent = q.data.name;
     $("miniReader").textContent = read.name;
     $("miniVerse").textContent = q.data.ayahs[0]?.text || "";
-    $("miniAyah").textContent = lang === "ar" ? "١" : "1";
+    $("miniAyah").textContent = "١";
     $("progressFill").style.width = "0%";
     
     updatePlayButton();
-    
-    if (autoPlay) {
-      audio.play().catch(() => qmsg("اضغط زر التشغيل لبدء الصوت."));
-    } else {
-      qmsg("جاهز للتشغيل — اضغط زر التشغيل للبدء.");
-    }
+    if (autoPlay) audio.play();
+    else qmsg("جاهز للتشغيل — اضغط زر التشغيل للبدء.");
   } catch (e) {
-    times = []; loaded = false; versesBox.textContent = "تعذّر تحميل السورة أو التوقيتات.";
-    qmsg("لم يكتمل التحميل:\n" + e.message);
-  } finally {
-    $("loadSurah").disabled = false;
+    versesBox.textContent = "تعذّر تحميل السورة أو الصوت.";
+    qmsg("خطأ في التحميل.");
   }
 }
 
 function toggleAudio() {
   if (!loaded) { openModal("quranModal"); return; }
-  if (audio.paused) {
-    audio.play().catch(() => qmsg("تعذّر تشغيل الصوت. تحقق من الاتصال بالإنترنت."));
-  } else {
-    audio.pause();
-  }
+  if (audio.paused) audio.play();
+  else audio.pause();
 }
 
+$("playQuran").addEventListener("click", toggleAudio);
 $("miniPlay").addEventListener("click", toggleAudio);
-$("miniPrev").addEventListener("click", () => loaded ? jump(-1) : openModal("quranModal"));
-$("miniNext").addEventListener("click", () => loaded ? jump(1) : openModal("quranModal"));
-
 audio.addEventListener("timeupdate", mark);
 audio.addEventListener("play", updatePlayButton);
 audio.addEventListener("pause", updatePlayButton);
-audio.addEventListener("ended", updatePlayButton);
 
-/* النوافذ وإدارتها */
+/* 3. إصلاح زر الرجوع (History API + Remote Control) */
 function openModal(id) {
-  previousFocus = document.activeElement;
   $(id).classList.add("open");
-  const first = $(id).querySelector("button, select, [tabindex='0']");
-  if (first) first.focus();
+  // إضافة حالة للـ History لمنع إغلاق التطبيق بضغطة زر رجوع
+  window.history.pushState({ modalOpen: id }, "");
 }
 
-function closeModal(id) {
-  $(id).classList.remove("open");
-  if (previousFocus && previousFocus.isConnected) previousFocus.focus();
+function closeModal(id, fromHistory = false) {
+  const modal = $(id);
+  if (modal.classList.contains("open")) {
+    modal.classList.remove("open");
+    if (!fromHistory && window.history.state?.modalOpen) {
+      window.history.back();
+    }
+  }
+}
+
+function closeAllModals() {
+  ["quranModal", "weatherModal", "exitModal"].forEach(id => closeModal(id));
+}
+
+// الاستجابة لزر الرجوع عبر History API (Android System Back)
+window.addEventListener("popstate", (e) => {
+  const openModalEl = document.querySelector(".modal-backdrop.open");
+  if (openModalEl) {
+    openModalEl.classList.remove("open");
+  }
+});
+
+// التعامل مع الخروج والريموت
+function handleBackAction() {
+  const openModalEl = document.querySelector(".modal-backdrop.open");
+  
+  if (openModalEl) {
+    // إغلاق النافذة المفتوحة بضغطة واحدة فوراً
+    closeModal(openModalEl.id);
+    backPressCount = 0;
+  } else {
+    // في الشاشة الرئيسية: يلزم ضغطتان متتاليتان لإظهار نافذة تأكيد الخروج
+    backPressCount++;
+    clearTimeout(backTimer);
+    backTimer = setTimeout(() => backPressCount = 0, 2500);
+    
+    if (backPressCount >= 2) {
+      backPressCount = 0;
+      openModal("exitModal");
+    }
+  }
 }
 
 $("openQuran").addEventListener("click", () => openModal("quranModal"));
-$("surah").addEventListener("change", () => { if ($("reciter").value) loadSelectedSurah(false); });
-$("reciter").addEventListener("change", () => { if ($("surah").value) loadSelectedSurah(false); });
+$("surah").addEventListener("change", () => loadSelectedSurah(false));
+$("reciter").addEventListener("change", () => loadSelectedSurah(false));
 $("weatherCard").addEventListener("click", () => openModal("weatherModal"));
 $("closeQuran").addEventListener("click", () => closeModal("quranModal"));
 $("closeWeather").addEventListener("click", () => closeModal("weatherModal"));
+$("cancelExit").addEventListener("click", () => closeModal("exitModal"));
+$("confirmExit").addEventListener("click", () => {
+  if (window.AndroidTV && typeof window.AndroidTV.exitApp === "function") {
+    window.AndroidTV.exitApp();
+  } else {
+    closeModal("exitModal");
+  }
+});
 
-["quranModal", "weatherModal"].forEach(id => $(id).addEventListener("click", e => {
+["quranModal", "weatherModal", "exitModal"].forEach(id => $(id).addEventListener("click", e => {
   if (e.target === $(id)) closeModal(id);
 }));
 
-function changeLanguage(value) {
-  lang = value; document.documentElement.lang = value;
-  $("subtitle").textContent = T[lang].subtitle;
-  document.querySelectorAll(".p-name").forEach(el => el.textContent = el.dataset[lang] || el.dataset.ar);
-  updateClock(); updateCityLabel(); renderMemory(); loadPrayerTimes();
-  if (weatherData) renderWeather(); else loadWeather();
-}
-$("language").addEventListener("change", e => changeLanguage(e.target.value));
-
-/* 7. ضبط سلوك زر الرجوع (Back Button) بدقة */
-function showExitDialog() {
-  previousFocus = document.activeElement;
-  $("exitModal").classList.add("open");
-  $("cancelExit").focus();
-}
-
-function hideExitDialog() {
-  $("exitModal").classList.remove("open");
-  backCount = 0; clearTimeout(backTimer);
-  if (previousFocus && previousFocus.isConnected) previousFocus.focus();
-}
-
-function handleBack() {
-  // إذا كانت شاشة الخروج مفتوحة، نغلقها
-  if ($("exitModal").classList.contains("open")) {
-    hideExitDialog();
-    return;
-  }
-  // إذا كانت أي نافذة منبثقة مفتوحة (كالطقس أو القرآن)، نغلقها فوراً بضغطة واحدة
-  if ($("quranModal").classList.contains("open")) {
-    closeModal("quranModal");
-    backCount = 0;
-    return;
-  }
-  if ($("weatherModal").classList.contains("open")) {
-    closeModal("weatherModal");
-    backCount = 0;
-    return;
-  }
-  
-  // في الشاشة الرئيسية: يلزم ضغطتين متتاليتين لإظهار مربع الخروج
-  backCount++;
-  clearTimeout(backTimer);
-  backTimer = setTimeout(() => backCount = 0, 2000);
-  
-  if (backCount >= 2) {
-    backCount = 0;
-    showExitDialog();
-  }
-}
-
-window.handleAndroidBack = handleBack;
-$("cancelExit").addEventListener("click", hideExitDialog);
-$("exitModal").addEventListener("click", e => { if (e.target === $("exitModal")) hideExitDialog(); });
-$("confirmExit").addEventListener("click", () => {
-  if (window.AndroidTV && typeof window.AndroidTV.exitApp === "function") window.AndroidTV.exitApp();
-  else hideExitDialog();
-});
-
-/* 5 & 6. التنقل الكامل بجهاز التحكم (الريموت) وتصحيح الاتجاهات RTL والتمرير */
+/* التنقل بالريموت ومفاتيح الكنترول */
 document.addEventListener("keydown", function(event) {
   const key = event.key;
   const backKeys = ["Escape", "Backspace", "BrowserBack", "GoBack"];
   
   if (backKeys.includes(key) || event.keyCode === 4) {
     event.preventDefault();
-    event.stopImmediatePropagation();
-    handleBack();
+    handleBackAction();
     return;
   }
 
-  // إذا كانت نافذة الخروج مفتوحة
-  const exit = $("exitModal");
-  if (exit.classList.contains("open")) {
-    const buttons = [$("confirmExit"), $("cancelExit")];
-    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(key)) {
+  const activeModal = document.querySelector(".modal-backdrop.open");
+  if (activeModal && activeModal.id === "weatherModal") {
+    const scrollArea = $("weatherScrollArea");
+    if (key === "ArrowDown") { scrollArea.scrollTop += 50; return; }
+    if (key === "ArrowUp") { scrollArea.scrollTop -= 50; return; }
+  }
+
+  const focusables = Array.from(document.querySelectorAll("button:not(:disabled), select, [tabindex='0']"))
+    .filter(el => el.offsetWidth > 0 && el.offsetHeight > 0);
+  
+  if (!focusables.length) return;
+  let index = focusables.indexOf(document.activeElement);
+
+  if (["ArrowDown", "ArrowLeft"].includes(key)) {
+    event.preventDefault();
+    index = (index + 1) % focusables.length;
+    focusables[index].focus();
+  } else if (["ArrowUp", "ArrowRight"].includes(key)) {
+    event.preventDefault();
+    index = (index - 1 + focusables.length) % focusables.length;
+    focusables[index].focus();
+  } else if (key === "Enter" || key === " ") {
+    if (document.activeElement && document.activeElement.tagName === "BUTTON") {
       event.preventDefault();
-      const i = buttons.indexOf(document.activeElement);
-      buttons[(i + 1) % buttons.length].focus();
+      document.activeElement.click();
     }
-    if (key === "Enter" || key === " ") {
-      if (buttons.includes(document.activeElement)) {
-        event.preventDefault();
-        document.activeElement.click();
-      }
-    }
-    return;
   }
+});
 
-  // إذا كانت إحدى النوافذ المنبثقة مفتوحة
-  const modal = document.querySelector(".modal-backdrop.open");
-  if (modal) {
-    // 5. تمكين التمرير بالسهمين الأعلى والأسفل في نافذة تفاصيل الطقس
-    if (modal.id === "weatherModal") {
-      const scrollArea = $("weatherScrollArea");
-      if (key === "ArrowDown") {
-        event.preventDefault();
-        scrollArea.scrollTop += 60;
-        return;
-      } else if (key === "ArrowUp") {
-        event.preventDefault();
-        scrollArea.scrollTop -= 60;
-        return;
-      }
-    }
-
-    const controls = Array.from(modal.querySelectorAll('button:not(:disabled), select, input, [tabindex="0"]'))
-      .filter(el => el.offsetWidth > 0 && el.offsetHeight > 0);
-    
-    if (["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(key) && controls.length) {
-      event.preventDefault();
-      let i = controls.indexOf(document.activeElement);
-      if (i < 0) i = 0;
-      else if (key === "ArrowDown" || key === "ArrowLeft") i = (i + 1) % controls.length;
-      else i = (i - 1 + controls.length) % controls.length;
-      controls[i].focus();
-      return;
-    }
-    
-    if (key === "Enter" || key === " ") {
-      const a = document.activeElement;
-      if (a && a.matches("button")) { event.preventDefault(); a.click(); }
-    }
-    return;
-  }
-
-  // 6. التحكم بالريموت في الشاشة الرئيسية وتصحيح الاتجاهات اليمين واليسار (RTL)
-  const controls = Array.from(document.querySelectorAll(".topbar button, .topbar select, .tiles button, .player button"))
-    .filter(el => !el.disabled && el.offsetWidth > 0 && el.offsetHeight > 0);
-  
-  if (key === "Enter" || key === " ") {
-    const a = document.activeElement;
-    if (a && a.matches("button")) { event.preventDefault(); a.click(); }
-    return;
-  }
-
-  if (!["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft"].includes(key) || !controls.length) return;
-  
-  event.preventDefault();
-  let i = controls.indexOf(document.activeElement);
-  if (i < 0) i = 0;
-  
-  // تصحيح الاتجاهات ليتوافق مع اتجاه الواجهة العربية (RTL)
-  if (key === "ArrowLeft" || key === "ArrowDown") {
-    i = (i + 1) % controls.length;
-  } else if (key === "ArrowRight" || key === "ArrowUp") {
-    i = (i - 1 + controls.length) % controls.length;
-  }
-  
-  controls[i].focus();
-}, true);
-
-// البدء الأولي
+// بدء التشغيل
 updateCityLabel();
 loadPrayerTimes();
 loadWeather();
