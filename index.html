@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" as="image" href="zikra_logo.png">
+<!-- Zikra weather scenes build: 2026-10-23 -->
 <title>ذِكرى | Zikra</title>
 <style>
 :root{--green:#496d55;--dark:#304b3a;--gold:#bd9b52;--cream:#f7f4e9;--muted:#858d7d}
@@ -30,6 +31,22 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 .tile-weather-effects{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;border-radius:inherit}
 .tile-rain-drop{position:absolute;top:-12px;width:3px;height:8px;border-radius:60% 60% 70% 70%;background:linear-gradient(180deg,#f4fbff,#83c9f3 70%,#d9f3ff);box-shadow:0 0 4px #b8e6ff80;opacity:.85;transform:rotate(16deg);animation:tile-rain-fall var(--tile-rain-duration,.75s) linear var(--tile-rain-delay,0s) infinite}
 .weather-tile.storm .tile-rain-drop{height:10px;width:4px;opacity:.95;animation-duration:var(--tile-rain-duration,.52s)}
+.weather-tile.sunny{background:linear-gradient(145deg,#4fc4f3,#1763a6 72%,#123b70)}
+.weather-tile.sunny:before{content:"";position:absolute;z-index:0;width:115px;height:115px;right:-24px;top:-44px;border-radius:50%;background:radial-gradient(circle,#fff5ac 0 10%,#ffdf70bb 18%,#ffb63844 45%,transparent 70%);animation:tile-sun-pulse 3.2s ease-in-out infinite;pointer-events:none}
+.weather-tile.cloudy{background:linear-gradient(145deg,#9bb8ca,#526e88 70%,#344b67)}
+.weather-tile.rainy{background:linear-gradient(145deg,#466d90,#24425f 62%,#182c45)}
+.weather-tile.snowy{background:linear-gradient(145deg,#d4eaf5,#719bb7 75%,#416987);color:#183a50}
+.weather-tile.storm{background:linear-gradient(145deg,#5d5a7b,#292f4c 68%,#161f36)}
+.weather-tile.night{background:linear-gradient(145deg,#06152d,#102b50 65%,#183657)}
+.tile-cloud{position:absolute;width:42px;height:15px;border-radius:999px;background:#eaf7ff92;box-shadow:0 0 16px #d1eeff55;animation:tile-cloud-drift 6s ease-in-out infinite alternate}
+.tile-cloud:before,.tile-cloud:after{content:"";position:absolute;bottom:4px;border-radius:50%;background:inherit}
+.tile-cloud:before{width:19px;height:19px;left:7px}.tile-cloud:after{width:24px;height:24px;left:17px}
+.tile-snow-flake{position:absolute;top:-12px;color:#fff;font-size:11px;line-height:1;text-shadow:0 0 5px #fff;animation:tile-snow-fall var(--tile-snow-duration,3s) linear var(--tile-snow-delay,0s) infinite}
+.tile-star{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff6c7;box-shadow:0 0 5px #fff;animation:tile-star-twinkle 1.8s ease-in-out infinite alternate}
+@keyframes tile-sun-pulse{0%,100%{transform:scale(.92);opacity:.72}50%{transform:scale(1.1);opacity:1}}
+@keyframes tile-cloud-drift{from{transform:translateX(-5px)}to{transform:translateX(9px)}}
+@keyframes tile-snow-fall{from{top:-12px;transform:translateX(0) rotate(0)}to{top:110%;transform:translateX(-8px) rotate(180deg)}}
+@keyframes tile-star-twinkle{from{opacity:.35;transform:scale(.7)}to{opacity:1;transform:scale(1.2)}}
 @keyframes tile-rain-fall{from{top:-12px;transform:translate3d(0,0,0) rotate(16deg)}to{top:110%;transform:translate3d(-8px,0,0) rotate(16deg)}}
 .weather-tile.cloudy{background:linear-gradient(150deg,#aebfcb,#536d81)}.weather-tile.rainy{background:linear-gradient(150deg,#536f91,#243954)}.weather-tile.snowy{background:linear-gradient(150deg,#d7e7ef,#7199b0);color:#243f52}.weather-tile.storm{background:linear-gradient(150deg,#665f7d,#292d48)}.weather-icon{font-size:clamp(22px,3.2vw,32px)}.weather-temp{font-size:clamp(24px,3.5vw,36px);font-weight:700}.weather-condition{font-size:clamp(10px,1.1vw,13px)}.weather-extra{font-size:9px;line-height:1.3}
 .player{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.6fr) auto;align-items:center;gap:10px;padding:10px 14px;min-height:82px;border:1px solid #dce0d0;border-radius:16px;background:linear-gradient(110deg,#fffdf4ed,#edf0e4ed)}.now-reading{display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer;padding:6px;border-radius:10px;border:1px solid transparent}.now-reading:hover,.now-reading:focus-visible{background:#e8eee0;border-color:#bd9b52}.mini-mushaf{width:38px;height:40px;flex-shrink:0;border-radius:10px;background:linear-gradient(145deg,#dce6d2,#bacdaf);border:1px solid #bd9b52;display:grid;place-items:center;font-size:22px;color:var(--dark)}.now-reading strong{display:block;font-size:12px;color:var(--dark)}.now-reading small{display:block;font-size:10px;color:var(--green);font-weight:bold}.track-area{min-width:0}.verse-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:3px}.verse{font-size:12px;line-height:1.4;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ayah-number{flex-shrink:0;width:24px;height:24px;display:grid;place-items:center;border:1.5px solid var(--gold);border-radius:50%;background:#f8f0d9;font-size:10px;font-weight:800}.progress{height:4px;border-radius:20px;background:#dfe3d6;overflow:hidden}.progress-fill{height:100%;width:0;background:var(--green)}.controls{display:flex;align-items:center;justify-content:center;gap:5px}.control{border:0;background:#e9ecdf;border-radius:50%;width:34px;height:34px;color:var(--dark);font-size:13px}.control.main{width:40px;height:40px;color:white;background:var(--green);font-size:16px}
@@ -45,8 +62,16 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 .weather-scene.rainy{background:radial-gradient(ellipse at 78% 8%,#a7cde52a,transparent 35%),linear-gradient(145deg,#4e7190,#263f5c 65%,#172a42)}
 .weather-scene.snowy{background:radial-gradient(circle at 80% 15%,#fff9 0 2px,transparent 3px),radial-gradient(circle at 60% 28%,#fff9 0 2px,transparent 3px),linear-gradient(145deg,#b9d8e8,#668da7 60%,#3b5e79)}
 .weather-scene.storm{background:radial-gradient(ellipse at 55% 0,#8c83b755,transparent 40%),linear-gradient(145deg,#514c70,#292d49 60%,#161b31)}
+.weather-scene.sunny:before{content:"";position:absolute;width:min(28vw,260px);height:min(28vw,260px);right:8%;top:3%;border-radius:50%;background:radial-gradient(circle,#fff9b5 0 12%,#ffdf80aa 24%,#ffbf5140 52%,transparent 72%);animation:tile-sun-pulse 4s ease-in-out infinite}
+.weather-scene.cloudy:before,.weather-scene.cloudy:after{content:"";position:absolute;width:35%;height:14%;border-radius:100px;background:#e2eff455;filter:blur(2px);top:13%;left:14%;animation:tile-cloud-drift 9s ease-in-out infinite alternate}
+.weather-scene.cloudy:after{width:27%;top:28%;left:60%;animation-delay:-3s;opacity:.7}
+.weather-scene.night:before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.7px),radial-gradient(circle,#fff5c5 0 1.4px,transparent 2px);background-size:43px 37px,71px 59px;background-position:0 0,17px 24px;animation:tile-star-twinkle 3s ease-in-out infinite alternate;opacity:.55}
+.weather-scene.snowy:before{content:"❄     ❅   ❄      ❅     ❄";position:absolute;left:8%;top:-10%;font-size:26px;letter-spacing:18px;color:#fff9;white-space:normal;width:90%;line-height:3;animation:weather-snow-drift 7s linear infinite}
+@keyframes weather-snow-drift{from{transform:translateY(-10%)}to{transform:translateY(120%)}}
 .weather-scene .rain-drop{position:absolute;top:-18px;width:6px;height:10px;border-radius:55% 55% 65% 65%;background:linear-gradient(180deg,#eaf8ff 0%,#a9d7f2 54%,#63a4d4 100%);box-shadow:0 0 3px #b9e4ff65;opacity:.82;transform:rotate(17deg);animation:rain-fall var(--rain-duration,.85s) linear var(--rain-delay,0s) infinite;will-change:transform,top}
 .weather-scene.storm .rain-drop{height:13px;width:7px;opacity:.92;animation-duration:var(--rain-duration,.58s)}
+.weather-scene .modal-snow-flake{position:absolute;top:-22px;color:#fff;font-size:16px;text-shadow:0 0 8px #dff5ff;opacity:.86;animation:modal-snow-fall var(--snow-duration,4s) linear var(--rain-delay,0s) infinite}
+@keyframes modal-snow-fall{from{top:-22px;transform:translateX(0) rotate(0)}to{top:110%;transform:translateX(-25px) rotate(180deg)}}
 @keyframes rain-fall{from{top:-18px;transform:translate3d(0,0,0) rotate(17deg)}to{top:110%;transform:translate3d(-15px,0,0) rotate(17deg)}}
 @media(prefers-reduced-motion:reduce){.weather-scene .rain-drop{animation-duration:2.5s;opacity:.45}}
 .weather-scene.night{background:radial-gradient(circle at 78% 18%,#f8f0c9 0 2px,transparent 3px),radial-gradient(circle at 20% 26%,#fff 0 1px,transparent 2px),radial-gradient(circle at 34% 13%,#fff 0 1px,transparent 2px),radial-gradient(circle at 55% 30%,#fff 0 1px,transparent 2px),radial-gradient(circle at 90% 40%,#fff 0 1px,transparent 2px),radial-gradient(circle at 67% 9%,#fff 0 1px,transparent 2px),linear-gradient(160deg,#07152d,#10284a 55%,#172d4c)}
@@ -164,7 +189,35 @@ setInterval(updatePrayerCountdowns,1000);
 function condition(code){const c=T[lang].conditions;if(code===0)return{text:c.clear,icon:"☀️",cls:"sunny"};if(code===1)return{text:c.mainly,icon:"🌤️",cls:"sunny"};if(code===2)return{text:c.partly,icon:"⛅",cls:"cloudy"};if(code===3)return{text:c.cloudy,icon:"☁️",cls:"cloudy"};if([45,48].includes(code))return{text:c.fog,icon:"🌫️",cls:"cloudy"};if([51,53,55,56,57].includes(code))return{text:c.drizzle,icon:"🌦️",cls:"rainy"};if([61,63,65,66,67,80,81,82].includes(code))return{text:c.rain,icon:"🌧️",cls:"rainy"};if([71,73,75,77,85,86].includes(code))return{text:c.snow,icon:"❄️",cls:"snowy"};if([95,96,99].includes(code))return{text:c.storm,icon:"⛈️",cls:"storm"};return{text:c.other,icon:"🌥️",cls:"cloudy"}}
 function weatherIcon(code){const c=condition(code),h=new Date().getHours();return(h>=20||h<6)&&c.cls==="sunny"?"🌙":c.icon}const temp=v=>v==null?"--":Math.round(v)+"°";
 async function loadWeather(){ $("weatherCondition").textContent=T[lang].loading;try{weatherData=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=auto&forecast_days=14`);renderWeather()}catch(e){$("weatherCondition").textContent=T[lang].unavailable}}
-function renderWeather(){if(!weatherData)return;const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard"),effects=$("weatherTileEffects");card.className="tile weather-tile "+desc.cls;effects.replaceChildren();if(["rainy","storm"].includes(desc.cls)){const count=desc.cls==="storm"?30:20;for(let i=0;i<count;i++){const drop=document.createElement("span");drop.className="tile-rain-drop";drop.style.left=((i*43+7)%100)+"%";drop.style.setProperty("--tile-rain-delay",(-((i*11)%24)/10)+"s");drop.style.setProperty("--tile-rain-duration",(desc.cls==="storm"?.48:.68)+((i*7)%36)/100+"s");drop.style.opacity=String(.45+((i*13)%45)/100);effects.append(drop)}}$("weatherIcon").textContent=weatherIcon(c.weather_code);$("weatherTemp").textContent=temp(c.temperature_2m);$("weatherCondition").textContent=desc.text;$("weatherExtra").textContent=`↑ ${temp(d.daily.temperature_2m_max[0])} ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;renderWeatherModal()}
+function renderWeather(){
+  if(!weatherData)return;
+  const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard"),effects=$("weatherTileEffects"),hour=new Date().getHours();
+  const isNight=(hour>=20||hour<6)&&!['rainy','snowy','storm'].includes(desc.cls);
+  const cardScene=isNight?'night':desc.cls;
+  card.className="tile weather-tile "+cardScene;
+  effects.replaceChildren();
+  if(['rainy','storm'].includes(cardScene)){
+    const count=cardScene==='storm'?34:25;
+    for(let i=0;i<count;i++){
+      const drop=document.createElement('span');drop.className='tile-rain-drop';
+      drop.style.left=((i*43+7)%100)+'%';
+      drop.style.setProperty('--tile-rain-delay',(-((i*11)%24)/10)+'s');
+      drop.style.setProperty('--tile-rain-duration',(cardScene==='storm'?.48:.68)+((i*7)%36)/100+'s');
+      drop.style.opacity=String(.45+((i*13)%45)/100);effects.append(drop);
+    }
+  }else if(cardScene==='snowy'){
+    for(let i=0;i<18;i++){const flake=document.createElement('span');flake.className='tile-snow-flake';flake.textContent='❄';flake.style.left=((i*29+5)%100)+'%';flake.style.setProperty('--tile-snow-delay',(-((i*7)%28)/10)+'s');flake.style.setProperty('--tile-snow-duration',(2.1+((i*5)%24)/10)+'s');effects.append(flake)}
+  }else if(cardScene==='cloudy'){
+    for(let i=0;i<3;i++){const cloud=document.createElement('span');cloud.className='tile-cloud';cloud.style.left=(8+i*30)+'%';cloud.style.top=(12+(i%2)*28)+'%';cloud.style.opacity=String(.38+i*.14);cloud.style.animationDelay=(-i*1.6)+'s';effects.append(cloud)}
+  }else if(cardScene==='night'){
+    for(let i=0;i<11;i++){const star=document.createElement('span');star.className='tile-star';star.style.left=((i*31+6)%96)+'%';star.style.top=((i*19+7)%74)+'%';star.style.animationDelay=(-i*.23)+'s';effects.append(star)}
+  }
+  $("weatherIcon").textContent=weatherIcon(c.weather_code);
+  $("weatherTemp").textContent=temp(c.temperature_2m);
+  $("weatherCondition").textContent=desc.text;
+  $("weatherExtra").textContent=`↑ ${temp(d.daily.temperature_2m_max[0])} ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;
+  renderWeatherModal()
+}
 function weatherSceneClass(code,dateString){
   const info=condition(code),today=new Date().toISOString().slice(0,10),night=dateString===today&&(new Date().getHours()>=20||new Date().getHours()<6);
   // Preserve rain/snow/storm animations even after dark.
@@ -218,6 +271,8 @@ function renderWeatherModal(){
         drop.style.opacity=String(.42+((i*7)%50)/100);
         scene.append(drop);
       }
+    }else if(sceneClass.endsWith("snowy")){
+      for(let i=0;i<32;i++){const flake=document.createElement("span");flake.className="modal-snow-flake";flake.textContent="❄";flake.style.left=((i*31+4)%100)+"%";flake.style.setProperty("--rain-delay",(-((i*13)%35)/10)+"s");flake.style.setProperty("--snow-duration",(3+((i*7)%30)/10)+"s");scene.append(flake)}
     }
   }
   [["humidityLabel","humidity"],["windLabel","wind"],["maxLabel","max"],["minLabel","min"],["rainLabel","rain"],["uvLabel","uv"]].forEach(([id,k])=>$(id).textContent=t[k]);
