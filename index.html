@@ -1,855 +1,888 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#304b3a">
-<title>ذِكرى | Zikra</title>
-<style>
-:root {
-  --green: #496d55;
-  --dark: #304b3a;
-  --gold: #bd9b52;
-  --cream: #f7f4e9;
-  --muted: #858d7d;
-  --focus-glow: #89a27c;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ذِكرى | Zikra</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            950: '#022c22',
+                        },
+                        amber: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                        }
+                    },
+                    fontFamily: {
+                        arabic: ['Traditional Arabic', 'Amiri', 'Scheherazade New', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Noto Naskh Arabic', serif;
+            background-color: #030712;
+            color: #f9fafb;
+            user-select: none;
+            overflow-x: hidden;
+        }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  width: 100%;
-  height: 100%;
-  height: 100dvh;
-  overflow: hidden;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--dark);
-  background: radial-gradient(ellipse at 50% 70%, #e3e9d8, transparent 48%), linear-gradient(#f9f6eb, #e9ecdd);
-  user-select: none;
-}
+        .quran-font {
+            font-family: 'Amiri', serif;
+        }
 
-button, select { font: inherit; }
-button { cursor: pointer; touch-action: manipulation; }
-button:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
-  outline: 3px solid var(--focus-glow) !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 12px rgba(73, 109, 85, 0.5) !important;
-}
+        /* Focus highlight for TV Remote Navigation */
+        .focusable {
+            transition: all 0.2s ease-in-out;
+            outline: none !important;
+        }
 
-/* تخطيط مرن يتكيف تماماً مع حجم الشاشة دون خروج عن الحدود */
-.app {
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  padding: clamp(8px, 1.5vh, 20px) clamp(12px, 2.5vw, 35px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: clamp(6px, 1.2vh, 14px);
-  max-width: 1600px;
-  margin: 0 auto;
-}
+        .focusable:focus, .focusable.tv-focused {
+            transform: scale(1.03);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+            border-color: #34d399 !important;
+            background-color: rgba(6, 78, 59, 0.8) !important;
+        }
 
-/* الترويسة العليا */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-shrink: 0;
-}
-.brand { display: flex; align-items: center; gap: 10px; }
-.brand-mark {
-  width: clamp(38px, 4.5vh, 48px);
-  height: clamp(38px, 4.5vh, 48px);
-  display: grid; place-items: center;
-  border: 1px solid #d4c18e; border-radius: 12px;
-  background: #fffdf4; color: var(--green); font-size: clamp(20px, 2.8vh, 28px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-.brand h1 { margin: 0; font-size: clamp(18px, 2.3vw, 26px); line-height: 1.1; }
-.brand p { margin: 2px 0 0; font-size: clamp(10px, 1vw, 13px); color: var(--muted); }
-.tools { display: flex; gap: 8px; }
-.icon-btn, #language {
-  height: clamp(36px, 4vh, 42px); border: 1px solid #d9ddca; background: #fffdf4;
-  border-radius: 10px; color: var(--dark); font-weight: 600;
-}
-.icon-btn { width: clamp(36px, 4vh, 42px); font-size: 16px; display: grid; place-items: center; }
-#language { padding: 0 8px; direction: ltr; font-size: 12px; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #059669;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10b981;
+        }
 
-/* لوحة التاريخ والوقت */
-.date-panel { text-align: center; flex-shrink: 0; margin: 0 auto; }
-.clock { font-size: clamp(28px, 4.8vh, 52px); line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums; }
-.date-text { font-size: clamp(11px, 1.4vh, 14px); color: var(--muted); margin-top: 3px; }
-.hijri { font-size: clamp(12px, 1.5vh, 15px); color: var(--green); font-weight: 700; margin-top: 2px; }
-.city-label { font-size: clamp(10px, 1.2vh, 12px); color: var(--muted); margin-top: 1px; }
-
-/* شريط أوقات الصلاة */
-.prayer-strip {
-  display: grid; grid-template-columns: repeat(6, 1fr);
-  gap: 4px; padding: clamp(6px, 1vh, 10px); border: 1px solid #e2dfce;
-  border-radius: 16px; background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 4px 15px rgba(48, 75, 58, 0.04); flex-shrink: 0;
-}
-.prayer { text-align: center; padding: 2px; border-left: 1px solid #e6e3d6; }
-.prayer:last-child { border-left: 0; }
-.p-icon { display: block; font-size: clamp(13px, 1.8vh, 18px); color: var(--gold); }
-.p-name { font-size: clamp(10px, 1.2vw, 13px); color: #798272; font-weight: 600; }
-.p-time { font-size: clamp(12px, 1.8vw, 16px); font-weight: 800; color: var(--dark); margin-top: 1px; }
-
-/* المربعات التفاعلية الرئيسية */
-.tiles {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: clamp(8px, 1.8vw, 18px); width: 100%;
-  flex: 1; min-height: 0; align-items: center;
-}
-.tile {
-  height: 100%; max-height: 100%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 6px; padding: 10px; border: 2px solid #e6e1cd;
-  border-radius: 20px; background: linear-gradient(145deg, #fffef9, #f1f0e4);
-  box-shadow: 0 6px 18px rgba(55, 74, 50, 0.06); color: var(--dark);
-  text-align: center; overflow: hidden; transition: transform 0.2s;
-}
-.tile:active { transform: scale(0.98); }
-.quran-logo { width: 100%; height: auto; max-height: 80%; }
-
-.weather-tile {
-  color: white; border: 1px solid rgba(255, 255, 255, 0.4);
-  background: linear-gradient(150deg, #83c9ed, #397bb6);
-}
-.weather-tile.cloudy { background: linear-gradient(150deg, #aebfcb, #536d81); }
-.weather-tile.rainy { background: linear-gradient(150deg, #536f91, #243954); }
-.weather-tile.snowy { background: linear-gradient(150deg, #d7e7ef, #7199b0); color: #243f52; }
-.weather-tile.storm { background: linear-gradient(150deg, #665f7d, #292d48); }
-.weather-icon { font-size: clamp(24px, 3.5vh, 40px); }
-.weather-temp { font-size: clamp(24px, 4vh, 42px); font-weight: 800; }
-.weather-condition { font-size: clamp(11px, 1.4vw, 14px); font-weight: 600; }
-.weather-extra { font-size: clamp(9px, 1vw, 11px); opacity: 0.95; }
-
-.tile-memory { padding: 10px; justify-content: center; }
-.tile-icon { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; font-size: 16px; background: #e6ecd9; }
-.tile-title { font-size: clamp(11px, 1.2vw, 14px); font-weight: 800; color: var(--green); }
-.memory-preview-text { font-size: clamp(11px, 1.4vw, 16px); font-weight: 700; line-height: 1.5; }
-.memory-preview-source { font-size: 10px; color: #96783d; font-weight: 600; }
-.memory-preview-benefit { font-size: 10px; line-height: 1.4; color: #52684d; }
-
-/* مشغل القرآن السفلي الموسّع */
-.player {
-  display: grid;
-  grid-template-columns: minmax(160px, 1.2fr) minmax(200px, 2fr) auto;
-  align-items: center;
-  gap: 12px;
-  padding: clamp(8px, 1.2vh, 14px) clamp(12px, 2vw, 20px);
-  border: 1.5px solid #d5dbc7;
-  border-radius: 20px;
-  background: linear-gradient(120deg, #ffffff, #f0f3e6);
-  box-shadow: 0 8px 20px rgba(48, 75, 58, 0.08);
-  flex-shrink: 0;
-}
-.now-reading { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.mini-mushaf {
-  width: clamp(38px, 4.5vh, 48px); height: clamp(38px, 4.5vh, 48px); flex-shrink: 0; border-radius: 12px;
-  background: linear-gradient(145deg, #dce6d2, #a1ba93);
-  display: grid; place-items: center; font-size: 22px; color: var(--dark);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-}
-.now-reading strong { display: block; font-size: clamp(12px, 1.3vw, 14px); color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.now-reading small { display: block; font-size: clamp(10px, 1.1vw, 12px); color: #6b7562; margin-top: 1px; }
-
-.track-area { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.verse-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.verse {
-  font-size: clamp(11px, 1.3vw, 15px); font-weight: 600; color: var(--dark);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
-}
-.ayah-number {
-  flex-shrink: 0; width: 26px; height: 26px; display: grid; place-items: center;
-  border: 1.5px solid var(--gold); border-radius: 50%; background: #fbf6ea;
-  font-size: 11px; font-weight: 800; color: var(--dark);
-}
-.progress { height: 6px; border-radius: 12px; background: #e0e5d5; overflow: hidden; }
-.progress-fill { height: 100%; width: 0%; background: var(--green); transition: width 0.3s linear; }
-
-.controls { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.control {
-  border: 0; background: #e2e7d7; border-radius: 50%; width: clamp(34px, 4vh, 40px); height: clamp(34px, 4vh, 40px);
-  color: var(--dark); font-size: 14px; display: grid; place-items: center; transition: background 0.2s;
-}
-.control.main {
-  width: clamp(42px, 5vh, 48px); height: clamp(42px, 5vh, 48px); color: white; background: var(--green); font-size: 18px;
-  box-shadow: 0 4px 10px rgba(73, 109, 85, 0.3);
-}
-
-/* خلية الأدعية الشاملة */
-.dua-box {
-  border: 1.5px solid #d5d9c8; border-radius: 16px;
-  background: linear-gradient(135deg, #ffffff, #f4f7eb);
-  padding: clamp(6px, 1vh, 10px) 16px;
-  box-shadow: 0 4px 12px rgba(48, 75, 58, 0.05); flex-shrink: 0;
-}
-.dua-bar {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  color: var(--dark); font-size: clamp(11px, 1.3vw, 15px); font-weight: 700; text-align: center;
-}
-.dua-symbol { color: var(--gold); font-size: 18px; flex-shrink: 0; }
-.dua-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* حقوق النشر */
-.footer { text-align: center; padding-top: 2px; flex-shrink: 0; }
-.copyright { font-size: clamp(10px, 1.1vh, 12px); color: var(--dark); font-weight: 700; opacity: 0.85; }
-
-/* النوافذ المنبثقة (Modals) */
-.modal-backdrop {
-  position: fixed; inset: 0; background: rgba(21, 37, 29, 0.78);
-  z-index: 100; display: none; align-items: center; justify-content: center;
-  padding: 15px; backdrop-filter: blur(4px);
-}
-.modal-backdrop.open { display: flex; }
-.modal {
-  width: min(900px, 95vw); max-height: 88vh; max-height: 88dvh;
-  overflow-y: auto; border-radius: 20px; padding: clamp(14px, 2vw, 24px);
-  background: #f9f7ed; color: var(--dark); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-}
-.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-.modal-head h2 { margin: 0; font-size: clamp(18px, 2vw, 22px); color: var(--dark); }
-.close-modal {
-  width: 36px; height: 36px; border: 0; border-radius: 50%;
-  background: #dfe8dc; font-size: 20px; color: var(--dark); display: grid; place-items: center;
-}
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.modal label { display: block; font-weight: bold; margin: 6px 0 2px; font-size: 13px; }
-.modal select, .action {
-  width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #bdbda7; margin: 4px 0;
-}
-.modal select { background: white; color: var(--dark); font-size: 14px; }
-.action { background: var(--green); color: white; border: 0; font-weight: 700; min-height: 42px; font-size: 14px; }
-.action:disabled { opacity: 0.5; }
-
-#quranStatus {
-  white-space: pre-wrap; background: #edf1e8; padding: 8px 12px;
-  border-radius: 10px; margin: 8px 0; font-size: 12px;
-}
-#verses {
-  font-family: 'Amiri', 'Traditional Arabic', serif; font-size: clamp(16px, 2vw, 20px);
-  line-height: 2.1; text-align: justify; padding: 12px; background: #fffdf4;
-  border: 1px solid #e2d8bd; border-radius: 10px; max-height: 50vh; overflow-y: auto;
-}
-.mushaf-page {
-  position: relative; padding: 14px; border: 1px solid #d8c99f; border-radius: 6px;
-  background: #fffdf4; margin-bottom: 12px; line-height: 2.1;
-}
-.mushaf-page-number { text-align: center; font: 11px Arial; color: #98865a; font-weight: bold; margin-top: 6px; }
-.ayah { padding: 2px 3px; border-radius: 4px; }
-.ayah.active { background: #d7e9ce; color: #1c3d24; font-weight: bold; }
-.waqf {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 1.5em; height: 1.5em; margin: 0 3px; border: 1px solid #b49a60;
-  border-radius: 50%; font-size: 0.65em; color: #826b37; background: #fbf4df; font-weight: bold;
-}
-
-/* نافذة الطقس للتمرير بالريموت */
-.weather-modal-content { display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; padding-right: 4px; }
-.weather-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.stat { border: 1px solid #dce4d8; background: rgba(255, 255, 255, 0.8); border-radius: 10px; padding: 10px; }
-.stat-label { font-size: 11px; color: #788574; }
-.stat-value { font-size: 15px; font-weight: 800; margin-top: 2px; color: var(--dark); }
-.hourly { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px; }
-.hour { flex: 0 0 68px; text-align: center; padding: 8px 4px; border-radius: 10px; background: white; border: 1px solid #e0e6dc; font-size: 11px; }
-.daily-list { display: grid; gap: 6px; }
-.day-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; padding: 8px 12px; background: rgba(255, 255, 255, 0.8); border-radius: 10px; font-size: 13px; font-weight: 600; }
-
-/* نافذة الخروج */
-.exit-dialog { max-width: 380px; text-align: center; }
-.exit-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
-#cancelExit { background: #e4eadc; color: var(--dark); }
-
-@media(max-width: 768px) {
-  .player { grid-template-columns: 1fr auto; gap: 8px; }
-  .track-area { grid-column: 1 / -1; grid-row: 2; }
-  .form-row { grid-template-columns: 1fr; }
-}
-</style>
+        /* Modal Overlay Glassmorphism */
+        .modal-overlay {
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(8px);
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between bg-gray-950 text-gray-100 p-4 md:p-6">
 
-<div class="app">
-  <!-- الترويسة العليا -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-mark" tabindex="0">۞</div>
-      <div>
-        <h1>ذِكرى</h1>
-        <p id="subtitle">طمأنينةٌ للقلب في كل يوم</p>
-      </div>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center space-x-3 space-x-reverse text-lg border border-emerald-400">
+        <i id="toast-icon" class="fas fa-info-circle text-xl"></i>
+        <span id="toast-message">تمت العملية بنجاح</span>
     </div>
-    <div class="tools">
-      <button class="icon-btn" id="locationBtn" aria-label="اختيار المدينة" tabindex="0">📍</button>
-      <select id="language" aria-label="Language" tabindex="0">
-        <option value="ar">العربية</option>
-        <option value="en">English</option>
-        <option value="de">Deutsch</option>
-      </select>
+
+    <!-- Main Wrapper -->
+    <div class="max-w-7xl mx-auto w-full flex-grow flex flex-col justify-between space-y-6">
+
+        <!-- Top Header Navigation -->
+        <header class="flex flex-wrap justify-between items-center bg-gray-900/80 p-4 rounded-2xl border border-gray-800 shadow-lg">
+            <div class="flex items-center space-x-4 space-x-reverse">
+                <!-- Smart Logo Button (Clears Cache and Reloads) -->
+                <button id="brand-logo" onclick="clearCacheAndReload()" title="انقر لمسح التخزين المؤقت وتحديث التطبيق" class="focusable p-3 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/50 rounded-xl cursor-pointer flex items-center justify-center group text-emerald-400">
+                    <span class="text-3xl font-bold group-hover:rotate-180 transition-transform duration-500">۞</span>
+                </button>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-l from-emerald-400 to-teal-200 bg-clip-text text-transparent">ذِكرى | Zikra</h1>
+                    <p class="text-xs text-gray-400">رفيقك الإيماني لشاشات والأجهزة الذكية</p>
+                </div>
+            </div>
+
+            <!-- Date & Location Brief -->
+            <div class="flex items-center space-x-6 space-x-reverse mt-2 sm:mt-0">
+                <div class="text-left dir-ltr">
+                    <div id="current-time" class="text-2xl font-bold text-emerald-400 tracking-wider">00:00:00</div>
+                    <div id="current-date" class="text-xs text-gray-400">جاري التحميل...</div>
+                </div>
+                <button id="btn-weather" onclick="openWeatherModal()" class="focusable p-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl flex items-center space-x-3 space-x-reverse cursor-pointer">
+                    <i class="fas fa-cloud-sun text-amber-400 text-xl"></i>
+                    <div class="text-right">
+                        <span id="header-temp" class="block text-sm font-semibold">--°C</span>
+                        <span id="header-city" class="block text-xs text-gray-400">Erfurt, DE</span>
+                    </div>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow">
+
+            <!-- Card 1: Quran Surah Browser -->
+            <section class="bg-gray-900/60 border border-gray-800 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                            <i class="fas fa-quran text-emerald-500"></i> القرآن الكريم
+                        </h2>
+                        <span class="text-xs bg-emerald-950 text-emerald-300 px-2.5 py-1 rounded-full border border-emerald-800/50">114 سورة</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">تصفح واستمع إلى سور القرآن الكريم كاملة بدون تشغيل تلقائي مع إمكانية التنقل بالريموت.</p>
+                </div>
+                <button id="btn-quran-open" onclick="openQuranModal()" class="focusable w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/40 cursor-pointer">
+                    <i class="fas fa-book-open"></i> فتح فهرس القرآن الكريم
+                </button>
+            </section>
+
+            <!-- Card 2: Prayer Times -->
+            <section class="bg-gray-900/60 border border-gray-800 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                            <i class="fas fa-mosque text-emerald-500"></i> مواقيت الصلاة
+                        </h2>
+                        <span id="city-tag" class="text-xs bg-gray-800 text-gray-300 px-2.5 py-1 rounded-full">Erfurt</span>
+                    </div>
+                    
+                    <div id="prayer-grid" class="grid grid-cols-5 gap-2 my-2 text-center text-xs">
+                        <div class="bg-gray-800/80 p-2 rounded-lg border border-gray-700/50">
+                            <span class="block text-gray-400">الفجر</span>
+                            <span id="p-fajr" class="font-bold text-emerald-400">--:--</span>
+                        </div>
+                        <div class="bg-gray-800/80 p-2 rounded-lg border border-gray-700/50">
+                            <span class="block text-gray-400">الظهر</span>
+                            <span id="p-dhuhr" class="font-bold text-emerald-400">--:--</span>
+                        </div>
+                        <div class="bg-gray-800/80 p-2 rounded-lg border border-gray-700/50">
+                            <span class="block text-gray-400">العصر</span>
+                            <span id="p-asr" class="font-bold text-emerald-400">--:--</span>
+                        </div>
+                        <div class="bg-gray-800/80 p-2 rounded-lg border border-gray-700/50">
+                            <span class="block text-gray-400">المغرب</span>
+                            <span id="p-maghrib" class="font-bold text-emerald-400">--:--</span>
+                        </div>
+                        <div class="bg-gray-800/80 p-2 rounded-lg border border-gray-700/50">
+                            <span class="block text-gray-400">العشاء</span>
+                            <span id="p-isha" class="font-bold text-emerald-400">--:--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-gray-800 flex justify-between items-center text-xs text-gray-400">
+                    <span>الصلاة القادمة: <strong id="next-prayer-name" class="text-emerald-400">--</strong></span>
+                    <span id="next-prayer-timer" class="text-amber-400 font-mono">--:--:--</span>
+                </div>
+            </section>
+
+            <!-- Card 3: Weather Card -->
+            <section class="bg-gray-900/60 border border-gray-800 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                            <i class="fas fa-temperature-high text-emerald-500"></i> حالة الطقس
+                        </h2>
+                        <i class="fas fa-synagogue text-gray-500"></i>
+                    </div>
+                    <div class="flex items-center space-x-4 space-x-reverse my-2">
+                        <div id="weather-icon-large" class="text-4xl text-amber-400"><i class="fas fa-sun"></i></div>
+                        <div>
+                            <div id="weather-temp-large" class="text-3xl font-bold">--°C</div>
+                            <div id="weather-desc" class="text-sm text-gray-400">جاري تحميل الطقس...</div>
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-weather-open" onclick="openWeatherModal()" class="focusable w-full py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-200 font-medium rounded-xl flex items-center justify-center gap-2 cursor-pointer mt-2">
+                    <i class="fas fa-sliders-h"></i> تغيير المدينة / التفاصيل
+                </button>
+            </section>
+
+            <!-- Card 4: Supplications & Athkar (Wide & Detailed Section) -->
+            <section class="md:col-span-3 bg-gray-900/60 border border-gray-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                        <i class="fas fa-hands-praying text-emerald-500"></i> الأذكار والأدعية اليومية
+                    </h2>
+                    <span class="text-xs text-gray-400">تنقل عبر الأسهم لاختيار الذكر</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Morning Athkar -->
+                    <div class="bg-gray-950/70 p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2 text-amber-400 font-semibold">
+                                <span>🌅</span> أذكار الصباح
+                            </div>
+                            <p id="athkar-morning-text" class="text-sm text-gray-300 leading-relaxed min-h-[60px]">
+                                "أَصْبَحْنَا وَأَصْبَحَ المُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ"
+                            </p>
+                        </div>
+                        <button onclick="nextAthkar('morning')" class="focusable mt-3 py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-medium w-full text-emerald-400 border border-gray-700">
+                            الذكر التالي ➔
+                        </button>
+                    </div>
+
+                    <!-- Evening Athkar -->
+                    <div class="bg-gray-950/70 p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2 text-indigo-400 font-semibold">
+                                <span>🌙</span> أذكار المساء
+                            </div>
+                            <p id="athkar-evening-text" class="text-sm text-gray-300 leading-relaxed min-h-[60px]">
+                                "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ"
+                            </p>
+                        </div>
+                        <button onclick="nextAthkar('evening')" class="focusable mt-3 py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-medium w-full text-emerald-400 border border-gray-700">
+                            الذكر التالي ➔
+                        </button>
+                    </div>
+
+                    <!-- Selected Duas -->
+                    <div class="bg-gray-950/70 p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2 text-emerald-400 font-semibold">
+                                <span>🤲</span> أدعية مختارة
+                            </div>
+                            <p id="athkar-dua-text" class="text-sm text-gray-300 leading-relaxed min-h-[60px]">
+                                "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ"
+                            </p>
+                        </div>
+                        <button onclick="nextAthkar('dua')" class="focusable mt-3 py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-medium w-full text-emerald-400 border border-gray-700">
+                            دعاء آخر ➔
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-6 py-4 border-t border-gray-800/80 text-center text-xs text-gray-500">
+            <p>© جميع الحقوق محفوظة لـ <span class="text-emerald-400 font-semibold">ذِكرى | Zikra</span> — Directed by <span class="text-gray-300 font-medium">Nabil Koukach</span>.</p>
+        </footer>
     </div>
-  </header>
 
-  <!-- التاريخ والوقت -->
-  <section class="date-panel">
-    <div class="clock" id="clock">--:--</div>
-    <div class="date-text" id="dateText"></div>
-    <div class="hijri" id="hijriText"></div>
-    <div class="city-label" id="cityLabel">المدينة: إرفورت</div>
-  </section>
+    <!-- MODAL 1: Quran Surah Viewer & Player -->
+    <div id="modal-quran" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-950">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <i class="fas fa-quran text-2xl text-emerald-400"></i>
+                    <div>
+                        <h3 id="quran-modal-title" class="text-xl font-bold text-white">المصحف الشريف</h3>
+                        <p id="quran-modal-subtitle" class="text-xs text-gray-400">اختر سورة للبدء بالقراءة والإستماع</p>
+                    </div>
+                </div>
+                <button id="quran-close-btn" onclick="closeQuranModal()" class="focusable p-2 px-4 bg-gray-800 hover:bg-red-900/60 hover:text-red-300 text-gray-400 rounded-lg cursor-pointer">
+                    <i class="fas fa-times"></i> إغلاق (Back)
+                </button>
+            </div>
 
-  <!-- أوقات الصلاة -->
-  <section class="prayer-strip">
-    <div class="prayer"><span class="p-icon">☾</span><div class="p-name" data-ar="الفجر" data-en="Fajr" data-de="Fadschr">الفجر</div><div class="p-time" id="fajr">--:--</div></div>
-    <div class="prayer"><span class="p-icon">☀</span><div class="p-name" data-ar="الشروق" data-en="Sunrise" data-de="Sonnenaufgang">الشروق</div><div class="p-time" id="sunrise">--:--</div></div>
-    <div class="prayer"><span class="p-icon">☀</span><div class="p-name" data-ar="الظهر" data-en="Dhuhr" data-de="Dhuhr">الظهر</div><div class="p-time" id="dhuhr">--:--</div></div>
-    <div class="prayer"><span class="p-icon">◒</span><div class="p-name" data-ar="العصر" data-en="Asr" data-de="Asr">العصر</div><div class="p-time" id="asr">--:--</div></div>
-    <div class="prayer"><span class="p-icon">◉</span><div class="p-name" data-ar="المغرب" data-en="Maghrib" data-de="Maghrib">المغرب</div><div class="p-time" id="maghrib">--:--</div></div>
-    <div class="prayer"><span class="p-icon">☾</span><div class="p-name" data-ar="العشاء" data-en="Isha" data-de="Ischa">العشاء</div><div class="p-time" id="isha">--:--</div></div>
-  </section>
+            <!-- Modal Content Layout (Surah List & Ayah Viewer) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 flex-grow overflow-hidden">
+                <!-- Surah List Sidebar -->
+                <div class="border-b md:border-b-0 md:border-l border-gray-800 p-3 overflow-y-auto max-h-[250px] md:max-h-none bg-gray-950/40">
+                    <input type="text" id="surah-search" oninput="filterSurahs()" placeholder="بحث عن سورة..." class="focusable w-full p-2.5 mb-3 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white focus:outline-none">
+                    <div id="surah-list" class="space-y-1.5">
+                        <!-- Populated dynamic list -->
+                    </div>
+                </div>
 
-  <!-- المربعات الرئيسية -->
-  <main class="tiles">
-    <button class="tile" id="openQuran" aria-label="القرآن الكريم" tabindex="0">
-      <svg class="quran-logo" viewBox="0 0 220 180" role="img">
-        <path d="M110 7 124 22 145 17 151 37 171 43 166 64 184 78 173 96 182 116 162 128 158 149 136 150 122 168 110 157 98 168 84 150 62 149 58 128 38 116 47 96 36 78 54 64 49 43 69 37 75 17 96 22Z" fill="#f5f0df" stroke="#bd9b52" stroke-width="2.5"/>
-        <path d="M108 69Q80 52 49 65V119Q80 109 108 129ZM112 69Q140 52 171 65V119Q140 109 112 129Z" fill="#496d55" stroke="#bd9b52" stroke-width="2"/>
-        <path d="M108 73Q80 59 56 69V111Q80 104 108 122ZM112 73Q140 59 164 69V111Q140 104 112 122Z" fill="#fffdf4" stroke="#d5c69a"/>
-        <path d="M110 71V126" stroke="#bd9b52" stroke-width="2"/>
-        <rect x="28" y="136" width="164" height="29" rx="9" fill="#304b3a" stroke="#bd9b52" stroke-width="1.7"/>
-        <text x="110" y="156" text-anchor="middle" font-size="20" font-weight="700" fill="#fff7df">القرآن الكريم</text>
-      </svg>
-    </button>
-    <button class="tile weather-tile" id="weatherCard" aria-label="تفاصيل الطقس" tabindex="0">
-      <span class="weather-icon" id="weatherIcon">🌤️</span>
-      <span class="weather-temp" id="weatherTemp">--°</span>
-      <span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span>
-      <span class="weather-extra" id="weatherExtra"></span>
-    </button>
-    <button class="tile tile-memory" id="memoryCard" aria-label="تبديل الذكرى" tabindex="0">
-      <span class="tile-icon">🌿</span>
-      <span class="tile-title" id="memoryCardTitle">ذِكرى قرآنية ونبوية</span>
-      <span class="memory-preview-text" id="memoryPreviewText"></span>
-      <span class="memory-preview-source" id="memoryPreviewSource"></span>
-      <span class="memory-preview-benefit" id="memoryPreviewBenefit"></span>
-    </button>
-  </main>
+                <!-- Ayahs & Player Viewport -->
+                <div class="md:col-span-2 p-5 flex flex-col justify-between overflow-y-auto bg-gray-900/80">
+                    <!-- Ayah Reader Container -->
+                    <div id="ayah-container" class="space-y-4 overflow-y-auto max-h-[50vh] pr-2">
+                        <div class="text-center py-12 text-gray-500">
+                            <i class="fas fa-book-open-reader text-4xl mb-3 block opacity-40"></i>
+                            اختر سورة من القائمة لعرض الآيات والاستماع
+                        </div>
+                    </div>
 
-  <!-- مشغل القرآن الكريم -->
-  <section class="player">
-    <div class="now-reading">
-      <div class="mini-mushaf">۞</div>
-      <div>
-        <strong id="miniSurah">اختر سورة من مشغّل القرآن</strong>
-        <small id="miniReader">مشغّل القرآن</small>
-      </div>
+                    <!-- Audio Player Control Bar -->
+                    <div class="mt-4 pt-4 border-t border-gray-800 bg-gray-950/90 p-4 rounded-xl flex flex-col space-y-3">
+                        <div class="flex justify-between items-center text-xs text-gray-400">
+                            <span id="audio-current-surah">لم يتم اختيار سورة</span>
+                            <span id="audio-timer">00:00 / 00:00</span>
+                        </div>
+                        <audio id="quran-audio-player" class="hidden"></audio>
+                        <!-- Controls Row -->
+                        <div class="flex justify-center items-center gap-4">
+                            <button id="btn-audio-prev" onclick="playPrevAyah()" title="الآية السابقة (MediaPrev)" class="focusable p-3 bg-gray-800 hover:bg-gray-700 rounded-full text-gray-200">
+                                <i class="fas fa-step-forward"></i>
+                            </button>
+                            <button id="btn-audio-play" onclick="toggleAudioPlay()" title="تشغيل / إيقاف مؤقت (MediaPlay)" class="focusable p-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xl shadow-lg shadow-emerald-900/50">
+                                <i id="play-icon" class="fas fa-play"></i>
+                            </button>
+                            <button id="btn-audio-next" onclick="playNextAyah()" title="الآية التالية (MediaNext)" class="focusable p-3 bg-gray-800 hover:bg-gray-700 rounded-full text-gray-200">
+                                <i class="fas fa-step-backward"></i>
+                            </button>
+                            <button id="btn-audio-stop" onclick="stopAudio()" title="إيقاف (MediaStop)" class="focusable p-3 bg-red-950/60 hover:bg-red-900 text-red-300 rounded-full">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="track-area">
-      <div class="verse-row">
-        <div class="verse" id="miniVerse">ستظهر الآية عند تحميل السورة والضغط على تشغيل</div>
-        <span class="ayah-number" id="miniAyah">١</span>
-      </div>
-      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+
+    <!-- MODAL 2: Weather Details & Settings -->
+    <div id="modal-weather" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-3 mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-cloud-sun text-amber-400"></i> إعدادات الطقس
+                </h3>
+                <button id="weather-close-btn" onclick="closeWeatherModal()" class="focusable p-2 px-3 bg-gray-800 hover:bg-red-900/60 text-gray-400 rounded-lg">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">تغيير المدينة:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="city-input" placeholder="مثال: Erfurt, Berlin, Damascus" class="focusable flex-grow p-2.5 bg-gray-950 border border-gray-700 rounded-xl text-sm text-white focus:outline-none">
+                        <button onclick="changeCity()" class="focusable px-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold">
+                            حفظ
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">الرطوبة:</span>
+                        <span id="weather-humidity" class="text-white font-semibold">--%</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">سرعة الرياح:</span>
+                        <span id="weather-wind" class="text-white font-semibold">-- km/h</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">الضغط الجوي:</span>
+                        <span id="weather-pressure" class="text-white font-semibold">-- hPa</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="controls">
-      <button class="control" id="miniPrev" aria-label="الآية السابقة" tabindex="0">⏮</button>
-      <button class="control main" id="miniPlay" aria-label="تشغيل أو إيقاف القرآن" tabindex="0">▶</button>
-      <button class="control" id="miniNext" aria-label="الآية التالية" tabindex="0">⏭</button>
+
+    <!-- MODAL 3: Exit App Confirmation Modal -->
+    <div id="modal-exit" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-red-900/50 rounded-2xl w-full max-w-sm p-6 text-center shadow-2xl space-y-5">
+            <div class="w-16 h-16 bg-red-950/80 text-red-500 border border-red-800/50 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fas fa-power-off"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-white mb-1">تأكيد الخروج</h3>
+                <p class="text-xs text-gray-400">هل تريد حقاً الخروج من تطبيق ذِكرى؟</p>
+            </div>
+            <div class="flex justify-center gap-4 pt-2">
+                <button id="btn-exit-yes" onclick="confirmExitApp()" class="focusable py-2.5 px-6 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-sm cursor-pointer shadow-lg">
+                    نعم، إغلاق
+                </button>
+                <button id="btn-exit-no" onclick="closeExitModal()" class="focusable py-2.5 px-6 bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold rounded-xl text-sm cursor-pointer border border-gray-700">
+                    لا، البقاء
+                </button>
+            </div>
+        </div>
     </div>
-  </section>
 
-  <!-- خلية الأدعية الشاملة -->
-  <div class="dua-box">
-    <div class="dua-bar">
-      <span class="dua-symbol">۞</span>
-      <div class="dua-text" id="duaText">🤲 اللهم إنك عفو تحب العفو فاعفُ عنا، واعفُ عن والدينا وللمؤمنين والمؤمنات الأحياء منهم والأموات</div>
-      <span class="dua-symbol">۞</span>
-    </div>
-  </div>
+    <!-- Application Engine Logic -->
+    <script>
+        // State Management
+        let currentCity = 'Erfurt';
+        let surahData = [];
+        let currentSurahIndex = null;
+        let currentAyahIndex = 0;
+        let activeAyahs = [];
+        let backPressCounter = 0;
+        let backPressTimer = null;
 
-  <!-- الفوتر وحقوق النشر -->
-  <footer class="footer">
-    <div class="copyright">© جميع الحقوق محفوظة لـ ذِكرى | Zikra — Directed by Nabil Koukach</div>
-  </footer>
-</div>
+        // Athkar Database
+        const athkarData = {
+            morning: [
+                "أَصْبَحْنَا وَأَصْبَحَ المُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ",
+                "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ",
+                "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ أَصْلِحْ لِي شَأْنِي كُلَّهُ وَلاَ تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ"
+            ],
+            evening: [
+                "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ",
+                "اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ وَإِلَيْكَ المَصِيرُ",
+                "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ (ثَلاَثَ مَرَّاتٍ)"
+            ],
+            dua: [
+                "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+                "اللَّهُمَّ إِنِّي أَسْأَلُكَ العَفْوَ وَالعَافِيَةَ فِي الدُّنْيَا وَالآخِرَةِ",
+                "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي وَاحْلُلْ عُقْدَةً مِنْ لِسَانِي يَفْقَهُوا قَوْلِي"
+            ]
+        };
+        let athkarIndices = { morning: 0, evening: 0, dua: 0 };
 
-<!-- نافذة القرآن الكريم (تضم جميع السور الـ 114) -->
-<div class="modal-backdrop" id="quranModal" role="dialog" aria-modal="true">
-  <section class="modal">
-    <div class="modal-head">
-      <h2>ذِكرى — القرآن الكريم</h2>
-      <button class="close-modal" id="closeQuran" aria-label="إغلاق" tabindex="0">×</button>
-    </div>
-    <div class="form-row">
-      <div>
-        <label for="reciter">اختر الشيخ</label>
-        <select id="reciter" tabindex="0"><option value="">جاري تحميل القرّاء...</option></select>
-      </div>
-      <div>
-        <label for="surah">اختر السورة (114 سورة)</label>
-        <select id="surah" tabindex="0">
-          <!-- 2. توليد 114 سورة بالكامل -->
-        </select>
-      </div>
-    </div>
-    <div id="quranStatus">اختر الشيخ والسورة لبدء الاستماع والقراءة.</div>
-    <div id="verses">اختر السورة لعرض الآيات...</div>
-    <button class="action" id="playQuran" disabled style="margin-top:10px;" tabindex="0">▶ تشغيل التلاوة</button>
-    <audio id="audio" preload="none"></audio>
-  </section>
-</div>
+        // Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            fetchPrayerTimes();
+            fetchWeatherData();
+            loadQuranSurahList();
+            setupMediaKeysAndRemote();
+        });
 
-<!-- نافذة الطقس -->
-<div class="modal-backdrop" id="weatherModal" role="dialog" aria-modal="true">
-  <section class="modal">
-    <div class="modal-head">
-      <h2>تفاصيل الطقس</h2>
-      <button class="close-modal" id="closeWeather" aria-label="إغلاق" tabindex="0">×</button>
-    </div>
-    <div class="weather-modal-content" id="weatherScrollArea" tabindex="0">
-      <div style="text-align:center;padding:8px">
-        <div class="weather-icon" id="modalIcon">🌤️</div>
-        <div class="weather-temp" style="color:var(--dark)" id="modalTemp">--°</div>
-        <div id="modalCondition" style="font-weight:700"></div>
-        <div id="modalFeels" style="color:var(--muted);font-size:12px"></div>
-      </div>
-      <div class="weather-stats">
-        <div class="stat"><div class="stat-label" id="humidityLabel">الرطوبة</div><div class="stat-value" id="humidityValue">--</div></div>
-        <div class="stat"><div class="stat-label" id="windLabel">سرعة الرياح</div><div class="stat-value" id="windValue">--</div></div>
-        <div class="stat"><div class="stat-label" id="maxLabel">العظمى اليوم</div><div class="stat-value" id="maxValue">--</div></div>
-        <div class="stat"><div class="stat-label" id="minLabel">الصغرى اليوم</div><div class="stat-value" id="minValue">--</div></div>
-      </div>
-      <div style="font-weight:800;margin-top:8px" id="hourlyTitle">توقعات الساعات القادمة</div>
-      <div class="hourly" id="hourlyForecast"></div>
-      <div style="font-weight:800;margin-top:8px" id="dailyTitle">توقعات الأيام القادمة</div>
-      <div class="daily-list" id="dailyForecast"></div>
-    </div>
-  </section>
-</div>
+        // 1. Toast Notification Utility
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
 
-<!-- نافذة تأكيد الخروج -->
-<div class="modal-backdrop" id="exitModal" role="dialog" aria-modal="true">
-  <section class="modal exit-dialog">
-    <div class="brand-mark" style="margin:0 auto 12px">۞</div>
-    <h2>هل تريد إغلاق التطبيق؟</h2>
-    <p style="margin-top:6px;font-size:13px;color:var(--muted)">هل أنت متأكد أنك تريد الخروج من تطبيق ذِكرى؟</p>
-    <div class="exit-buttons">
-      <button class="action" id="confirmExit" tabindex="0">نعم</button>
-      <button class="action" id="cancelExit" tabindex="0">لا</button>
-    </div>
-  </section>
-</div>
+            toastMsg.textContent = message;
+            if(isError) {
+                toast.classList.remove('bg-emerald-600', 'border-emerald-400');
+                toast.classList.add('bg-red-600', 'border-red-400');
+                toastIcon.className = 'fas fa-exclamation-triangle text-xl';
+            } else {
+                toast.classList.remove('bg-red-600', 'border-red-400');
+                toast.classList.add('bg-emerald-600', 'border-emerald-400');
+                toastIcon.className = 'fas fa-check-circle text-xl';
+            }
 
-<script>
-"use strict";
-const $ = id => document.getElementById(id);
-let lang = "ar", weatherData = null, city = { name: "Erfurt", latitude: 50.9848, longitude: 11.0299 };
-let backPressCount = 0, backTimer = null;
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
 
-// أسماء سور القرآن الـ 114 بالكامل
-const surahNames = [
-  "الفاتحة", "البقرة", "آل عمران", "النساء", "المائدة", "الأنعام", "الأعراف", "الأنفال", "التوبة", "يونس",
-  "هود", "يوسف", "الرعد", "إبراهيم", "الحجر", "النحل", "الإسراء", "الكهف", "مريم", "طه",
-  "الأنبياء", "الحج", "المؤمنون", "النور", "الفرقان", "الشعراء", "النمل", "القصص", "العنكبوت", "الروم",
-  "لقمان", "السجدة", "الأحزاب", "سبأ", "فاطر", "يس", "الصافات", "ص", "الزمر", "غافر",
-  "فصلت", "الشورى", "الزخرف", "الدخان", "الجاثية", "الأحقاف", "محمد", "الفتح", "الحجرات", "ق",
-  "الذاريات", "الطور", "النجم", "القمر", "الرحمن", "الواقعة", "الحديد", "المجادلة", "الحشر", "الممتحنة",
-  "الصف", "الجمعة", "المنافقون", "التغابن", "الطلاق", "التحريم", "الملك", "القلم", "الحاقة", "المعارج",
-  "نوح", "الجن", "المزمل", "المدثر", "القيامة", "الإنسان", "المرسلات", "النبأ", "النازعات", "عبس",
-  "التكوير", "الإنفطار", "المطففين", "الإنشقاق", "البروج", "الطارق", "الأعلى", "الغاشية", "الفجر", "البلد",
-  "الشمس", "الليل", "الضحى", "الشرح", "التين", "العلق", "القدر", "البينة", "الزلزلة", "العاديات",
-  "القارعة", "التكاثر", "العصر", "الهمزة", "الفيل", "قريش", "المواعون", "الكوثر", "الكافرون", "النصر",
-  "المسد", "الإخلاص", "الفلق", "الناس"
-];
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-20', 'opacity-0');
+            }, 3000);
+        }
 
-// تعبئة قائمة السور الـ 114
-function populateSurahs() {
-  const select = $("surah");
-  select.innerHTML = "";
-  surahNames.forEach((name, index) => {
-    const opt = document.createElement("option");
-    opt.value = index + 1;
-    opt.textContent = `${index + 1}. ${name}`;
-    select.appendChild(opt);
-  });
-}
-populateSurahs();
+        // 2. Realtime Clock
+        function initClock() {
+            const timeElem = document.getElementById('current-time');
+            const dateElem = document.getElementById('current-date');
 
-const T = {
-  ar: { subtitle: "طمأنينةٌ للقلب في كل يوم", city: "المدينة: ", loading: "جارٍ تحميل الطقس…", unavailable: "الطقس غير متاح حالياً", locationPrompt: "اكتب اسم المدينة:", cityNotFound: "لم يتم العثور على المدينة.", details: "تفاصيل الطقس", feels: "الحرارة المحسوسة", humidity: "الرطوبة", wind: "سرعة الرياح", max: "العظمى اليوم", min: "الصغرى اليوم", hourly: "توقعات الساعات القادمة", daily: "توقعات الأيام القادمة", today: "اليوم", tomorrow: "غداً", conditions: { clear: "سماء صافية", mainly: "صحو غالباً", partly: "غائم جزئياً", cloudy: "غائم", fog: "ضباب", drizzle: "رذاذ", rain: "أمطار", snow: "ثلوج", storm: "عواصف رعدية", other: "حالة جو متغيرة" }, days: ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"] },
-  en: { subtitle: "Peace for the heart, every day", city: "City: ", loading: "Loading weather…", unavailable: "Weather unavailable", locationPrompt: "Enter city:", cityNotFound: "City not found.", details: "Weather details", feels: "Feels like", humidity: "Humidity", wind: "Wind speed", max: "Today's high", min: "Today's low", hourly: "Hourly forecast", daily: "Next few days", today: "Today", tomorrow: "Tomorrow", conditions: { clear: "Clear sky", mainly: "Mainly clear", partly: "Partly cloudy", cloudy: "Cloudy", fog: "Fog", drizzle: "Drizzle", rain: "Rain", snow: "Snow", storm: "Thunderstorms", other: "Changing conditions" }, days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] },
-  de: { subtitle: "Ruhe für das Herz, jeden Tag", city: "Stadt: ", loading: "Wetter wird geladen…", unavailable: "Wetter nicht verfügbar", locationPrompt: "Stadt eingeben:", cityNotFound: "Stadt nicht gefunden.", details: "Wetterdetails", feels: "Gefühlt", humidity: "Luftfeuchtigkeit", wind: "Windgeschwindigkeit", max: "Tageshöchstwert", min: "Tagestiefstwert", hourly: "Stündliche Vorhersage", daily: "Vorhersage für die nächsten Tage", today: "Heute", tomorrow: "Morgen", conditions: { clear: "Klarer Himmel", mainly: "Überwiegend klar", partly: "Teilweise bewölkt", cloudy: "Bewölkt", fog: "Nebel", drizzle: "Nieselregen", rain: "Regen", snow: "Schnee", storm: "Gewitter", other: "Wechselhaft" }, days: ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"] }
-};
+            function update() {
+                const now = new Date();
+                timeElem.textContent = now.toLocaleTimeString('ar-EG', { hour12: false });
+                dateElem.textContent = now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+            update();
+            setInterval(update, 1000);
+        }
 
-async function fetchJSON(url) { const r = await fetch(url); if (!r.ok) throw Error("HTTP " + r.status); return r.json(); }
+        // 3. Smart Logo Clear Cache & Reload
+        function clearCacheAndReload() {
+            showToast("جاري مسح الملفات التالفة وتحديث التطبيق...");
+            
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                if ('caches' in window) {
+                    caches.keys().then(names => {
+                        for (let name of names) caches.delete(name);
+                    });
+                }
+            } catch (e) {
+                console.warn("Storage clearing notice:", e);
+            }
 
-function updateClock() {
-  const n = new Date(), locale = lang === "ar" ? "ar" : lang === "de" ? "de-DE" : "en-GB";
-  $("clock").textContent = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", hour12: false }).format(n);
-  $("dateText").textContent = new Intl.DateTimeFormat(locale, { weekday: "long", year: "numeric", month: "long", day: "numeric" }).format(n);
-}
-setInterval(updateClock, 1000); updateClock();
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1000);
+        }
 
-function updateCityLabel() { $("cityLabel").textContent = T[lang].city + city.name; }
+        // 4. Athkar Rotation
+        function nextAthkar(type) {
+            const list = athkarData[type];
+            athkarIndices[type] = (athkarIndices[type] + 1) % list.length;
+            document.getElementById(`athkar-${type}-text`).textContent = `"${list[athkarIndices[type]]}"`;
+        }
 
-async function loadPrayerTimes() {
-  const n = new Date(), date = [String(n.getDate()).padStart(2, "0"), String(n.getMonth() + 1).padStart(2, "0"), n.getFullYear()].join("-");
-  try {
-    const d = (await fetchJSON(`https://api.aladhan.com/v1/timings/${date}?latitude=${city.latitude}&longitude=${city.longitude}&method=3`)).data;
-    ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"].forEach((k, i) => $(["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"][i]).textContent = (d.timings[k] || "--:--").split(" ")[0]);
-    const h = d.date.hijri;
-    $("hijriText").textContent = lang === "ar" ? `${h.day} ${h.month.ar || h.month.en} ${h.year} هـ` : `${h.day} ${h.month.en} ${h.year} AH`;
-  } catch (e) { $("hijriText").textContent = ""; }
-}
+        // 5. Quran Module (114 Surahs from Alquran API)
+        async function loadQuranSurahList() {
+            const listContainer = document.getElementById('surah-list');
+            try {
+                const res = await fetch('https://api.alquran.cloud/v1/surah');
+                const data = await res.json();
+                if(data.code === 200) {
+                    surahData = data.data;
+                    renderSurahList(surahData);
+                }
+            } catch(e) {
+                listContainer.innerHTML = `<div class="text-red-400 text-xs p-2">فشل تحميل قائمة السور. يرجى إعادة التحديث.</div>`;
+            }
+        }
 
-function condition(code) {
-  const c = T[lang].conditions;
-  if (code === 0) return { text: c.clear, icon: "☀️", cls: "sunny" };
-  if (code === 1) return { text: c.mainly, icon: "🌤️", cls: "sunny" };
-  if (code === 2) return { text: c.partly, icon: "⛅", cls: "cloudy" };
-  if (code === 3) return { text: c.cloudy, icon: "☁️", cls: "cloudy" };
-  if ([45, 48].includes(code)) return { text: c.fog, icon: "🌫️", cls: "cloudy" };
-  if ([51, 53, 55, 56, 57].includes(code)) return { text: c.drizzle, icon: "🌦️", cls: "rainy" };
-  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { text: c.rain, icon: "🌧️", cls: "rainy" };
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return { text: c.snow, icon: "❄️", cls: "snowy" };
-  if ([95, 96, 99].includes(code)) return { text: c.storm, icon: "⛈️", cls: "storm" };
-  return { text: c.other, icon: "🌥️", cls: "cloudy" };
-}
+        function renderSurahList(list) {
+            const container = document.getElementById('surah-list');
+            container.innerHTML = '';
+            list.forEach(surah => {
+                const btn = document.createElement('button');
+                btn.className = 'focusable w-full text-right p-2.5 rounded-lg text-sm bg-gray-900 hover:bg-emerald-900/50 border border-gray-800 text-gray-200 flex justify-between items-center cursor-pointer';
+                btn.setAttribute('data-surah-number', surah.number);
+                btn.innerHTML = `
+                    <span class="font-bold text-emerald-400">${surah.number}. ${surah.name}</span>
+                    <span class="text-xs text-gray-500">${surah.numberOfAyahs} آية</span>
+                `;
+                btn.onclick = () => loadSurahContent(surah.number, surah.name);
+                container.appendChild(btn);
+            });
+        }
 
-const temp = v => v == null ? "--" : Math.round(v) + "°";
+        function filterSurahs() {
+            const q = document.getElementById('surah-search').value.trim().toLowerCase();
+            const filtered = surahData.filter(s => s.name.toLowerCase().includes(q) || s.number.toString() === q);
+            renderSurahList(filtered);
+        }
 
-async function loadWeather() {
-  $("weatherCondition").textContent = T[lang].loading;
-  try {
-    weatherData = await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=auto&forecast_days=5`);
-    renderWeather();
-  } catch (e) { $("weatherCondition").textContent = T[lang].unavailable; }
-}
+        async function loadSurahContent(surahNumber, surahName) {
+            const container = document.getElementById('ayah-container');
+            document.getElementById('quran-modal-subtitle').textContent = `سورة ${surahName}`;
+            document.getElementById('audio-current-surah').textContent = `سورة ${surahName}`;
+            container.innerHTML = `<div class="text-center py-8 text-emerald-400"><i class="fas fa-spinner fa-spin text-2xl"></i><p class="mt-2 text-xs">جاري تحميل السورة...</p></div>`;
 
-function renderWeather() {
-  if (!weatherData) return;
-  const d = weatherData, c = d.current, desc = condition(c.weather_code);
-  $("weatherCard").className = "tile weather-tile " + desc.cls;
-  $("weatherIcon").textContent = desc.icon;
-  $("weatherTemp").textContent = temp(c.temperature_2m);
-  $("weatherCondition").textContent = desc.text;
-  $("weatherExtra").textContent = `↑ ${temp(d.daily.temperature_2m_max[0])} ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;
-  renderWeatherModal();
-}
+            try {
+                const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/ar.alafasy`);
+                const data = await res.json();
+                if(data.code === 200) {
+                    activeAyahs = data.data.ayahs;
+                    currentSurahIndex = surahNumber;
+                    currentAyahIndex = 0;
+                    
+                    container.innerHTML = activeAyahs.map((a, idx) => `
+                        <div id="ayah-box-${idx}" class="p-3 bg-gray-950/60 border border-gray-800/80 rounded-xl leading-loose font-arabic text-xl text-gray-100 flex items-center justify-between gap-3">
+                            <span>${a.text} <strong class="text-sm text-emerald-500 font-sans">(${a.numberInSurah})</strong></span>
+                            <button onclick="playSpecificAyah(${idx})" class="focusable p-2 bg-emerald-900/40 hover:bg-emerald-600 rounded-lg text-emerald-400 hover:text-white text-xs">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    `).join('');
 
-function renderWeatherModal() {
-  if (!weatherData) return;
-  const d = weatherData, c = d.current, t = T[lang];
-  $("modalIcon").textContent = condition(c.weather_code).icon;
-  $("modalTemp").textContent = temp(c.temperature_2m);
-  $("modalCondition").textContent = condition(c.weather_code).text;
-  $("modalFeels").textContent = `${t.feels}: ${temp(c.apparent_temperature)}`;
-  $("humidityLabel").textContent = t.humidity; $("humidityValue").textContent = c.relative_humidity_2m + "%";
-  $("windLabel").textContent = t.wind; $("windValue").textContent = Math.round(c.wind_speed_10m) + " km/h";
-  $("maxLabel").textContent = t.max; $("maxValue").textContent = temp(d.daily.temperature_2m_max[0]);
-  $("minLabel").textContent = t.min; $("minValue").textContent = temp(d.daily.temperature_2m_min[0]);
-  
-  const h = d.hourly, now = new Date();
-  let start = h.time.findIndex(x => new Date(x) >= now);
-  if (start < 0) start = 0;
-  
-  $("hourlyForecast").replaceChildren();
-  for (let i = start; i < Math.min(start + 10, h.time.length); i++) {
-    const item = document.createElement("div"); item.className = "hour";
-    const tm = document.createElement("div"); tm.textContent = new Intl.DateTimeFormat(lang === "ar" ? "ar" : lang === "de" ? "de-DE" : "en-GB", { hour: "2-digit" }).format(new Date(h.time[i]));
-    const ic = document.createElement("div"); ic.style.fontSize = "18px"; ic.textContent = condition(h.weather_code[i]).icon;
-    const te = document.createElement("strong"); te.textContent = temp(h.temperature_2m[i]);
-    item.append(tm, ic, te); $("hourlyForecast").append(item);
-  }
-  
-  $("dailyForecast").replaceChildren();
-  for (let i = 0; i < d.daily.time.length; i++) {
-    const date = new Date(d.daily.time[i] + "T12:00:00"), row = document.createElement("div");
-    row.className = "day-row";
-    const day = document.createElement("span"); day.textContent = i === 0 ? t.today : i === 1 ? t.tomorrow : t.days[date.getDay()];
-    const ic = document.createElement("span"); ic.textContent = condition(d.daily.weather_code[i]).icon;
-    const range = document.createElement("span"); range.textContent = `${temp(d.daily.temperature_2m_min[i])} / ${temp(d.daily.temperature_2m_max[i])}`;
-    row.append(day, ic, range); $("dailyForecast").append(row);
-  }
-}
+                    // Highlight first
+                    highlightActiveAyah(0);
+                }
+            } catch(e) {
+                container.innerHTML = `<div class="text-red-400 text-sm">حدث خطأ أثناء تحميل الآيات.</div>`;
+            }
+        }
 
-async function chooseCity() {
-  const entered = prompt(T[lang].locationPrompt, city.name);
-  if (!entered?.trim()) return;
-  try {
-    const data = await fetchJSON("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(entered.trim()) + "&count=1&language=" + (lang === "ar" ? "ar" : "en") + "&format=json");
-    if (!data.results?.length) { alert(T[lang].cityNotFound); return; }
-    const f = data.results[0];
-    city = { name: f.name, latitude: f.latitude, longitude: f.longitude };
-    updateCityLabel();
-    await Promise.all([loadPrayerTimes(), loadWeather()]);
-  } catch (e) { alert(T[lang].cityError); }
-}
-$("locationBtn").addEventListener("click", chooseCity);
+        function highlightActiveAyah(index) {
+            activeAyahs.forEach((_, i) => {
+                const box = document.getElementById(`ayah-box-${i}`);
+                if(box) {
+                    if(i === index) {
+                        box.classList.add('border-emerald-500', 'bg-emerald-950/40');
+                        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        box.classList.remove('border-emerald-500', 'bg-emerald-950/40');
+                    }
+                }
+            });
+        }
 
-/* الذكريات */
-const memories = [
-  { text: "﴿ فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ﴾", source: "سورة الشرح، الآية 5", en: "Surah Ash-Sharh, 94:5", de: "Sure Asch-Scharh, 94:5", benefit: "تذكّرنا الآية أن الشدة لا تدوم، وأن مع العسر تيسيراً من الله.", ben: "Hardship does not last forever; ease accompanies hardship.", bde: "Schwierigkeiten dauern nicht ewig; Erleichterung folgt." },
-  { text: "«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ»", source: "صحيح البخاري، حديث 1", en: "Sahih al-Bukhari 1", de: "Sahih al-Bukhari 1", benefit: "النية أساس العمل؛ فاحرص على إخلاص قصدك لله.", ben: "Intention is central to deeds. Seek sincerity in what you do.", bde: "Die Absicht ist entscheidend. Bemühe dich um Aufrichtigkeit." },
-  { text: "﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾", source: "سورة الرعد، الآية 28", en: "Surah Ar-Ra'd, 13:28", de: "Sure Ar-Ra'd, 13:28", benefit: "ذكر الله من أسباب سكينة القلب وطمأنينته.", ben: "Remembering God can bring calm and reassurance.", bde: "Das Gedenken an Gott kann Ruhe und Zuversicht schenken." }
-];
-let memoryIndex = 0;
-function renderMemory() {
-  const m = memories[memoryIndex];
-  $("memoryPreviewText").textContent = m.text;
-  $("memoryPreviewSource").textContent = (lang === "ar" ? "المصدر: " : "Source: ") + (lang === "ar" ? m.source : m.en);
-  $("memoryPreviewBenefit").textContent = lang === "ar" ? m.benefit : m.ben;
-}
-function nextMemory() { memoryIndex = (memoryIndex + 1) % memories.length; renderMemory(); }
-$("memoryCard").addEventListener("click", nextMemory); renderMemory(); setInterval(nextMemory, 30000);
+        // Audio Engine Controls
+        const audioPlayer = document.getElementById('quran-audio-player');
 
-/* أدعية متبدلة */
-const duas = [
-  "🤲 اللهم إنك عفو تحب العفو فاعفُ عنا، واعفُ عن والدينا وللمؤمنين والمؤمنات الأحياء منهم والأموات",
-  "🌿 رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
-  "🤍 اللهم اجعل القرآن الكريم ربيع قلوبنا، ونور صدورنا، وجلاء أحزاننا، وذهاب همومنا",
-  "✨ اللهم إنا نسألك الهدى والتقى والعفاف والغنى، وأصلح لنا شأننا كله"
-];
-let duaIndex = 0;
-setInterval(() => {
-  duaIndex = (duaIndex + 1) % duas.length;
-  $("duaText").textContent = duas[duaIndex];
-}, 8000);
+        function playSpecificAyah(index) {
+            if(!activeAyahs || activeAyahs.length === 0) return;
+            currentAyahIndex = index;
+            highlightActiveAyah(index);
 
-/* القرآن الكريم والقرّاء */
-const API = "https://mp3quran.net/api/v3", audio = $("audio"), versesBox = $("verses"), statusBox = $("quranStatus");
-let readers = [], times = [], read = null, loaded = false;
+            audioPlayer.src = activeAyahs[index].audio;
+            audioPlayer.play();
+            updatePlayIcon(true);
+        }
 
-async function get(url) { const r = await fetch(url); if (!r.ok) throw Error("خطأ اتصال: " + r.status); return r.json(); }
-function qmsg(s) { statusBox.textContent = s; }
+        function toggleAudioPlay() {
+            if(!activeAyahs || activeAyahs.length === 0) {
+                showToast("الرجاء اختيار سورة أولاً", true);
+                return;
+            }
+            if(audioPlayer.paused) {
+                if(!audioPlayer.src) {
+                    playSpecificAyah(currentAyahIndex);
+                } else {
+                    audioPlayer.play();
+                    updatePlayIcon(true);
+                }
+            } else {
+                audioPlayer.pause();
+                updatePlayIcon(false);
+            }
+        }
 
-function updatePlayButton() {
-  const isPlaying = !audio.paused;
-  $("playQuran").textContent = isPlaying ? "⏸ إيقاف التلاوة" : "▶ تشغيل التلاوة";
-  $("miniPlay").textContent = isPlaying ? "Ⅱ" : "▶";
-}
+        function playNextAyah() {
+            if(currentAyahIndex < activeAyahs.length - 1) {
+                playSpecificAyah(currentAyahIndex + 1);
+            } else {
+                showToast("وصلت لنهاية السورة");
+            }
+        }
 
-async function loadReaders() {
-  try {
-    const data = await get(API + "/ayat_timing/reads");
-    if (!Array.isArray(data) || !data.length) throw Error("لم تصل قائمة القرّاء.");
-    readers = data;
-    $("reciter").replaceChildren();
-    readers.forEach(r => {
-      const o = document.createElement("option");
-      o.value = String(r.id);
-      o.textContent = r.name + (r.rewaya ? " — " + r.rewaya : "");
-      $("reciter").append(o);
-    });
-    const preferred = readers.find(r => Number(r.id) === 5);
-    if (preferred) $("reciter").value = String(preferred.id);
-    qmsg("تم تحميل قائمة القرّاء. اختر السورة ثم اضغط تشغيل.");
-    loadSelectedSurah(false);
-  } catch (e) {
-    $("reciter").innerHTML = '<option value="">تعذّر تحميل القرّاء</option>';
-    qmsg("تعذّر تحميل قائمة القرّاء:\n" + e.message);
-  }
-}
+        function playPrevAyah() {
+            if(currentAyahIndex > 0) {
+                playSpecificAyah(currentAyahIndex - 1);
+            }
+        }
 
-function renderVerses(ayahs) {
-  versesBox.replaceChildren();
-  let pageBox = document.createElement("div"); pageBox.className = "mushaf-page";
-  ayahs.forEach(v => {
-    const span = document.createElement("span"); span.className = "ayah"; span.id = "a" + v.numberInSurah;
-    span.append(document.createTextNode(v.text + " "));
-    const marker = document.createElement("span"); marker.className = "waqf"; marker.textContent = v.numberInSurah;
-    span.append(marker); pageBox.append(span);
-  });
-  versesBox.append(pageBox);
-}
+        function stopAudio() {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            updatePlayIcon(false);
+        }
 
-function mark() {
-  if (!times.length) return;
-  const ms = audio.currentTime * 1000, timing = times.find(x => ms >= Number(x.start_time) && ms < Number(x.end_time)), active = document.querySelector(".ayah.active");
-  if (timing && active && active.id === "a" + timing.ayah) {
-    if (audio.duration) $("progressFill").style.width = (audio.currentTime / audio.duration * 100) + "%";
-    return;
-  }
-  if (active) active.classList.remove("active");
-  if (timing) {
-    const v = $("a" + timing.ayah);
-    if (v) {
-      v.classList.add("active");
-      if ($("quranModal").classList.contains("open")) v.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      $("miniAyah").textContent = String(timing.ayah);
-      $("miniVerse").textContent = v.firstChild?.textContent?.trim() || "";
-    }
-  }
-  if (audio.duration) $("progressFill").style.width = (audio.currentTime / audio.duration * 100) + "%";
-}
+        audioPlayer.onended = () => {
+            if(currentAyahIndex < activeAyahs.length - 1) {
+                playNextAyah();
+            } else {
+                updatePlayIcon(false);
+            }
+        };
 
-async function loadSelectedSurah(autoPlay = false) {
-  const surah = Number($("surah").value), readerId = Number($("reciter").value);
-  read = readers.find(r => Number(r.id) === readerId);
-  if (!read) { qmsg("اختر الشيخ أولاً."); return; }
-  
-  loaded = false; times = [];
-  audio.pause(); audio.removeAttribute("src"); audio.load();
-  $("playQuran").disabled = true;
-  versesBox.textContent = "جاري تحميل الآيات...";
-  qmsg("جاري تحميل التوقيت والصوت...");
-  
-  try {
-    const [td, q] = await Promise.all([
-      get(API + "/ayat_timing?surah=" + surah + "&read=" + readerId),
-      get("https://api.alquran.cloud/v1/surah/" + surah)
-    ]);
-    times = td.filter(x => Number(x.ayah) > 0 && Number.isFinite(Number(x.start_time)));
-    renderVerses(q.data.ayahs);
-    
-    audio.src = String(read.folder_url).replace(/\/?$/, "/") + String(surah).padStart(3, "0") + ".mp3";
-    audio.load();
-    loaded = true;
-    
-    $("playQuran").disabled = false;
-    $("miniSurah").textContent = q.data.name;
-    $("miniReader").textContent = read.name;
-    $("miniVerse").textContent = q.data.ayahs[0]?.text || "";
-    $("miniAyah").textContent = "١";
-    $("progressFill").style.width = "0%";
-    
-    updatePlayButton();
-    if (autoPlay) audio.play();
-    else qmsg("جاهز للتشغيل — اضغط زر التشغيل للبدء.");
-  } catch (e) {
-    versesBox.textContent = "تعذّر تحميل السورة أو الصوت.";
-    qmsg("خطأ في التحميل.");
-  }
-}
+        function updatePlayIcon(isPlaying) {
+            const icon = document.getElementById('play-icon');
+            icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+        }
 
-function toggleAudio() {
-  if (!loaded) { openModal("quranModal"); return; }
-  if (audio.paused) audio.play();
-  else audio.pause();
-}
+        // 6. Prayer Times API Integration
+        async function fetchPrayerTimes() {
+            try {
+                const res = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${currentCity}&country=Germany&method=3`);
+                const data = await res.json();
+                if(data.code === 200) {
+                    const timings = data.data.timings;
+                    document.getElementById('p-fajr').textContent = timings.Fajr;
+                    document.getElementById('p-dhuhr').textContent = timings.Dhuhr;
+                    document.getElementById('p-asr').textContent = timings.Asr;
+                    document.getElementById('p-maghrib').textContent = timings.Maghrib;
+                    document.getElementById('p-isha').textContent = timings.Isha;
+                }
+            } catch(e) {
+                console.error("Prayer times error:", e);
+            }
+        }
 
-$("playQuran").addEventListener("click", toggleAudio);
-$("miniPlay").addEventListener("click", toggleAudio);
-audio.addEventListener("timeupdate", mark);
-audio.addEventListener("play", updatePlayButton);
-audio.addEventListener("pause", updatePlayButton);
+        // 7. Weather API Integration
+        async function fetchWeatherData() {
+            try {
+                const res = await fetch(`https://wttr.in/${currentCity}?format=j1`);
+                const data = await res.json();
+                const curr = data.current_condition[0];
 
-/* 3. إصلاح زر الرجوع (History API + Remote Control) */
-function openModal(id) {
-  $(id).classList.add("open");
-  // إضافة حالة للـ History لمنع إغلاق التطبيق بضغطة زر رجوع
-  window.history.pushState({ modalOpen: id }, "");
-}
+                const temp = `${curr.temp_C}°C`;
+                const desc = curr.lang_ar ? curr.lang_ar[0].value : curr.weatherDesc[0].value;
 
-function closeModal(id, fromHistory = false) {
-  const modal = $(id);
-  if (modal.classList.contains("open")) {
-    modal.classList.remove("open");
-    if (!fromHistory && window.history.state?.modalOpen) {
-      window.history.back();
-    }
-  }
-}
+                document.getElementById('header-temp').textContent = temp;
+                document.getElementById('header-city').textContent = `${currentCity}, DE`;
+                document.getElementById('weather-temp-large').textContent = temp;
+                document.getElementById('weather-desc').textContent = desc;
+                
+                document.getElementById('weather-humidity').textContent = `${curr.humidity}%`;
+                document.getElementById('weather-wind').textContent = `${curr.windspeedKmph} km/h`;
+                document.getElementById('weather-pressure').textContent = `${curr.pressure} hPa`;
+            } catch(e) {
+                document.getElementById('weather-desc').textContent = "الطقس غير متاح حالياً";
+            }
+        }
 
-function closeAllModals() {
-  ["quranModal", "weatherModal", "exitModal"].forEach(id => closeModal(id));
-}
+        function changeCity() {
+            const input = document.getElementById('city-input').value.trim();
+            if(input) {
+                currentCity = input;
+                fetchWeatherData();
+                fetchPrayerTimes();
+                closeWeatherModal();
+                showToast(`تم تغيير المدينة إلى ${currentCity}`);
+            }
+        }
 
-// الاستجابة لزر الرجوع عبر History API (Android System Back)
-window.addEventListener("popstate", (e) => {
-  const openModalEl = document.querySelector(".modal-backdrop.open");
-  if (openModalEl) {
-    openModalEl.classList.remove("open");
-  }
-});
+        // 8. Modals Focus Trap & Remote Navigation Control
+        function openQuranModal() {
+            document.getElementById('modal-quran').classList.remove('hidden');
+            focusModalFirstElement('modal-quran');
+        }
 
-// التعامل مع الخروج والريموت
-function handleBackAction() {
-  const openModalEl = document.querySelector(".modal-backdrop.open");
-  
-  if (openModalEl) {
-    // إغلاق النافذة المفتوحة بضغطة واحدة فوراً
-    closeModal(openModalEl.id);
-    backPressCount = 0;
-  } else {
-    // في الشاشة الرئيسية: يلزم ضغطتان متتاليتان لإظهار نافذة تأكيد الخروج
-    backPressCount++;
-    clearTimeout(backTimer);
-    backTimer = setTimeout(() => backPressCount = 0, 2500);
-    
-    if (backPressCount >= 2) {
-      backPressCount = 0;
-      openModal("exitModal");
-    }
-  }
-}
+        function closeQuranModal() {
+            document.getElementById('modal-quran').classList.add('hidden');
+            stopAudio();
+            document.getElementById('btn-quran-open').focus();
+        }
 
-$("openQuran").addEventListener("click", () => openModal("quranModal"));
-$("surah").addEventListener("change", () => loadSelectedSurah(false));
-$("reciter").addEventListener("change", () => loadSelectedSurah(false));
-$("weatherCard").addEventListener("click", () => openModal("weatherModal"));
-$("closeQuran").addEventListener("click", () => closeModal("quranModal"));
-$("closeWeather").addEventListener("click", () => closeModal("weatherModal"));
-$("cancelExit").addEventListener("click", () => closeModal("exitModal"));
-$("confirmExit").addEventListener("click", () => {
-  if (window.AndroidTV && typeof window.AndroidTV.exitApp === "function") {
-    window.AndroidTV.exitApp();
-  } else {
-    closeModal("exitModal");
-  }
-});
+        function openWeatherModal() {
+            document.getElementById('modal-weather').classList.remove('hidden');
+            focusModalFirstElement('modal-weather');
+        }
 
-["quranModal", "weatherModal", "exitModal"].forEach(id => $(id).addEventListener("click", e => {
-  if (e.target === $(id)) closeModal(id);
-}));
+        function closeWeatherModal() {
+            document.getElementById('modal-weather').classList.add('hidden');
+            document.getElementById('btn-weather-open').focus();
+        }
 
-/* التنقل بالريموت ومفاتيح الكنترول */
-document.addEventListener("keydown", function(event) {
-  const key = event.key;
-  const backKeys = ["Escape", "Backspace", "BrowserBack", "GoBack"];
-  
-  if (backKeys.includes(key) || event.keyCode === 4) {
-    event.preventDefault();
-    handleBackAction();
-    return;
-  }
+        function openExitModal() {
+            document.getElementById('modal-exit').classList.remove('hidden');
+            focusModalFirstElement('modal-exit');
+        }
 
-  const activeModal = document.querySelector(".modal-backdrop.open");
-  if (activeModal && activeModal.id === "weatherModal") {
-    const scrollArea = $("weatherScrollArea");
-    if (key === "ArrowDown") { scrollArea.scrollTop += 50; return; }
-    if (key === "ArrowUp") { scrollArea.scrollTop -= 50; return; }
-  }
+        function closeExitModal() {
+            document.getElementById('modal-exit').classList.add('hidden');
+            document.getElementById('brand-logo').focus();
+        }
 
-  const focusables = Array.from(document.querySelectorAll("button:not(:disabled), select, [tabindex='0']"))
-    .filter(el => el.offsetWidth > 0 && el.offsetHeight > 0);
-  
-  if (!focusables.length) return;
-  let index = focusables.indexOf(document.activeElement);
+        function confirmExitApp() {
+            showToast("إغلاق التطبيق...");
+            setTimeout(() => {
+                window.close();
+                // Fallback for browsers
+                document.body.innerHTML = `
+                    <div class="h-screen flex items-center justify-center text-center p-6 bg-black text-gray-400">
+                        <div>
+                            <i class="fas fa-power-off text-5xl mb-4 text-red-500"></i>
+                            <h2 class="text-2xl text-white font-bold">تم إغلاق التطبيق</h2>
+                            <p class="mt-2 text-sm">يمكنك الآن إغلاق النافذة أو الضغط على زر الصفحة الرئيسية بالريموت.</p>
+                        </div>
+                    </div>
+                `;
+            }, 800);
+        }
 
-  if (["ArrowDown", "ArrowLeft"].includes(key)) {
-    event.preventDefault();
-    index = (index + 1) % focusables.length;
-    focusables[index].focus();
-  } else if (["ArrowUp", "ArrowRight"].includes(key)) {
-    event.preventDefault();
-    index = (index - 1 + focusables.length) % focusables.length;
-    focusables[index].focus();
-  } else if (key === "Enter" || key === " ") {
-    if (document.activeElement && document.activeElement.tagName === "BUTTON") {
-      event.preventDefault();
-      document.activeElement.click();
-    }
-  }
-});
+        function focusModalFirstElement(modalId) {
+            const modal = document.getElementById(modalId);
+            const focusables = modal.querySelectorAll('.focusable, input, button');
+            if(focusables.length > 0) {
+                focusables[0].focus();
+            }
+        }
 
-// بدء التشغيل
-updateCityLabel();
-loadPrayerTimes();
-loadWeather();
-loadReaders();
-</script>
+        // 9. Remote Control Key Event Interceptors & Focus Trap Engine
+        function setupMediaKeysAndRemote() {
+            document.addEventListener('keydown', (e) => {
+                const activeModal = getActiveModal();
+
+                // Media Control Key Handlers (Physical Play/Pause/Next/Prev/Stop buttons on Smart TV Remote)
+                switch(e.keyCode || e.key) {
+                    case 179: // MediaPlayPause
+                    case 85:  // Play/Pause Keycode
+                        e.preventDefault();
+                        toggleAudioPlay();
+                        return;
+                    case 87:  // MediaTrackNext
+                    case 176: // FastForward / Next
+                        e.preventDefault();
+                        playNextAyah();
+                        return;
+                    case 88:  // MediaTrackPrevious
+                    case 177: // Rewind / Prev
+                        e.preventDefault();
+                        playPrevAyah();
+                        return;
+                    case 178: // MediaStop
+                        e.preventDefault();
+                        stopAudio();
+                        return;
+                }
+
+                // Back / Escape Button Processing (KeyCode 4 = Android TV Back, 27 = Esc)
+                if (e.keyCode === 4 || e.key === 'Escape' || e.keyCode === 27) {
+                    e.preventDefault();
+                    if (activeModal) {
+                        // Close currently open modal
+                        if (activeModal.id === 'modal-quran') closeQuranModal();
+                        else if (activeModal.id === 'modal-weather') closeWeatherModal();
+                        else if (activeModal.id === 'modal-exit') closeExitModal();
+                    } else {
+                        // Main screen back double-press handler
+                        backPressCounter++;
+                        if (backPressCounter === 1) {
+                            showToast("اضغط مرة أخرى فوراً لتأكيد الخروج");
+                            backPressTimer = setTimeout(() => {
+                                backPressCounter = 0;
+                            }, 2000);
+                        } else if (backPressCounter >= 2) {
+                            clearTimeout(backPressTimer);
+                            backPressCounter = 0;
+                            openExitModal();
+                        }
+                    }
+                    return;
+                }
+
+                // Focus Trap inside Modal Navigation (Prevent leaking to background)
+                if (activeModal) {
+                    handleModalNavigation(e, activeModal);
+                } else {
+                    handleGridNavigation(e);
+                }
+            });
+        }
+
+        function getActiveModal() {
+            const modals = ['modal-quran', 'modal-weather', 'modal-exit'];
+            for(let id of modals) {
+                const el = document.getElementById(id);
+                if(el && !el.classList.contains('hidden')) return el;
+            }
+            return null;
+        }
+
+        // Precise Grid Focus Navigation inside Modals
+        function handleModalNavigation(e, modal) {
+            const focusables = Array.from(modal.querySelectorAll('.focusable:not([disabled])'));
+            const current = document.activeElement;
+            const index = focusables.indexOf(current);
+
+            if (index === -1) {
+                if(focusables.length > 0) focusables[0].focus();
+                return;
+            }
+
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                if (index < focusables.length - 1) {
+                    e.preventDefault();
+                    focusables[index + 1].focus();
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                if (index > 0) {
+                    e.preventDefault();
+                    focusables[index - 1].focus();
+                }
+            }
+        }
+
+        // Directional Grid Focus Navigation for Main Dashboard
+        function handleGridNavigation(e) {
+            const focusables = Array.from(document.querySelectorAll('body > div > header .focusable, body > div > main .focusable'));
+            const current = document.activeElement;
+            let index = focusables.indexOf(current);
+
+            if (index === -1) {
+                focusables[0].focus();
+                return;
+            }
+
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (index > 0) focusables[index - 1].focus();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (index < focusables.length - 1) focusables[index + 1].focus();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (index + 2 < focusables.length) focusables[index + 2].focus();
+                else if (index < focusables.length - 1) focusables[index + 1].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (index - 2 >= 0) focusables[index - 2].focus();
+                else if (index > 0) focusables[index - 1].focus();
+            }
+        }
+    </script>
 </body>
 </html>
