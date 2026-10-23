@@ -225,9 +225,9 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 #weatherModal #modalFeels{font-size:clamp(9px,.95vw,11px);line-height:1.1;margin-top:2px}
 #weatherModal .section-title{font-size:clamp(10px,1.05vw,13px);margin:2px 0 0;line-height:1.15}
 #weatherModal .weather-days{flex:0 0 auto;gap:5px;padding:4px 2px 6px;overflow-x:auto;overflow-y:hidden}
-#weatherModal .weather-day{flex:0 0 clamp(58px,7.5vw,78px);min-height:clamp(58px,8.2vh,76px);gap:3px;padding:4px 3px;font-size:clamp(9px,.9vw,11px);border-radius:10px}
-#weatherModal .weather-day .day-icon{font-size:clamp(16px,1.7vw,21px)}
-#weatherModal .weather-day .day-range{font-size:clamp(8px,.8vw,10px)}
+#weatherModal .weather-day{flex:0 0 clamp(76px,9vw,104px);min-height:clamp(76px,9.5vh,92px);gap:5px;padding:7px 5px;font-size:clamp(11px,1.05vw,13px);border-radius:12px}
+#weatherModal .weather-day .day-icon{font-size:clamp(21px,2.1vw,27px)}
+#weatherModal .weather-day .day-range{font-size:clamp(9px,.9vw,11px)}
 #weatherModal .weather-selected-date{flex:0 0 auto;font-size:10px;margin:0;line-height:1.1}
 #weatherModal #hourlyTitle{flex:0 0 auto}
 #weatherModal .hourly{flex:0 0 auto;display:flex;gap:5px;overflow-x:auto;overflow-y:hidden;padding:4px 2px 6px;max-width:100%;scrollbar-width:thin}
@@ -339,7 +339,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
   background-color:transparent!important;
   color:inherit;
   box-shadow:0 8px 20px rgba(0,0,0,.22),0 2px 7px rgba(0,0,0,.13)!important;
-  transform:scale(1.08);
+  transform:scale(1.16);
   z-index:4;
 }
 #weatherModal .weather-days,#weatherModal .hourly{
@@ -354,6 +354,23 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 #weatherModal .weather-scene.cloudy{background:radial-gradient(ellipse at 72% 15%,#c7d5df50,transparent 34%),linear-gradient(150deg,#71879a 0%,#465d73 55%,#293d54 100%)}
 #weatherModal .weather-scene.night{background:radial-gradient(circle at 78% 18%,#f9f2ce 0 2px,transparent 3px),radial-gradient(circle at 20% 26%,#fff 0 1px,transparent 2px),radial-gradient(circle at 34% 13%,#fff 0 1px,transparent 2px),radial-gradient(circle at 55% 30%,#fff 0 1px,transparent 2px),radial-gradient(circle at 90% 40%,#fff 0 1px,transparent 2px),radial-gradient(circle at 67% 9%,#fff 0 1px,transparent 2px),linear-gradient(160deg,#050f22,#0b1d38 55%,#142b48)}
 @media(prefers-reduced-motion:reduce){#weatherModal .weather-day,#weatherModal .hour{transition:none}}
+</style>
+
+
+<style id="zikra-weather-interaction-v14">
+#weatherModal .weather-day{transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s ease;transform-origin:center;}
+#weatherModal .weather-day.selected{transform:scale(1.16);z-index:5;box-shadow:0 9px 24px #0005!important;}
+#weatherModal .hour{transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s ease;transform-origin:center;}
+#weatherModal .hour.active{transform:scale(1.13);z-index:5;box-shadow:0 8px 20px #0005!important;}
+#weatherModal .sun-marker{min-height:20px;font-size:17px;line-height:20px;}
+#weatherModal .sun-label{display:block;min-height:11px;font-size:8px;line-height:1.1;white-space:nowrap;color:#ffe7a0;}
+#weatherModal .hour-time{font-size:clamp(10px,1vw,12px);font-weight:700;}
+#weatherModal .weather-scene .weather-star{position:absolute;width:3px;height:3px;border-radius:50%;background:#fffbe0;box-shadow:0 0 7px #fff9;animation:weatherTwinkle 2.2s ease-in-out infinite alternate;}
+#weatherModal .weather-scene .weather-cloud{position:absolute;width:clamp(90px,14vw,180px);height:36px;border-radius:40px;background:#fff8;filter:blur(1px);animation:weatherCloudDrift 24s linear infinite;}
+@keyframes weatherTwinkle{from{opacity:.18;transform:scale(.65)}to{opacity:1;transform:scale(1.25)}}
+@keyframes weatherCloudDrift{from{translate:-30px 0}to{translate:120px 0}}
+@media(max-width:700px){#weatherModal .weather-day{flex-basis:76px;min-height:78px}#weatherModal .sun-label{font-size:7px}}
+@media(prefers-reduced-motion:reduce){#weatherModal .weather-day,#weatherModal .hour{transition:none!important;transform:none!important}}
 </style>
 
 </head>
@@ -453,11 +470,11 @@ function updatePrayerCountdowns(){if(!prayerTimesObj)return;const now=new Date()
 setInterval(updatePrayerCountdowns,1000);
 function condition(code){const c=T[lang].conditions;if(code===0)return{text:c.clear,icon:"☀️",cls:"sunny"};if(code===1)return{text:c.mainly,icon:"🌤️",cls:"sunny"};if(code===2)return{text:c.partly,icon:"⛅",cls:"cloudy"};if(code===3)return{text:c.cloudy,icon:"☁️",cls:"cloudy"};if([45,48].includes(code))return{text:c.fog,icon:"🌫️",cls:"cloudy"};if([51,53,55,56,57].includes(code))return{text:c.drizzle,icon:"🌦️",cls:"rainy"};if([61,63,65,66,67,80,81,82].includes(code))return{text:c.rain,icon:"🌧️",cls:"rainy"};if([71,73,75,77,85,86].includes(code))return{text:c.snow,icon:"❄️",cls:"snowy"};if([95,96,99].includes(code))return{text:c.storm,icon:"⛈️",cls:"storm"};return{text:c.other,icon:"🌥️",cls:"cloudy"}}
 function weatherIcon(code){const c=condition(code),h=new Date().getHours();return(h>=20||h<6)&&c.cls==="sunny"?"🌙":c.icon}const temp=v=>v==null?"--":Math.round(v)+"°";
-async function loadWeather(){ $("weatherCondition").textContent=T[lang].loading;try{weatherData=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=auto&forecast_days=14`);renderWeather()}catch(e){$("weatherCondition").textContent=T[lang].unavailable}}
+async function loadWeather(){ $("weatherCondition").textContent=T[lang].loading;try{weatherData=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=14`);renderWeather()}catch(e){$("weatherCondition").textContent=T[lang].unavailable}}
 function renderWeather(){
   if(!weatherData)return;
   const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard"),panel=$("datePanel"),effects=$("weatherTileEffects"),hour=new Date().getHours();
-  const isNight=(hour>=20||hour<6)&&!['rainy','snowy','storm'].includes(desc.cls);
+  const todayKey=new Date().toLocaleDateString('en-CA');const sunrise=weatherData.daily?.sunrise?.[0],sunset=weatherData.daily?.sunset?.[0];const nowMs=Date.now();const isDark=sunrise&&sunset?(nowMs<new Date(sunrise).getTime()||nowMs>=new Date(sunset).getTime()):(hour>=20||hour<6);const isNight=isDark&&!['rainy','snowy','storm'].includes(desc.cls);
   const cardScene=isNight?'night':desc.cls;
   document.body.classList.remove('weather-theme-sunny','weather-theme-cloudy','weather-theme-rainy','weather-theme-snowy','weather-theme-storm','weather-theme-night');
   document.body.classList.add('weather-theme-'+cardScene);
@@ -489,10 +506,21 @@ function renderWeather(){
   $("weatherExtra").textContent=`↑ ${temp(d.daily.temperature_2m_max[0])} ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;
   renderWeatherModal()
 }
-function weatherSceneClass(code,dateString){
-  const info=condition(code),now=new Date(),today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`,night=dateString===today&&(now.getHours()>=20||now.getHours()<6);
-  // Preserve rain/snow/storm animations even after dark.
+function weatherSceneClass(code,dateString,hourDateTime=null){
+  const info=condition(code),idx=weatherData?.daily?.time?.indexOf(dateString)??-1;
+  const sunrise=idx>=0?weatherData.daily.sunrise?.[idx]:null,sunset=idx>=0?weatherData.daily.sunset?.[idx]:null;
+  const target=hourDateTime?new Date(hourDateTime):new Date();
+  const night=sunrise&&sunset?(target<new Date(sunrise)||target>=new Date(sunset)):(target.getHours()>=20||target.getHours()<6);
   return night&&!['rainy','snowy','storm'].includes(info.cls)?"night":info.cls;
+}
+function setWeatherScene(sceneClass){
+  const scene=$("weatherScene");
+  if(scene.dataset.scene===sceneClass)return;
+  scene.dataset.scene=sceneClass;scene.className="weather-scene "+sceneClass;scene.replaceChildren();
+  if(['rainy','storm'].includes(sceneClass)){const count=sceneClass==='storm'?42:32;for(let i=0;i<count;i++){const drop=document.createElement('span');drop.className='rain-drop';drop.style.left=((i*37+9)%100)+'%';drop.style.setProperty('--rain-delay',(-((i*17)%29)/10)+'s');drop.style.setProperty('--rain-duration',(sceneClass==='storm'?.48:.72)+((i*13)%42)/100+'s');drop.style.opacity=String(.42+((i*7)%50)/100);scene.append(drop)}}
+  else if(sceneClass==='snowy'){for(let i=0;i<32;i++){const flake=document.createElement('span');flake.className='modal-snow-flake';flake.textContent='❄';flake.style.left=((i*31+4)%100)+'%';flake.style.setProperty('--rain-delay',(-((i*13)%35)/10)+'s');flake.style.setProperty('--snow-duration',(3+((i*7)%30)/10)+'s');scene.append(flake)}}
+  else if(sceneClass==='night'){for(let i=0;i<35;i++){const star=document.createElement('span');star.className='weather-star';star.style.left=((i*31+7)%98)+'%';star.style.top=((i*19+11)%84)+'%';star.style.animationDelay=(-i*.31)+'s';scene.append(star)}}
+  else if(sceneClass==='cloudy'){for(let i=0;i<5;i++){const cloud=document.createElement('span');cloud.className='weather-cloud';cloud.style.left=((i*23+3)%90)+'%';cloud.style.top=(10+(i%3)*28)+'%';cloud.style.animationDelay=(-i*1.7)+'s';scene.append(cloud)}}
 }
 function scrollWeatherDayIntoView(button){
   if(!button)return;
@@ -559,38 +587,35 @@ function renderWeatherModal(){
   $("modalTemp").textContent=isToday?temp(c.temperature_2m):temp(daily.temperature_2m_max[idx]);
   $("modalCondition").textContent=desc.text;
   $("modalFeels").textContent=isToday?`${t.feels}: ${temp(c.apparent_temperature)}`:(lang==="ar"?"العظمى / الصغرى: ":lang==="de"?"Höchst-/Tiefstwert: ":"High / low: ")+temp(daily.temperature_2m_max[idx])+" / "+temp(daily.temperature_2m_min[idx]);
-  const scene=$("weatherScene"),sceneClass="weather-scene "+weatherSceneClass(code,date);
-  if(scene.className!==sceneClass){
-    scene.className=sceneClass;scene.replaceChildren();
-    if(["rainy","storm"].includes(sceneClass.replace("weather-scene ",""))){
-      const count=sceneClass.endsWith("storm")?42:32;
-      for(let i=0;i<count;i++){
-        const drop=document.createElement("span");drop.className="rain-drop";
-        drop.style.left=((i*37+9)%100)+"%";
-        drop.style.setProperty("--rain-delay",(-((i*17)%29)/10)+"s");
-        drop.style.setProperty("--rain-duration",(sceneClass.endsWith("storm")?0.48:0.72)+((i*13)%42)/100+"s");
-        drop.style.opacity=String(.42+((i*7)%50)/100);
-        scene.append(drop);
-      }
-    }else if(sceneClass.endsWith("snowy")){
-      for(let i=0;i<32;i++){const flake=document.createElement("span");flake.className="modal-snow-flake";flake.textContent="❄";flake.style.left=((i*31+4)%100)+"%";flake.style.setProperty("--rain-delay",(-((i*13)%35)/10)+"s");flake.style.setProperty("--snow-duration",(3+((i*7)%30)/10)+"s");scene.append(flake)}
-    }
-  }
+  const sceneClass=weatherSceneClass(code,date);
+  setWeatherScene(sceneClass);
   [["humidityLabel","humidity"],["windLabel","wind"],["maxLabel","max"],["minLabel","min"],["rainLabel","rain"],["uvLabel","uv"]].forEach(([id,k])=>$(id).textContent=t[k]);
   $("humidityValue").textContent=isToday?c.relative_humidity_2m+"%":"—";$("windValue").textContent=isToday?Math.round(c.wind_speed_10m)+" km/h":"—";
   $("maxValue").textContent=temp(daily.temperature_2m_max[idx]);$("minValue").textContent=temp(daily.temperature_2m_min[idx]);
   $("rainValue").textContent=(daily.precipitation_probability_max?.[idx]??0)+"%";$("uvValue").textContent=daily.uv_index_max?.[idx]??"--";
   $("hourlyTitle").textContent=t.hourly;$("dailyTitle").textContent=t.daily;renderWeatherDays();
   const h=d.hourly,now=new Date();let start=isToday?h.time.findIndex(x=>new Date(x)>=now):h.time.findIndex(x=>x.slice(0,10)===date);if(start<0)start=0;
-  $("hourlyForecast").replaceChildren();
-  for(let i=start;i<Math.min(start+(isToday?12:24),h.time.length)&&h.time[i].slice(0,10)===date;i++){
-    const item=document.createElement("div");item.className="hour";item.tabIndex=0;item.setAttribute("role","group");
-    const tm=document.createElement("div");tm.textContent=new Intl.DateTimeFormat(lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",{hour:"2-digit",minute:"2-digit"}).format(new Date(h.time[i]));
-    const ic=document.createElement("div");ic.className="hour-icon";ic.textContent=condition(h.weather_code[i]).icon;const te=document.createElement("strong");te.textContent=temp(h.temperature_2m[i]);const ra=document.createElement("div");ra.textContent=(h.precipitation_probability?.[i]??0)+"%";item.append(tm,ic,te,ra);
-    const activateHour=()=>{document.querySelectorAll("#hourlyForecast .hour.active").forEach(x=>x.classList.remove("active"));item.classList.add("active");item.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});};
-    item.addEventListener("pointerenter",activateHour);item.addEventListener("focus",activateHour);item.addEventListener("click",activateHour);
-    $("hourlyForecast").append(item);
+  const hourBox=$("hourlyForecast");hourBox.replaceChildren();
+  const sunrise=daily.sunrise?.[idx],sunset=daily.sunset?.[idx];
+  for(let i=start;i<h.time.length&&h.time[i].slice(0,10)===date;i++){
+    const item=document.createElement("div");item.className="hour";item.tabIndex=0;item.setAttribute("role","group");item.dataset.hourIndex=String(i);
+    const dt=new Date(h.time[i]),timeLabel=new Intl.DateTimeFormat(lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",{hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(dt);
+    const tm=document.createElement('div');tm.className='hour-time';tm.textContent=timeLabel;
+    const marker=document.createElement('div');marker.className='sun-marker';
+    const sameHour=(a,b)=>a&&b&&new Date(a).getHours()===new Date(b).getHours();
+    if(sameHour(h.time[i],sunrise)){marker.textContent='🌅';marker.title=lang==='ar'?'الشروق':lang==='de'?'Sonnenaufgang':'Sunrise';marker.setAttribute('aria-label',marker.title);}
+    else if(sameHour(h.time[i],sunset)){marker.textContent='🌇';marker.title=lang==='ar'?'الغروب':lang==='de'?'Sonnenuntergang':'Sunset';marker.setAttribute('aria-label',marker.title);}
+    const ic=document.createElement("div");ic.className="hour-icon";ic.textContent=condition(h.weather_code[i]).icon;
+    const te=document.createElement("strong");te.textContent=temp(h.temperature_2m[i]);
+    const ra=document.createElement("div");ra.className='hour-rain';ra.textContent=(h.precipitation_probability?.[i]??0)+"%";
+    const eventLabel=document.createElement('small');eventLabel.className='sun-label';eventLabel.textContent=marker.title||'';
+    item.append(tm,marker,ic,te,ra,eventLabel);
+    const activateHour=()=>{hourBox.querySelectorAll('.hour.active').forEach(x=>x.classList.remove('active'));item.classList.add('active');setWeatherScene(weatherSceneClass(h.weather_code[i],date,h.time[i]));item.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});};
+    item.addEventListener('pointerenter',activateHour);item.addEventListener('focus',activateHour);item.addEventListener('click',activateHour);
+    hourBox.append(item);
   }
+  const firstHour=hourBox.querySelector('.hour');if(firstHour){firstHour.classList.add('active');setWeatherScene(weatherSceneClass(Number(h.weather_code[start]),date,h.time[start]));}
+
 }
 function openModal(id){
   previousFocus=document.activeElement;
