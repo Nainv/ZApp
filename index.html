@@ -553,6 +553,18 @@ function renderReaderOptions(){
   else {const preferred=readers.find(r=>/مشاري.*العفاسي|mishary.*afasy/i.test(r.name))||readers.find(r=>Number(r.id)===5)||readers[0];if(preferred)select.value=String(preferred.id)}
 }
 $("reciter").addEventListener("change",()=>{const first=$("surahIndexGrid").querySelector(".surah-item");if(first){first.focus();qmsg(lang==="ar"?"اختر السورة لبدء التلاوة مباشرة.":"Choose a surah to start playback.")}});
+// Android TV remotes may send Enter/OK without opening a native HTML select in WebView.
+// Explicitly activate the focused reciter selector so OK opens its choices.
+$("reciter").addEventListener("keydown",ev=>{
+  if(ev.key==="Enter"||ev.key===" "||ev.keyCode===13||ev.keyCode===23){
+    ev.preventDefault();ev.stopPropagation();
+    const el=ev.currentTarget;
+    el.click();
+  }
+},true);
+$("reciter").addEventListener("keyup",ev=>{
+  if(ev.key==="Enter"||ev.key===" "||ev.keyCode===13||ev.keyCode===23){ev.preventDefault();ev.stopPropagation()}
+},true);
 async function loadReaders(){
   try{
     let all=[];
