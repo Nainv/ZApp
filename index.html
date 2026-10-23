@@ -850,6 +850,31 @@ function getVisibleFocusable(root){
 
 function moveDirectionalFocus(direction){
   if(!Object.values(ZIKRA_DPAD_KEYS).includes(direction))return;
+  // Adhan voice picker is a dedicated TV-remote list, using the proven Quran reciter-index pattern.
+  const adhanModal=$("adhanSettingsModal"), adhanList=$("adhanVoiceOptions");
+  if(adhanModal && adhanModal.classList.contains("open")){
+    if(adhanList && !adhanList.hidden){
+      const options=Array.from(adhanList.querySelectorAll("button[data-voice]"));
+      if(options.length){
+        let ix=options.indexOf(document.activeElement); if(ix<0)ix=0;
+        if(direction==="down"||direction==="right")ix=(ix+1)%options.length;
+        else ix=(ix-1+options.length)%options.length;
+        options[ix].focus({preventScroll:true});
+        options[ix].scrollIntoView({block:"nearest",behavior:"auto"});
+      }
+      return;
+    }
+    const active=document.activeElement;
+    if(direction==="down" && active===$("adhanVoiceButton")){$("adhanEnabledToggle").focus({preventScroll:true});return;}
+    if(direction==="up" && active===$("adhanEnabledToggle")){$("adhanVoiceButton").focus({preventScroll:true});return;}
+    if(direction==="down" && active===$("adhanEnabledToggle")){$("adhanPreviewBtn").focus({preventScroll:true});return;}
+    if(direction==="up" && active===$("adhanPreviewBtn")){$("adhanEnabledToggle").focus({preventScroll:true});return;}
+    if(direction==="right" && active===$("adhanPreviewBtn")){$("adhanSaveBtn").focus({preventScroll:true});return;}
+    if(direction==="left" && active===$("adhanSaveBtn")){$("adhanPreviewBtn").focus({preventScroll:true});return;}
+    if(direction==="up" && active===$("adhanSaveBtn")){$("adhanEnabledToggle").focus({preventScroll:true});return;}
+    if(direction==="down" && active===$("adhanCloseBtn")){$("adhanVoiceButton").focus({preventScroll:true});return;}
+    return;
+  }
   // Language dropdown is a focus trap: never let the remote jump to weather or other page controls.
   const languageMenu=$("languageMenu");
   if(languageMenu && !languageMenu.hidden){
@@ -1009,15 +1034,35 @@ function setAdhanVoice(voice){
   $("adhanVoiceOptions").querySelectorAll("[data-voice]").forEach(b=>{b.setAttribute("aria-selected",String(b.dataset.voice===voice));});
 }
 function adhanVoiceListOpen(){return !$("adhanVoiceOptions").hidden;}
-function openAdhanVoiceList(){const list=$("adhanVoiceOptions");list.hidden=false;$("adhanVoiceButton").setAttribute("aria-expanded","true");const selected=list.querySelector('[data-voice="'+adhanSettings[adhanEditingPrayer].voice+'"]')||list.querySelector("[data-voice]");selected?.focus({preventScroll:true});}
-function closeAdhanVoiceList(returnFocus=true){const list=$("adhanVoiceOptions");if(list.hidden)return false;list.hidden=true;$("adhanVoiceButton").setAttribute("aria-expanded","false");if(returnFocus)$("adhanVoiceButton").focus({preventScroll:true});return true;}
+function openAdhanVoiceList(){const list=$("adhanVoiceOptions"),button=$("adhanVoiceButton");if(!list||!button)return;list.hidden=false;button.setAttribute("aria-expanded","true");const selected=list.querySelector('[data-voice="'+adhanDraftVoice+'"]')||list.querySelector("[data-voice]");if(selected){selected.focus({preventScroll:true});selected.scrollIntoView({block:"nearest",behavior:"auto"});}}
+function closeAdhanVoiceList(returnFocus=true){adhanPreviewSequence++;try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(e){}const list=$("adhanVoiceOptions");if(list.hidden)return false;list.hidden=true;$("adhanVoiceButton").setAttribute("aria-expanded","false");if(returnFocus)$("adhanVoiceButton").focus({preventScroll:true});return true;}
 $("adhanVoiceButton").addEventListener("click",()=>adhanVoiceListOpen()?closeAdhanVoiceList(false):openAdhanVoiceList());
 $("adhanVoiceOptions").querySelectorAll("[data-voice]").forEach((button,index,all)=>{
   button.addEventListener("click",()=>{setAdhanVoice(button.dataset.voice);closeAdhanVoiceList(true);});
+  // Preview immediately when the TV remote moves focus to a voice.
+  button.addEventListener("focus",()=>{
+    if(!adhanVoiceListOpen() || !$("adhanSettingsModal").classList.contains("open"))return;
+    setAdhanVoice(button.dataset.voice);
+    previewAdhan(button.dataset.voice);
+  });
 });
 function openAdhanSettings(prayerKey){if(!ADHAN_PRAYERS.includes(prayerKey))return;adhanEditingPrayer=prayerKey;adhanModalReturnFocus=document.activeElement;const modal=$("adhanSettingsModal");$("adhanSettingsPrayerName").textContent=prayerDisplayName(prayerKey);setAdhanVoice(adhanSettings[prayerKey].voice);$("adhanEnabledToggle").checked=adhanSettings[prayerKey].enabled;$("adhanStatus").textContent="اختيارات كل صلاة محفوظة بشكل مستقل، ولا تتغير عند تحديث البيانات.";modal.classList.add("open");$("adhanVoiceButton").focus({preventScroll:true});}
-function closeAdhanSettings(){const modal=$("adhanSettingsModal");if(!modal.classList.contains("open"))return;modal.classList.remove("open");try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(e){}if(adhanModalReturnFocus&&adhanModalReturnFocus.isConnected)adhanModalReturnFocus.focus({preventScroll:true});else nextPrayerCard()?.focus({preventScroll:true});}
-async function previewAdhan(){const voice=adhanDraftVoice;const url=ADHAN_AUDIO_URLS[voice];if(!url)return;try{adhanAudio.pause();adhanAudio=new Audio(url);adhanAudio.preload="none";$("adhanStatus").textContent="جارٍ تحميل صوت الأذان من الإنترنت…";await adhanAudio.play();$("adhanStatus").textContent="يتم تشغيل معاينة الأذان.";}catch(e){$("adhanStatus").textContent="تعذّر تشغيل الصوت. تأكد من اتصال الإنترنت ثم جرّب مرة أخرى.";}}
+function closeAdhanSettings(){adhanPreviewSequence++;const modal=$("adhanSettingsModal");if(!modal.classList.contains("open"))return;modal.classList.remove("open");try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(e){}if(adhanModalReturnFocus&&adhanModalReturnFocus.isConnected)adhanModalReturnFocus.focus({preventScroll:true});else nextPrayerCard()?.focus({preventScroll:true});}
+let adhanPreviewSequence=0;
+async function previewAdhan(voiceOverride){
+  const voice=typeof voiceOverride==="string"?voiceOverride:adhanDraftVoice;
+  const url=ADHAN_AUDIO_URLS[voice];if(!url)return;
+  const sequence=++adhanPreviewSequence;
+  try{
+    adhanAudio.pause();adhanAudio.currentTime=0;
+    adhanAudio=new Audio(url);adhanAudio.preload="auto";
+    $("adhanStatus").textContent="جارٍ تحميل صوت "+(ADHAN_VOICE_LABELS[voice]||"الأذان")+"…";
+    await adhanAudio.play();
+    if(sequence===adhanPreviewSequence)$("adhanStatus").textContent="يتم تشغيل صوت "+(ADHAN_VOICE_LABELS[voice]||"الأذان")+" تلقائياً.";
+  }catch(e){
+    if(sequence===adhanPreviewSequence)$("adhanStatus").textContent="تعذّر تشغيل الصوت. تأكد من اتصال الإنترنت.";
+  }
+}
 $("adhanCloseBtn").addEventListener("click",closeAdhanSettings);
 $("adhanSettingsModal").addEventListener("click",e=>{if(e.target===$("adhanSettingsModal"))closeAdhanSettings();});
 $("adhanPreviewBtn").addEventListener("click",previewAdhan);
@@ -1718,6 +1763,97 @@ body[data-layout-mode="tv"] .prayer-strip .prayer{
 @media(prefers-reduced-motion:reduce){.prayer-strip .prayer{transition:none!important}}
 </style>
 
+
+<style id="prayer-3d-upcoming-v5">
+/* Make the upcoming prayer unmistakably raised, illuminated and zoomed, without a border frame. */
+.prayer-strip .prayer.next-prayer:not(:focus):not(.remote-selected){
+  transform:perspective(650px) translateY(-4px) scale(1.055)!important;
+  background:linear-gradient(150deg,rgba(255,255,255,.98),rgba(220,238,205,.90) 58%,rgba(191,216,177,.78))!important;
+  box-shadow:0 3px 0 rgba(91,122,75,.28),0 9px 17px rgba(39,68,37,.22),inset 0 2px 5px rgba(255,255,255,.95),inset 0 -3px 6px rgba(83,120,69,.12)!important;
+  z-index:4!important;
+}
+.prayer-strip .prayer.next-prayer .p-name{color:#365d31!important;font-weight:900!important;text-shadow:0 1px 0 rgba(255,255,255,.9)!important}
+.prayer-strip .prayer.next-prayer .p-time{color:#203e24!important;text-shadow:0 1px 0 rgba(255,255,255,.8)!important}
+.prayer-strip .prayer.remote-selected,
+.prayer-strip .prayer:focus,
+.prayer-strip .prayer:focus-visible{
+  transform:perspective(650px) translateY(-6px) scale(1.10)!important;
+  background:linear-gradient(150deg,#ffffff,rgba(236,247,226,.98) 55%,rgba(205,229,190,.92))!important;
+  box-shadow:0 4px 0 rgba(79,112,65,.34),0 12px 24px rgba(32,58,30,.28),0 0 20px rgba(210,244,183,.58),inset 0 2px 7px rgba(255,255,255,.98),inset 0 -4px 8px rgba(78,115,62,.13)!important;
+  border:0!important;outline:none!important;z-index:10!important;
+}
+.prayer-strip{overflow:visible!important;isolation:isolate!important}
+.prayer-strip .prayer{transform-origin:center center!important;will-change:transform,box-shadow!important}
+</style>
+<script id="prayer-remote-hard-fix-v5">
+(function(){
+  const $=id=>document.getElementById(id);
+  const row=()=>document.querySelector('.prayer-strip');
+  const cards=()=>Array.from(document.querySelectorAll('.prayer-strip .prayer'));
+  const nextCard=()=>document.querySelector('.prayer-strip .prayer.next-prayer')||$('box-Fajr');
+  const modalOpen=()=>!!$('adhanSettingsModal')?.classList.contains('open');
+  const voiceList=()=>$('adhanVoiceOptions');
+  const voiceItems=()=>Array.from(voiceList()?.querySelectorAll('[data-voice]')||[]);
+  function mark(card){cards().forEach(c=>c.classList.toggle('remote-selected',c===card));}
+  function focusCard(card){if(!card)return;mark(card);card.focus({preventScroll:true});try{card.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});}catch(e){}}
+  function focusUpcoming(){focusCard(nextCard());}
+  function keyName(e){if(e.key)return e.key;return ({19:'ArrowUp',20:'ArrowDown',21:'ArrowLeft',22:'ArrowRight',23:'Enter',66:'Enter',4:'Escape'})[e.keyCode]||'';}
+  // Window capture runs before document-level app handlers, so the general D-pad manager cannot steal these keys.
+  window.addEventListener('keydown',function(e){
+    const key=keyName(e);
+    if(modalOpen()){
+      const list=voiceList(),items=voiceItems(),active=document.activeElement,idx=items.indexOf(active);
+      const isBack=['Escape','Backspace','BrowserBack','GoBack'].includes(key)||e.keyCode===4;
+      if(isBack){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(list&&!list.hidden){adhanPreviewSequence++;try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(err){}list.hidden=true;$('adhanVoiceButton').setAttribute('aria-expanded','false');$('adhanVoiceButton').focus({preventScroll:true});}else $('adhanCloseBtn')?.click();return;}
+      if(list&&!list.hidden){
+        if(['ArrowDown','ArrowRight','ArrowUp','ArrowLeft','Enter',' '].includes(key)){
+          e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+          if(idx<0){(items.find(b=>b.getAttribute('aria-selected')==='true')||items[0])?.focus({preventScroll:true});return;}
+          if(key==='Enter'||key===' '){const b=items[idx];if(typeof setAdhanVoice==='function')setAdhanVoice(b.dataset.voice);adhanPreviewSequence++;try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(err){}list.hidden=true;$('adhanVoiceButton').setAttribute('aria-expanded','false');$('adhanVoiceButton').focus({preventScroll:true});return;}
+          const delta=(key==='ArrowDown'||key==='ArrowRight')?1:-1;items[(idx+delta+items.length)%items.length]?.focus({preventScroll:true});return;
+        }
+        return;
+      }
+      if(key==='Enter'||key===' '){
+        const target=document.activeElement;
+        if(target===$('adhanVoiceButton')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(typeof openAdhanVoiceList==='function')openAdhanVoiceList();else {list.hidden=false;items[0]?.focus({preventScroll:true});}return;}
+        if(target===$('adhanSaveBtn')||target===$('adhanPreviewBtn')||target===$('adhanCloseBtn')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();target.click();return;}
+        if(target===$('adhanEnabledToggle')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();target.checked=!target.checked;return;}
+      }
+      if(key.startsWith('Arrow')){
+        const ids=['adhanVoiceButton','adhanEnabledToggle','adhanPreviewBtn','adhanSaveBtn','adhanCloseBtn'];
+        const target=document.activeElement,idx=ids.indexOf(target?.id);if(idx<0)return;
+        e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+        let next=idx;
+        if(key==='ArrowDown')next=Math.min(ids.length-1,idx+1);
+        else if(key==='ArrowUp')next=Math.max(0,idx-1);
+        else if(key==='ArrowRight'&&target.id==='adhanPreviewBtn')next=3;
+        else if(key==='ArrowLeft'&&target.id==='adhanSaveBtn')next=2;
+        $(ids[next])?.focus({preventScroll:true});return;
+      }
+      return;
+    }
+    if($('weatherModal')?.classList.contains('open'))return;
+    const arr=cards(),idx=arr.indexOf(document.activeElement),target=document.activeElement;
+    if(idx>=0){
+      if(['ArrowLeft','ArrowRight'].includes(key)){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();const delta=key==='ArrowLeft'?1:-1;focusCard(arr[(idx+delta+arr.length)%arr.length]);return;}
+      if(key==='ArrowUp'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();mark(nextCard());$('datePanel')?.focus({preventScroll:true});return;}
+      if(key==='ArrowDown'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();mark(nextCard());$('memoryCard')?.focus({preventScroll:true});return;}
+      if(key==='Enter'||key===' '){const prayer=arr[idx].id.replace('box-','');if(['Fajr','Dhuhr','Asr','Maghrib','Isha'].includes(prayer)){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openAdhanSettings(prayer);return;}}
+      return;
+    }
+    if(key==='ArrowDown'&&target===$('datePanel')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focusUpcoming();return;}
+    if(key==='ArrowUp'&&target===$('memoryCard')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focusUpcoming();return;}
+  },true);
+  // On pointer or programmatic focus changes, keep the visual selection synced.
+  document.addEventListener('focusin',e=>{const c=e.target?.closest?.('.prayer-strip .prayer');if(c)mark(c);});
+  // Restore upcoming prayer highlight whenever focus leaves the prayer row.
+  document.addEventListener('focusout',e=>{if(e.target?.matches?.('.prayer-strip .prayer')){const dest=e.relatedTarget;if(!dest||!dest.closest?.('.prayer-strip'))mark(nextCard());}});
+  document.addEventListener('DOMContentLoaded',()=>{cards().forEach(c=>{c.setAttribute('tabindex','0');});mark(nextCard());});
+  mark(nextCard());
+})();
+</script>
+
 </body>
 </html>
 
@@ -1735,4 +1871,45 @@ body[data-layout-mode="tv"] .prayer-strip .prayer{
 .prayer-strip .prayer,html[data-layout-mode="tv"] .prayer-strip .prayer,body[data-layout-mode="tv"] .prayer-strip .prayer{border:0!important;min-height:clamp(78px,10.7vh,108px)!important;padding:clamp(6px,.7vw,9px) 3px!important;border-radius:12px!important;background:rgba(255,255,255,.34)!important;}
 .prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{outline:none!important;border:0!important;transform:scale(1.045)!important;box-shadow:0 5px 14px rgba(30,50,32,.16)!important;background:rgba(255,255,255,.72)!important;}
 .prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus){background:rgba(230,238,220,.48)!important;box-shadow:none!important;}
+</style>
+
+<style id="prayer-cards-unified-3d-v7">
+/* Unified final visual layer: upcoming prayer is raised and softly illuminated; remote focus gets a stronger lift. */
+.prayer-strip, html[data-layout-mode="tv"] .prayer-strip, body[data-layout-mode="tv"] .prayer-strip {
+  display:grid!important; gap:clamp(8px,1vw,14px)!important; padding:clamp(12px,1.6vh,18px) 8px!important;
+  border:0!important; outline:0!important; background:transparent!important; box-shadow:none!important;
+  overflow:visible!important; isolation:isolate!important;
+}
+.prayer-strip .prayer, html[data-layout-mode="tv"] .prayer-strip .prayer, body[data-layout-mode="tv"] .prayer-strip .prayer {
+  position:relative!important; z-index:1!important; min-width:0!important; min-height:clamp(82px,11vh,112px)!important;
+  display:flex!important; flex-direction:column!important; align-items:center!important; justify-content:center!important; gap:5px!important;
+  padding:clamp(7px,.8vw,10px) 4px!important; border:0!important; outline:0!important; border-radius:15px!important;
+  background:linear-gradient(155deg,rgba(255,255,255,.58),rgba(237,242,231,.36))!important;
+  box-shadow:0 2px 4px rgba(28,48,29,.05),inset 0 1px 0 rgba(255,255,255,.7)!important;
+  transform:perspective(700px) translateY(0) scale(1)!important; transform-origin:center center!important;
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease,filter .18s ease!important;
+  will-change:transform,box-shadow!important;
+}
+.prayer-strip .prayer .p-icon {filter:drop-shadow(0 2px 2px rgba(30,50,30,.12))!important;}
+.prayer-strip .prayer.next-prayer:not(:focus):not(.remote-selected) {
+  z-index:3!important; transform:perspective(700px) translateY(-5px) scale(1.055)!important;
+  background:linear-gradient(145deg,#ffffff 0%,#edf8e5 42%,#cfe6c1 100%)!important;
+  box-shadow:0 3px 0 rgba(83,119,68,.36),0 10px 19px rgba(42,72,36,.23),0 0 17px rgba(202,239,181,.48),
+    inset 0 2px 6px rgba(255,255,255,.98),inset 0 -4px 7px rgba(73,113,57,.15)!important;
+  filter:saturate(1.08)!important;
+}
+.prayer-strip .prayer.next-prayer .p-name {color:#315b2a!important;font-weight:900!important;text-shadow:0 1px 0 #fff!important;}
+.prayer-strip .prayer.next-prayer .p-time {color:#1f4020!important;font-weight:900!important;text-shadow:0 1px 0 rgba(255,255,255,.95)!important;}
+.prayer-strip .prayer.remote-selected, .prayer-strip .prayer:focus, .prayer-strip .prayer:focus-visible {
+  z-index:10!important; transform:perspective(700px) translateY(-7px) scale(1.105)!important;
+  border:0!important; outline:0!important;
+  background:linear-gradient(145deg,#fff 0%,#f1f9eb 45%,#d7ebca 100%)!important;
+  box-shadow:0 4px 0 rgba(74,110,60,.42),0 14px 26px rgba(28,55,28,.30),0 0 22px rgba(208,244,185,.68),
+    inset 0 3px 8px rgba(255,255,255,1),inset 0 -5px 9px rgba(68,108,52,.18)!important;
+  filter:saturate(1.12) brightness(1.025)!important;
+}
+.prayer-strip .prayer.remote-selected .p-name, .prayer-strip .prayer:focus .p-name {color:#285127!important;font-weight:900!important;}
+.prayer-strip .prayer.remote-selected .p-time, .prayer-strip .prayer:focus .p-time {color:#173b1c!important;font-weight:900!important;}
+@media(max-width:700px){.prayer-strip{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}.prayer-strip .prayer{min-height:84px!important;border-radius:13px!important}}
+@media(prefers-reduced-motion:reduce){.prayer-strip .prayer{transition:none!important}}
 </style>
