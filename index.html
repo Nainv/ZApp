@@ -1192,11 +1192,14 @@ document.addEventListener("keydown",function(event){
       event.preventDefault();event.stopImmediatePropagation();setRemotePrayerSelection(null);card.blur();$("memoryCard").focus({preventScroll:true});return;
     }
   }
-  if(key==="ArrowDown"&&active===$("datePanel")){
-    event.preventDefault();event.stopImmediatePropagation();selectPrayerCard(0,true);return;
+  // Weather/date tile -> always Fajr, regardless of the previously selected prayer.
+  const datePanel=$("datePanel"), memoryCard=$("memoryCard");
+  if(key==="ArrowDown"&&(active===datePanel||datePanel.contains(active))){
+    event.preventDefault();event.stopImmediatePropagation();selectPrayerCard(cards.indexOf($("box-Fajr")),true);return;
   }
-  if(key==="ArrowUp"&&active===$("memoryCard")){
-    event.preventDefault();event.stopImmediatePropagation();setRemotePrayerSelection(null);selectPrayerCard(0,true);return;
+  // Memory tile -> always Fajr, regardless of the previously selected prayer.
+  if(key==="ArrowUp"&&(active===memoryCard||memoryCard.contains(active))){
+    event.preventDefault();event.stopImmediatePropagation();setRemotePrayerSelection(null);selectPrayerCard(cards.indexOf($("box-Fajr")),true);return;
   }
   // Keep language-menu navigation local.
   const languageMenu=$("languageMenu");
