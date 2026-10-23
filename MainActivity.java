@@ -5,6 +5,11 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.content.pm.PackageManager;
+import android.content.pm.ActivityInfo;
+import android.Manifest;
+import android.os.Build;
+import android.widget.Toast;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -21,14 +26,21 @@ public class MainActivity extends Activity {
     private WebView webView;
     private FrameLayout root;
     private TextView errorView;
-    private static final String SITE_URL = "https://koukach91-hash.github.io/zikra-android-tv-new/";
+    // Load the bundled interface first so the app can open without internet.
+    private static final String LOCAL_URL = "file:///android_asset/index.html";
     private static final String TAG = "ZikraRemote";
     private boolean pageReady = false;
+    private static final int LOCATION_PERMISSION_REQUEST = 4101;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         hideSystemBars();
+        // Keep TV landscape; allow phones/tablets to use portrait or rotate naturally.
+        boolean isTv = getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
+        setRequestedOrientation(isTv
+                ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                : ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         root = new FrameLayout(this);
         webView = new WebView(this);
         WebSettings settings = webView.getSettings();
@@ -39,7 +51,12 @@ public class MainActivity extends Activity {
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
-        settings.setAllowFileAccess(false);
+        // Required for file:///android_asset/index.html. Keep cross-file and
+        // universal file access disabled for security.
+        settings.setAllowFileAccess(true);
+        settings.setAllowFileAccessFromFileURLs(false);
+        settings.setAllowUniversalAccessFromFileURLs(false);
+        settings.setAllowContentAccess(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         webView.setFocusable(true);
         webView.setFocusableInTouchMode(true);
@@ -63,7 +80,9 @@ public class MainActivity extends Activity {
         });
         root.addView(webView, new FrameLayout.LayoutParams(-1, -1));
         setContentView(root);
-        if (savedInstanceState == null) webView.loadUrl(SITE_URL); else webView.restoreState(savedInstanceState);
+        // Start from the bundled copy. Background content updates will be added
+        // in a separate step, without making every launch depend on GitHub Pages.
+        webView.loadUrl(LOCAL_URL);
     }
     private void hideSystemBars() {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
@@ -72,7 +91,41 @@ public class MainActivity extends Activity {
     }
     private class AndroidBridge {
         @JavascriptInterface public void exitApp() { runOnUiThread(() -> finish()); }
+        // Call this from JavaScript only when the user selects a location-based feature.
+        @JavascriptInterface public void requestLocationPermission() {
+            runOnUiThread(() -> MainActivity.this.requestLocationPermission());
+        }
+        @JavascriptInterface public boolean hasLocationPermission() {
+            return Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                    checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                    checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        }
     }
+    private void requestLocationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
+        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (webView != null && pageReady) {
+                webView.evaluateJavascript("if(window.onAndroidLocationPermissionResult)window.onAndroidLocationPermissionResult(true);", null);
+            }
+            return;
+        }
+        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                LOCATION_PERMISSION_REQUEST);
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST) {
+            boolean granted = checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                    checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+            if (webView != null && pageReady) {
+                webView.evaluateJavascript("if(window.onAndroidLocationPermissionResult)window.onAndroidLocationPermissionResult(" + granted + ");", null);
+            }
+            if (!granted) Toast.makeText(this, "لم يتم منح إذن الموقع", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void sendBackToWeb() {
         if (webView == null || !pageReady) return;
         webView.evaluateJavascript("(function(){if(typeof window.handleAndroidBack==='function'){window.handleAndroidBack();}})();", null);
@@ -87,7 +140,7 @@ public class MainActivity extends Activity {
     }
     private void retryLoading() {
         if (errorView != null) { root.removeView(errorView); errorView = null; }
-        pageReady = false; if (webView != null) webView.loadUrl(SITE_URL);
+        pageReady = false; if (webView != null) webView.loadUrl(LOCAL_URL);
     }
     private void sendDpadToWeb(String direction) {
         if (webView == null || !pageReady) {
@@ -209,8 +262,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override protected void onResume() { super.onResume(); hideSystemBars(); if (webView != null) webView.onResume(); }
+    @Override protected void onResume() {
+        super.onResume();
+        hideSystemBars();
+        if (webView != null) webView.onResume();
+    }
     @Override protected void onPause() { if (webView != null) webView.onPause(); super.onPause(); }
-    @Override protected void onSaveInstanceState(Bundle outState) { if (webView != null) webView.saveState(outState); super.onSaveInstanceState(outState); }
+    @Override protected void onSaveInstanceState(Bundle outState) {
+        // The bundled page is loaded on creation; don't restore a stale remote page state.
+        super.onSaveInstanceState(outState);
+    }
     @Override protected void onDestroy() { if (webView != null) { webView.stopLoading(); webView.destroy(); webView = null; } super.onDestroy(); }
 }
