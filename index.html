@@ -94,11 +94,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 .weather-modal-content{position:relative;z-index:1}.weather-modal-content .weather-temp{font-size:clamp(38px,5vw,58px);color:#fff}.weather-modal-content .weather-icon{font-size:42px}.weather-modal-content .section-title{color:#fff;font-size:14px;margin:12px 0 7px}
 .weather-days{display:flex;direction:ltr;gap:8px;overflow-x:auto;padding:8px 4px 14px;scrollbar-width:thin;overscroll-behavior-x:contain;scroll-behavior:smooth;max-width:100%;touch-action:pan-x}
 .weather-day{flex:0 0 88px;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:1px solid #ffffff42;border-radius:15px;background:#ffffff18;color:#fff;padding:8px 5px;font-size:12px}
-.weather-day .day-icon{font-size:23px}.weather-day .day-range{font-size:11px;white-space:nowrap}.weather-day.selected,.weather-day:focus{outline:3px solid #fff0b4;outline-offset:-3px;background:#ffffff40;border-color:#fff0b4;box-shadow:0 0 0 2px #132b45} .weather-day{cursor:pointer;flex-shrink:0;scroll-margin-inline:10px;transform:scale(1);transition:transform .22s ease,box-shadow .22s ease,outline-color .22s ease;transform-origin:center}
-.weather-day.selected,.weather-day:focus-visible{outline:2px solid #fff0b4;outline-offset:-2px;background:#ffffff18;border-color:#ffffff70;box-shadow:0 7px 20px #06182b55,0 0 0 2px #ffffff20;transform:scale(1.07);z-index:3}
-.weather-day:hover{transform:scale(1.045);box-shadow:0 6px 16px #06182b45;z-index:2}
-.weather-day.selected:hover{transform:scale(1.07)}
-@media(prefers-reduced-motion:reduce){.weather-day{transition:none}}
+.weather-day .day-icon{font-size:23px}.weather-day .day-range{font-size:11px;white-space:nowrap}.weather-day.selected,.weather-day:focus{outline:3px solid #fff0b4;outline-offset:-3px;background:#ffffff40;border-color:#fff0b4;box-shadow:0 0 0 2px #132b45}.weather-day{cursor:pointer;flex-shrink:0;scroll-margin-inline:10px}
 .weather-selected-date{font-size:12px;color:#e7f2ff;margin:2px 0 8px}
 .weather-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{border:1px solid #ffffff38;background:#ffffff18;border-radius:13px;padding:10px;color:#fff;min-height:68px}.stat-label{font-size:11px;color:#d8e6f2}.stat-value{font-size:17px;font-weight:700;margin-top:4px}
 .hourly{display:flex;direction:ltr;gap:7px;overflow-x:auto;padding:4px 3px 11px;overscroll-behavior-x:contain;scroll-behavior:smooth;max-width:100%}.hour{flex:0 0 70px;text-align:center;padding:8px 4px;border-radius:12px;background:#ffffff18;border:1px solid #ffffff30;font-size:11px;color:#fff}.hour-icon{font-size:20px;margin:4px 0}.hour:focus{outline:3px solid #fff0b4;outline-offset:-3px;background:#ffffff36;box-shadow:0 0 0 2px #132b45}.daily-list{display:none}
@@ -225,9 +221,9 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 #weatherModal #modalFeels{font-size:clamp(9px,.95vw,11px);line-height:1.1;margin-top:2px}
 #weatherModal .section-title{font-size:clamp(10px,1.05vw,13px);margin:2px 0 0;line-height:1.15}
 #weatherModal .weather-days{flex:0 0 auto;gap:5px;padding:4px 2px 6px;overflow-x:auto;overflow-y:hidden}
-#weatherModal .weather-day{flex:0 0 clamp(76px,9vw,104px);min-height:clamp(76px,9.5vh,92px);gap:5px;padding:7px 5px;font-size:clamp(11px,1.05vw,13px);border-radius:12px}
-#weatherModal .weather-day .day-icon{font-size:clamp(21px,2.1vw,27px)}
-#weatherModal .weather-day .day-range{font-size:clamp(9px,.9vw,11px)}
+#weatherModal .weather-day{flex:0 0 clamp(58px,7.5vw,78px);min-height:clamp(58px,8.2vh,76px);gap:3px;padding:4px 3px;font-size:clamp(9px,.9vw,11px);border-radius:10px}
+#weatherModal .weather-day .day-icon{font-size:clamp(16px,1.7vw,21px)}
+#weatherModal .weather-day .day-range{font-size:clamp(8px,.8vw,10px)}
 #weatherModal .weather-selected-date{flex:0 0 auto;font-size:10px;margin:0;line-height:1.1}
 #weatherModal #hourlyTitle{flex:0 0 auto}
 #weatherModal .hourly{flex:0 0 auto;display:flex;gap:5px;overflow-x:auto;overflow-y:hidden;padding:4px 2px 6px;max-width:100%;scrollbar-width:thin}
@@ -313,64 +309,26 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 </style>
 
 
-<style id="weather-carousel-polish-v2">
-/* Weather selection: zoom and soft shadow only; never add a frame or recolor the card. */
-#weatherModal .weather-day,
-#weatherModal .hour{
-  outline:none!important;
-  border-color:transparent!important;
-  background-color:transparent!important;
-  box-shadow:none;
-  transform:scale(1);
-  transition:transform .2s ease,box-shadow .2s ease;
-  transform-origin:center;
-  position:relative;
-}
-#weatherModal .weather-day.selected,
-#weatherModal .weather-day:hover,
-#weatherModal .weather-day:focus,
-#weatherModal .weather-day:focus-visible,
-#weatherModal .hour.active,
-#weatherModal .hour:hover,
-#weatherModal .hour:focus,
-#weatherModal .hour:focus-visible{
-  outline:none!important;
-  border-color:transparent!important;
-  background-color:transparent!important;
-  color:inherit;
-  box-shadow:0 8px 20px rgba(0,0,0,.22),0 2px 7px rgba(0,0,0,.13)!important;
-  transform:scale(1.16);
-  z-index:4;
-}
-#weatherModal .weather-days,#weatherModal .hourly{
-  overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-y:none;
-  scrollbar-width:none;align-items:center;scroll-snap-type:x proximity;
-  padding-top:9px;padding-bottom:9px;
-}
-#weatherModal .weather-days::-webkit-scrollbar,#weatherModal .hourly::-webkit-scrollbar{display:none}
-#weatherModal .weather-day,#weatherModal .hour{scroll-snap-align:center;flex-shrink:0}
-#weatherModal .weather-scene.sunny{background:radial-gradient(circle at 78% 18%,#fffbd2 0 5%,#ffe88a 6%,#ffcf6548 15%,transparent 29%),linear-gradient(150deg,#8ed9f8 0%,#4eafe4 46%,#2878b8 100%)}
-#weatherModal .weather-scene.sunny:before{content:"";position:absolute;width:min(28vw,260px);height:min(28vw,260px);right:8%;top:3%;border-radius:50%;background:radial-gradient(circle,#fffbd5 0 13%,#ffe88cb8 23%,#ffd15c45 51%,transparent 72%);animation:tile-sun-pulse 4s ease-in-out infinite}
-#weatherModal .weather-scene.cloudy{background:radial-gradient(ellipse at 72% 15%,#c7d5df50,transparent 34%),linear-gradient(150deg,#71879a 0%,#465d73 55%,#293d54 100%)}
-#weatherModal .weather-scene.night{background:radial-gradient(circle at 78% 18%,#f9f2ce 0 2px,transparent 3px),radial-gradient(circle at 20% 26%,#fff 0 1px,transparent 2px),radial-gradient(circle at 34% 13%,#fff 0 1px,transparent 2px),radial-gradient(circle at 55% 30%,#fff 0 1px,transparent 2px),radial-gradient(circle at 90% 40%,#fff 0 1px,transparent 2px),radial-gradient(circle at 67% 9%,#fff 0 1px,transparent 2px),linear-gradient(160deg,#050f22,#0b1d38 55%,#142b48)}
-@media(prefers-reduced-motion:reduce){#weatherModal .weather-day,#weatherModal .hour{transition:none}}
-</style>
-
-
-<style id="zikra-weather-interaction-v14">
-#weatherModal .weather-day{transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s ease;transform-origin:center;}
-#weatherModal .weather-day.selected{transform:scale(1.16);z-index:5;box-shadow:0 9px 24px #0005!important;}
-#weatherModal .hour{transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s ease;transform-origin:center;}
-#weatherModal .hour.active{transform:scale(1.13);z-index:5;box-shadow:0 8px 20px #0005!important;}
-#weatherModal .sun-marker{min-height:20px;font-size:17px;line-height:20px;}
-#weatherModal .sun-label{display:block;min-height:11px;font-size:8px;line-height:1.1;white-space:nowrap;color:#ffe7a0;}
-#weatherModal .hour-time{font-size:clamp(10px,1vw,12px);font-weight:700;}
-#weatherModal .weather-scene .weather-star{position:absolute;width:3px;height:3px;border-radius:50%;background:#fffbe0;box-shadow:0 0 7px #fff9;animation:weatherTwinkle 2.2s ease-in-out infinite alternate;}
-#weatherModal .weather-scene .weather-cloud{position:absolute;width:clamp(90px,14vw,180px);height:36px;border-radius:40px;background:#fff8;filter:blur(1px);animation:weatherCloudDrift 24s linear infinite;}
-@keyframes weatherTwinkle{from{opacity:.18;transform:scale(.65)}to{opacity:1;transform:scale(1.25)}}
-@keyframes weatherCloudDrift{from{translate:-30px 0}to{translate:120px 0}}
-@media(max-width:700px){#weatherModal .weather-day{flex-basis:76px;min-height:78px}#weatherModal .sun-label{font-size:7px}}
-@media(prefers-reduced-motion:reduce){#weatherModal .weather-day,#weatherModal .hour{transition:none!important;transform:none!important}}
+<style id="weather-interaction-fix-v2">
+/* Transparent day/hour rail: no individual frames; selection alone scales smoothly. */
+#weatherModal .weather-days,#weatherModal .hourly{align-items:center;overflow-x:auto!important;overflow-y:hidden!important;scroll-behavior:smooth;scroll-snap-type:x proximity;padding:12px 8px 14px;gap:clamp(12px,1.6vw,22px);}
+#weatherModal .weather-day{flex-basis:clamp(78px,8.8vw,104px);min-height:100px;border:1px solid transparent!important;border-radius:12px;background:transparent!important;box-shadow:none!important;outline:none!important;transform:scale(1);transition:transform .24s ease,opacity .24s ease,color .24s ease;scroll-snap-align:center;opacity:.82;}
+#weatherModal .weather-day.selected,#weatherModal .weather-day:focus-visible{transform:scale(1.19);opacity:1;color:#fff;z-index:5;text-shadow:0 2px 8px #00101f88;}
+#weatherModal .weather-day .day-icon{font-size:clamp(25px,2.6vw,34px);margin:4px 0;}
+#weatherModal .weather-day .day-range{font-size:clamp(10px,1vw,12px);}
+#weatherModal .hour{border:1px solid transparent!important;background:transparent!important;box-shadow:none;transform:scale(1);opacity:.82;transition:transform .2s ease,opacity .2s ease;scroll-snap-align:center;}
+#weatherModal .hour.active,#weatherModal .hour:focus-visible{transform:scale(1.18);opacity:1;z-index:5;background:#ffffff12!important;box-shadow:0 6px 18px #0002!important;}
+#weatherModal .sun-marker{flex:0 0 62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:60px;color:#ffe9a5;font-size:19px;text-align:center;white-space:nowrap;}
+#weatherModal .sun-marker small{font-size:9px;color:#fff;}
+#weatherModal .sun-marker b{font-size:10px;color:#ffe9a5;}
+.weather-cloud-layer{position:absolute;width:42%;height:13%;border-radius:999px;background:linear-gradient(180deg,#f3f8ff66,#b9d5e333);filter:blur(2px);box-shadow:0 0 30px #e5f4ff22;animation:weather-cloud-drift 10s ease-in-out infinite alternate;}
+.weather-cloud-layer:before,.weather-cloud-layer:after{content:"";position:absolute;bottom:20%;border-radius:50%;background:inherit;width:48%;height:160%;}
+.weather-cloud-layer:before{left:13%;}.weather-cloud-layer:after{left:42%;width:55%;height:210%;}
+@keyframes weather-cloud-drift{from{transform:translateX(-12px)}to{transform:translateX(26px)}}
+.weather-twinkle-star{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff9d5;box-shadow:0 0 8px 2px #fff7c466;animation:weather-star-blink 2s ease-in-out infinite alternate;}
+@keyframes weather-star-blink{0%,100%{opacity:.18;transform:scale(.65)}50%{opacity:1;transform:scale(1.35)}}
+#weatherModal .modal-head{padding-right:4px;}
+@media(max-width:700px){#weatherModal .weather-day{flex-basis:70px;min-height:86px;}#weatherModal .weather-day.selected{transform:scale(1.12)}#weatherModal .sun-marker{flex-basis:52px}}
 </style>
 
 </head>
@@ -453,7 +411,7 @@ const $=id=>document.getElementById(id);
 const API="https://mp3quran.net/api/v3";
 let lang=localStorage.getItem("zikra_language")||"ar";
 if(!["ar","en","de"].includes(lang))lang="ar";
-let weatherData=null,selectedWeatherDay=0,prayerTimesObj=null,city={name:localStorage.getItem("zikra_city")||"Erfurt",latitude:Number(localStorage.getItem("zikra_lat"))||50.9848,longitude:Number(localStorage.getItem("zikra_lon"))||11.0299};
+let weatherData=null,selectedWeatherDay=0,selectedWeatherHour=null,prayerTimesObj=null,city={name:localStorage.getItem("zikra_city")||"Erfurt",latitude:Number(localStorage.getItem("zikra_lat"))||50.9848,longitude:Number(localStorage.getItem("zikra_lon"))||11.0299};
 let previousFocus=null,readers=[],times=[],read=null,loaded=false,currentSurahNum=1,surahListCache=[],lastBookmarkTime=0;
 const audio=$("audio"),versesBox=$("verses"),statusBox=$("quranStatus");
 const T={
@@ -473,8 +431,10 @@ function weatherIcon(code){const c=condition(code),h=new Date().getHours();retur
 async function loadWeather(){ $("weatherCondition").textContent=T[lang].loading;try{weatherData=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=14`);renderWeather()}catch(e){$("weatherCondition").textContent=T[lang].unavailable}}
 function renderWeather(){
   if(!weatherData)return;
-  const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard"),panel=$("datePanel"),effects=$("weatherTileEffects"),hour=new Date().getHours();
-  const todayKey=new Date().toLocaleDateString('en-CA');const sunrise=weatherData.daily?.sunrise?.[0],sunset=weatherData.daily?.sunset?.[0];const nowMs=Date.now();const isDark=sunrise&&sunset?(nowMs<new Date(sunrise).getTime()||nowMs>=new Date(sunset).getTime()):(hour>=20||hour<6);const isNight=isDark&&!['rainy','snowy','storm'].includes(desc.cls);
+  const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard"),panel=$("datePanel"),effects=$("weatherTileEffects"),now=new Date(),hour=now.getHours();
+  const todayIndex=d.daily.time.indexOf(localDateKey()),sunrise=d.daily.sunrise?.[todayIndex]?.slice(11,16),sunset=d.daily.sunset?.[todayIndex]?.slice(11,16);
+  const currentMinutes=hour*60+now.getMinutes(),sunriseMinutes=sunrise?Number(sunrise.slice(0,2))*60+Number(sunrise.slice(3)):360,sunsetMinutes=sunset?Number(sunset.slice(0,2))*60+Number(sunset.slice(3)):1200;
+  const isNight=(currentMinutes<sunriseMinutes||currentMinutes>=sunsetMinutes)&&!['rainy','snowy','storm'].includes(desc.cls);
   const cardScene=isNight?'night':desc.cls;
   document.body.classList.remove('weather-theme-sunny','weather-theme-cloudy','weather-theme-rainy','weather-theme-snowy','weather-theme-storm','weather-theme-night');
   document.body.classList.add('weather-theme-'+cardScene);
@@ -506,117 +466,80 @@ function renderWeather(){
   $("weatherExtra").textContent=`↑ ${temp(d.daily.temperature_2m_max[0])} ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;
   renderWeatherModal()
 }
-function weatherSceneClass(code,dateString,hourDateTime=null){
-  const info=condition(code),idx=weatherData?.daily?.time?.indexOf(dateString)??-1;
-  const sunrise=idx>=0?weatherData.daily.sunrise?.[idx]:null,sunset=idx>=0?weatherData.daily.sunset?.[idx]:null;
-  const target=hourDateTime?new Date(hourDateTime):new Date();
-  const night=sunrise&&sunset?(target<new Date(sunrise)||target>=new Date(sunset)):(target.getHours()>=20||target.getHours()<6);
-  return night&&!['rainy','snowy','storm'].includes(info.cls)?"night":info.cls;
+function localDateKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function isNightAt(dateString,hourIndex=null){
+  if(!weatherData?.daily)return false;
+  const idx=weatherData.daily.time.indexOf(dateString);if(idx<0)return false;
+  const stamp=hourIndex!==null?weatherData.hourly.time[hourIndex]:null;
+  const hour=stamp?Number(stamp.slice(11,13)):12;
+  const sunrise=weatherData.daily.sunrise?.[idx]?.slice(11,16),sunset=weatherData.daily.sunset?.[idx]?.slice(11,16);
+  if(sunrise&&sunset){const mins=hour*60+(stamp?Number(stamp.slice(14,16)):0),sr=Number(sunrise.slice(0,2))*60+Number(sunrise.slice(3)),ss=Number(sunset.slice(0,2))*60+Number(sunset.slice(3));return mins<sr||mins>=ss;}
+  return hour<6||hour>=20;
 }
-function setWeatherScene(sceneClass){
-  const scene=$("weatherScene");
-  if(scene.dataset.scene===sceneClass)return;
-  scene.dataset.scene=sceneClass;scene.className="weather-scene "+sceneClass;scene.replaceChildren();
-  if(['rainy','storm'].includes(sceneClass)){const count=sceneClass==='storm'?42:32;for(let i=0;i<count;i++){const drop=document.createElement('span');drop.className='rain-drop';drop.style.left=((i*37+9)%100)+'%';drop.style.setProperty('--rain-delay',(-((i*17)%29)/10)+'s');drop.style.setProperty('--rain-duration',(sceneClass==='storm'?.48:.72)+((i*13)%42)/100+'s');drop.style.opacity=String(.42+((i*7)%50)/100);scene.append(drop)}}
-  else if(sceneClass==='snowy'){for(let i=0;i<32;i++){const flake=document.createElement('span');flake.className='modal-snow-flake';flake.textContent='❄';flake.style.left=((i*31+4)%100)+'%';flake.style.setProperty('--rain-delay',(-((i*13)%35)/10)+'s');flake.style.setProperty('--snow-duration',(3+((i*7)%30)/10)+'s');scene.append(flake)}}
-  else if(sceneClass==='night'){for(let i=0;i<35;i++){const star=document.createElement('span');star.className='weather-star';star.style.left=((i*31+7)%98)+'%';star.style.top=((i*19+11)%84)+'%';star.style.animationDelay=(-i*.31)+'s';scene.append(star)}}
-  else if(sceneClass==='cloudy'){for(let i=0;i<5;i++){const cloud=document.createElement('span');cloud.className='weather-cloud';cloud.style.left=((i*23+3)%90)+'%';cloud.style.top=(10+(i%3)*28)+'%';cloud.style.animationDelay=(-i*1.7)+'s';scene.append(cloud)}}
-}
-function scrollWeatherDayIntoView(button){
-  if(!button)return;
-  const box=$("weatherDays");
-  const targetLeft=button.offsetLeft-box.offsetLeft-(box.clientWidth-button.offsetWidth)/2;
-  box.scrollTo({left:Math.max(0,Math.min(box.scrollWidth-box.clientWidth,targetLeft)),behavior:"smooth"});
-}
+function weatherSceneClass(code,dateString,hourIndex=null){const info=condition(code);return isNightAt(dateString,hourIndex)&&!['rainy','snowy','storm'].includes(info.cls)?'night':info.cls}
+function scrollWeatherDayIntoView(button){if(!button)return;const box=$("weatherDays");const targetLeft=button.offsetLeft-box.offsetLeft-(box.clientWidth-button.offsetWidth)/2;box.scrollTo({left:Math.max(0,Math.min(box.scrollWidth-box.clientWidth,targetLeft)),behavior:"smooth"})}
 function selectWeatherDay(index,focusButton=true){
   if(!weatherData?.daily)return;
-  const box=$("weatherDays"),oldScroll=box.scrollLeft;
-  const next=Math.max(0,Math.min(index,weatherData.daily.time.length-1));
-  if(next===selectedWeatherDay){if(focusButton){const same=box.querySelector(`[data-day="${next}"]`);same?.focus({preventScroll:true});scrollWeatherDayIntoView(same);}return;}
-  selectedWeatherDay=next;
-  renderWeatherModal();
-  const button=$("weatherDays").querySelector(`[data-day="${selectedWeatherDay}"]`);
-  if(focusButton){button?.focus({preventScroll:true});scrollWeatherDayIntoView(button);}
-  else {box.scrollLeft=oldScroll;}
+  const count=weatherData.daily.time.length;selectedWeatherDay=(index%count+count)%count;selectedWeatherHour=null;
+  renderWeatherModal();const button=$("weatherDays").querySelector(`[data-day="${selectedWeatherDay}"]`);
+  if(focusButton){button?.focus({preventScroll:true});scrollWeatherDayIntoView(button)}
 }
 function renderWeatherDays(){
-  if(!weatherData?.daily)return;
-  const d=weatherData.daily,locale=lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",box=$("weatherDays"),savedScrollLeft=box.scrollLeft;box.replaceChildren();
+  if(!weatherData?.daily)return;const d=weatherData.daily,locale=lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",box=$("weatherDays");box.replaceChildren();
   d.time.forEach((date,i)=>{
     const dayDate=new Date(date+"T12:00:00"),label=i===0?T[lang].today:i===1?T[lang].tomorrow:new Intl.DateTimeFormat(locale,{weekday:"short"}).format(dayDate);
     const b=document.createElement("button");b.type="button";b.className="weather-day"+(i===selectedWeatherDay?" selected":"");b.dataset.day=String(i);b.setAttribute("role","option");b.setAttribute("aria-selected",String(i===selectedWeatherDay));
     const name=document.createElement("span");name.textContent=label;const icon=document.createElement("span");icon.className="day-icon";icon.textContent=condition(d.weather_code[i]).icon;
-    const range=document.createElement("span");range.className="day-range";range.textContent=temp(d.temperature_2m_min[i])+" / "+temp(d.temperature_2m_max[i]);
-    b.append(name,icon,range);b.addEventListener("click",()=>selectWeatherDay(i,true));b.addEventListener("pointerenter",()=>selectWeatherDay(i,false));b.addEventListener("focus",()=>selectWeatherDay(i,false));box.append(b);
+    const range=document.createElement("span");range.className="day-range";range.textContent=temp(d.temperature_2m_min[i])+" / "+temp(d.temperature_2m_max[i]);b.append(name,icon,range);
+    b.addEventListener("click",()=>selectWeatherDay(i,true));b.addEventListener("pointerenter",()=>{if(i!==selectedWeatherDay)selectWeatherDay(i,false)});b.addEventListener("focus",()=>{if(i!==selectedWeatherDay)selectWeatherDay(i,false)});box.append(b);
   });
 }
-let weatherScrollSelectTimer=null,weatherProgrammaticScroll=false;
-$("weatherDays").addEventListener("scroll",()=>{
-  if(!weatherData?.daily)return;
-  if(weatherScrollSelectTimer)clearTimeout(weatherScrollSelectTimer);
-  weatherScrollSelectTimer=setTimeout(()=>{
-    const box=$("weatherDays"),items=Array.from(box.querySelectorAll(".weather-day"));
-    if(!items.length)return;
-    const center=box.getBoundingClientRect().left+box.clientWidth/2;
-    let nearest=0,dist=Infinity;
-    items.forEach((item,i)=>{const r=item.getBoundingClientRect(),d=Math.abs((r.left+r.width/2)-center);if(d<dist){dist=d;nearest=i;}});
-    if(nearest!==selectedWeatherDay)selectWeatherDay(nearest,false);
-  },100);
-},{passive:true});
-// Keep both forecast strips horizontal and wrap to the beginning at the end.
-function installWeatherLoop(id){
-  const box=$(id);let wrapping=false;
-  box.addEventListener("scroll",()=>{
-    if(wrapping)return;
-    const max=box.scrollWidth-box.clientWidth;
-    if(max>20 && box.scrollLeft>=max-3){wrapping=true;box.scrollTo({left:0,behavior:"auto"});requestAnimationFrame(()=>{wrapping=false;});}
-  },{passive:true});
-  box.addEventListener("wheel",ev=>{
-    if(Math.abs(ev.deltaY)>Math.abs(ev.deltaX)&&box.scrollWidth>box.clientWidth){ev.preventDefault();box.scrollLeft+=ev.deltaY;}
-  },{passive:false});
+function selectWeatherHour(index,focusItem=true){
+  const items=Array.from($("hourlyForecast").querySelectorAll(".hour"));if(!items.length)return;
+  index=(index%items.length+items.length)%items.length;const item=items[index];selectedWeatherHour=Number(item.dataset.hourIndex);
+  items.forEach((el,i)=>{el.classList.toggle("active",i===index);el.setAttribute("aria-selected",String(i===index))});
+  const h=weatherData.hourly,iHour=selectedWeatherHour,code=h.weather_code[iHour],date=h.time[iHour].slice(0,10),scene=$("weatherScene"),cls=weatherSceneClass(code,date,iHour),sceneClass="weather-scene "+cls;
+  updateWeatherScene(scene,sceneClass);
+  $("modalIcon").textContent=condition(code).icon;$("modalTemp").textContent=temp(h.temperature_2m[iHour]);$("modalCondition").textContent=condition(code).text;
+  const stamp=new Date(h.time[iHour]);$("modalFeels").textContent=new Intl.DateTimeFormat(lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",{hour:"2-digit",minute:"2-digit",hour12:false}).format(stamp)+" · "+(lang==="ar"?"احتمال المطر: ":lang==="de"?"Regenwahrscheinlichkeit: ":"Rain chance: ")+(h.precipitation_probability?.[iHour]??0)+"%";
+  if(focusItem){item.focus({preventScroll:true});item.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"})}
 }
-installWeatherLoop("weatherDays");installWeatherLoop("hourlyForecast");
+function updateWeatherScene(scene,sceneClass){
+  if(scene.className===sceneClass)return;scene.className=sceneClass;scene.replaceChildren();const kind=sceneClass.replace("weather-scene ","");
+  if(["rainy","storm"].includes(kind)){for(let i=0;i<(kind==="storm"?48:34);i++){const drop=document.createElement("span");drop.className="rain-drop";drop.style.left=((i*37+9)%100)+"%";drop.style.setProperty("--rain-delay",(-((i*17)%29)/10)+"s");drop.style.setProperty("--rain-duration",(kind==="storm"?.48:.72)+((i*13)%42)/100+"s");scene.append(drop)}}
+  else if(kind==="snowy"){for(let i=0;i<32;i++){const flake=document.createElement("span");flake.className="modal-snow-flake";flake.textContent="❄";flake.style.left=((i*31+4)%100)+"%";flake.style.setProperty("--rain-delay",(-((i*13)%35)/10)+"s");flake.style.setProperty("--snow-duration",(3+((i*7)%30)/10)+"s");scene.append(flake)}}
+  else if(kind==="cloudy"){for(let i=0;i<6;i++){const cloud=document.createElement("span");cloud.className="weather-cloud-layer";cloud.style.left=(i*17-5)+"%";cloud.style.top=(12+(i%3)*18)+"%";cloud.style.animationDelay=(-i*1.4)+"s";scene.append(cloud)}}
+  else if(kind==="night"){for(let i=0;i<45;i++){const star=document.createElement("span");star.className="weather-twinkle-star";star.style.left=((i*29+4)%98)+"%";star.style.top=((i*17+6)%80)+"%";star.style.animationDelay=(-i*.19)+"s";scene.append(star)}}
+}
 function renderWeatherModal(){
-  if(!weatherData)return;
-  const d=weatherData,c=d.current,t=T[lang],daily=d.daily,idx=Math.max(0,Math.min(selectedWeatherDay,daily.time.length-1)),date=daily.time[idx],isToday=idx===0,code=isToday?c.weather_code:daily.weather_code[idx],desc=condition(code);
-  $("weatherTitle").textContent=lang==="ar"?"الطقس والتوقعات":lang==="de"?"Wetter und Vorhersage":"Weather forecast";
-  $("daysTitle").textContent=lang==="ar"?"الأيام القادمة":lang==="de"?"Die nächsten Tage":"Coming days";
-  $("detailsTitle").textContent=lang==="ar"?"تفاصيل اليوم":lang==="de"?"Tagesdetails":"Day details";
+  if(!weatherData)return;const d=weatherData,c=d.current,t=T[lang],daily=d.daily,idx=Math.max(0,Math.min(selectedWeatherDay,daily.time.length-1)),date=daily.time[idx],isToday=idx===0,code=daily.weather_code[idx],desc=condition(code);
+  $("weatherTitle").textContent=lang==="ar"?"الطقس والتوقعات":lang==="de"?"Wetter und Vorhersage":"Weather forecast";$("daysTitle").textContent=lang==="ar"?"الأيام القادمة":lang==="de"?"Die nächsten Tage":"Coming days";$("detailsTitle").textContent=lang==="ar"?"تفاصيل اليوم":lang==="de"?"Tagesdetails":"Day details";
   $("weatherSelectedDate").textContent=new Intl.DateTimeFormat(lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",{weekday:"long",day:"numeric",month:"long"}).format(new Date(date+"T12:00:00"));
-  $("modalIcon").textContent=condition(isToday?c.weather_code:code).icon;
-  $("modalTemp").textContent=isToday?temp(c.temperature_2m):temp(daily.temperature_2m_max[idx]);
-  $("modalCondition").textContent=desc.text;
-  $("modalFeels").textContent=isToday?`${t.feels}: ${temp(c.apparent_temperature)}`:(lang==="ar"?"العظمى / الصغرى: ":lang==="de"?"Höchst-/Tiefstwert: ":"High / low: ")+temp(daily.temperature_2m_max[idx])+" / "+temp(daily.temperature_2m_min[idx]);
-  const sceneClass=weatherSceneClass(code,date);
-  setWeatherScene(sceneClass);
+  const h=d.hourly,now=new Date();let start;
+  if(isToday){const key=localDateKey();start=h.time.findIndex(x=>x.slice(0,10)===key&&Number(x.slice(11,13))>=now.getHours())}
+  else start=h.time.findIndex(x=>x.slice(0,10)===date);
+  if(start<0)start=h.time.findIndex(x=>x.slice(0,10)===date);if(start<0)start=0;
+  const hours=[];for(let i=start;i<h.time.length&&h.time[i].slice(0,10)===date;i++)hours.push(i);
+  if(selectedWeatherHour===null||!hours.includes(selectedWeatherHour))selectedWeatherHour=hours[0]??null;
+  const chosen=selectedWeatherHour!==null?selectedWeatherHour:null;
+  $("modalIcon").textContent=chosen!==null?condition(h.weather_code[chosen]).icon:condition(isToday?c.weather_code:code).icon;
+  $("modalTemp").textContent=chosen!==null?temp(h.temperature_2m[chosen]):(isToday?temp(c.temperature_2m):temp(daily.temperature_2m_max[idx]));
+  $("modalCondition").textContent=chosen!==null?condition(h.weather_code[chosen]).text:desc.text;
+  $("modalFeels").textContent=chosen!==null?(lang==="ar"?"احتمال المطر: ":lang==="de"?"Regenwahrscheinlichkeit: ":"Rain chance: ")+(h.precipitation_probability?.[chosen]??0)+"%":(isToday?`${t.feels}: ${temp(c.apparent_temperature)}`:(lang==="ar"?"العظمى / الصغرى: ":lang==="de"?"Höchst-/Tiefstwert: ":"High / low: ")+temp(daily.temperature_2m_max[idx])+" / "+temp(daily.temperature_2m_min[idx]));
+  const sceneClass="weather-scene "+weatherSceneClass(chosen!==null?h.weather_code[chosen]:code,date,chosen);updateWeatherScene($("weatherScene"),sceneClass);
   [["humidityLabel","humidity"],["windLabel","wind"],["maxLabel","max"],["minLabel","min"],["rainLabel","rain"],["uvLabel","uv"]].forEach(([id,k])=>$(id).textContent=t[k]);
-  $("humidityValue").textContent=isToday?c.relative_humidity_2m+"%":"—";$("windValue").textContent=isToday?Math.round(c.wind_speed_10m)+" km/h":"—";
-  $("maxValue").textContent=temp(daily.temperature_2m_max[idx]);$("minValue").textContent=temp(daily.temperature_2m_min[idx]);
-  $("rainValue").textContent=(daily.precipitation_probability_max?.[idx]??0)+"%";$("uvValue").textContent=daily.uv_index_max?.[idx]??"--";
+  $("humidityValue").textContent=isToday?c.relative_humidity_2m+"%":"—";$("windValue").textContent=isToday?Math.round(c.wind_speed_10m)+" km/h":"—";$("maxValue").textContent=temp(daily.temperature_2m_max[idx]);$("minValue").textContent=temp(daily.temperature_2m_min[idx]);$("rainValue").textContent=(daily.precipitation_probability_max?.[idx]??0)+"%";$("uvValue").textContent=daily.uv_index_max?.[idx]??"--";
   $("hourlyTitle").textContent=t.hourly;$("dailyTitle").textContent=t.daily;renderWeatherDays();
-  const h=d.hourly,now=new Date();let start=isToday?h.time.findIndex(x=>new Date(x)>=now):h.time.findIndex(x=>x.slice(0,10)===date);if(start<0)start=0;
-  const hourBox=$("hourlyForecast");hourBox.replaceChildren();
-  const sunrise=daily.sunrise?.[idx],sunset=daily.sunset?.[idx];
-  for(let i=start;i<h.time.length&&h.time[i].slice(0,10)===date;i++){
-    const item=document.createElement("div");item.className="hour";item.tabIndex=0;item.setAttribute("role","group");item.dataset.hourIndex=String(i);
-    const dt=new Date(h.time[i]),timeLabel=new Intl.DateTimeFormat(lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",{hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(dt);
-    const tm=document.createElement('div');tm.className='hour-time';tm.textContent=timeLabel;
-    const marker=document.createElement('div');marker.className='sun-marker';
-    const sameHour=(a,b)=>a&&b&&new Date(a).getHours()===new Date(b).getHours();
-    if(sameHour(h.time[i],sunrise)){marker.textContent='🌅';marker.title=lang==='ar'?'الشروق':lang==='de'?'Sonnenaufgang':'Sunrise';marker.setAttribute('aria-label',marker.title);}
-    else if(sameHour(h.time[i],sunset)){marker.textContent='🌇';marker.title=lang==='ar'?'الغروب':lang==='de'?'Sonnenuntergang':'Sunset';marker.setAttribute('aria-label',marker.title);}
-    const ic=document.createElement("div");ic.className="hour-icon";ic.textContent=condition(h.weather_code[i]).icon;
-    const te=document.createElement("strong");te.textContent=temp(h.temperature_2m[i]);
-    const ra=document.createElement("div");ra.className='hour-rain';ra.textContent=(h.precipitation_probability?.[i]??0)+"%";
-    const eventLabel=document.createElement('small');eventLabel.className='sun-label';eventLabel.textContent=marker.title||'';
-    item.append(tm,marker,ic,te,ra,eventLabel);
-    const activateHour=()=>{hourBox.querySelectorAll('.hour.active').forEach(x=>x.classList.remove('active'));item.classList.add('active');setWeatherScene(weatherSceneClass(h.weather_code[i],date,h.time[i]));item.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});};
-    item.addEventListener('pointerenter',activateHour);item.addEventListener('focus',activateHour);item.addEventListener('click',activateHour);
-    hourBox.append(item);
-  }
-  const firstHour=hourBox.querySelector('.hour');if(firstHour){firstHour.classList.add('active');setWeatherScene(weatherSceneClass(Number(h.weather_code[start]),date,h.time[start]));}
-
+  const box=$("hourlyForecast");box.replaceChildren();
+  hours.forEach(i=>{const item=document.createElement("div");item.className="hour"+(i===chosen?" active":"");item.tabIndex=0;item.dataset.hourIndex=String(i);item.setAttribute("role","option");item.setAttribute("aria-selected",String(i===chosen));
+    const tm=document.createElement("div");tm.textContent=h.time[i].slice(11,16);const ic=document.createElement("div");ic.className="hour-icon";ic.textContent=condition(h.weather_code[i]).icon;const te=document.createElement("strong");te.textContent=temp(h.temperature_2m[i]);const ra=document.createElement("div");ra.textContent=(h.precipitation_probability?.[i]??0)+"%";item.append(tm,ic,te,ra);
+    item.addEventListener("focus",()=>selectWeatherHour(Array.from(box.children).indexOf(item),false));item.addEventListener("pointerenter",()=>selectWeatherHour(Array.from(box.children).indexOf(item),false));item.addEventListener("click",()=>selectWeatherHour(Array.from(box.children).indexOf(item),false));box.append(item);
+  });
+  // Add actual sunrise/sunset markers for the selected date, using forecast API data.
+  const sr=daily.sunrise?.[idx]?.slice(11,16),ss=daily.sunset?.[idx]?.slice(11,16);
+  if(sr||ss){const addMarker=(time,label,emoji)=>{const marker=document.createElement("div");marker.className="sun-marker";marker.innerHTML=`<span>${emoji}</span><small>${label}</small><b>${time}</b>`;marker.title=label+" "+time;const before=Array.from(box.children).find(el=>el.dataset.hourIndex&&el.querySelector("div")?.textContent>time);box.insertBefore(marker,before||null)};addMarker(sr,lang==="ar"?"الشروق":lang==="de"?"Sonnenaufgang":"Sunrise","🌅");addMarker(ss,lang==="ar"?"الغروب":lang==="de"?"Sonnenuntergang":"Sunset","🌇")}
 }
+
 function openModal(id){
   previousFocus=document.activeElement;
   $(id).classList.add("open");
@@ -627,7 +550,7 @@ function openModal(id){
     if(reciterPicker){setTimeout(()=>{reciterPicker.focus({preventScroll:true});},0);return}
   }
   if(id==="weatherModal"){
-    selectedWeatherDay=0;
+    selectedWeatherDay=0;selectedWeatherHour=null;
     if(weatherData)renderWeatherModal();
     const selected=$("weatherDays").querySelector('[data-day="0"]');
     if(selected){selected.focus({preventScroll:true});scrollWeatherDayIntoView(selected);return}
@@ -638,7 +561,7 @@ function openModal(id){
 function closeModal(id){
   $(id).classList.remove("open");
   if(id==="weatherModal"&&weatherData){
-    selectedWeatherDay=0;
+    selectedWeatherDay=0;selectedWeatherHour=null;
     renderWeatherModal();
   }
   if(previousFocus?.isConnected)previousFocus.focus();
@@ -911,8 +834,8 @@ function moveDirectionalFocus(direction){
 
 window.handleAndroidDpad=moveDirectionalFocus;
 
-$("datePanel").addEventListener("click",()=>{selectedWeatherDay=0;openModal("weatherModal");renderWeatherModal();requestAnimationFrame(()=>scrollWeatherDayIntoView($("weatherDays").querySelector('[data-day="0"]')));});
-$("datePanel").addEventListener("keydown",ev=>{if(ev.target!==ev.currentTarget)return;if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();selectedWeatherDay=0;openModal("weatherModal");renderWeatherModal();requestAnimationFrame(()=>scrollWeatherDayIntoView($("weatherDays").querySelector('[data-day="0"]')))}});$("closeQuran").addEventListener("click",()=>closeModal("quranModal"));
+$("datePanel").addEventListener("click",()=>openModal("weatherModal"));
+$("datePanel").addEventListener("keydown",ev=>{if(ev.target!==ev.currentTarget)return;if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();openModal("weatherModal")}});$("closeQuran").addEventListener("click",()=>closeModal("quranModal"));$("closeWeather")?.addEventListener("click",()=>closeModal("weatherModal"));
 function changeLanguage(value){lang=value;localStorage.setItem("zikra_language",value);document.documentElement.lang=value;document.documentElement.dir="rtl";const t=T[lang];$("appTitle").textContent=t.title;$("subtitle").textContent=t.subtitle;$("quranTitle").textContent=t.quranTitle;$("reciterLabel").textContent=t.reciterLabel;$("resumeLabel").textContent=t.resumeLabel;$("cityTitle").textContent=lang==="ar"?"الموقع والمدينة":lang==="de"?"Standort und Stadt":"Location and city";$("cityInputLabel").textContent=lang==="ar"?"اسم المدينة":lang==="de"?"Stadtname":"City name";$("cityHelp").textContent=lang==="ar"?"يمكنك تحديد موقع الجهاز أو كتابة اسم المدينة يدوياً.":lang==="de"?"Standort automatisch bestimmen oder den Stadtnamen eingeben.":"Use device location or enter a city name."; $("findLocationBtn").textContent=lang==="ar"?"📍 تحديد موقعي تلقائياً":lang==="de"?"📍 Meinen Standort bestimmen":"📍 Use my location";$("saveCityBtn").textContent=lang==="ar"?"حفظ المدينة":lang==="de"?"Stadt speichern":"Save city";$("backToIndex").textContent=lang==="ar"?"→ فهرس السور":lang==="de"?"→ Sure auswählen":"→ Surah index";$("exitTitle").textContent=lang==="ar"?"الخروج من التطبيق":lang==="de"?"App verlassen":"Exit app";$("exitMessage").textContent=lang==="ar"?"هل تريد الخروج من تطبيق ذِكرى؟":lang==="de"?"Möchtest du Zikra verlassen?":"Do you want to exit Zikra?";$("confirmExitBtn").textContent=lang==="ar"?"نعم، خروج":lang==="de"?"Ja, beenden":"Yes, exit";$("cancelExitBtn").textContent=lang==="ar"?"لا، إلغاء":lang==="de"?"Nein, abbrechen":"No, cancel";if(!loaded){$("miniSurah").textContent=t.defaultSurah;$("miniReader").textContent=t.openPrompt;$("miniVerse").textContent=t.startPrompt}document.querySelectorAll(".p-name").forEach(el=>{const p=el.dataset.prayer;if(p)el.textContent=el.dataset[lang]||el.dataset.ar});renderMemory();updateClock();updateCityLabel();loadPrayerTimes();checkResumeBookmark();$("footerRights").textContent=t.rights;if(weatherData)renderWeather();else loadWeather();if(surahListCache.length)renderSurahIndex()}
 function closeLanguageMenu(){const m=$("languageMenu");m.hidden=true;$("languageBtn").setAttribute("aria-expanded","false");}
 $("languageBtn").addEventListener("click",()=>{const m=$("languageMenu");m.hidden=!m.hidden;$("languageBtn").setAttribute("aria-expanded",String(!m.hidden));if(!m.hidden)m.querySelector(`[data-lang="${lang}"]`)?.focus();});
@@ -939,7 +862,6 @@ function handleBack(){
 }
 window.handleAndroidBack=handleBack;
 $("exitModal").addEventListener("click",e=>{if(e.target===$("exitModal"))hideExitPrompt()});
-$("weatherModal").addEventListener("click",e=>{if(e.target===$("weatherModal"))closeModal("weatherModal")});
 document.addEventListener("keydown",function(event){
   const key=event.key;
   if(["Escape","Backspace","BrowserBack","GoBack"].includes(key)||event.keyCode===4){
@@ -953,18 +875,18 @@ document.addEventListener("keydown",function(event){
     event.preventDefault();event.stopImmediatePropagation();
     const dayButtons=Array.from($("weatherDays").querySelectorAll(".weather-day"));
     const hourCards=Array.from($("hourlyForecast").querySelectorAll(".hour"));
-    const current=document.activeElement,currentDayIndex=dayButtons.indexOf(current),currentHourIndex=hourCards.indexOf(current);
+    const current=document.activeElement,currentDayIndex=dayButtons.indexOf(current),currentHourIndex=hourCards.indexOf(current),close=$("closeWeather");
     const focusDay=()=>{const selected=dayButtons[selectedWeatherDay]||dayButtons[0];selected?.focus({preventScroll:true});scrollWeatherDayIntoView(selected);};
     const focusHour=index=>{const item=hourCards[index];if(item){item.focus({preventScroll:true});item.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});}};
     if(key==="ArrowLeft"||key==="ArrowRight"){
       if(currentDayIndex>=0){
         // Day buttons and hourly cards are LTR so physical arrows match visual order.
         const next=currentDayIndex+(key==="ArrowRight"?1:-1);
-        if(next>=0&&next<dayButtons.length)selectWeatherDay(next,true);else if(dayButtons.length)selectWeatherDay(next<0?dayButtons.length-1:0,true);
+        selectWeatherDay((next+dayButtons.length)%dayButtons.length,true);
       }else if(currentHourIndex>=0){
         const next=currentHourIndex+(key==="ArrowRight"?1:-1);
-        if(next>=0&&next<hourCards.length)focusHour(next);else if(hourCards.length)focusHour(next<0?hourCards.length-1:0);
-      }
+        if(hourCards.length)selectWeatherHour((next+hourCards.length)%hourCards.length,true);
+      }else if(current===close){focusDay();}
       return;
     }
     if(key==="ArrowUp"){
