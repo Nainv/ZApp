@@ -317,6 +317,43 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media (prefers-reduced-motion: reduce) { .prayer.next-prayer { transition: none; } }
 </style>
 
+
+<style id="zikra-weather-tv-interaction-v2">
+/* Match the richer prototype while keeping the existing modal and app controls intact. */
+#weatherModal .weather-day{
+  flex:0 0 clamp(76px,8.6vw,102px)!important;
+  min-height:clamp(86px,12vh,112px)!important;
+  padding:8px 5px!important;gap:7px!important;
+  border-radius:14px!important;
+  transform:scale(1);transform-origin:center;
+  transition:transform .14s ease,background .14s ease,box-shadow .14s ease,border-color .14s ease;
+}
+#weatherModal .weather-day .day-icon{font-size:clamp(23px,2.5vw,30px)!important}
+#weatherModal .weather-day .day-range{font-size:clamp(10px,1vw,12px)!important}
+#weatherModal .weather-day.selected,
+#weatherModal .weather-day:focus,
+#weatherModal .weather-day:focus-visible,
+#weatherModal .hour:focus,
+#weatherModal .hour:focus-visible{
+  transform:scale(1.075);z-index:5;position:relative;
+  background:rgba(255,255,255,.27)!important;
+  border-color:rgba(255,255,255,.92)!important;
+  box-shadow:0 5px 18px rgba(0,0,0,.24),inset 0 0 0 1px rgba(255,255,255,.22)!important;
+  outline:none!important;
+}
+#weatherModal .hour{transition:transform .14s ease,background .14s ease,box-shadow .14s ease;border:1px solid transparent}
+#weatherModal .weather-stats{grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:7px!important}
+#weatherModal .weather-stats .stat{min-width:0;padding:9px 4px!important}
+#weatherModal .weather-stats .stat-label{font-size:clamp(8px,.8vw,11px)!important;overflow-wrap:anywhere}
+#weatherModal .weather-stats .stat-value{font-size:clamp(11px,1.05vw,15px)!important}
+#weatherModal #detailsTitle{margin-top:4px!important}
+@media(max-width:700px){
+  #weatherModal .weather-stats{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  #weatherModal .weather-day{flex-basis:76px!important;min-height:88px!important}
+}
+@media(prefers-reduced-motion:reduce){#weatherModal .weather-day,#weatherModal .hour{transition:none!important}}
+</style>
+
 </head>
 <body>
 <div id="zikraSplash" aria-label="ذِكرى"><img src="zikra_logo.png" alt="ذِكرى | Zikra"></div>
@@ -482,7 +519,7 @@ function renderWeatherDays(){
 }
 function renderWeatherModal(){
   if(!weatherData)return;
-  const d=weatherData,c=d.current,t=T[lang],daily=d.daily,idx=Math.max(0,Math.min(selectedWeatherDay,daily.time.length-1)),date=daily.time[idx],isToday=idx===0,code=daily.weather_code[idx],desc=condition(code);
+  const d=weatherData,c=d.current,t=T[lang],daily=d.daily,idx=Math.max(0,Math.min(selectedWeatherDay,daily.time.length-1)),date=daily.time[idx],isToday=idx===0,code=isToday?c.weather_code:daily.weather_code[idx],desc=condition(code);
   $("weatherTitle").textContent=lang==="ar"?"الطقس والتوقعات":lang==="de"?"Wetter und Vorhersage":"Weather forecast";
   $("daysTitle").textContent=lang==="ar"?"الأيام القادمة":lang==="de"?"Die nächsten Tage":"Coming days";
   $("detailsTitle").textContent=lang==="ar"?"تفاصيل اليوم":lang==="de"?"Tagesdetails":"Day details";
@@ -867,8 +904,10 @@ document.addEventListener("keydown",function(event){
     if(key==="ArrowLeft"||key==="ArrowRight"){
       if(currentDayIndex>=0){
         // Day buttons and hourly cards are LTR so physical arrows match visual order.
-        const next=currentDayIndex+(key==="ArrowRight"?1:-1);
-        if(next>=0&&next<dayButtons.length)selectWeatherDay(next,true);
+        let next=currentDayIndex+(key==="ArrowRight"?1:-1);
+        if(dayButtons.length&&next>=dayButtons.length)next=0;
+        else if(dayButtons.length&&next<0)next=dayButtons.length-1;
+        if(dayButtons.length)selectWeatherDay(next,true);
       }else if(currentHourIndex>=0){
         const next=currentHourIndex+(key==="ArrowRight"?1:-1);
         if(next>=0&&next<hourCards.length)focusHour(next);
