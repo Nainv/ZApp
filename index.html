@@ -352,6 +352,11 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
   #weatherModal .weather-day{flex-basis:76px!important;min-height:88px!important}
 }
 @media(prefers-reduced-motion:reduce){#weatherModal .weather-day,#weatherModal .hour{transition:none!important}}
+/* Animated cloud layers visible in the weather modal on TV browsers */
+#weatherModal .weather-scene.cloudy:before,#weatherModal .weather-scene.cloudy:after{content:none!important}
+#weatherModal .weather-moving-cloud{position:absolute;left:-18%;top:12%;font-size:var(--cloud-size,70px);line-height:1;color:#f3f8fc;opacity:var(--cloud-opacity,.28);text-shadow:0 4px 18px #dceaf455;white-space:nowrap;animation:weather-cloud-travel var(--cloud-duration,24s) linear var(--cloud-delay,0s) infinite;will-change:transform}
+@keyframes weather-cloud-travel{from{transform:translate3d(-15vw,0,0)}to{transform:translate3d(130vw,8px,0)}}
+#weatherModal .weather-day:focus,#weatherModal .weather-day:focus-visible{transform:scale(1.075)!important}
 </style>
 
 </head>
@@ -514,7 +519,11 @@ function renderWeatherDays(){
     const b=document.createElement("button");b.type="button";b.className="weather-day"+(i===selectedWeatherDay?" selected":"");b.dataset.day=String(i);b.setAttribute("role","option");b.setAttribute("aria-selected",String(i===selectedWeatherDay));
     const name=document.createElement("span");name.textContent=label;const icon=document.createElement("span");icon.className="day-icon";icon.textContent=condition(d.weather_code[i]).icon;
     const range=document.createElement("span");range.className="day-range";range.textContent=temp(d.temperature_2m_min[i])+" / "+temp(d.temperature_2m_max[i]);
-    b.append(name,icon,range);b.addEventListener("click",()=>selectWeatherDay(i,true));box.append(b);
+    b.append(name,icon,range);
+    b.addEventListener("click",()=>selectWeatherDay(i,true));
+    b.addEventListener("focus",()=>{if(i!==selectedWeatherDay)selectWeatherDay(i,true);});
+    b.addEventListener("pointerenter",()=>{if(i!==selectedWeatherDay)selectWeatherDay(i,false);});
+    box.append(b);
   });
 }
 function renderWeatherModal(){
@@ -543,6 +552,14 @@ function renderWeatherModal(){
       }
     }else if(sceneClass.endsWith("snowy")){
       for(let i=0;i<32;i++){const flake=document.createElement("span");flake.className="modal-snow-flake";flake.textContent="❄";flake.style.left=((i*31+4)%100)+"%";flake.style.setProperty("--rain-delay",(-((i*13)%35)/10)+"s");flake.style.setProperty("--snow-duration",(3+((i*7)%30)/10)+"s");scene.append(flake)}
+    }else if(sceneClass.endsWith("cloudy")){
+      // Explicit cloud elements: more reliable than pseudo-elements on Android TV WebView.
+      for(let i=0;i<6;i++){
+        const cloud=document.createElement("span");cloud.className="weather-moving-cloud";cloud.textContent="☁";
+        cloud.style.top=(8+i*13)%72+"%";cloud.style.setProperty("--cloud-size",(54+(i%3)*22)+"px");
+        cloud.style.setProperty("--cloud-duration",(18+(i%4)*7)+"s");cloud.style.setProperty("--cloud-delay",(-i*4)+"s");
+        cloud.style.setProperty("--cloud-opacity",String(.2+(i%3)*.09));scene.append(cloud);
+      }
     }
   }
   [["humidityLabel","humidity"],["windLabel","wind"],["maxLabel","max"],["minLabel","min"],["rainLabel","rain"],["uvLabel","uv"]].forEach(([id,k])=>$(id).textContent=t[k]);
