@@ -448,7 +448,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
     <label for="adhanVoiceButton">صوت الأذان لهذه الصلاة</label>
     <div class="adhan-voice-picker" id="adhanVoicePicker">
       <button type="button" id="adhanVoiceButton" aria-haspopup="listbox" aria-expanded="false">أذان مكة — عبد الرحمن السديس　⌄</button>
-      <div id="adhanVoiceOptions" role="listbox" aria-label="أصوات الأذان" hidden>
+      <div id="adhanVoiceOptions" role="listbox" aria-label="أصوات الأذان">
         <button type="button" role="option" data-voice="makkah" tabindex="-1">أذان مكة — عبد الرحمن السديس</button>
         <button type="button" role="option" data-voice="madinah" tabindex="-1">أذان المدينة</button>
         <button type="button" role="option" data-voice="alafasy" tabindex="-1">أذان مشاري العفاسي</button>
@@ -1042,11 +1042,10 @@ $("adhanVoiceOptions").querySelectorAll("[data-voice]").forEach((button,index,al
   // Preview immediately when the TV remote moves focus to a voice.
   button.addEventListener("focus",()=>{
     if(!adhanVoiceListOpen() || !$("adhanSettingsModal").classList.contains("open"))return;
-    setAdhanVoice(button.dataset.voice);
     previewAdhan(button.dataset.voice);
   });
 });
-function openAdhanSettings(prayerKey){if(!ADHAN_PRAYERS.includes(prayerKey))return;adhanEditingPrayer=prayerKey;adhanModalReturnFocus=document.activeElement;const modal=$("adhanSettingsModal");$("adhanSettingsPrayerName").textContent=prayerDisplayName(prayerKey);setAdhanVoice(adhanSettings[prayerKey].voice);$("adhanEnabledToggle").checked=adhanSettings[prayerKey].enabled;$("adhanStatus").textContent="اختيارات كل صلاة محفوظة بشكل مستقل، ولا تتغير عند تحديث البيانات.";modal.classList.add("open");const voiceList=$("adhanVoiceOptions");if(voiceList){voiceList.hidden=false;$("adhanVoiceButton").setAttribute("aria-expanded","true");const first=voiceList.querySelector("button[data-voice]");if(first){first.focus({preventScroll:true});}else{$("adhanVoiceButton").focus({preventScroll:true});}}else{$("adhanVoiceButton").focus({preventScroll:true});}}
+function openAdhanSettings(prayerKey){if(!ADHAN_PRAYERS.includes(prayerKey))return;adhanEditingPrayer=prayerKey;adhanModalReturnFocus=document.activeElement;const modal=$("adhanSettingsModal");$("adhanSettingsPrayerName").textContent=prayerDisplayName(prayerKey);setAdhanVoice(adhanSettings[prayerKey].voice);$("adhanEnabledToggle").checked=adhanSettings[prayerKey].enabled;$("adhanStatus").textContent="اختيارات كل صلاة محفوظة بشكل مستقل، ولا تتغير عند تحديث البيانات.";modal.classList.add("open");const voiceTarget=$("adhanVoiceOptions").querySelector('[data-voice="'+adhanDraftVoice+'"]')||$("adhanVoiceOptions").querySelector("[data-voice]");if(voiceTarget)voiceTarget.focus({preventScroll:true});}
 function closeAdhanSettings(){adhanPreviewSequence++;const modal=$("adhanSettingsModal");if(!modal.classList.contains("open"))return;modal.classList.remove("open");try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(e){}if(adhanModalReturnFocus&&adhanModalReturnFocus.isConnected)adhanModalReturnFocus.focus({preventScroll:true});else nextPrayerCard()?.focus({preventScroll:true});}
 let adhanPreviewSequence=0;
 async function previewAdhan(voiceOverride){
@@ -1783,148 +1782,6 @@ body[data-layout-mode="tv"] .prayer-strip .prayer{
 .prayer-strip{overflow:visible!important;isolation:isolate!important}
 .prayer-strip .prayer{transform-origin:center center!important;will-change:transform,box-shadow!important}
 </style>
-<script id="prayer-remote-hard-fix-v13">
-(function(){
- 'use strict';
- const el=id=>document.getElementById(id);
- const cards=()=>Array.from(document.querySelectorAll('.prayer-strip .prayer'));
- const modal=()=>el('adhanSettingsModal');
- const isModalOpen=()=>!!modal()?.classList.contains('open');
- const voiceList=()=>el('adhanVoiceOptions');
- const voiceOptions=()=>Array.from(voiceList()?.querySelectorAll('button[data-voice]')||[]);
- const focus=target=>{if(!target)return;try{target.focus({preventScroll:true});}catch(_){target.focus();}};
- let selectedCard=null;
- let returnCard=null;
- const adhanPrayers=new Set(['Fajr','Dhuhr','Asr','Maghrib','Isha']);
- function normalize(e){
-   const raw=String(e.key||e.code||'').toLowerCase().replace(/[ _-]/g,'');
-   const byName={arrowleft:'ArrowLeft',left:'ArrowLeft',dpadleft:'ArrowLeft',keyleft:'ArrowLeft',arrowright:'ArrowRight',right:'ArrowRight',dpadright:'ArrowRight',keyright:'ArrowRight',arrowup:'ArrowUp',up:'ArrowUp',dpadup:'ArrowUp',arrowdown:'ArrowDown',down:'ArrowDown',dpaddown:'ArrowDown',enter:'Enter',select:'Enter',numpadenter:'Enter',' ':'Enter',escape:'Escape',backspace:'Escape',browserback:'Escape',goback:'Escape'};
-   const code=e.keyCode||e.which||0;
-   const byCode={4:'Escape',8:'Escape',27:'Escape',19:'ArrowUp',20:'ArrowDown',21:'ArrowLeft',22:'ArrowRight',23:'Enter',66:'Enter',13:'Enter',37:'ArrowLeft',38:'ArrowUp',39:'ArrowRight',40:'ArrowDown'};
-   return byCode[code]||byName[raw]||e.key||'';
- }
- function setSelected(card){
-   const all=cards();
-   all.forEach(c=>c.classList.toggle('remote-selected',c===card));
-   selectedCard=card||null;
- }
- function focusCard(card){if(!card)return;setSelected(card);focus(card);try{card.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});}catch(_){} }
- function cardIndex(card){return cards().indexOf(card);}
- function openForCard(card){
-   const key=String(card?.id||'').replace(/^box-/,'');
-   if(!adhanPrayers.has(key)||typeof window.openAdhanSettings!=='function')return;
-   returnCard=card;window.openAdhanSettings(key);
- }
- function closeSettings(){
-   const wasOpen=isModalOpen();
-   if(wasOpen&&typeof window.closeAdhanSettings==='function')window.closeAdhanSettings();
-   else if(wasOpen)modal().classList.remove('open');
-   if(returnCard&&returnCard.isConnected){const target=returnCard;setTimeout(()=>focusCard(target),0);}
- }
- function hideVoiceList(){
-   const list=voiceList(),button=el('adhanVoiceButton');
-   if(!list)return;
-   list.hidden=true;button?.setAttribute('aria-expanded','false');
- }
- function chooseVoice(option){
-   if(!option)return;
-   if(typeof window.setAdhanVoice==='function')window.setAdhanVoice(option.dataset.voice);
-   hideVoiceList();focus(el('adhanVoiceButton'));
- }
- function modalKey(e,key){
-   const active=document.activeElement, list=voiceList(), opts=voiceOptions(), idx=opts.indexOf(active), listOpen=!!list&&!list.hidden;
-   if(key==='Escape'||key==='Back'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();closeSettings();return true;}
-   if(key==='Enter'||key===' '){
-     if(listOpen&&idx>=0){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();chooseVoice(opts[idx]);return true;}
-     if(active===el('adhanVoiceButton')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(typeof window.openAdhanVoiceList==='function')window.openAdhanVoiceList();else{list.hidden=false;el('adhanVoiceButton').setAttribute('aria-expanded','true');focus(opts[0]);}return true;}
-     if(active===el('adhanCloseBtn')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();closeSettings();return true;}
-     if(active===el('adhanSaveBtn')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();el('adhanSaveBtn').click();return true;}
-     if(active===el('adhanEnabledToggle')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();active.checked=!active.checked;active.dispatchEvent(new Event('change',{bubbles:true}));return true;}
-   }
-   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)){
-     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-     const close=el('adhanCloseBtn'), voice=el('adhanVoiceButton'), toggle=el('adhanEnabledToggle'), save=el('adhanSaveBtn');
-     if(listOpen&&idx>=0){
-       if(key==='ArrowDown'&&idx===opts.length-1){hideVoiceList();focus(toggle);return true;}
-       if(key==='ArrowUp'&&idx===0){hideVoiceList();focus(voice);return true;}
-       if(key==='ArrowLeft'||key==='ArrowRight'){
-         const delta=key==='ArrowDown'||key==='ArrowRight'?1:-1;
-         const next=(idx+delta+opts.length)%opts.length;focus(opts[next]);return true;
-       }
-       if(key==='ArrowDown'){focus(opts[Math.min(idx+1,opts.length-1)]);return true;}
-       if(key==='ArrowUp'){focus(opts[Math.max(idx-1,0)]);return true;}
-       return true;
-     }
-     if(key==='ArrowUp'){
-       if(active===voice)focus(close);
-       else if(active===toggle)focus(voice);
-       else if(active===save)focus(toggle);
-       else if(active===close)focus(close);
-       else focus(voice);
-       return true;
-     }
-     if(key==='ArrowDown'){
-       if(active===close)focus(voice);
-       else if(active===voice)focus(toggle);
-       else if(active===toggle)focus(save);
-       else if(active===save)focus(save);
-       else focus(voice);
-       return true;
-     }
-     if(active===voice){focus(voice);return true;}
-     if(active===toggle){focus(voice);return true;}
-     if(active===save){focus(toggle);return true;}
-     if(active===close){focus(voice);return true;}
-   }
-   return false;
- }
- function onKey(e){
-   const key=normalize(e);
-   if(isModalOpen()){modalKey(e,key);return;}
-   if(el('weatherModal')?.classList.contains('open'))return;
-   const all=cards();if(!all.length)return;
-   const activeCard=e.target?.closest?.('.prayer-strip .prayer')||document.activeElement?.closest?.('.prayer-strip .prayer');
-   if(activeCard&&all.includes(activeCard))selectedCard=activeCard;
-   let current=activeCard&&all.includes(activeCard)?activeCard:(selectedCard&&all.includes(selectedCard)?selectedCard:null);
-   if(current){
-     const idx=all.indexOf(current);
-     if(key==='ArrowLeft'||key==='ArrowRight'){
-       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-       // RTL screen: Right from the rightmost/first card wraps to the leftmost/last card.
-       const delta=key==='ArrowRight'?-1:1;
-       focusCard(all[(idx+delta+all.length)%all.length]);return;
-     }
-     if(key==='ArrowUp'){
-       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focus(el('datePanel'));setSelected(null);return;
-     }
-     if(key==='ArrowDown'){
-       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-       if(idx===all.length-1){setSelected(null);focus(el('memoryCard'));}
-       return;
-     }
-     if(key==='Enter'||key===' '){
-       const k=String(current.id||'').replace(/^box-/,'');
-       if(adhanPrayers.has(k)){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openForCard(current);return;}
-     }
-   }
-   if(key==='ArrowDown'&&(e.target===el('datePanel')||document.activeElement===el('datePanel'))){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focusCard(all[0]);return;}
-   if(key==='ArrowUp'&&(e.target===el('memoryCard')||document.activeElement===el('memoryCard'))){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focusCard(all[0]);return;}
- }
- window.addEventListener('keydown',onKey,true);
- document.addEventListener('focusin',e=>{
-   const card=e.target?.closest?.('.prayer-strip .prayer');
-   if(card&&cards().includes(card))setSelected(card);
-   else if(isModalOpen()||e.target===el('datePanel')||e.target===el('memoryCard'))setSelected(null);
- });
- function init(){
-   const all=cards();all.forEach(c=>{if(!c.hasAttribute('tabindex'))c.tabIndex=0;});
-   const voice=el('adhanVoiceButton'),list=voiceList();
-   if(voice&&list)voice.setAttribute('aria-expanded',String(!list.hidden));
-   setSelected(null);
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
-})();
-</script>
 <style id="zikra-final-remote-repair-v13">
 .prayer-strip{direction:rtl;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));overflow:visible!important;isolation:isolate!important;gap:clamp(8px,1vw,14px)!important;border:0!important;background:transparent!important;box-shadow:none!important}
 .prayer-strip .prayer{position:relative;outline:0!important;border:0!important;border-radius:16px!important;transform-origin:center center!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease!important;will-change:transform,box-shadow!important}
@@ -1946,6 +1803,71 @@ body[data-layout-mode="tv"] .prayer-strip .prayer{
 
 
 
+
+<style id="zikra-unified-prayer-focus-final">
+.prayer-strip{overflow:visible!important;isolation:isolate!important}
+.prayer-strip .prayer{transform-origin:center center!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,filter .18s ease!important;border:0!important;outline:0!important;will-change:transform,box-shadow!important}
+.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{position:relative!important;z-index:30!important;transform:perspective(700px) translateY(-9px) scale(1.12)!important;outline:0!important;border:0!important;background:linear-gradient(145deg,#fffefb 0%,#f1f9eb 45%,#d7ebca 100%)!important;color:#243b2b!important;box-shadow:0 5px 0 rgba(74,110,60,.48),0 16px 30px rgba(28,55,28,.36),0 0 24px rgba(208,244,185,.78),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.2)!important;filter:saturate(1.12) brightness(1.03)!important}
+.prayer-strip .prayer.remote-selected .p-name,.prayer-strip .prayer.remote-selected .p-time,.prayer-strip .prayer.remote-selected .p-countdown,.prayer-strip .prayer.remote-selected .p-icon,.prayer-strip .prayer:focus .p-name,.prayer-strip .prayer:focus .p-time,.prayer-strip .prayer:focus .p-countdown,.prayer-strip .prayer:focus .p-icon{color:#244b22!important;font-weight:900!important;text-shadow:0 1px 0 #fff!important}
+.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible){background:linear-gradient(110deg,#15324d 0%,#204e70 52%,#25699a 100%)!important;color:#fff!important;border:0!important;outline:0!important;transform:perspective(700px) translateY(-5px) scale(1.055)!important;box-shadow:0 6px 18px #10243838,0 0 16px #3e83b755,inset 0 1px 0 #ffffff55!important;z-index:4!important}
+.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus) .p-name,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus) .p-time,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus) .p-countdown,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus) .p-icon{color:#fff!important}
+.prayer-strip .prayer.next-prayer.remote-selected,.prayer-strip .prayer.next-prayer:focus,.prayer-strip .prayer.next-prayer:focus-visible{background:linear-gradient(110deg,#15324d 0%,#204e70 52%,#25699a 100%)!important;color:#fff!important;border:0!important;outline:0!important;transform:perspective(700px) translateY(-9px) scale(1.12)!important;box-shadow:0 6px 0 rgba(16,36,56,.42),0 16px 30px rgba(16,36,56,.38),0 0 25px rgba(62,131,183,.72)!important}
+#adhanSettingsModal .adhan-dialog{width:min(390px,86vw)!important;max-height:80vh!important;padding:12px!important;overflow-y:auto!important}
+#adhanSettingsModal .adhan-head h2{font-size:17px!important;margin:0!important}
+#adhanSettingsModal #adhanVoiceButton{display:none!important}
+#adhanSettingsModal #adhanVoiceOptions,#adhanSettingsModal #adhanVoiceOptions[hidden]{display:flex!important;position:static!important;max-height:none!important;overflow:visible!important;flex-direction:column!important;gap:4px!important;padding:0!important;margin:6px 0!important;background:transparent!important}
+#adhanSettingsModal #adhanVoiceOptions [data-voice]{display:flex!important;align-items:center!important;gap:10px!important;min-height:34px!important;padding:6px 9px!important;border-radius:9px!important;background:rgba(230,237,224,.58)!important;text-align:right!important;border:1px solid transparent!important;color:#304b3a!important}
+#adhanSettingsModal #adhanVoiceOptions [data-voice]::before{content:"";width:16px;height:16px;flex:0 0 16px;border:2px solid #829080;border-radius:50%;box-sizing:border-box;background:transparent}
+#adhanSettingsModal #adhanVoiceOptions [data-voice][aria-selected="true"]::before{border-color:#39944b;background:radial-gradient(circle,#39944b 0 4px,transparent 4.5px)}
+#adhanSettingsModal #adhanVoiceOptions [data-voice]:focus,#adhanSettingsModal #adhanEnabledToggle:focus-visible,#adhanSettingsModal #adhanSaveBtn:focus-visible,#adhanSettingsModal #adhanCloseBtn:focus-visible{outline:none!important;box-shadow:0 0 0 2px #9bbd8f!important;background:#dce9d5!important}
+#adhanSettingsModal .adhan-switch-row{margin:7px 0!important;padding:7px!important}
+#adhanSettingsModal .adhan-actions{margin-top:7px!important}
+#adhanSettingsModal #adhanSaveBtn{min-height:36px!important;min-width:100px!important}
+#adhanSettingsModal #adhanPreviewBtn{display:none!important}
+</style>
+
+<script id="zikra-single-remote-controller">
+(function(){
+ 'use strict';
+ const $=id=>document.getElementById(id), cards=()=>Array.from(document.querySelectorAll('.prayer-strip .prayer'));
+ const focus=el=>{if(!el)return;try{el.focus({preventScroll:true})}catch(_){el.focus()}};
+ const modalOpen=()=>!!$('adhanSettingsModal')?.classList.contains('open');
+ const opts=()=>Array.from($('adhanVoiceOptions')?.querySelectorAll('[data-voice]')||[]);
+ let returnCard=null;
+ function select(card){cards().forEach(c=>c.classList.toggle('remote-selected',c===card));}
+ function closeModal(){if(typeof window.closeAdhanSettings==='function')window.closeAdhanSettings();else $('adhanSettingsModal')?.classList.remove('open');if(returnCard?.isConnected){select(returnCard);focus(returnCard)}}
+ window.addEventListener('keydown',function(e){
+  const key=e.key, isBack=['Escape','Backspace','BrowserBack','GoBack'].includes(key)||e.keyCode===4;
+  if(modalOpen()){
+   const list=opts(),i=list.indexOf(document.activeElement),active=document.activeElement,toggle=$('adhanEnabledToggle'),save=$('adhanSaveBtn'),close=$('adhanCloseBtn');
+   if(isBack){e.preventDefault();e.stopImmediatePropagation();closeModal();return}
+   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)){e.preventDefault();e.stopImmediatePropagation();
+    if(i>=0){if(key==='ArrowDown'){if(i<list.length-1)focus(list[i+1]);else focus(toggle)}else if(key==='ArrowUp'){if(i>0)focus(list[i-1]);else focus(close)}else{const d=key==='ArrowRight'?-1:1;focus(list[(i+d+list.length)%list.length])}return}
+    if(active===toggle){focus(key==='ArrowUp'?list[list.length-1]:save);return}
+    if(active===save){focus(key==='ArrowUp'?toggle:save);return}
+    if(active===close){focus(key==='ArrowDown'?list[0]:close);return}
+    focus(list[0]);return;
+   }
+   if(key==='Enter'||key===' '){if(i>=0){e.preventDefault();e.stopImmediatePropagation();list[i].click();return}if(active===toggle){e.preventDefault();e.stopImmediatePropagation();toggle.checked=!toggle.checked;toggle.dispatchEvent(new Event('change',{bubbles:true}));return}if(active===save){e.preventDefault();e.stopImmediatePropagation();save.click();return}if(active===close){e.preventDefault();e.stopImmediatePropagation();closeModal();return}}
+   return;
+  }
+  const all=cards();if(!all.length)return;
+  const card=e.target?.closest?.('.prayer-strip .prayer')||document.activeElement?.closest?.('.prayer-strip .prayer');
+  if(card&&all.includes(card)){select(card);const i=all.indexOf(card);
+   if(key==='ArrowRight'||key==='ArrowLeft'){e.preventDefault();e.stopImmediatePropagation();const d=key==='ArrowRight'?-1:1;const target=all[(i+d+all.length)%all.length];select(target);focus(target);return}
+   if(key==='ArrowDown'&&i===all.length-1){e.preventDefault();e.stopImmediatePropagation();select(null);focus($('memoryCard'));return}
+   if(key==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();select(null);focus($('datePanel'));return}
+   if((key==='Enter'||key===' ')&&card.id!=='box-Sunrise'){e.preventDefault();e.stopImmediatePropagation();returnCard=card;if(typeof window.openAdhanSettings==='function')window.openAdhanSettings(card.id.replace('box-',''));return}
+  }
+  if(key==='ArrowDown'&&(e.target===$('datePanel')||document.activeElement===$('datePanel'))){e.preventDefault();e.stopImmediatePropagation();select(all[0]);focus(all[0]);return}
+  if(key==='ArrowUp'&&(e.target===$('memoryCard')||document.activeElement===$('memoryCard'))){e.preventDefault();e.stopImmediatePropagation();select(all[0]);focus(all[0]);return}
+ },true);
+ document.addEventListener('focusin',e=>{const c=e.target?.closest?.('.prayer-strip .prayer');if(c&&cards().includes(c))select(c)});
+ // Preview when focus lands on a voice, but only commit selection on OK.
+ opts().forEach(b=>{b.addEventListener('focus',()=>{if(modalOpen()&&typeof window.previewAdhan==='function')window.previewAdhan(b.dataset.voice)});b.addEventListener('click',()=>{if(typeof window.setAdhanVoice==='function')window.setAdhanVoice(b.dataset.voice);opts().forEach(o=>o.setAttribute('aria-selected',String(o===b)));if(typeof window.previewAdhan==='function')window.previewAdhan(b.dataset.voice);setTimeout(()=>{if(modalOpen())focus(b)},0)})});
+ const saveBtn=$('adhanSaveBtn');if(saveBtn)saveBtn.addEventListener('click',()=>{setTimeout(()=>{if(modalOpen())closeModal()},0)});
+})();
+</script>
 </body>
 </html>
 
@@ -2094,27 +2016,22 @@ body[data-layout-mode="tv"] .prayer-strip .prayer{
 .prayer-strip .prayer.next-prayer:focus .p-icon { color:#fff!important; text-shadow:0 1px 3px #10243888!important; }
 </style>
 
-
-<style id="zikra-prayer-selection-final-clean">
-/* Final TV prayer-card appearance: no gold frame; selected card and next prayer are independent states. */
-.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{
- outline:none!important;border:1px solid transparent!important;border-color:transparent!important;
- transform:perspective(700px) translateY(-8px) scale(1.09)!important;z-index:40!important;
- background:linear-gradient(145deg,#fff 0%,#f2f8ed 55%,#dcebd2 100%)!important;color:#244b22!important;
- box-shadow:0 5px 0 rgba(74,110,60,.30),0 13px 24px rgba(28,55,28,.25),0 0 18px rgba(208,244,185,.48)!important;
-}
-.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible){
- background:linear-gradient(110deg,#15324d 0%,#204e70 52%,#25699a 100%)!important;color:#fff!important;
- border:1px solid transparent!important;outline:none!important;transform:perspective(650px) translateY(-4px) scale(1.045)!important;
- box-shadow:0 6px 18px #10243838,0 0 16px #3e83b755!important;
-}
-.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-name,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-time,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-countdown,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-icon{color:#fff!important}
-.prayer-strip .prayer.next-prayer.remote-selected,.prayer-strip .prayer.next-prayer:focus,.prayer-strip .prayer.next-prayer:focus-visible{
- background:linear-gradient(145deg,#244f75 0%,#2d6c9f 58%,#214d76 100%)!important;color:#fff!important;
- outline:none!important;border:1px solid transparent!important;
- box-shadow:0 5px 0 rgba(16,36,56,.35),0 14px 27px rgba(16,36,56,.34),0 0 20px rgba(62,131,183,.55)!important;
-}
-.prayer-strip .prayer.next-prayer.remote-selected .p-name,.prayer-strip .prayer.next-prayer.remote-selected .p-time,.prayer-strip .prayer.next-prayer.remote-selected .p-countdown,.prayer-strip .prayer.next-prayer.remote-selected .p-icon,.prayer-strip .prayer.next-prayer:focus .p-name,.prayer-strip .prayer.next-prayer:focus .p-time,.prayer-strip .prayer.next-prayer:focus .p-countdown,.prayer-strip .prayer.next-prayer:focus .p-icon{color:#fff!important;text-shadow:0 1px 3px #10243888!important}
-#adhanSettingsModal #adhanVoiceOptions[hidden]{display:none!important}
-#adhanSettingsModal #adhanVoiceOptions button:focus,#adhanSettingsModal #adhanCloseBtn:focus,#adhanSettingsModal #adhanEnabledToggle:focus,#adhanSettingsModal #adhanSaveBtn:focus{outline:2px solid #789b75!important;outline-offset:2px!important;box-shadow:0 0 0 2px rgba(120,155,117,.18)!important}
+<style id="zikra-final-clean-prayer-and-adhan">
+/* One final visual rule for all six cards; no gold frame. */
+.prayer-strip .prayer{border:0!important;outline:0!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease!important;}
+.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{z-index:30!important;transform:perspective(700px) translateY(-8px) scale(1.10)!important;border:0!important;outline:none!important;outline-offset:0!important;background:linear-gradient(145deg,#fffefb 0%,#f1f9eb 48%,#d7ebca 100%)!important;color:#243b2b!important;box-shadow:0 5px 0 rgba(74,110,60,.42),0 15px 27px rgba(28,55,28,.32),0 0 22px rgba(208,244,185,.7),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.18)!important;}
+.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible){background:linear-gradient(110deg,#15324d 0%,#204e70 52%,#25699a 100%)!important;color:#fff!important;border:0!important;outline:0!important;transform:perspective(700px) translateY(-5px) scale(1.055)!important;box-shadow:0 6px 18px #10243838,0 0 16px #3e83b755,inset 0 1px 0 #ffffff55!important;}
+.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus) .p-name,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus) .p-time,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus) .p-countdown,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus) .p-icon{color:#fff!important;}
+#adhanSettingsModal .adhan-dialog{width:min(430px,90vw)!important;max-height:82vh!important;padding:14px!important;overflow-y:auto!important;}
+#adhanSettingsModal .adhan-head h2{font-size:18px!important;margin:0!important}
+#adhanSettingsModal #adhanVoiceButton{display:none!important}
+#adhanSettingsModal #adhanVoiceOptions{display:flex!important;position:static!important;max-height:none!important;overflow:visible!important;flex-direction:column;gap:5px;padding:0;margin:8px 0!important;background:transparent!important}
+#adhanSettingsModal #adhanVoiceOptions[hidden]{display:flex!important}
+#adhanSettingsModal #adhanVoiceOptions [data-voice]{display:flex!important;align-items:center;gap:10px;min-height:36px!important;padding:7px 10px!important;border-radius:9px!important;background:rgba(230,237,224,.58)!important;text-align:right!important;border:1px solid transparent!important}
+#adhanSettingsModal #adhanVoiceOptions [data-voice]::before{content:"";width:16px;height:16px;flex:0 0 16px;border:2px solid #829080;border-radius:50%;box-sizing:border-box;background:transparent;}
+#adhanSettingsModal #adhanVoiceOptions [data-voice][aria-selected="true"]::before{border-color:#39944b;background:radial-gradient(circle,#39944b 0 4px,transparent 4.5px);}
+#adhanSettingsModal #adhanVoiceOptions [data-voice]:focus{background:#dce9d5!important;box-shadow:0 0 0 2px #9bbd8f!important;}
+#adhanSettingsModal .adhan-switch-row{margin:8px 0!important;padding:8px!important}
+#adhanSettingsModal .adhan-actions{margin-top:8px!important;justify-content:flex-end!important}
+#adhanSettingsModal #adhanSaveBtn{min-height:38px!important;min-width:110px!important}
 </style>
