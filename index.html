@@ -94,7 +94,11 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 .weather-modal-content{position:relative;z-index:1}.weather-modal-content .weather-temp{font-size:clamp(38px,5vw,58px);color:#fff}.weather-modal-content .weather-icon{font-size:42px}.weather-modal-content .section-title{color:#fff;font-size:14px;margin:12px 0 7px}
 .weather-days{display:flex;direction:ltr;gap:8px;overflow-x:auto;padding:8px 4px 14px;scrollbar-width:thin;overscroll-behavior-x:contain;scroll-behavior:smooth;max-width:100%;touch-action:pan-x}
 .weather-day{flex:0 0 88px;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:1px solid #ffffff42;border-radius:15px;background:#ffffff18;color:#fff;padding:8px 5px;font-size:12px}
-.weather-day .day-icon{font-size:23px}.weather-day .day-range{font-size:11px;white-space:nowrap}.weather-day.selected,.weather-day:focus{outline:3px solid #fff0b4;outline-offset:-3px;background:#ffffff40;border-color:#fff0b4;box-shadow:0 0 0 2px #132b45}.weather-day{cursor:pointer;flex-shrink:0;scroll-margin-inline:10px}
+.weather-day .day-icon{font-size:23px}.weather-day .day-range{font-size:11px;white-space:nowrap}.weather-day.selected,.weather-day:focus{outline:3px solid #fff0b4;outline-offset:-3px;background:#ffffff40;border-color:#fff0b4;box-shadow:0 0 0 2px #132b45} .weather-day{cursor:pointer;flex-shrink:0;scroll-margin-inline:10px;transform:scale(1);transition:transform .22s ease,box-shadow .22s ease,outline-color .22s ease;transform-origin:center}
+.weather-day.selected,.weather-day:focus-visible{outline:2px solid #fff0b4;outline-offset:-2px;background:#ffffff18;border-color:#ffffff70;box-shadow:0 7px 20px #06182b55,0 0 0 2px #ffffff20;transform:scale(1.07);z-index:3}
+.weather-day:hover{transform:scale(1.045);box-shadow:0 6px 16px #06182b45;z-index:2}
+.weather-day.selected:hover{transform:scale(1.07)}
+@media(prefers-reduced-motion:reduce){.weather-day{transition:none}}
 .weather-selected-date{font-size:12px;color:#e7f2ff;margin:2px 0 8px}
 .weather-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{border:1px solid #ffffff38;background:#ffffff18;border-radius:13px;padding:10px;color:#fff;min-height:68px}.stat-label{font-size:11px;color:#d8e6f2}.stat-value{font-size:17px;font-weight:700;margin-top:4px}
 .hourly{display:flex;direction:ltr;gap:7px;overflow-x:auto;padding:4px 3px 11px;overscroll-behavior-x:contain;scroll-behavior:smooth;max-width:100%}.hour{flex:0 0 70px;text-align:center;padding:8px 4px;border-radius:12px;background:#ffffff18;border:1px solid #ffffff30;font-size:11px;color:#fff}.hour-icon{font-size:20px;margin:4px 0}.hour:focus{outline:3px solid #fff0b4;outline-offset:-3px;background:#ffffff36;box-shadow:0 0 0 2px #132b45}.daily-list{display:none}
@@ -357,7 +361,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <div class="modal-backdrop" id="weatherModal" role="dialog" aria-modal="true" aria-labelledby="weatherTitle"><section class="modal">
   <div class="weather-scene night" id="weatherScene" aria-hidden="true"></div>
   <div class="weather-modal-content">
-    <div class="modal-head"><h2 id="weatherTitle">الطقس والتوقعات</h2><button class="close-modal" id="closeWeather" aria-label="إغلاق">×</button></div>
+    <div class="modal-head"><h2 id="weatherTitle">الطقس والتوقعات</h2></div>
     <div class="weather-current-summary"><div class="weather-icon" id="modalIcon">🌙</div><div class="weather-temp" id="modalTemp">--°</div><div id="modalCondition"></div><div id="modalFeels"></div></div>
     <div class="section-title" id="daysTitle">الأيام القادمة</div><div class="weather-days" id="weatherDays" role="listbox" aria-label="اختر اليوم"></div>
     <div class="weather-selected-date" id="weatherSelectedDate"></div>
@@ -442,7 +446,7 @@ function renderWeather(){
   renderWeatherModal()
 }
 function weatherSceneClass(code,dateString){
-  const info=condition(code),today=new Date().toISOString().slice(0,10),night=dateString===today&&(new Date().getHours()>=20||new Date().getHours()<6);
+  const info=condition(code),now=new Date(),today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`,night=dateString===today&&(now.getHours()>=20||now.getHours()<6);
   // Preserve rain/snow/storm animations even after dark.
   return night&&!['rainy','snowy','storm'].includes(info.cls)?"night":info.cls;
 }
@@ -461,7 +465,7 @@ function selectWeatherDay(index,focusButton=true){
 }
 function renderWeatherDays(){
   if(!weatherData?.daily)return;
-  const d=weatherData.daily,locale=lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",box=$("weatherDays");box.replaceChildren();
+  const d=weatherData.daily,locale=lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",box=$("weatherDays"),savedScrollLeft=box.scrollLeft;box.replaceChildren();
   d.time.forEach((date,i)=>{
     const dayDate=new Date(date+"T12:00:00"),label=i===0?T[lang].today:i===1?T[lang].tomorrow:new Intl.DateTimeFormat(locale,{weekday:"short"}).format(dayDate);
     const b=document.createElement("button");b.type="button";b.className="weather-day"+(i===selectedWeatherDay?" selected":"");b.dataset.day=String(i);b.setAttribute("role","option");b.setAttribute("aria-selected",String(i===selectedWeatherDay));
@@ -470,9 +474,22 @@ function renderWeatherDays(){
     b.append(name,icon,range);b.addEventListener("click",()=>selectWeatherDay(i,true));box.append(b);
   });
 }
+let weatherScrollSelectTimer=null,weatherProgrammaticScroll=false;
+$("weatherDays").addEventListener("scroll",()=>{
+  if(!weatherData?.daily)return;
+  if(weatherScrollSelectTimer)clearTimeout(weatherScrollSelectTimer);
+  weatherScrollSelectTimer=setTimeout(()=>{
+    const box=$("weatherDays"),items=Array.from(box.querySelectorAll(".weather-day"));
+    if(!items.length)return;
+    const center=box.getBoundingClientRect().left+box.clientWidth/2;
+    let nearest=0,dist=Infinity;
+    items.forEach((item,i)=>{const r=item.getBoundingClientRect(),d=Math.abs((r.left+r.width/2)-center);if(d<dist){dist=d;nearest=i;}});
+    if(nearest!==selectedWeatherDay)selectWeatherDay(nearest,false);
+  },100);
+},{passive:true});
 function renderWeatherModal(){
   if(!weatherData)return;
-  const d=weatherData,c=d.current,t=T[lang],daily=d.daily,idx=Math.max(0,Math.min(selectedWeatherDay,daily.time.length-1)),date=daily.time[idx],isToday=idx===0,code=daily.weather_code[idx],desc=condition(code);
+  const d=weatherData,c=d.current,t=T[lang],daily=d.daily,idx=Math.max(0,Math.min(selectedWeatherDay,daily.time.length-1)),date=daily.time[idx],isToday=idx===0,code=isToday?c.weather_code:daily.weather_code[idx],desc=condition(code);
   $("weatherTitle").textContent=lang==="ar"?"الطقس والتوقعات":lang==="de"?"Wetter und Vorhersage":"Weather forecast";
   $("daysTitle").textContent=lang==="ar"?"الأيام القادمة":lang==="de"?"Die nächsten Tage":"Coming days";
   $("detailsTitle").textContent=lang==="ar"?"تفاصيل اليوم":lang==="de"?"Tagesdetails":"Day details";
@@ -805,8 +822,8 @@ function moveDirectionalFocus(direction){
 
 window.handleAndroidDpad=moveDirectionalFocus;
 
-$("datePanel").addEventListener("click",()=>openModal("weatherModal"));
-$("datePanel").addEventListener("keydown",ev=>{if(ev.target!==ev.currentTarget)return;if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();openModal("weatherModal")}});$("closeQuran").addEventListener("click",()=>closeModal("quranModal"));$("closeWeather").addEventListener("click",()=>closeModal("weatherModal"));
+$("datePanel").addEventListener("click",()=>{selectedWeatherDay=0;openModal("weatherModal");renderWeatherModal();requestAnimationFrame(()=>scrollWeatherDayIntoView($("weatherDays").querySelector('[data-day="0"]')));});
+$("datePanel").addEventListener("keydown",ev=>{if(ev.target!==ev.currentTarget)return;if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();selectedWeatherDay=0;openModal("weatherModal");renderWeatherModal();requestAnimationFrame(()=>scrollWeatherDayIntoView($("weatherDays").querySelector('[data-day="0"]')))}});$("closeQuran").addEventListener("click",()=>closeModal("quranModal"));
 function changeLanguage(value){lang=value;localStorage.setItem("zikra_language",value);document.documentElement.lang=value;document.documentElement.dir="rtl";const t=T[lang];$("appTitle").textContent=t.title;$("subtitle").textContent=t.subtitle;$("quranTitle").textContent=t.quranTitle;$("reciterLabel").textContent=t.reciterLabel;$("resumeLabel").textContent=t.resumeLabel;$("cityTitle").textContent=lang==="ar"?"الموقع والمدينة":lang==="de"?"Standort und Stadt":"Location and city";$("cityInputLabel").textContent=lang==="ar"?"اسم المدينة":lang==="de"?"Stadtname":"City name";$("cityHelp").textContent=lang==="ar"?"يمكنك تحديد موقع الجهاز أو كتابة اسم المدينة يدوياً.":lang==="de"?"Standort automatisch bestimmen oder den Stadtnamen eingeben.":"Use device location or enter a city name."; $("findLocationBtn").textContent=lang==="ar"?"📍 تحديد موقعي تلقائياً":lang==="de"?"📍 Meinen Standort bestimmen":"📍 Use my location";$("saveCityBtn").textContent=lang==="ar"?"حفظ المدينة":lang==="de"?"Stadt speichern":"Save city";$("backToIndex").textContent=lang==="ar"?"→ فهرس السور":lang==="de"?"→ Sure auswählen":"→ Surah index";$("exitTitle").textContent=lang==="ar"?"الخروج من التطبيق":lang==="de"?"App verlassen":"Exit app";$("exitMessage").textContent=lang==="ar"?"هل تريد الخروج من تطبيق ذِكرى؟":lang==="de"?"Möchtest du Zikra verlassen?":"Do you want to exit Zikra?";$("confirmExitBtn").textContent=lang==="ar"?"نعم، خروج":lang==="de"?"Ja, beenden":"Yes, exit";$("cancelExitBtn").textContent=lang==="ar"?"لا، إلغاء":lang==="de"?"Nein, abbrechen":"No, cancel";if(!loaded){$("miniSurah").textContent=t.defaultSurah;$("miniReader").textContent=t.openPrompt;$("miniVerse").textContent=t.startPrompt}document.querySelectorAll(".p-name").forEach(el=>{const p=el.dataset.prayer;if(p)el.textContent=el.dataset[lang]||el.dataset.ar});renderMemory();updateClock();updateCityLabel();loadPrayerTimes();checkResumeBookmark();$("footerRights").textContent=t.rights;if(weatherData)renderWeather();else loadWeather();if(surahListCache.length)renderSurahIndex()}
 function closeLanguageMenu(){const m=$("languageMenu");m.hidden=true;$("languageBtn").setAttribute("aria-expanded","false");}
 $("languageBtn").addEventListener("click",()=>{const m=$("languageMenu");m.hidden=!m.hidden;$("languageBtn").setAttribute("aria-expanded",String(!m.hidden));if(!m.hidden)m.querySelector(`[data-lang="${lang}"]`)?.focus();});
@@ -833,6 +850,7 @@ function handleBack(){
 }
 window.handleAndroidBack=handleBack;
 $("exitModal").addEventListener("click",e=>{if(e.target===$("exitModal"))hideExitPrompt()});
+$("weatherModal").addEventListener("click",e=>{if(e.target===$("weatherModal"))closeModal("weatherModal")});
 document.addEventListener("keydown",function(event){
   const key=event.key;
   if(["Escape","Backspace","BrowserBack","GoBack"].includes(key)||event.keyCode===4){
@@ -846,7 +864,7 @@ document.addEventListener("keydown",function(event){
     event.preventDefault();event.stopImmediatePropagation();
     const dayButtons=Array.from($("weatherDays").querySelectorAll(".weather-day"));
     const hourCards=Array.from($("hourlyForecast").querySelectorAll(".hour"));
-    const current=document.activeElement,currentDayIndex=dayButtons.indexOf(current),currentHourIndex=hourCards.indexOf(current),close=$("closeWeather");
+    const current=document.activeElement,currentDayIndex=dayButtons.indexOf(current),currentHourIndex=hourCards.indexOf(current);
     const focusDay=()=>{const selected=dayButtons[selectedWeatherDay]||dayButtons[0];selected?.focus({preventScroll:true});scrollWeatherDayIntoView(selected);};
     const focusHour=index=>{const item=hourCards[index];if(item){item.focus({preventScroll:true});item.scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});}};
     if(key==="ArrowLeft"||key==="ArrowRight"){
@@ -857,7 +875,7 @@ document.addEventListener("keydown",function(event){
       }else if(currentHourIndex>=0){
         const next=currentHourIndex+(key==="ArrowRight"?1:-1);
         if(next>=0&&next<hourCards.length)focusHour(next);
-      }else if(current===close){focusDay();}
+      }
       return;
     }
     if(key==="ArrowUp"){
@@ -1385,162 +1403,5 @@ html[data-layout-mode="tv"] .footer,body[data-layout-mode="tv"] .footer{flex:0 0
  },true);
 })();
 </script>
-
-<style id="zikra-user-request-patch-v1">
-/* Keep the original page footprint; give the Quran verse more readable space and compress memory. */
-.tile.tile-memory{height:clamp(112px,17vh,150px)!important;min-height:112px!important;padding:8px 14px!important}
-.player{min-height:clamp(112px,17vh,150px)!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"caption logo" "verse verse" "controls controls" "progress progress";row-gap:6px!important;align-content:center}
-.player>.quran-entry-caption{grid-area:caption!important;align-items:flex-start!important;text-align:right!important;gap:3px!important;min-width:0}
-.player>.quran-entry-caption strong{font-size:clamp(13px,1.5vw,19px)!important;text-align:right!important}
-.player>.quran-entry-caption small{display:block!important;font-size:clamp(10px,1vw,12px)!important;text-align:right!important}
-.player .track-area{grid-area:verse!important;width:100%;min-width:0}
-.player .verse-row{align-items:flex-start!important;justify-content:flex-start!important;gap:8px!important}
-.player .verse{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;text-align:justify!important;line-height:1.9!important;font-family:"Amiri Quran","KFGQPC Uthmanic Script HAFS",serif!important;font-size:clamp(17px,2vw,25px)!important;flex:1;min-width:0;overflow-wrap:anywhere}
-.player .ayah-number{width:auto!important;min-width:32px!important;height:32px!important;border-radius:50%!important;font-size:13px!important;flex-shrink:0}
-.player .controls{grid-area:controls!important;justify-content:center!important}
-.player .progress{grid-area:progress!important;width:100%}
-.dua-bar{display:block!important;position:relative!important;overflow:hidden!important;min-height:42px!important;padding:0!important;text-align:initial!important}
-.dua-track{display:flex;align-items:center;width:max-content;min-width:100%;gap:0;white-space:nowrap;will-change:transform;animation:zikraDuaTicker 105s linear infinite;direction:ltr}
-.dua-track span{display:inline-flex;align-items:center;gap:14px;padding:10px 0;font-size:clamp(12px,1.35vw,15px);line-height:1.5}
-.dua-track .dua-separator{color:var(--gold);padding:0 16px;font-size:20px}
-.dua-bar:hover .dua-track{animation-play-state:paused}
-@keyframes zikraDuaTicker{from{transform:translateX(-50%)}to{transform:translateX(0)}}
-.reader-search-wrap{position:sticky;top:0;z-index:3;background:#fffdf4;padding:4px 2px}
-.reader-search{width:100%;border:1px solid #bdc8b2;border-radius:9px;padding:10px;background:#fff;color:var(--dark);font:inherit}
-.reader-change-backdrop{position:fixed;inset:0;z-index:250;display:none;align-items:center;justify-content:center;padding:18px;background:#17251dcc}
-.reader-change-backdrop.open{display:flex}
-.reader-change-dialog{width:min(460px,100%);padding:22px;border:1px solid #c4a35b;border-radius:18px;background:linear-gradient(145deg,#fffdf4,#eaf0e4);box-shadow:0 20px 70px #0005;text-align:center;color:var(--dark)}
-.reader-change-dialog h3{margin:0 0 12px;font-size:clamp(17px,2.5vw,22px);color:var(--dark)}
-.reader-change-dialog p{margin:0 0 20px;line-height:1.8;font-weight:700;overflow-wrap:anywhere}
-.reader-change-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.reader-change-actions button{border:1px solid #b99a56;border-radius:10px;padding:12px 8px;font-weight:800;background:#e5ecd9;color:#304b3a}
-.reader-change-actions button:first-child{background:#496d55;color:#fff;border-color:#496d55}
-.weather-day{transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease}
-.weather-day.selected{transform:scale(1.09);z-index:2;position:relative;background:#fff7dc!important;color:#304b3a!important;border:2px solid #d0ad57!important;box-shadow:0 5px 18px #0004,0 0 0 3px #f4df9a55!important}
-.weather-day:focus-visible{outline:3px solid #e5c46c!important;outline-offset:2px}
-@media(max-width:700px){.player{min-height:clamp(124px,20vh,170px)!important;padding:8px!important}.player .verse{font-size:clamp(16px,4.2vw,21px)!important;line-height:1.8!important}.tile.tile-memory{height:clamp(108px,15vh,135px)!important;min-height:108px!important}.reader-change-actions{grid-template-columns:1fr}.dua-track{animation-duration:125s}}
-</style>
-<script id="zikra-user-request-patch-v1">
-(function(){
- const $=id=>document.getElementById(id);
- // Current conditions control the weather tile and its animation. Forecast cards remain forecast-based.
- const originalRenderWeather=window.renderWeather;
- if(typeof originalRenderWeather==='function'){
-   window.renderWeather=function(){
-     originalRenderWeather();
-     const d=weatherData;
-     if(!d||!d.current)return;
-     // Existing renderer uses current.weather_code; ensure the active scene also derives from current conditions only.
-     const code=Number(d.current.weather_code);
-     const rainy=[51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code);
-     if(!rainy){const effects=$('weatherTileEffects');if(effects){effects.querySelectorAll('.tile-rain-drop').forEach(x=>x.remove())}}
-   }
- }
- // Weather selection updates automatically on focus/remote navigation, not only after pressing OK.
- document.addEventListener('focusin',ev=>{const day=ev.target.closest?.('#weatherDays .weather-day');if(day){const n=Number(day.dataset.day);if(Number.isFinite(n)&&n!==selectedWeatherDay){window.selectWeatherDay?.(n,false);day.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}}});
- document.addEventListener('keydown',ev=>{
-   const day=ev.target.closest?.('#weatherDays .weather-day');if(!day)return;
-   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(ev.key)){
-     const items=[...document.querySelectorAll('#weatherDays .weather-day')];if(!items.length)return;
-     const rtl=getComputedStyle(day.parentElement).direction==='rtl';let delta=(ev.key==='ArrowRight'?(rtl?-1:1):ev.key==='ArrowLeft'?(rtl?1:-1):ev.key==='ArrowDown'?1:-1);
-     const i=items.indexOf(day),next=Math.max(0,Math.min(items.length-1,i+delta));if(next!==i){ev.preventDefault();items[next].focus({preventScroll:true});}
-   }
- });
- // Reciter picker: alphabetical order with Mishary Alafasy pinned first and a live search field.
- const originalRenderReaderOptions=window.renderReaderOptions;
- const originalRenderReciterPicker=window.renderReciterPicker;
- let chosenReaderBeforeChange=null;
- function ensureReaderDialog(){
-   if($('readerChangeBackdrop'))return;
-   const backdrop=document.createElement('div');backdrop.id='readerChangeBackdrop';backdrop.className='reader-change-backdrop';backdrop.innerHTML='<section class="reader-change-dialog" role="dialog" aria-modal="true" aria-labelledby="readerChangeTitle"><h3 id="readerChangeTitle">تأكيد تغيير القارئ</h3><p id="readerChangeMessage"></p><div class="reader-change-actions"><button type="button" id="readerResumeBtn">استئناف القراءة</button><button type="button" id="readerIndexBtn">الذهاب للفهرس</button></div></section>';
-   document.body.append(backdrop);
-   $('readerResumeBtn').addEventListener('click',async()=>{
-     const pending=window.__zikraPendingReaderChange;if(!pending)return;backdrop.classList.remove('open');
-     const {readerId,surah,ayah,time}=pending;const select=$('reciter');select.value=String(readerId);select.dispatchEvent(new Event('change',{bubbles:true}));
-     await window.loadSurahAndShow(surah,ayah,time);
-   });
-   $('readerIndexBtn').addEventListener('click',()=>{
-     const pending=window.__zikraPendingReaderChange;if(!pending)return;backdrop.classList.remove('open');
-     const select=$('reciter');select.value=String(pending.readerId);select.dispatchEvent(new Event('change',{bubbles:true}));
-     $('versesView').style.display='none';$('surahIndexGrid').style.display='grid';$('quranModal').classList.add('open');
-     $('surahIndexGrid').querySelector('.surah-item')?.focus({preventScroll:true});
-   });
-   backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.classList.remove('open')});
- }
- window.renderReciterPicker=function(){
-   const menu=$('reciterPickerMenu'),button=$('reciterPickerButton'),select=$('reciter');if(!menu||!button||!select)return;
-   const search=document.createElement('div');search.className='reader-search-wrap';search.innerHTML='<input class="reader-search" id="reciterSearchInput" type="search" placeholder="ابحث عن اسم القارئ…" aria-label="ابحث عن اسم القارئ">';
-   menu.replaceChildren(search);
-   const ordered=[...readers].sort((a,b)=>{
-     const af=/المعيقلي|maher.*muaiqly|maher.*al.?muaiqly/i.test(a.name),bf=/المعيقلي|maher.*muaiqly|maher.*al.?muaiqly/i.test(b.name);if(af!==bf)return af?-1:1;return String(a.name).localeCompare(String(b.name),'ar');
-   });
-   ordered.forEach(r=>{
-     const item=document.createElement('button');item.type='button';item.className='reader-option';item.setAttribute('role','option');item.dataset.readerId=String(r.id);item.setAttribute('aria-selected',String(String(r.id)===select.value));item.textContent=r.name+(r.rewaya?' — '+r.rewaya:'');
-     item.addEventListener('click',()=>{
-       const newId=String(r.id),oldId=String(select.value);menu.hidden=true;button.setAttribute('aria-expanded','false');
-       if(newId===oldId){button.textContent=item.textContent;button.focus({preventScroll:true});return;}
-       const wasPlaying=!!(loaded&&read&&!audio?.paused);
-       if(loaded&&currentSurahNum){
-         const activeAyah=Number($('miniAyah').textContent.replace(/[^0-9]/g,''))||1;
-         const timing=(times||[]).find(x=>Number(x.ayah)===activeAyah);const time=timing?Number(timing.start_time)/1000:(audio?.currentTime||0);
-         window.__zikraPendingReaderChange={readerId:newId,surah:currentSurahNum,ayah:activeAyah,time};ensureReaderDialog();$('readerChangeTitle').textContent='تغيير قارئ التلاوة';$('readerChangeMessage').textContent='اخترت القارئ '+r.name+' لتلاوة القرآن الكريم';$('readerChangeBackdrop').classList.add('open');$('readerResumeBtn').focus({preventScroll:true});
-       }else{
-         select.value=newId;select.dispatchEvent(new Event('change',{bubbles:true}));button.textContent=item.textContent;
-       }
-     });menu.append(item);
-   });
-   const current=readers.find(r=>String(r.id)===select.value);button.textContent=current?(current.name+(current.rewaya?' — '+current.rewaya:'')):(lang==='ar'?'اختر القارئ':'Choose reciter');
-   const input=$('reciterSearchInput');input.addEventListener('input',()=>{const q=input.value.trim().toLocaleLowerCase('ar');menu.querySelectorAll('.reader-option').forEach(item=>{item.hidden=!item.textContent.toLocaleLowerCase('ar').includes(q)})});
-   input.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();menu.querySelector('.reader-option:not([hidden])')?.focus({preventScroll:true})}if(e.key==='Escape'){menu.hidden=true;button.setAttribute('aria-expanded','false');button.focus({preventScroll:true})}});
- };
- // Keep the first reader pinned as Maher Al-Muaiqly, then Arabic alphabetical order.
- const originalLoadReaders=window.loadReaders;
- if(typeof originalLoadReaders==='function'){
-   window.loadReaders=async function(){await originalLoadReaders();if(Array.isArray(readers)){readers.sort((a,b)=>{const af=/المعيقلي|maher.*muaiqly|maher.*al.?muaiqly/i.test(a.name),bf=/المعيقلي|maher.*muaiqly|maher.*al.?muaiqly/i.test(b.name);if(af!==bf)return af?-1:1;return String(a.name).localeCompare(String(b.name),'ar')});window.renderReaderOptions?.()}}
- }
- // Ensure the default selection is Maher Al-Muaiqly, then render the customized alphabetical picker.
- const baseRenderReaderOptions=window.renderReaderOptions;
- if(typeof baseRenderReaderOptions==='function')window.renderReaderOptions=function(){
-   const target=readers.find(r=>/المعيقلي|maher.*muaiqly|maher.*al.?muaiqly/i.test(r.name));
-   if(target&&!readers.some(r=>String(r.id)===String($('reciter').value)))$('reciter').value=String(target.id);
-   if(target&&!$('reciter').value)$('reciter').value=String(target.id);
-   baseRenderReaderOptions();
-   if(target&&!$('reciter').value)$('reciter').value=String(target.id);
- };
- function parseArabicNumber(value){return Number(String(value||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[^0-9]/g,''))||1}
- // Main player: title and reciter with page and active ayah indicators; hide metadata until a surah is chosen.
- const playerCaption=document.querySelector('.player>.quran-entry-caption');
- if(playerCaption){let meta=$('miniSurahMeta');if(!meta){meta=document.createElement('small');meta.id='miniSurahMeta';meta.style.cssText='display:block!important;color:#8a7139;font-weight:800;line-height:1.5';playerCaption.append(meta)}}
- function updatePlayerMeta(){
-   const meta=$('miniSurahMeta'),surah=$('miniSurah'),reader=$('miniReader'),verse=$('miniVerse'),ayah=$('miniAyah');if(!meta||!surah)return;
-   let basmala=$('miniBasmala');if(!basmala){basmala=document.createElement('div');basmala.id='miniBasmala';basmala.textContent='﷽';basmala.style.cssText='display:none;color:#8a7139;font-family:serif;font-size:clamp(16px,1.8vw,22px);font-weight:800;text-align:center;line-height:1.5';const row=$('miniVerse')?.parentElement;if(row)row.insertAdjacentElement('beforebegin',basmala)}
-   if(!loaded){surah.textContent='اختر سورة وابدأ التلاوة';reader.textContent='';meta.textContent='';ayah.hidden=true;basmala.style.display='none';return}
-   ayah.hidden=false;basmala.style.display=(parseArabicNumber(ayah.textContent)===1&&currentSurahNum!==1&&currentSurahNum!==9)?'block':'none';
-   const active=document.querySelector('.ayah.active');const page=active?.closest('.mushaf-page')?.querySelector('.mushaf-page-number')?.textContent?.match(/\d+/)?.[0]||'';
-   const n=parseArabicNumber(ayah.textContent);
-   meta.textContent=(page?'⦅ صـ '+new Intl.NumberFormat('ar').format(Number(page))+' ⦆':'')+(page?' • ':'')+'۝ '+new Intl.NumberFormat('ar').format(n)+' ۝';
- }
- const origLoadSurah=window.loadSurahAndShow;
- if(typeof origLoadSurah==='function')window.loadSurahAndShow=async function(...args){await origLoadSurah(...args);updatePlayerMeta();};
- const origMark=window.mark;
- if(typeof origMark==='function')window.mark=function(){origMark();updatePlayerMeta()};
- document.addEventListener('DOMContentLoaded',updatePlayerMeta);updatePlayerMeta();
- // Smooth continuous dua ticker, Arabic direction explicitly left-to-right, separator ۞ only.
- const duaBar=document.querySelector('.dua-bar');
- if(duaBar){
-   const duaTexts=[
-    'اللهم أعنّا على ذكرك وشكرك وحسن عبادتك','رَبِّ زِدْنِي عِلْمًا','اللهم اجعل القرآن ربيع قلوبنا ونور صدورنا وجلاء أحزاننا وذهاب همومنا','رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ','اللهم اغفر لنا ولوالدينا وللمؤمنين والمؤمنات الأحياء منهم والأموات','اللهم إني أسألك الهدى والتقى والعفاف والغنى','رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي','يا مقلب القلوب ثبت قلبي على دينك','اللهم إنك عفو كريم تحب العفو فاعف عنا','اللهم إني أسألك العفو والعافية في الدنيا والآخرة','سبحان الله وبحمده سبحان الله العظيم','لا حول ولا قوة إلا بالله العلي العظيم','اللهم صل وسلم وبارك على نبينا محمد ﷺ','أستغفر الله العظيم وأتوب إليه','اللهم ارزقنا راحة القلب وطمأنينة النفس وحسن التوكل عليك','اللهم اجعل هذا اليوم خيراً وبركةً ورحمةً لنا ولأهلينا'];
-   duaBar.replaceChildren();const track=document.createElement('div');track.className='dua-track';track.setAttribute('aria-label','شريط الأذكار والأدعية');
-   // Duplicate the sequence to ensure the strip is never visually empty during the loop.
-   for(let copy=0;copy<2;copy++)for(let i=0;i<duaTexts.length;i++){const span=document.createElement('span');span.textContent=duaTexts[i];track.append(span);const sep=document.createElement('span');sep.className='dua-separator';sep.textContent='۞';sep.setAttribute('aria-hidden','true');track.append(sep)}
-   duaBar.append(track);
- }
- // Add a non-blocking Al Jazeera news ticker after the existing dua ticker; RSS may be unavailable offline.
- const news=document.createElement('div');news.id='zikraNewsTicker';news.className='dua-bar';news.setAttribute('aria-label','شريط أخبار الجزيرة');news.innerHTML='<span style="flex:0 0 auto;padding:0 10px;color:#496d55;font-weight:900">الجزيرة | أخبار</span><div class="dua-track" id="zikraNewsTrack"><span>تابع آخر الأخبار والتطورات عبر قناة الجزيرة</span><span class="dua-separator">۞</span><span>أخبار العالم على مدار الساعة</span><span class="dua-separator">۞</span></div>';
-   if(duaBar)duaBar.insertAdjacentElement('afterend',news);
-   fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent('https://www.aljazeera.com/xml/rss/all.xml')).then(r=>r.json()).then(data=>{const items=(data.items||[]).slice(0,12);if(!items.length)return;const track=$('zikraNewsTrack');track.replaceChildren();for(let k=0;k<2;k++)items.forEach((item,i)=>{const span=document.createElement('span');span.textContent=item.title||'آخر أخبار الجزيرة';track.append(span);const sep=document.createElement('span');sep.className='dua-separator';sep.textContent='۞';track.append(sep)})}).catch(()=>{});
-})();
-</script>
-
 </body>
 </html>
