@@ -1783,106 +1783,164 @@ body[data-layout-mode="tv"] .prayer-strip .prayer{
 .prayer-strip{overflow:visible!important;isolation:isolate!important}
 .prayer-strip .prayer{transform-origin:center center!important;will-change:transform,box-shadow!important}
 </style>
-<script id="prayer-remote-hard-fix-v12">
+<script id="prayer-remote-hard-fix-v13">
 (function(){
- const $=id=>document.getElementById(id);
+ 'use strict';
+ const el=id=>document.getElementById(id);
  const cards=()=>Array.from(document.querySelectorAll('.prayer-strip .prayer'));
- const modalOpen=()=>!!$('adhanSettingsModal')?.classList.contains('open');
- const voiceList=()=>$('adhanVoiceOptions');
- const voiceItems=()=>Array.from(voiceList()?.querySelectorAll('button[data-voice]')||[]);
- const focus=el=>{if(!el)return;try{el.focus({preventScroll:true});}catch(_){el.focus();}};
- const prayerKeys=['Fajr','Dhuhr','Asr','Maghrib','Isha'];
- function upcoming(){return document.querySelector('.prayer-strip .prayer.next-prayer')||$('box-Fajr');}
- function markSelected(card){cards().forEach(c=>c.classList.toggle('remote-selected',c===card));}
- function focusCard(card){if(card){markSelected(card);focus(card);}}
+ const modal=()=>el('adhanSettingsModal');
+ const isModalOpen=()=>!!modal()?.classList.contains('open');
+ const voiceList=()=>el('adhanVoiceOptions');
+ const voiceOptions=()=>Array.from(voiceList()?.querySelectorAll('button[data-voice]')||[]);
+ const focus=target=>{if(!target)return;try{target.focus({preventScroll:true});}catch(_){target.focus();}};
+ let selectedCard=null;
+ let returnCard=null;
+ const adhanPrayers=new Set(['Fajr','Dhuhr','Asr','Maghrib','Isha']);
  function normalize(e){
-   const raw=String(e.key||e.code||'').toLowerCase();
-   const names={arrowleft:'ArrowLeft',left:'ArrowLeft',dpad_left:'ArrowLeft',keyleft:'ArrowLeft',arrowright:'ArrowRight',right:'ArrowRight',dpad_right:'ArrowRight',keyright:'ArrowRight',arrowup:'ArrowUp',up:'ArrowUp',dpad_up:'ArrowUp',arrowdown:'ArrowDown',down:'ArrowDown',dpad_down:'ArrowDown',enter:'Enter',select:'Enter',numpadenter:'Enter',' ':'Enter',escape:'Escape',backspace:'Escape',browserback:'Escape',goback:'Escape'};
-   const k=e.keyCode||e.which||0;
-   const codes={4:'Escape',8:'Escape',27:'Escape',19:'ArrowUp',20:'ArrowDown',21:'ArrowLeft',22:'ArrowRight',23:'Enter',66:'Enter',13:'Enter',37:'ArrowLeft',38:'ArrowUp',39:'ArrowRight',40:'ArrowDown'};
-   return codes[k]||names[raw]||e.key||'';
+   const raw=String(e.key||e.code||'').toLowerCase().replace(/[ _-]/g,'');
+   const byName={arrowleft:'ArrowLeft',left:'ArrowLeft',dpadleft:'ArrowLeft',keyleft:'ArrowLeft',arrowright:'ArrowRight',right:'ArrowRight',dpadright:'ArrowRight',keyright:'ArrowRight',arrowup:'ArrowUp',up:'ArrowUp',dpadup:'ArrowUp',arrowdown:'ArrowDown',down:'ArrowDown',dpaddown:'ArrowDown',enter:'Enter',select:'Enter',numpadenter:'Enter',' ':'Enter',escape:'Escape',backspace:'Escape',browserback:'Escape',goback:'Escape'};
+   const code=e.keyCode||e.which||0;
+   const byCode={4:'Escape',8:'Escape',27:'Escape',19:'ArrowUp',20:'ArrowDown',21:'ArrowLeft',22:'ArrowRight',23:'Enter',66:'Enter',13:'Enter',37:'ArrowLeft',38:'ArrowUp',39:'ArrowRight',40:'ArrowDown'};
+   return byCode[code]||byName[raw]||e.key||'';
  }
- window.addEventListener('keydown',function(e){
-   const key=normalize(e), back=key==='Escape'||key==='Back';
-   if(modalOpen()){
-     // One Back press closes the complete settings window, even while the voice list is open.
-     if(back){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(typeof closeAdhanSettings==='function')closeAdhanSettings();else $('adhanSettingsModal').classList.remove('open');return;}
-     const menu=voiceList(), opts=voiceItems(), active=document.activeElement, oi=opts.indexOf(active);
-     if(menu&&!menu.hidden){
-       if(['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','Enter'].includes(key)){
-         e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-         if(!opts.length)return;
-         if(key==='Enter'){
-           if(oi>=0){if(typeof setAdhanVoice==='function')setAdhanVoice(opts[oi].dataset.voice);menu.hidden=true;$('adhanVoiceButton')?.setAttribute('aria-expanded','false');focus($('adhanVoiceButton'));}
-           return;
-         }
-         const delta=(key==='ArrowDown'||key==='ArrowRight')?1:-1;
-         let i=oi;if(i<0){i=opts.findIndex(b=>b.getAttribute('aria-selected')==='true');if(i<0)i=0;}else i=(i+delta+opts.length)%opts.length;
-         focus(opts[i]);return;
-       }
-       return;
-     }
-     const close=$('adhanCloseBtn'), voice=$('adhanVoiceButton'), toggle=$('adhanEnabledToggle'), save=$('adhanSaveBtn');
-     if(key==='Enter'){
-       if(active===voice){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(typeof openAdhanVoiceList==='function')openAdhanVoiceList();else if(menu){menu.hidden=false;focus(opts[0]);}return;}
-       if(active===close||active===save){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();active.click();return;}
-       if(active===toggle){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();toggle.checked=!toggle.checked;toggle.dispatchEvent(new Event('change',{bubbles:true}));return;}
-     }
-     if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)){
-       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-       let target=active;
-       if(key==='ArrowUp'){
-         if(active===voice)target=close;else if(active===toggle)target=voice;else if(active===save)target=toggle;else if(active===close)target=close;else target=voice;
-       }else if(key==='ArrowDown'){
-         if(active===close)target=voice;else if(active===voice)target=toggle;else if(active===toggle)target=save;else if(active===save)target=save;else target=voice;
-       }else if(active===voice){target=voice;}
-       else if(active===toggle){target=voice;}
-       else if(active===save){target=toggle;}
-       else if(active===close){target=voice;}
-       focus(target);return;
-     }
-     return;
+ function setSelected(card){
+   const all=cards();
+   all.forEach(c=>c.classList.toggle('remote-selected',c===card));
+   selectedCard=card||null;
+ }
+ function focusCard(card){if(!card)return;setSelected(card);focus(card);try{card.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});}catch(_){} }
+ function cardIndex(card){return cards().indexOf(card);}
+ function openForCard(card){
+   const key=String(card?.id||'').replace(/^box-/,'');
+   if(!adhanPrayers.has(key)||typeof window.openAdhanSettings!=='function')return;
+   returnCard=card;window.openAdhanSettings(key);
+ }
+ function closeSettings(){
+   const wasOpen=isModalOpen();
+   if(wasOpen&&typeof window.closeAdhanSettings==='function')window.closeAdhanSettings();
+   else if(wasOpen)modal().classList.remove('open');
+   if(returnCard&&returnCard.isConnected){const target=returnCard;setTimeout(()=>focusCard(target),0);}
+ }
+ function hideVoiceList(){
+   const list=voiceList(),button=el('adhanVoiceButton');
+   if(!list)return;
+   list.hidden=true;button?.setAttribute('aria-expanded','false');
+ }
+ function chooseVoice(option){
+   if(!option)return;
+   if(typeof window.setAdhanVoice==='function')window.setAdhanVoice(option.dataset.voice);
+   hideVoiceList();focus(el('adhanVoiceButton'));
+ }
+ function modalKey(e,key){
+   const active=document.activeElement, list=voiceList(), opts=voiceOptions(), idx=opts.indexOf(active), listOpen=!!list&&!list.hidden;
+   if(key==='Escape'||key==='Back'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();closeSettings();return true;}
+   if(key==='Enter'||key===' '){
+     if(listOpen&&idx>=0){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();chooseVoice(opts[idx]);return true;}
+     if(active===el('adhanVoiceButton')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(typeof window.openAdhanVoiceList==='function')window.openAdhanVoiceList();else{list.hidden=false;el('adhanVoiceButton').setAttribute('aria-expanded','true');focus(opts[0]);}return true;}
+     if(active===el('adhanCloseBtn')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();closeSettings();return true;}
+     if(active===el('adhanSaveBtn')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();el('adhanSaveBtn').click();return true;}
+     if(active===el('adhanEnabledToggle')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();active.checked=!active.checked;active.dispatchEvent(new Event('change',{bubbles:true}));return true;}
    }
-   if($('weatherModal')?.classList.contains('open'))return;
-   const arr=cards(), active=document.activeElement, idx=arr.indexOf(active);
-   if(idx>=0){
-     if(key==='ArrowLeft'||key==='ArrowRight'){
-       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-       // RTL row: first DOM card is at the right. Right wraps to the leftmost card; left wraps back.
-       const delta=key==='ArrowRight'?-1:1;
-       focusCard(arr[(idx+delta+arr.length)%arr.length]);return;
+   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)){
+     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+     const close=el('adhanCloseBtn'), voice=el('adhanVoiceButton'), toggle=el('adhanEnabledToggle'), save=el('adhanSaveBtn');
+     if(listOpen&&idx>=0){
+       if(key==='ArrowDown'&&idx===opts.length-1){hideVoiceList();focus(toggle);return true;}
+       if(key==='ArrowUp'&&idx===0){hideVoiceList();focus(voice);return true;}
+       if(key==='ArrowLeft'||key==='ArrowRight'){
+         const delta=key==='ArrowDown'||key==='ArrowRight'?1:-1;
+         const next=(idx+delta+opts.length)%opts.length;focus(opts[next]);return true;
+       }
+       if(key==='ArrowDown'){focus(opts[Math.min(idx+1,opts.length-1)]);return true;}
+       if(key==='ArrowUp'){focus(opts[Math.max(idx-1,0)]);return true;}
+       return true;
      }
      if(key==='ArrowUp'){
-       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focus($('datePanel'));return;
+       if(active===voice)focus(close);
+       else if(active===toggle)focus(voice);
+       else if(active===save)focus(toggle);
+       else if(active===close)focus(close);
+       else focus(voice);
+       return true;
+     }
+     if(key==='ArrowDown'){
+       if(active===close)focus(voice);
+       else if(active===voice)focus(toggle);
+       else if(active===toggle)focus(save);
+       else if(active===save)focus(save);
+       else focus(voice);
+       return true;
+     }
+     if(active===voice){focus(voice);return true;}
+     if(active===toggle){focus(voice);return true;}
+     if(active===save){focus(toggle);return true;}
+     if(active===close){focus(voice);return true;}
+   }
+   return false;
+ }
+ function onKey(e){
+   const key=normalize(e);
+   if(isModalOpen()){modalKey(e,key);return;}
+   if(el('weatherModal')?.classList.contains('open'))return;
+   const all=cards();if(!all.length)return;
+   const activeCard=e.target?.closest?.('.prayer-strip .prayer')||document.activeElement?.closest?.('.prayer-strip .prayer');
+   if(activeCard&&all.includes(activeCard))selectedCard=activeCard;
+   let current=activeCard&&all.includes(activeCard)?activeCard:(selectedCard&&all.includes(selectedCard)?selectedCard:null);
+   if(current){
+     const idx=all.indexOf(current);
+     if(key==='ArrowLeft'||key==='ArrowRight'){
+       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+       // RTL screen: Right from the rightmost/first card wraps to the leftmost/last card.
+       const delta=key==='ArrowRight'?-1:1;
+       focusCard(all[(idx+delta+all.length)%all.length]);return;
+     }
+     if(key==='ArrowUp'){
+       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focus(el('datePanel'));setSelected(null);return;
      }
      if(key==='ArrowDown'){
        e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-       // Only the leftmost/end card leads down to the Memory tile.
-       if(idx===arr.length-1)focus($('memoryCard'));
+       if(idx===all.length-1){setSelected(null);focus(el('memoryCard'));}
        return;
      }
-     if(key==='Enter'){
-       const prayer=String(active.id||'').replace('box-','');
-       if(prayerKeys.includes(prayer)){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(typeof openAdhanSettings==='function')openAdhanSettings(prayer);return;}
+     if(key==='Enter'||key===' '){
+       const k=String(current.id||'').replace(/^box-/,'');
+       if(adhanPrayers.has(k)){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openForCard(current);return;}
      }
-     return;
    }
-   if(key==='ArrowDown'&&active===$('datePanel')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focusCard(arr[0]||upcoming());return;}
-   if(key==='ArrowUp'&&active===$('memoryCard')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focusCard(arr[0]||upcoming());return;}
- },true);
- function init(){cards().forEach(c=>{if(!c.hasAttribute('tabindex'))c.setAttribute('tabindex','0');});markSelected(null);}
+   if(key==='ArrowDown'&&(e.target===el('datePanel')||document.activeElement===el('datePanel'))){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focusCard(all[0]);return;}
+   if(key==='ArrowUp'&&(e.target===el('memoryCard')||document.activeElement===el('memoryCard'))){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focusCard(all[0]);return;}
+ }
+ window.addEventListener('keydown',onKey,true);
+ document.addEventListener('focusin',e=>{
+   const card=e.target?.closest?.('.prayer-strip .prayer');
+   if(card&&cards().includes(card))setSelected(card);
+   else if(isModalOpen()||e.target===el('datePanel')||e.target===el('memoryCard'))setSelected(null);
+ });
+ function init(){
+   const all=cards();all.forEach(c=>{if(!c.hasAttribute('tabindex'))c.tabIndex=0;});
+   const voice=el('adhanVoiceButton'),list=voiceList();
+   if(voice&&list)voice.setAttribute('aria-expanded',String(!list.hidden));
+   setSelected(null);
+ }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
- document.addEventListener('focusin',e=>{const card=e.target?.closest?.('.prayer-strip .prayer');markSelected(card||null);});
 })();
 </script>
-<style id="zikra-final-remote-repair-v10">
-/* Final authoritative visuals: the upcoming prayer remains highlighted without remote focus. */
-.prayer-strip{overflow:visible!important;isolation:isolate!important;gap:clamp(8px,1vw,14px)!important;border:0!important;background:transparent!important;box-shadow:none!important}
-.prayer-strip .prayer.next-prayer{z-index:4!important;transform:perspective(700px) translateY(-5px) scale(1.055)!important;background:linear-gradient(145deg,#fff 0%,#edf8e5 42%,#cfe6c1 100%)!important;box-shadow:0 4px 0 rgba(83,119,68,.4),0 10px 20px rgba(42,72,36,.24),0 0 18px rgba(202,239,181,.62),inset 0 2px 6px rgba(255,255,255,.98),inset 0 -4px 7px rgba(73,113,57,.17)!important;filter:saturate(1.08)!important}
-.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{z-index:12!important;transform:perspective(700px) translateY(-8px) scale(1.105)!important;background:linear-gradient(145deg,#fff 0%,#f1f9eb 45%,#d7ebca 100%)!important;box-shadow:0 4px 0 rgba(74,110,60,.44),0 14px 26px rgba(28,55,28,.31),0 0 22px rgba(208,244,185,.72),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.2)!important;border:0!important;outline:none!important}
-#adhanSettingsModal .adhan-dialog{overflow-y:auto!important;max-height:88vh!important}
+<style id="zikra-final-remote-repair-v13">
+.prayer-strip{direction:rtl;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));overflow:visible!important;isolation:isolate!important;gap:clamp(8px,1vw,14px)!important;border:0!important;background:transparent!important;box-shadow:none!important}
+.prayer-strip .prayer{position:relative;outline:0!important;border:0!important;border-radius:16px!important;transform-origin:center center!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease!important;will-change:transform,box-shadow!important}
+/* Upcoming prayer has its own weather-like blue treatment and stays raised even without focus. */
+.prayer-strip .prayer.next-prayer{z-index:5!important;transform:perspective(700px) translateY(-5px) scale(1.055)!important;background:linear-gradient(145deg,#79a9d7 0%,#397bb9 55%,#285d91 100%)!important;color:#fff!important;box-shadow:0 4px 0 rgba(24,62,101,.42),0 10px 20px rgba(20,57,92,.30),0 0 18px rgba(95,165,229,.58),inset 0 2px 6px rgba(255,255,255,.32)!important}
+.prayer-strip .prayer.next-prayer .p-name,.prayer-strip .prayer.next-prayer .p-time,.prayer-strip .prayer.next-prayer .p-countdown,.prayer-strip .prayer.next-prayer .p-icon{color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.22)!important}
+/* Remote-selected card is visually different; when it is also upcoming, retain the blue fill and add a clear focus halo. */
+.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{z-index:12!important;transform:perspective(700px) translateY(-8px) scale(1.10)!important;outline:3px solid #e7c66c!important;outline-offset:2px!important;background:linear-gradient(145deg,#fffefb 0%,#f1f9eb 45%,#d7ebca 100%)!important;color:#243b2b!important;box-shadow:0 4px 0 rgba(74,110,60,.44),0 14px 26px rgba(28,55,28,.31),0 0 22px rgba(208,244,185,.72),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.2)!important}
+.prayer-strip .prayer.next-prayer.remote-selected,.prayer-strip .prayer.next-prayer:focus,.prayer-strip .prayer.next-prayer:focus-visible{background:linear-gradient(145deg,#79a9d7 0%,#397bb9 55%,#285d91 100%)!important;color:#fff!important;outline:3px solid #ffe08a!important;outline-offset:3px!important;box-shadow:0 4px 0 rgba(24,62,101,.42),0 14px 26px rgba(20,57,92,.34),0 0 0 6px rgba(255,224,138,.22),0 0 22px rgba(95,165,229,.65)!important}
+#adhanSettingsModal .adhan-dialog{overflow-y:auto!important;max-height:88vh!important;overflow-x:hidden!important}
 #adhanSettingsModal .adhan-head{position:sticky;top:0;z-index:3;background:linear-gradient(150deg,#fffef8,#eef1e5);padding-bottom:8px}
 #adhanSettingsModal #adhanPreviewBtn{display:none!important}
+#adhanSettingsModal #adhanCloseBtn,#adhanSettingsModal #adhanVoiceButton,#adhanSettingsModal #adhanSaveBtn{position:relative;z-index:5;min-height:44px}
+#adhanSettingsModal #adhanVoiceOptions{position:relative;z-index:4;max-height:210px;overflow-y:auto}
+#adhanSettingsModal #adhanVoiceOptions[hidden]{display:none!important}
+#adhanSettingsModal #adhanCloseBtn:focus-visible,#adhanSettingsModal #adhanVoiceButton:focus-visible,#adhanSettingsModal #adhanVoiceOptions button:focus-visible,#adhanSettingsModal #adhanEnabledToggle:focus-visible,#adhanSettingsModal #adhanSaveBtn:focus-visible{outline:3px solid #b4c9a8!important;outline-offset:2px!important}
 </style>
 
 
@@ -1993,4 +2051,45 @@ body[data-layout-mode="tv"] .prayer-strip .prayer{
 
 <style id="prayer-next-and-focus-distinction-v12">
 .prayer-strip .prayer.next-prayer.remote-selected,.prayer-strip .prayer.next-prayer:focus,.prayer-strip .prayer.next-prayer:focus-visible{border:2px solid #25699a!important;box-shadow:0 4px 0 rgba(74,110,60,.44),0 14px 26px rgba(28,55,28,.31),0 0 0 3px rgba(37,105,154,.32),0 0 22px rgba(208,244,185,.72)!important}
+</style>
+
+<style id="prayer-focus-zoom-final-v14">
+/* The focused remote card must visibly lift, zoom, and differ from the upcoming-prayer highlight. */
+.prayer-strip .prayer.remote-selected,
+.prayer-strip .prayer:focus,
+.prayer-strip .prayer:focus-visible {
+  position:relative!important; z-index:30!important;
+  transform:perspective(700px) translateY(-9px) scale(1.12)!important;
+  outline:3px solid #ffe08a!important; outline-offset:3px!important;
+  background:linear-gradient(145deg,#fffefb 0%,#f1f9eb 45%,#d7ebca 100%)!important;
+  color:#243b2b!important;
+  box-shadow:0 5px 0 rgba(74,110,60,.48),0 16px 30px rgba(28,55,28,.36),0 0 0 4px rgba(255,224,138,.22),0 0 24px rgba(208,244,185,.78),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.2)!important;
+  filter:saturate(1.12) brightness(1.03)!important;
+}
+.prayer-strip .prayer.remote-selected .p-name,
+.prayer-strip .prayer.remote-selected .p-time,
+.prayer-strip .prayer.remote-selected .p-countdown,
+.prayer-strip .prayer.remote-selected .p-icon,
+.prayer-strip .prayer:focus .p-name,
+.prayer-strip .prayer:focus .p-time,
+.prayer-strip .prayer:focus .p-countdown,
+.prayer-strip .prayer:focus .p-icon { color:#244b22!important; font-weight:900!important; text-shadow:0 1px 0 #fff!important; }
+/* If the upcoming prayer is also selected, keep its blue fill and show selection with a gold halo + stronger zoom. */
+.prayer-strip .prayer.next-prayer.remote-selected,
+.prayer-strip .prayer.next-prayer:focus,
+.prayer-strip .prayer.next-prayer:focus-visible {
+  background:linear-gradient(110deg,#15324d 0%,#204e70 52%,#25699a 100%)!important;
+  color:#fff!important; border:1px solid #ffe08a!important;
+  transform:perspective(700px) translateY(-9px) scale(1.12)!important;
+  outline:3px solid #ffe08a!important; outline-offset:3px!important;
+  box-shadow:0 6px 0 rgba(16,36,56,.42),0 16px 30px rgba(16,36,56,.38),0 0 0 5px rgba(255,224,138,.3),0 0 25px rgba(62,131,183,.72)!important;
+}
+.prayer-strip .prayer.next-prayer.remote-selected .p-name,
+.prayer-strip .prayer.next-prayer.remote-selected .p-time,
+.prayer-strip .prayer.next-prayer.remote-selected .p-countdown,
+.prayer-strip .prayer.next-prayer.remote-selected .p-icon,
+.prayer-strip .prayer.next-prayer:focus .p-name,
+.prayer-strip .prayer.next-prayer:focus .p-time,
+.prayer-strip .prayer.next-prayer:focus .p-countdown,
+.prayer-strip .prayer.next-prayer:focus .p-icon { color:#fff!important; text-shadow:0 1px 3px #10243888!important; }
 </style>
