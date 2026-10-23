@@ -31,7 +31,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 .date-panel .date-weather-widget .weather-extra{grid-column:2/4;grid-row:2;align-self:end;font-size:clamp(9px,.95vw,11px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;opacity:.94}
 .date-panel .date-weather-widget .weather-tap-hint{position:absolute;left:9px;bottom:7px;padding:4px 7px;border:1px solid #ffffff48;border-radius:999px;background:#05182d35;color:#fff;font-size:9px;font-weight:700;z-index:3;white-space:nowrap}
 .date-panel .date-weather-widget:focus-visible{outline:3px solid #bd9b52;outline-offset:2px}
-.prayer-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:6px 4px;border:1px solid #e2dfce;border-radius:14px;background:#ffffffc9}.prayer{text-align:center;padding:1px;border-left:1px solid #e6e3d6;position:relative}.prayer:last-child{border-left:0}.prayer.next-prayer{background:#e6ecd988;border-radius:8px;box-shadow:inset 0 0 0 1.5px var(--green)}.p-icon{display:block;font-size:13px;color:var(--gold)}.p-name{font-size:clamp(9px,.9vw,11px);color:#798272}.p-time{font-size:clamp(10px,1.2vw,14px);font-weight:700}.p-countdown{font-size:8px;color:var(--green);font-weight:bold;margin-top:1px}
+.prayer-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:6px 4px;border:1px solid #e2dfce;border-radius:14px;background:#ffffffc9}.prayer{text-align:center;padding:1px;border-left:1px solid #e6e3d6;position:relative}.prayer:last-child{border-left:0}.prayer.next-prayer{background:#e6ecd988;border-radius:8px;box-shadow:0 0 10px 3px #6f8b5b30,0 5px 14px #263d2528,0 0 0 5px #91ad7a12;transform:scale(1.045);z-index:2;transition:transform .22s ease,box-shadow .22s ease;position:relative;outline:none!important;border-color:transparent!important}.p-icon{display:block;font-size:13px;color:var(--gold)}.p-name{font-size:clamp(9px,.9vw,11px);color:#798272}.p-time{font-size:clamp(10px,1.2vw,14px);font-weight:700}.p-countdown{font-size:8px;color:var(--green);font-weight:bold;margin-top:1px}
 .tiles{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(10px,1.8vw,20px);width:100%;margin:6px auto}.tile{min-width:0;height:clamp(145px,25vh,210px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid #e6e1cd;border-radius:18px;background:linear-gradient(145deg,#fffef9,#f1f0e4);box-shadow:0 6px 16px #374a3208;color:var(--dark);text-align:center;overflow:hidden}.tile:active{transform:scale(.985)}.tile.selected{outline:3px solid #89a27c;outline-offset:2px}.tile-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:20px;background:#e6ecd9;color:var(--green);border:1px solid #d4c18e}.tile-title{font-size:clamp(12px,1.3vw,16px);font-weight:800}.memory-preview-text{font-size:clamp(12px,1.5vw,18px);font-weight:700;line-height:1.5;overflow-wrap:anywhere}.memory-preview-source{font-size:10px;color:#96783d}.memory-preview-benefit{font-size:11px;line-height:1.4;color:#52684d}.tile-memory{width:100%;min-height:clamp(145px,25vh,210px);padding:clamp(12px,2vh,24px) clamp(18px,4vw,54px);gap:9px}.tile-memory .tile-icon{width:42px;height:42px;font-size:24px}.tile-memory .tile-title{font-size:clamp(16px,1.8vw,22px)}.tile-memory .memory-preview-text{font-size:clamp(15px,1.8vw,22px);max-width:100%}.tile-memory .memory-preview-source{font-size:clamp(10px,1.1vw,12px)}.tile-memory .memory-preview-benefit{font-size:clamp(11px,1.2vw,14px)}
 .weather-tile{color:white;border:1px solid #ffffff65;background:linear-gradient(150deg,#83c9ed,#397bb6);position:relative;isolation:isolate}
 .weather-tile>*:not(.tile-weather-effects){position:relative;z-index:2}
@@ -282,6 +282,21 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
   .prayer-item.upcoming,.prayer-time-item.upcoming,.prayer-card.upcoming,
   .prayer-item[aria-current="true"],.prayer-time-item[aria-current="true"]{transition:none}
 }
+</style>
+
+
+<style id="prayer-next-no-frame-v16">
+/* Next prayer: gentle enlargement and surrounding glow only; no frame. */
+.prayer.next-prayer, .prayer.next-prayer:focus, .prayer.next-prayer:focus-visible, .prayer.next-prayer.selected {
+  outline: none !important;
+  border-top-color: transparent !important;
+  border-right-color: transparent !important;
+  border-bottom-color: transparent !important;
+  box-shadow: 0 0 10px 3px rgba(111,139,91,.20), 0 5px 14px rgba(38,61,37,.16), 0 0 0 5px rgba(145,173,122,.07) !important;
+  transform: scale(1.045);
+  z-index: 3;
+}
+@media (prefers-reduced-motion: reduce) { .prayer.next-prayer { transition: none; } }
 </style>
 
 </head>
@@ -963,15 +978,15 @@ body.weather-theme-night .prayer-strip,body.weather-theme-night .player,body.wea
 .quran-entry .quran-entry-text small{display:none!important}
 /* One memory card with three internal regions: brand at right, verse center, source/benefit left. */
 .tile.tile-memory{
-  display:grid; grid-template-columns:minmax(0,.92fr) minmax(0,1.65fr) minmax(0,.92fr);
+  display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,.9fr) minmax(0,2fr);
   grid-template-areas:"source verse brand";
   align-items:stretch; height:clamp(132px,21.5vh,184px); min-height:0;
   padding:clamp(10px,1.5vh,17px) clamp(12px,2vw,26px); gap:clamp(8px,1.2vw,18px);
 }
 .tile-memory .memory-brand-identity{grid-area:brand;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(4px,.8vh,9px);min-width:0;text-align:center;direction:rtl}
-.tile-memory .memory-brand-verse{font-size:clamp(11px,1.1vw,15px);font-weight:800;line-height:1.65;overflow-wrap:anywhere}
-.tile-memory .memory-brand-divider{font-size:clamp(8px,.8vw,12px);letter-spacing:.02em;color:var(--gold);white-space:nowrap;line-height:1.2}
-.tile-memory .memory-brand-tagline{font-size:clamp(11px,1.1vw,15px);font-weight:800;line-height:1.6;overflow-wrap:anywhere}
+.tile-memory .memory-brand-verse{font-size:clamp(16px,1.8vw,25px);font-weight:800;line-height:1.65;overflow-wrap:anywhere}
+.tile-memory .memory-brand-divider{font-size:clamp(12px,1.2vw,17px);letter-spacing:.02em;color:var(--gold);white-space:nowrap;line-height:1.2}
+.tile-memory .memory-brand-tagline{font-size:clamp(16px,1.8vw,25px);font-weight:800;line-height:1.6;overflow-wrap:anywhere}
 .tile-memory .memory-center{grid-area:verse;min-width:0;padding:0 clamp(7px,1vw,15px);border-left:1px solid #d7d1bd;border-right:1px solid #d7d1bd}
 .tile-memory .memory-preview-text{font-size:clamp(15px,1.65vw,23px);line-height:1.6;overflow-wrap:anywhere}
 .tile-memory .memory-source-side{grid-area:source;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;min-width:0;text-align:left;direction:ltr}
