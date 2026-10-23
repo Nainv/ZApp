@@ -312,6 +312,50 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media (prefers-reduced-motion: reduce) { .prayer.next-prayer { transition: none; } }
 </style>
 
+
+<style id="weather-carousel-polish-v2">
+/* Weather selection: zoom and soft shadow only; never add a frame or recolor the card. */
+#weatherModal .weather-day,
+#weatherModal .hour{
+  outline:none!important;
+  border-color:transparent!important;
+  background-color:transparent!important;
+  box-shadow:none;
+  transform:scale(1);
+  transition:transform .2s ease,box-shadow .2s ease;
+  transform-origin:center;
+  position:relative;
+}
+#weatherModal .weather-day.selected,
+#weatherModal .weather-day:hover,
+#weatherModal .weather-day:focus,
+#weatherModal .weather-day:focus-visible,
+#weatherModal .hour.active,
+#weatherModal .hour:hover,
+#weatherModal .hour:focus,
+#weatherModal .hour:focus-visible{
+  outline:none!important;
+  border-color:transparent!important;
+  background-color:transparent!important;
+  color:inherit;
+  box-shadow:0 8px 20px rgba(0,0,0,.22),0 2px 7px rgba(0,0,0,.13)!important;
+  transform:scale(1.08);
+  z-index:4;
+}
+#weatherModal .weather-days,#weatherModal .hourly{
+  overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-y:none;
+  scrollbar-width:none;align-items:center;scroll-snap-type:x proximity;
+  padding-top:9px;padding-bottom:9px;
+}
+#weatherModal .weather-days::-webkit-scrollbar,#weatherModal .hourly::-webkit-scrollbar{display:none}
+#weatherModal .weather-day,#weatherModal .hour{scroll-snap-align:center;flex-shrink:0}
+#weatherModal .weather-scene.sunny{background:radial-gradient(circle at 78% 18%,#fffbd2 0 5%,#ffe88a 6%,#ffcf6548 15%,transparent 29%),linear-gradient(150deg,#8ed9f8 0%,#4eafe4 46%,#2878b8 100%)}
+#weatherModal .weather-scene.sunny:before{content:"";position:absolute;width:min(28vw,260px);height:min(28vw,260px);right:8%;top:3%;border-radius:50%;background:radial-gradient(circle,#fffbd5 0 13%,#ffe88cb8 23%,#ffd15c45 51%,transparent 72%);animation:tile-sun-pulse 4s ease-in-out infinite}
+#weatherModal .weather-scene.cloudy{background:radial-gradient(ellipse at 72% 15%,#c7d5df50,transparent 34%),linear-gradient(150deg,#71879a 0%,#465d73 55%,#293d54 100%)}
+#weatherModal .weather-scene.night{background:radial-gradient(circle at 78% 18%,#f9f2ce 0 2px,transparent 3px),radial-gradient(circle at 20% 26%,#fff 0 1px,transparent 2px),radial-gradient(circle at 34% 13%,#fff 0 1px,transparent 2px),radial-gradient(circle at 55% 30%,#fff 0 1px,transparent 2px),radial-gradient(circle at 90% 40%,#fff 0 1px,transparent 2px),radial-gradient(circle at 67% 9%,#fff 0 1px,transparent 2px),linear-gradient(160deg,#050f22,#0b1d38 55%,#142b48)}
+@media(prefers-reduced-motion:reduce){#weatherModal .weather-day,#weatherModal .hour{transition:none}}
+</style>
+
 </head>
 <body>
 <div id="zikraSplash" aria-label="ذِكرى"><img src="zikra_logo.png" alt="ذِكرى | Zikra"></div>
@@ -458,10 +502,14 @@ function scrollWeatherDayIntoView(button){
 }
 function selectWeatherDay(index,focusButton=true){
   if(!weatherData?.daily)return;
-  selectedWeatherDay=Math.max(0,Math.min(index,weatherData.daily.time.length-1));
+  const box=$("weatherDays"),oldScroll=box.scrollLeft;
+  const next=Math.max(0,Math.min(index,weatherData.daily.time.length-1));
+  if(next===selectedWeatherDay){if(focusButton){const same=box.querySelector(`[data-day="${next}"]`);same?.focus({preventScroll:true});scrollWeatherDayIntoView(same);}return;}
+  selectedWeatherDay=next;
   renderWeatherModal();
   const button=$("weatherDays").querySelector(`[data-day="${selectedWeatherDay}"]`);
   if(focusButton){button?.focus({preventScroll:true});scrollWeatherDayIntoView(button);}
+  else {box.scrollLeft=oldScroll;}
 }
 function renderWeatherDays(){
   if(!weatherData?.daily)return;
@@ -471,7 +519,7 @@ function renderWeatherDays(){
     const b=document.createElement("button");b.type="button";b.className="weather-day"+(i===selectedWeatherDay?" selected":"");b.dataset.day=String(i);b.setAttribute("role","option");b.setAttribute("aria-selected",String(i===selectedWeatherDay));
     const name=document.createElement("span");name.textContent=label;const icon=document.createElement("span");icon.className="day-icon";icon.textContent=condition(d.weather_code[i]).icon;
     const range=document.createElement("span");range.className="day-range";range.textContent=temp(d.temperature_2m_min[i])+" / "+temp(d.temperature_2m_max[i]);
-    b.append(name,icon,range);b.addEventListener("click",()=>selectWeatherDay(i,true));box.append(b);
+    b.append(name,icon,range);b.addEventListener("click",()=>selectWeatherDay(i,true));b.addEventListener("pointerenter",()=>selectWeatherDay(i,false));b.addEventListener("focus",()=>selectWeatherDay(i,false));box.append(b);
   });
 }
 let weatherScrollSelectTimer=null,weatherProgrammaticScroll=false;
@@ -487,6 +535,19 @@ $("weatherDays").addEventListener("scroll",()=>{
     if(nearest!==selectedWeatherDay)selectWeatherDay(nearest,false);
   },100);
 },{passive:true});
+// Keep both forecast strips horizontal and wrap to the beginning at the end.
+function installWeatherLoop(id){
+  const box=$(id);let wrapping=false;
+  box.addEventListener("scroll",()=>{
+    if(wrapping)return;
+    const max=box.scrollWidth-box.clientWidth;
+    if(max>20 && box.scrollLeft>=max-3){wrapping=true;box.scrollTo({left:0,behavior:"auto"});requestAnimationFrame(()=>{wrapping=false;});}
+  },{passive:true});
+  box.addEventListener("wheel",ev=>{
+    if(Math.abs(ev.deltaY)>Math.abs(ev.deltaX)&&box.scrollWidth>box.clientWidth){ev.preventDefault();box.scrollLeft+=ev.deltaY;}
+  },{passive:false});
+}
+installWeatherLoop("weatherDays");installWeatherLoop("hourlyForecast");
 function renderWeatherModal(){
   if(!weatherData)return;
   const d=weatherData,c=d.current,t=T[lang],daily=d.daily,idx=Math.max(0,Math.min(selectedWeatherDay,daily.time.length-1)),date=daily.time[idx],isToday=idx===0,code=isToday?c.weather_code:daily.weather_code[idx],desc=condition(code);
@@ -525,7 +586,10 @@ function renderWeatherModal(){
   for(let i=start;i<Math.min(start+(isToday?12:24),h.time.length)&&h.time[i].slice(0,10)===date;i++){
     const item=document.createElement("div");item.className="hour";item.tabIndex=0;item.setAttribute("role","group");
     const tm=document.createElement("div");tm.textContent=new Intl.DateTimeFormat(lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",{hour:"2-digit",minute:"2-digit"}).format(new Date(h.time[i]));
-    const ic=document.createElement("div");ic.className="hour-icon";ic.textContent=condition(h.weather_code[i]).icon;const te=document.createElement("strong");te.textContent=temp(h.temperature_2m[i]);const ra=document.createElement("div");ra.textContent=(h.precipitation_probability?.[i]??0)+"%";item.append(tm,ic,te,ra);$("hourlyForecast").append(item);
+    const ic=document.createElement("div");ic.className="hour-icon";ic.textContent=condition(h.weather_code[i]).icon;const te=document.createElement("strong");te.textContent=temp(h.temperature_2m[i]);const ra=document.createElement("div");ra.textContent=(h.precipitation_probability?.[i]??0)+"%";item.append(tm,ic,te,ra);
+    const activateHour=()=>{document.querySelectorAll("#hourlyForecast .hour.active").forEach(x=>x.classList.remove("active"));item.classList.add("active");item.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});};
+    item.addEventListener("pointerenter",activateHour);item.addEventListener("focus",activateHour);item.addEventListener("click",activateHour);
+    $("hourlyForecast").append(item);
   }
 }
 function openModal(id){
@@ -871,10 +935,10 @@ document.addEventListener("keydown",function(event){
       if(currentDayIndex>=0){
         // Day buttons and hourly cards are LTR so physical arrows match visual order.
         const next=currentDayIndex+(key==="ArrowRight"?1:-1);
-        if(next>=0&&next<dayButtons.length)selectWeatherDay(next,true);
+        if(next>=0&&next<dayButtons.length)selectWeatherDay(next,true);else if(dayButtons.length)selectWeatherDay(next<0?dayButtons.length-1:0,true);
       }else if(currentHourIndex>=0){
         const next=currentHourIndex+(key==="ArrowRight"?1:-1);
-        if(next>=0&&next<hourCards.length)focusHour(next);
+        if(next>=0&&next<hourCards.length)focusHour(next);else if(hourCards.length)focusHour(next<0?hourCards.length-1:0);
       }
       return;
     }
