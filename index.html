@@ -340,7 +340,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 
 <div class="modal-backdrop" id="quranModal" role="dialog" aria-modal="true" aria-labelledby="quranTitle"><section class="modal">
   <div class="modal-head"><h2 id="quranTitle">فهرس القرآن الكريم</h2><button class="close-modal" id="closeQuran" aria-label="إغلاق">×</button></div>
-  <div class="form-row"><div><label id="reciterLabel" for="reciter">اختر القارئ:</label><select id="reciter"><option value="">جاري تحميل القرّاء...</option></select></div><div><label id="resumeLabel" for="resumeLastReadBtn">متابعة التلاوة:</label><button class="action" id="resumeLastReadBtn" disabled>لا توجد قراءة سابقة</button></div></div>
+  <div class="form-row"><div><label id="reciterLabel" for="reciter">اختر القارئ:</label><select id="reciter" aria-label="قائمة القرّاء — اضغط OK لفتح القائمة"><option value="">جاري تحميل القرّاء...</option></select></div><div><label id="resumeLabel" for="resumeLastReadBtn">متابعة التلاوة:</label><button class="action" id="resumeLastReadBtn" disabled>لا توجد قراءة سابقة</button></div></div>
   <div id="quranStatus">جاري تحميل الفهرس...</div>
   <div id="surahContainer"><div id="surahIndexGrid" class="surah-grid"></div><div id="versesView" style="display:none;margin-top:10px"><button class="action" id="backToIndex" style="width:auto;padding-inline:18px">→ فهرس السور</button><div id="verses">اختر السورة لعرض الآيات.</div></div></div>
   <audio id="audio" preload="none"></audio>
@@ -505,7 +505,13 @@ function renderWeatherModal(){
 function openModal(id){
   previousFocus=document.activeElement;
   $(id).classList.add("open");
-  if(id==="quranModal"&&!loaded){$("surahIndexGrid").style.display="grid";$("versesView").style.display="none"}
+  if(id==="quranModal"){
+    if(!loaded){$("surahIndexGrid").style.display="grid";$("versesView").style.display="none"}
+    // On opening the Quran index, put TV/keyboard focus directly on the reciter list.
+    // The user can press OK/Enter to open the native list of reciters.
+    const reciterSelect=$("reciter");
+    if(reciterSelect){setTimeout(()=>{reciterSelect.focus({preventScroll:true});},0);return}
+  }
   if(id==="weatherModal"){
     selectedWeatherDay=0;
     if(weatherData)renderWeatherModal();
