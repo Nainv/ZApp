@@ -308,6 +308,25 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media (prefers-reduced-motion: reduce) { .prayer.next-prayer { transition: none; } }
 </style>
 
+
+<style id="zikra-mobile-compact-final">
+@media (max-width: 700px), (orientation: portrait) and (max-width: 900px) {
+  html, body { width:100%; min-height:100%; height:auto; overflow-x:hidden !important; overflow-y:auto !important; }
+  body { margin:0; }
+  .app { width:100% !important; max-width:none !important; height:auto !important; min-height:100dvh; max-height:none !important; overflow:visible !important; justify-content:flex-start !important; gap:7px !important; padding:7px 9px calc(12px + env(safe-area-inset-bottom)) !important; }
+  .topbar { flex:0 0 auto; margin:0; }
+  #datePanel.date-panel { margin:0 !important; min-height:112px !important; padding:7px !important; gap:5px !important; border-radius:12px !important; }
+  .prayer-strip { margin:0 !important; padding:4px 2px !important; gap:1px !important; }
+  .tiles { margin:0 !important; gap:7px !important; }
+  .tile { height:auto !important; min-height:112px !important; padding:10px !important; border-radius:14px !important; }
+  .tile.tile-memory { min-height:0 !important; height:auto !important; padding:10px !important; gap:7px !important; }
+  .player { margin:0 !important; padding:7px !important; gap:6px !important; }
+  .player .now-reading.quran-entry { min-height:62px !important; }
+  .zikra-footer { margin:0 !important; padding:5px 2px !important; }
+  .modal { max-height:94dvh !important; overflow-y:auto !important; }
+}
+</style>
+
 </head>
 <body>
 <div id="zikraSplash" aria-label="ذِكرى"><img src="zikra_logo.png" alt="ذِكرى | Zikra"></div>
