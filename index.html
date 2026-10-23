@@ -359,6 +359,37 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 #weatherModal .weather-day:focus,#weatherModal .weather-day:focus-visible{transform:scale(1.075)!important}
 </style>
 
+
+<style id="prayer-cards-remote-v1">
+/* Prayer times: matching horizontal cards with live remote focus. */
+.prayer-strip{
+  display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(6px,.8vw,12px);
+  padding:clamp(8px,1.1vw,14px);align-items:stretch;overflow:visible;
+}
+.prayer-strip .prayer{
+  min-width:0;min-height:clamp(88px,12vh,126px);padding:clamp(8px,1vw,13px) 4px;
+  border:1px solid #e2dfce!important;border-radius:14px;background:linear-gradient(150deg,#fffefb,#f1f2e9);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  cursor:pointer;transform:scale(1);transform-origin:center;transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+  outline:none!important;box-shadow:0 3px 10px rgba(40,55,39,.05);
+}
+.prayer-strip .prayer .p-icon{font-size:clamp(20px,2vw,28px);line-height:1.1;color:#b79a55}
+.prayer-strip .prayer .p-name{font-size:clamp(11px,1.15vw,15px);font-weight:750;color:#52634b}
+.prayer-strip .prayer .p-time{font-size:clamp(14px,1.55vw,20px);font-weight:850;color:#263c32;font-variant-numeric:tabular-nums}
+.prayer-strip .prayer .p-countdown{font-size:clamp(8px,.85vw,11px);color:#657d59;min-height:1em}
+.prayer-strip .prayer.remote-selected,
+.prayer-strip .prayer:focus,
+.prayer-strip .prayer:focus-visible{
+  transform:scale(1.075);z-index:5;position:relative;
+  background:linear-gradient(150deg,#fffefb,#e5eddd)!important;
+  border-color:#d7c58e!important;
+  box-shadow:0 9px 22px rgba(42,61,38,.17),0 0 0 2px rgba(183,154,85,.18)!important;
+}
+.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus){box-shadow:0 4px 13px rgba(42,61,38,.1)!important;transform:scale(1.015)}
+@media(max-width:700px){.prayer-strip{gap:4px;padding:5px}.prayer-strip .prayer{min-height:84px;padding:7px 2px;border-radius:10px}.prayer-strip .prayer .p-name{font-size:10px}.prayer-strip .prayer .p-time{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.prayer-strip .prayer{transition:none}}
+</style>
+
 </head>
 <body>
 <div id="zikraSplash" aria-label="ذِكرى"><img src="zikra_logo.png" alt="ذِكرى | Zikra"></div>
@@ -375,12 +406,12 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 </header>
 <section class="date-panel weather-unified sunny" id="datePanel" role="button" tabindex="0" aria-label="فتح لوحة الطقس" title="فتح لوحة الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><div class="clock" id="clock">--:--</div><div class="date-weather-widget" id="weatherCard"><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></div><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">إرفورت</div></div></section>
 <section class="prayer-strip">
-  <div class="prayer" id="box-Fajr"><span class="p-icon">☾</span><div class="p-name" data-prayer="Fajr" data-ar="الفجر" data-en="Fajr" data-de="Fadschr">الفجر</div><div class="p-time" id="fajr">--:--</div><div class="p-countdown" id="cd-Fajr"></div></div>
-  <div class="prayer" id="box-Sunrise"><span class="p-icon">☀</span><div class="p-name" data-prayer="Sunrise" data-ar="الشروق" data-en="Sunrise" data-de="Sonnenaufgang">الشروق</div><div class="p-time" id="sunrise">--:--</div><div class="p-countdown" id="cd-Sunrise"></div></div>
-  <div class="prayer" id="box-Dhuhr"><span class="p-icon">☀</span><div class="p-name" data-prayer="Dhuhr" data-ar="الظهر" data-en="Dhuhr" data-de="Dhuhr">الظهر</div><div class="p-time" id="dhuhr">--:--</div><div class="p-countdown" id="cd-Dhuhr"></div></div>
-  <div class="prayer" id="box-Asr"><span class="p-icon">◒</span><div class="p-name" data-prayer="Asr" data-ar="العصر" data-en="Asr" data-de="Asr">العصر</div><div class="p-time" id="asr">--:--</div><div class="p-countdown" id="cd-Asr"></div></div>
-  <div class="prayer" id="box-Maghrib"><span class="p-icon">◉</span><div class="p-name" data-prayer="Maghrib" data-en="Maghrib" data-de="Maghrib" data-ar="المغرب">المغرب</div><div class="p-time" id="maghrib">--:--</div><div class="p-countdown" id="cd-Maghrib"></div></div>
-  <div class="prayer" id="box-Isha"><span class="p-icon">☾</span><div class="p-name" data-prayer="Isha" data-ar="العشاء" data-en="Isha" data-de="Ischa">العشاء</div><div class="p-time" id="isha">--:--</div><div class="p-countdown" id="cd-Isha"></div></div>
+  <div class="prayer" id="box-Fajr" tabindex="0" role="button" aria-label="Fajr"><span class="p-icon">☾</span><div class="p-name" data-prayer="Fajr" data-ar="الفجر" data-en="Fajr" data-de="Fadschr">الفجر</div><div class="p-time" id="fajr">--:--</div><div class="p-countdown" id="cd-Fajr"></div></div>
+  <div class="prayer" id="box-Sunrise" tabindex="0" role="button" aria-label="Sunrise"><span class="p-icon">☀</span><div class="p-name" data-prayer="Sunrise" data-ar="الشروق" data-en="Sunrise" data-de="Sonnenaufgang">الشروق</div><div class="p-time" id="sunrise">--:--</div><div class="p-countdown" id="cd-Sunrise"></div></div>
+  <div class="prayer" id="box-Dhuhr" tabindex="0" role="button" aria-label="Dhuhr"><span class="p-icon">☀</span><div class="p-name" data-prayer="Dhuhr" data-ar="الظهر" data-en="Dhuhr" data-de="Dhuhr">الظهر</div><div class="p-time" id="dhuhr">--:--</div><div class="p-countdown" id="cd-Dhuhr"></div></div>
+  <div class="prayer" id="box-Asr" tabindex="0" role="button" aria-label="Asr"><span class="p-icon">◒</span><div class="p-name" data-prayer="Asr" data-ar="العصر" data-en="Asr" data-de="Asr">العصر</div><div class="p-time" id="asr">--:--</div><div class="p-countdown" id="cd-Asr"></div></div>
+  <div class="prayer" id="box-Maghrib" tabindex="0" role="button" aria-label="Maghrib"><span class="p-icon">◉</span><div class="p-name" data-prayer="Maghrib" data-en="Maghrib" data-de="Maghrib" data-ar="المغرب">المغرب</div><div class="p-time" id="maghrib">--:--</div><div class="p-countdown" id="cd-Maghrib"></div></div>
+  <div class="prayer" id="box-Isha" tabindex="0" role="button" aria-label="Isha"><span class="p-icon">☾</span><div class="p-name" data-prayer="Isha" data-ar="العشاء" data-en="Isha" data-de="Ischa">العشاء</div><div class="p-time" id="isha">--:--</div><div class="p-countdown" id="cd-Isha"></div></div>
 </section>
 <main class="tiles">
   <button class="tile tile-memory" id="memoryCard" aria-label="تبديل الذكرى"><span class="memory-brand memory-brand-identity"><span class="memory-brand-verse">﴿ وَمَا هِيَ إِلَّا ذِكْرَىٰ لِلْبَشَرِ ﴾</span><span class="memory-brand-divider" aria-hidden="true">───── ✧ ─────</span><span class="memory-brand-tagline">🕊️ ذِكرى تُحيي الأثر 📜</span></span><span class="memory-center"><span class="memory-preview-text" id="memoryPreviewText"></span></span><span class="memory-source-side"><span class="memory-preview-source" id="memoryPreviewSource"></span><span class="memory-preview-benefit" id="memoryPreviewBenefit"></span></span></button>
@@ -902,6 +933,23 @@ function handleBack(){
 }
 window.handleAndroidBack=handleBack;
 $("exitModal").addEventListener("click",e=>{if(e.target===$("exitModal"))hideExitPrompt()});
+function prayerCards(){return Array.from(document.querySelectorAll(".prayer-strip .prayer"));}
+function selectPrayerCard(index,focus=true){
+  const cards=prayerCards();if(!cards.length)return;
+  const i=((index%cards.length)+cards.length)%cards.length;
+  cards.forEach((card,n)=>card.classList.toggle("remote-selected",n===i));
+  if(focus){cards[i].focus({preventScroll:true});cards[i].scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});}
+}
+function installPrayerCardInteraction(){
+  const cards=prayerCards();
+  cards.forEach((card,i)=>{
+    card.addEventListener("focus",()=>selectPrayerCard(i,false));
+    card.addEventListener("pointerenter",()=>selectPrayerCard(i,false));
+    card.addEventListener("click",()=>selectPrayerCard(i,true));
+  });
+}
+installPrayerCardInteraction();
+
 document.addEventListener("keydown",function(event){
   const key=event.key;
   if(["Escape","Backspace","BrowserBack","GoBack"].includes(key)||event.keyCode===4){
@@ -943,6 +991,29 @@ document.addEventListener("keydown",function(event){
       else if(currentDayIndex>=0)focusHour(0);
       return;
     }
+  }
+  // Prayer cards: immediate focus selection, horizontal wrap, and vertical links to adjacent tiles.
+  if(!$("weatherModal").classList.contains("open")){
+  const prayerCardsNow=prayerCards();
+  const prayerIndex=prayerCardsNow.indexOf(document.activeElement);
+  if(prayerIndex>=0){
+    if(key==="ArrowLeft"||key==="ArrowRight"){
+      event.preventDefault();event.stopImmediatePropagation();
+      // In RTL layout the first prayer is on the right; Left advances toward the left edge and wraps.
+      selectPrayerCard(prayerIndex+(key==="ArrowLeft"?1:-1),true);
+      return;
+    }
+    if(key==="ArrowUp"){
+      event.preventDefault();event.stopImmediatePropagation();
+      const weatherPanel=$("datePanel");weatherPanel?.focus({preventScroll:true});weatherPanel?.scrollIntoView({block:"nearest",behavior:"smooth"});
+      return;
+    }
+    if(key==="ArrowDown"){
+      event.preventDefault();event.stopImmediatePropagation();
+      const memory=$("memoryCard");memory?.focus({preventScroll:true});memory?.scrollIntoView({block:"nearest",behavior:"smooth"});
+      return;
+    }
+  }
   }
   const direction=ZIKRA_DPAD_KEYS[key];
   if(direction){
