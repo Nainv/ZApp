@@ -848,21 +848,7 @@ function getVisibleFocusable(root){
 
 function moveDirectionalFocus(direction){
   if(!Object.values(ZIKRA_DPAD_KEYS).includes(direction))return;
-  // Match the Quran index remote pattern: one explicit focus path for the adhan dialog.
-  const adhanModal=$("adhanSettingsModal");
-  if(adhanModal&&adhanModal.classList.contains("open")){
-    const options=Array.from($("adhanVoiceOptions").querySelectorAll("[data-voice]"));
-    const active=document.activeElement,ix=options.indexOf(active),save=$("adhanSaveBtn"),close=$("adhanCloseBtn");
-    if(ix>=0){
-      if(direction==="down")options[ix+1]?.focus({preventScroll:true})||(ix===options.length-1&&save.focus({preventScroll:true}));
-      else if(direction==="up")ix>0?options[ix-1].focus({preventScroll:true}):close.focus({preventScroll:true});
-      else {const delta=direction==="right"?-1:1;options[(ix+delta+options.length)%options.length]?.focus({preventScroll:true});}
-      return;
-    }
-    if(active===close){if(direction==="down")options[0]?.focus({preventScroll:true});else if(direction==="left"||direction==="right")save.focus({preventScroll:true});return;}
-    if(active===save){if(direction==="up")options[options.length-1]?.focus({preventScroll:true});else if(direction==="left"||direction==="right")close.focus({preventScroll:true});return;}
-    options[0]?.focus({preventScroll:true});return;
-  }
+  // Adhan navigation is handled only by the central remote-key controller below.
   // Language dropdown is a focus trap: never let the remote jump to weather or other page controls.
   const languageMenu=$("languageMenu");
   if(languageMenu && !languageMenu.hidden){
@@ -1013,8 +999,22 @@ function loadAdhanSettings(){
 function saveAdhanSettings(){try{localStorage.setItem(ADHAN_STORAGE_KEY,JSON.stringify(adhanSettings));}catch(e){}}
 function prayerDisplayName(key){const el=document.querySelector(`#box-${key} .p-name`);return el?.textContent?.trim()||key;}
 function nextPrayerCard(){return document.querySelector(".prayer-strip .prayer.next-prayer")||document.getElementById("box-Fajr");}
-function setRemotePrayerSelection(card){const cards=prayerCards();cards.forEach(c=>c.classList.toggle("remote-selected",c===card));}
-function selectPrayerCard(index,focus=true){const cards=prayerCards();if(!cards.length)return;const i=((index%cards.length)+cards.length)%cards.length;setRemotePrayerSelection(cards[i]);if(focus){cards[i].focus({preventScroll:true});cards[i].scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});}}
+function setRemotePrayerSelection(card){
+  const cards=prayerCards();
+  cards.forEach(c=>c.classList.toggle("remote-selected",c===card));
+}
+function selectPrayerCard(index,focus=true){
+  const cards=prayerCards();if(!cards.length)return;
+  const i=((Number(index)%cards.length)+cards.length)%cards.length;
+  const target=cards[i];
+  setRemotePrayerSelection(target);
+  if(focus){
+    target.focus({preventScroll:true});
+    // Scroll only when needed; smooth scrolling on every key made remote navigation feel delayed.
+    const r=target.getBoundingClientRect();
+    if(r.left<0||r.right>innerWidth||r.top<0||r.bottom>innerHeight)target.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});
+  }
+}
 function setAdhanVoice(voice){
   if(voice!=="silent"&&!ADHAN_AUDIO_URLS[voice])voice="makkah";
   adhanDraftVoice=voice;
@@ -1084,11 +1084,27 @@ function installPrayerCardInteraction(){
   });
 }
 installPrayerCardInteraction();
-$("adhanVoiceOptions").querySelectorAll("[data-voice]").forEach(button=>button.addEventListener("focus",()=>{
-  if(!$("adhanSettingsModal").classList.contains("open"))return;
-  if(button.dataset.voice!=="silent")previewAdhan(button.dataset.voice);
-  else {adhanPreviewSequence++;try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(e){}}
-}));
+$("memoryCard").addEventListener("focus",()=>setRemotePrayerSelection(null));
+$("adhanVoiceOptions").querySelectorAll("[data-voice]").forEach(button=>{
+  button.addEventListener("focus",()=>{
+    if(!$("adhanSettingsModal").classList.contains("open"))return;
+    // Focus previews without committing the choice.
+    if(button.dataset.voice!=="silent")previewAdhan(button.dataset.voice);
+    else {adhanPreviewSequence++;try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(e){}}
+  });
+  button.addEventListener("click",()=>{
+    if(!$("adhanSettingsModal").classList.contains("open"))return;
+    setAdhanVoice(button.dataset.voice);
+    if(button.dataset.voice!=="silent")previewAdhan(button.dataset.voice);
+  });
+});
+// Some Android TV remotes report OK as keyCode 23/66 and D-pad arrows as 19–22.
+function zikraRemoteKey(event){
+  const key=event.key||"";
+  if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Enter"," ","Escape","Backspace","BrowserBack","GoBack","Select","OK"].includes(key))return key;
+  const code=event.keyCode||event.which;
+  return ({19:"ArrowUp",20:"ArrowDown",21:"ArrowLeft",22:"ArrowRight",23:"Enter",66:"Enter",4:"Escape"})[code]||key;
+}
 // Trigger each enabled adhan at most once per local date; refreshes do not reset per-prayer preferences or played markers.
 let lastAdhanMinute="";
 function checkAutomaticAdhan(){
@@ -1099,8 +1115,8 @@ function checkAutomaticAdhan(){
 setInterval(checkAutomaticAdhan,5000);
 
 document.addEventListener("keydown",function(event){
-  const key=event.key;
-  const isBack=["Escape","Backspace","BrowserBack","GoBack"].includes(key)||event.keyCode===4;
+  const key=zikraRemoteKey(event);
+  const isBack=["Escape","Backspace","BrowserBack","GoBack"].includes(key)||event.keyCode===4||event.which===4;
   const modal=$("adhanSettingsModal"), modalOpen=modal.classList.contains("open");
   const cards=prayerCards(), active=document.activeElement;
   const card=active?.closest?.(".prayer-strip .prayer");
@@ -1111,7 +1127,7 @@ document.addEventListener("keydown",function(event){
   // One controller owns the adhan dialog; Escape/back discards the draft.
   if(modalOpen){
     if(isBack){event.preventDefault();event.stopImmediatePropagation();closeAdhanSettings();return;}
-    if(key==="Enter"||key===" "){
+    if(key==="Enter"||key===" "||key==="Select"||key==="OK"){
       if(voiceIndex>=0){event.preventDefault();event.stopImmediatePropagation();setAdhanVoice(voiceButtons[voiceIndex].dataset.voice);if(adhanDraftVoice!=="silent")previewAdhan(adhanDraftVoice);return;}
       if(active===save){event.preventDefault();event.stopImmediatePropagation();save.click();return;}
       if(active===close){event.preventDefault();event.stopImmediatePropagation();closeAdhanSettings();return;}
@@ -1160,7 +1176,7 @@ document.addEventListener("keydown",function(event){
   const idx=cards.indexOf(card);
   if(idx>=0){
     setRemotePrayerSelection(card);
-    if(key==="Enter"||key===" "){
+    if(key==="Enter"||key===" "||key==="Select"||key==="OK"){
       const prayerKey=card.id.replace("box-","");
       if(ADHAN_PRAYERS.includes(prayerKey)){event.preventDefault();event.stopImmediatePropagation();openAdhanSettings(prayerKey);return;}
     }
@@ -1173,14 +1189,14 @@ document.addEventListener("keydown",function(event){
       event.preventDefault();event.stopImmediatePropagation();setRemotePrayerSelection(null);$("datePanel").focus({preventScroll:true});return;
     }
     if(key==="ArrowDown"){
-      event.preventDefault();event.stopImmediatePropagation();setRemotePrayerSelection(null);$("memoryCard").focus({preventScroll:true});return;
+      event.preventDefault();event.stopImmediatePropagation();setRemotePrayerSelection(null);card.blur();$("memoryCard").focus({preventScroll:true});return;
     }
   }
   if(key==="ArrowDown"&&active===$("datePanel")){
     event.preventDefault();event.stopImmediatePropagation();selectPrayerCard(0,true);return;
   }
   if(key==="ArrowUp"&&active===$("memoryCard")){
-    event.preventDefault();event.stopImmediatePropagation();selectPrayerCard(0,true);return;
+    event.preventDefault();event.stopImmediatePropagation();setRemotePrayerSelection(null);selectPrayerCard(0,true);return;
   }
   // Keep language-menu navigation local.
   const languageMenu=$("languageMenu");
@@ -1694,13 +1710,13 @@ html[data-layout-mode="tv"] .footer,body[data-layout-mode="tv"] .footer{flex:0 0
 
 <style id="zikra-prayer-and-adhan-single-style">
 /* Single source of truth for prayer cards and the compact adhan dialog. */
-.prayer-strip{direction:rtl!important;display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;align-items:stretch!important;gap:clamp(7px,.9vw,12px)!important;padding:clamp(7px,.9vh,11px) 4px!important;overflow:visible!important;border:0!important;background:transparent!important;box-shadow:none!important;isolation:isolate!important}
-.prayer-strip .prayer{min-width:0!important;min-height:clamp(78px,10.4vh,104px)!important;padding:clamp(7px,.8vw,11px) 3px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;position:relative!important;border:0!important;border-radius:17px!important;background:linear-gradient(150deg,#fffefa,#f0f2e8)!important;box-shadow:0 3px 10px rgba(40,55,39,.07)!important;transform:translateY(0) scale(1)!important;transform-origin:center!important;transition:transform .13s ease-out,box-shadow .13s ease-out,background .13s ease-out!important;outline:0!important;cursor:pointer!important;will-change:transform,box-shadow!important}
+.prayer-strip{direction:rtl!important;display:grid!important;grid-template-columns:repeat(6,minmax(0,160px))!important;justify-content:center!important;align-items:stretch!important;gap:clamp(8px,.85vw,13px)!important;padding:clamp(8px,.9vh,12px) 4px!important;overflow:visible!important;border:0!important;background:transparent!important;box-shadow:none!important;isolation:isolate!important}
+.prayer-strip .prayer{min-width:0!important;min-height:clamp(86px,11vh,108px)!important;padding:clamp(8px,.8vw,12px) 5px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;position:relative!important;border:1px solid rgba(198,207,185,.45)!important;border-radius:23px!important;background:linear-gradient(150deg,#fffefa,#f0f3e9)!important;box-shadow:0 4px 12px rgba(40,55,39,.07)!important;transform:translateY(0) scale(1)!important;transform-origin:center!important;transition:transform .11s ease-out,box-shadow .11s ease-out,background .11s ease-out!important;outline:0!important;cursor:pointer!important;will-change:transform,box-shadow!important}
 .prayer-strip .prayer .p-icon{font-size:clamp(18px,1.8vw,25px)!important;line-height:1.05!important;color:#b79a55!important}
 .prayer-strip .prayer .p-name{font-size:clamp(10px,1.05vw,14px)!important;font-weight:800!important;color:#52634b!important}
 .prayer-strip .prayer .p-time{font-size:clamp(13px,1.45vw,19px)!important;font-weight:850!important;color:#263c32!important;font-variant-numeric:tabular-nums!important}
 .prayer-strip .prayer .p-countdown{font-size:clamp(8px,.8vw,10px)!important;color:#657d59!important;min-height:1em!important}
-.prayer-strip .prayer.next-prayer{z-index:4!important;transform:translateY(-3px) scale(1.035)!important;border:0!important;outline:0!important;background:linear-gradient(145deg,#78a9d8 0%,#397bb9 58%,#285d91 100%)!important;color:#fff!important;box-shadow:0 5px 14px rgba(28,75,119,.28),0 0 12px rgba(95,165,229,.24)!important}
+.prayer-strip .prayer.next-prayer{z-index:4!important;transform:translateY(0) scale(1)!important;border:0!important;outline:0!important;background:linear-gradient(145deg,#78a9d8 0%,#397bb9 58%,#285d91 100%)!important;color:#fff!important;box-shadow:0 5px 14px rgba(28,75,119,.28),0 0 12px rgba(95,165,229,.24)!important}
 .prayer-strip .prayer.next-prayer .p-name,.prayer-strip .prayer.next-prayer .p-time,.prayer-strip .prayer.next-prayer .p-countdown,.prayer-strip .prayer.next-prayer .p-icon{color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.18)!important}
 .prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{z-index:12!important;transform:translateY(-6px) scale(1.075)!important;border:0!important;outline:0!important;background:linear-gradient(150deg,#fffefa 0%,#f1f8eb 52%,#dcebd2 100%)!important;color:#243b2b!important;box-shadow:0 8px 18px rgba(28,55,28,.2),0 2px 5px rgba(28,55,28,.08)!important}
 .prayer-strip .prayer.remote-selected .p-name,.prayer-strip .prayer.remote-selected .p-time,.prayer-strip .prayer.remote-selected .p-countdown,.prayer-strip .prayer.remote-selected .p-icon,.prayer-strip .prayer:focus .p-name,.prayer-strip .prayer:focus .p-time,.prayer-strip .prayer:focus .p-countdown,.prayer-strip .prayer:focus .p-icon{color:#244b22!important;text-shadow:none!important;font-weight:900!important}
@@ -1725,7 +1741,7 @@ html[data-layout-mode="tv"] .footer,body[data-layout-mode="tv"] .footer{flex:0 0
 #adhanSettingsModal #adhanSaveBtn{width:100%!important;min-height:40px!important;border:0!important;border-radius:11px!important;background:#496d55!important;color:#fff!important;font-weight:900!important;font-size:14px!important}
 #adhanSettingsModal #adhanStatus{margin-top:6px!important;font-size:10px!important;line-height:1.35!important;color:#64735f!important;min-height:1em!important}
 #adhanSettingsModal #adhanPreviewBtn{display:none!important}
-@media(max-width:700px){.prayer-strip{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}.prayer-strip .prayer{min-height:78px!important;border-radius:14px!important}#adhanSettingsModal .adhan-dialog{width:min(430px,96vw)!important;padding:13px!important}}
+@media(max-width:700px){.prayer-strip{grid-template-columns:repeat(3,minmax(0,1fr))!important;justify-content:stretch!important;gap:7px!important}.prayer-strip .prayer{min-height:78px!important;border-radius:14px!important}#adhanSettingsModal .adhan-dialog{width:min(430px,96vw)!important;padding:13px!important}}
 @media(prefers-reduced-motion:reduce){.prayer-strip .prayer{transition:none!important}}
 </style>
 </body>
