@@ -390,6 +390,33 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media(prefers-reduced-motion:reduce){.prayer-strip .prayer{transition:none}}
 </style>
 
+
+<style id="zikra-prayer-cards-v2">
+/* Soft prayer cards: no borders/frames on focus, only a calm zoom and shadow. */
+.prayer-strip{border:0!important;background:transparent!important;box-shadow:none!important;gap:clamp(6px,.9vw,13px)!important;padding:clamp(8px,1vw,13px) 4px!important;overflow:visible!important}
+.prayer-strip .prayer{border:0!important;border-left:0!important;border-radius:16px!important;background:linear-gradient(150deg,#fffefa,#f0f2e8)!important;box-shadow:0 3px 11px rgba(35,54,37,.045)!important;transform:scale(1);transition:transform .18s ease,box-shadow .18s ease,background .18s ease!important;outline:0!important}
+.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{outline:0!important;border:0!important;transform:scale(1.075);background:linear-gradient(150deg,#fffefb,#e7eedf)!important;box-shadow:0 9px 22px rgba(42,61,38,.17),0 3px 8px rgba(42,61,38,.09)!important}
+.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus){border:0!important;outline:0!important;box-shadow:0 5px 14px rgba(42,61,38,.11)!important;transform:scale(1.015)}
+#adhanSettingsModal{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(9,22,18,.72)}
+#adhanSettingsModal.open{display:flex}
+#adhanSettingsModal .adhan-dialog{width:min(520px,100%);max-height:92dvh;overflow:auto;border-radius:22px;padding:clamp(16px,3vw,26px);background:linear-gradient(150deg,#fffef8,#eef1e5);color:#304b3a;box-shadow:0 24px 70px #0005}
+#adhanSettingsModal .adhan-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+#adhanSettingsModal h2{margin:0;font-size:clamp(18px,2vw,24px)}
+#adhanSettingsModal .adhan-close{width:40px;height:40px;border:0;border-radius:50%;background:#e2e9da;color:#304b3a;font-size:24px}
+#adhanSettingsModal label{display:block;font-size:13px;font-weight:800;margin:12px 0 6px}
+#adhanSettingsModal select{width:100%;min-height:46px;border:1px solid #d6dbc9;border-radius:12px;background:#fffef9;color:#304b3a;padding:10px;font-size:15px}
+#adhanSettingsModal .adhan-switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 0;padding:13px;border-radius:14px;background:#e7eddf}
+#adhanSettingsModal .adhan-switch-row strong{font-size:14px}
+#adhanSettingsModal input[type=checkbox]{width:25px;height:25px;accent-color:#496d55}
+#adhanSettingsModal .adhan-actions{display:flex;gap:9px;margin-top:14px}
+#adhanSettingsModal .adhan-actions button{flex:1;min-height:44px;border:0;border-radius:12px;font-weight:800;padding:8px 12px}
+#adhanPreviewBtn{background:#e3e9d9;color:#304b3a}#adhanSaveBtn{background:#496d55;color:#fff}
+#adhanStatus{min-height:1.4em;font-size:12px;color:#64745c;margin-top:8px;line-height:1.5}
+#adhanSettingsModal button:focus-visible,#adhanSettingsModal select:focus-visible,#adhanSettingsModal input:focus-visible{outline:3px solid #bd9b52;outline-offset:3px}
+@media(max-width:700px){.prayer-strip{grid-template-columns:repeat(3,minmax(0,1fr))!important}.prayer-strip .prayer{min-height:92px}#adhanSettingsModal .adhan-dialog{border-radius:17px}}
+@media(prefers-reduced-motion:reduce){.prayer-strip .prayer{transition:none!important}}
+</style>
+
 </head>
 <body>
 <div id="zikraSplash" aria-label="ذِكرى"><img src="zikra_logo.png" alt="ذِكرى | Zikra"></div>
@@ -413,6 +440,24 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
   <div class="prayer" id="box-Maghrib" tabindex="0" role="button" aria-label="Maghrib"><span class="p-icon">◉</span><div class="p-name" data-prayer="Maghrib" data-en="Maghrib" data-de="Maghrib" data-ar="المغرب">المغرب</div><div class="p-time" id="maghrib">--:--</div><div class="p-countdown" id="cd-Maghrib"></div></div>
   <div class="prayer" id="box-Isha" tabindex="0" role="button" aria-label="Isha"><span class="p-icon">☾</span><div class="p-name" data-prayer="Isha" data-ar="العشاء" data-en="Isha" data-de="Ischa">العشاء</div><div class="p-time" id="isha">--:--</div><div class="p-countdown" id="cd-Isha"></div></div>
 </section>
+
+<div id="adhanSettingsModal" role="dialog" aria-modal="true" aria-labelledby="adhanSettingsTitle">
+  <div class="adhan-dialog">
+    <div class="adhan-head"><h2 id="adhanSettingsTitle">إعدادات أذان الصلاة</h2><button class="adhan-close" id="adhanCloseBtn" type="button" aria-label="إغلاق">×</button></div>
+    <div id="adhanSettingsPrayerName" aria-live="polite" style="font-size:14px;font-weight:800;color:#8a7139"></div>
+    <label for="adhanVoiceSelect">صوت الأذان لهذه الصلاة</label>
+    <select id="adhanVoiceSelect">
+      <option value="makkah">أذان مكة — عبد الرحمن السديس</option>
+      <option value="madinah">أذان المدينة</option>
+      <option value="alafasy">أذان مشاري العفاسي</option>
+      <option value="syria">أذان سوري</option>
+    </select>
+    <div class="adhan-switch-row"><strong>تشغيل الأذان عند دخول الوقت</strong><input id="adhanEnabledToggle" type="checkbox" checked aria-label="تشغيل الأذان لهذه الصلاة"></div>
+    <div class="adhan-actions"><button id="adhanPreviewBtn" type="button">▶ تجربة الصوت</button><button id="adhanSaveBtn" type="button">حفظ</button></div>
+    <div id="adhanStatus" role="status">الإعدادات محفوظة بشكل مستقل عن تحديث الطقس ومواقيت الصلاة.</div>
+  </div>
+</div>
+
 <main class="tiles">
   <button class="tile tile-memory" id="memoryCard" aria-label="تبديل الذكرى"><span class="memory-brand memory-brand-identity"><span class="memory-brand-verse">﴿ وَمَا هِيَ إِلَّا ذِكْرَىٰ لِلْبَشَرِ ﴾</span><span class="memory-brand-divider" aria-hidden="true">───── ✧ ─────</span><span class="memory-brand-tagline">🕊️ ذِكرى تُحيي الأثر 📜</span></span><span class="memory-center"><span class="memory-preview-text" id="memoryPreviewText"></span></span><span class="memory-source-side"><span class="memory-preview-source" id="memoryPreviewSource"></span><span class="memory-preview-benefit" id="memoryPreviewBenefit"></span></span></button>
 </main>
@@ -484,7 +529,7 @@ function updateClock(){const n=new Date(),locale=lang==="ar"?"ar":lang==="de"?"d
 setInterval(updateClock,1000);updateClock();
 function updateCityLabel(){$("cityLabel").textContent=city.name}
 async function loadPrayerTimes(){const n=new Date(),date=[String(n.getDate()).padStart(2,"0"),String(n.getMonth()+1).padStart(2,"0"),n.getFullYear()].join("-");try{const res=await fetchJSON(`https://api.aladhan.com/v1/timings/${date}?latitude=${city.latitude}&longitude=${city.longitude}&method=3`);prayerTimesObj=res.data.timings;const keys=["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"],ids=["fajr","sunrise","dhuhr","asr","maghrib","isha"];keys.forEach((k,i)=>$(ids[i]).textContent=(prayerTimesObj[k]||"--:--").split(" ")[0]);const h=res.data.date.hijri;$("hijriText").textContent=lang==="ar"?`${h.day} ${h.month.ar||h.month.en} ${h.year} هـ`:`${h.day} ${h.month.en} ${h.year} AH`}catch(e){$("hijriText").textContent=""}}
-function updatePrayerCountdowns(){if(!prayerTimesObj)return;const now=new Date(),keys=["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"];let nextKey=null,nextDate=null;for(const k of keys){const [hrs,mins]=prayerTimesObj[k].split(" ")[0].split(":").map(Number),pDate=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hrs,mins);if(pDate>now){nextKey=k;nextDate=pDate;break}}if(!nextDate){const [hrs,mins]=prayerTimesObj.Fajr.split(":").map(Number);nextDate=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,hrs,mins);nextKey="Fajr"}document.querySelectorAll(".prayer").forEach(el=>el.classList.remove("next-prayer"));document.querySelectorAll(".p-countdown").forEach(el=>el.textContent="");$("box-"+nextKey)?.classList.add("next-prayer");const diff=nextDate-now,h=Math.floor(diff/3600000),m=Math.floor(diff/60000%60),s=Math.floor(diff/1000%60),pad=n=>String(n).padStart(2,"0");$("cd-"+nextKey).textContent=`${pad(h)}:${pad(m)}:${pad(s)}`}
+function updatePrayerCountdowns(){if(!prayerTimesObj)return;const now=new Date(),keys=["Fajr","Dhuhr","Asr","Maghrib","Isha"];let nextKey=null,nextDate=null;for(const k of keys){const [hrs,mins]=prayerTimesObj[k].split(" ")[0].split(":").map(Number),pDate=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hrs,mins);if(pDate>now){nextKey=k;nextDate=pDate;break}}if(!nextDate){const [hrs,mins]=prayerTimesObj.Fajr.split(":").map(Number);nextDate=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,hrs,mins);nextKey="Fajr"}document.querySelectorAll(".prayer").forEach(el=>el.classList.remove("next-prayer"));document.querySelectorAll(".p-countdown").forEach(el=>el.textContent="");$("box-"+nextKey)?.classList.add("next-prayer");const diff=nextDate-now,h=Math.floor(diff/3600000),m=Math.floor(diff/60000%60),s=Math.floor(diff/1000%60),pad=n=>String(n).padStart(2,"0");$("cd-"+nextKey).textContent=`${pad(h)}:${pad(m)}:${pad(s)}`}
 setInterval(updatePrayerCountdowns,1000);
 function condition(code){const c=T[lang].conditions;if(code===0)return{text:c.clear,icon:"☀️",cls:"sunny"};if(code===1)return{text:c.mainly,icon:"🌤️",cls:"sunny"};if(code===2)return{text:c.partly,icon:"⛅",cls:"cloudy"};if(code===3)return{text:c.cloudy,icon:"☁️",cls:"cloudy"};if([45,48].includes(code))return{text:c.fog,icon:"🌫️",cls:"cloudy"};if([51,53,55,56,57].includes(code))return{text:c.drizzle,icon:"🌦️",cls:"rainy"};if([61,63,65,66,67,80,81,82].includes(code))return{text:c.rain,icon:"🌧️",cls:"rainy"};if([71,73,75,77,85,86].includes(code))return{text:c.snow,icon:"❄️",cls:"snowy"};if([95,96,99].includes(code))return{text:c.storm,icon:"⛈️",cls:"storm"};return{text:c.other,icon:"🌥️",cls:"cloudy"}}
 function weatherIcon(code){const c=condition(code),h=new Date().getHours();return(h>=20||h<6)&&c.cls==="sunny"?"🌙":c.icon}const temp=v=>v==null?"--":Math.round(v)+"°";
@@ -934,24 +979,66 @@ function handleBack(){
 window.handleAndroidBack=handleBack;
 $("exitModal").addEventListener("click",e=>{if(e.target===$("exitModal"))hideExitPrompt()});
 function prayerCards(){return Array.from(document.querySelectorAll(".prayer-strip .prayer"));}
-function selectPrayerCard(index,focus=true){
-  const cards=prayerCards();if(!cards.length)return;
-  const i=((index%cards.length)+cards.length)%cards.length;
-  cards.forEach((card,n)=>card.classList.toggle("remote-selected",n===i));
-  if(focus){cards[i].focus({preventScroll:true});cards[i].scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});}
+const ADHAN_AUDIO_URLS={
+  makkah:"https://www.islamcan.com/audio/adhan/azan1.mp3",
+  madinah:"https://www.islamcan.com/audio/adhan/azan2.mp3",
+  alafasy:"https://www.islamcan.com/audio/adhan/azan8.mp3",
+  syria:"https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Adhan_Syria_(أذان_سوريا).mp3"
+};
+const ADHAN_VOICE_LABELS={makkah:"أذان مكة — عبد الرحمن السديس",madinah:"أذان المدينة",alafasy:"أذان مشاري العفاسي",syria:"أذان سوري"};
+const ADHAN_PRAYERS=["Fajr","Dhuhr","Asr","Maghrib","Isha"];
+const ADHAN_DEFAULTS=Object.fromEntries(ADHAN_PRAYERS.map(k=>[k,{enabled:true,voice:k==="Fajr"?"makkah":"makkah"}]));
+const ADHAN_STORAGE_KEY="zikra_adhan_settings_v1";
+let adhanSettings=loadAdhanSettings(),adhanEditingPrayer="Fajr",adhanAudio=new Audio(),adhanModalReturnFocus=null;
+function loadAdhanSettings(){
+  try{const saved=JSON.parse(localStorage.getItem(ADHAN_STORAGE_KEY)||"null");const out={};for(const k of ADHAN_PRAYERS){const v=saved&&saved[k];out[k]={enabled:typeof v?.enabled==="boolean"?v.enabled:true,voice:ADHAN_AUDIO_URLS[v?.voice]?v.voice:"makkah"};}return out}catch(e){return JSON.parse(JSON.stringify(ADHAN_DEFAULTS))}
 }
+function saveAdhanSettings(){try{localStorage.setItem(ADHAN_STORAGE_KEY,JSON.stringify(adhanSettings));}catch(e){}}
+function prayerDisplayName(key){const el=document.querySelector(`#box-${key} .p-name`);return el?.textContent?.trim()||key;}
+function nextPrayerCard(){return document.querySelector(".prayer-strip .prayer.next-prayer")||document.getElementById("box-Fajr");}
+function setRemotePrayerSelection(card){const cards=prayerCards();cards.forEach(c=>c.classList.toggle("remote-selected",c===card));}
+function selectPrayerCard(index,focus=true){const cards=prayerCards();if(!cards.length)return;const i=((index%cards.length)+cards.length)%cards.length;setRemotePrayerSelection(cards[i]);if(focus){cards[i].focus({preventScroll:true});cards[i].scrollIntoView({block:"nearest",inline:"nearest",behavior:"smooth"});}}
+function openAdhanSettings(prayerKey){if(!ADHAN_PRAYERS.includes(prayerKey))return;adhanEditingPrayer=prayerKey;adhanModalReturnFocus=document.activeElement;const modal=$("adhanSettingsModal");$("adhanSettingsPrayerName").textContent=prayerDisplayName(prayerKey);$("adhanVoiceSelect").value=adhanSettings[prayerKey].voice;$("adhanEnabledToggle").checked=adhanSettings[prayerKey].enabled;$("adhanStatus").textContent="اختيارات كل صلاة محفوظة بشكل مستقل، ولا تتغير عند تحديث البيانات.";modal.classList.add("open");$("adhanVoiceSelect").focus({preventScroll:true});}
+function closeAdhanSettings(){const modal=$("adhanSettingsModal");if(!modal.classList.contains("open"))return;modal.classList.remove("open");try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(e){}if(adhanModalReturnFocus&&adhanModalReturnFocus.isConnected)adhanModalReturnFocus.focus({preventScroll:true});else nextPrayerCard()?.focus({preventScroll:true});}
+async function previewAdhan(){const voice=$("adhanVoiceSelect").value;const url=ADHAN_AUDIO_URLS[voice];if(!url)return;try{adhanAudio.pause();adhanAudio=new Audio(url);adhanAudio.preload="none";$("adhanStatus").textContent="جارٍ تحميل صوت الأذان من الإنترنت…";await adhanAudio.play();$("adhanStatus").textContent="يتم تشغيل معاينة الأذان.";}catch(e){$("adhanStatus").textContent="تعذّر تشغيل الصوت. تأكد من اتصال الإنترنت ثم جرّب مرة أخرى.";}}
+$("adhanCloseBtn").addEventListener("click",closeAdhanSettings);
+$("adhanSettingsModal").addEventListener("click",e=>{if(e.target===$("adhanSettingsModal"))closeAdhanSettings();});
+$("adhanPreviewBtn").addEventListener("click",previewAdhan);
+$("adhanSaveBtn").addEventListener("click",()=>{adhanSettings[adhanEditingPrayer]={enabled:$("adhanEnabledToggle").checked,voice:$("adhanVoiceSelect").value};saveAdhanSettings();$("adhanStatus").textContent="تم حفظ إعدادات صلاة "+prayerDisplayName(adhanEditingPrayer)+".";closeAdhanSettings();});
 function installPrayerCardInteraction(){
   const cards=prayerCards();
   cards.forEach((card,i)=>{
-    card.addEventListener("focus",()=>selectPrayerCard(i,false));
-    card.addEventListener("pointerenter",()=>selectPrayerCard(i,false));
-    card.addEventListener("click",()=>selectPrayerCard(i,true));
+    card.addEventListener("focus",()=>setRemotePrayerSelection(card));
+    card.addEventListener("pointerenter",()=>setRemotePrayerSelection(card));
+    card.addEventListener("click",()=>{setRemotePrayerSelection(card);if(ADHAN_PRAYERS.includes(card.id.replace("box-","")))openAdhanSettings(card.id.replace("box-",""));});
+    card.addEventListener("blur",e=>{if(!e.relatedTarget||!e.relatedTarget.closest?.(".prayer-strip")){setRemotePrayerSelection(nextPrayerCard());}});
   });
 }
 installPrayerCardInteraction();
+// Trigger each enabled adhan at most once per local date; refreshes do not reset per-prayer preferences or played markers.
+let lastAdhanMinute="";
+function checkAutomaticAdhan(){
+  if(!prayerTimesObj)return;const now=new Date(),minuteKey=[now.getFullYear(),now.getMonth(),now.getDate(),now.getHours(),now.getMinutes()].join("-");if(minuteKey===lastAdhanMinute)return;lastAdhanMinute=minuteKey;
+  const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
+  for(const key of ADHAN_PRAYERS){const raw=prayerTimesObj[key];if(!raw)continue;const [h,m]=raw.split(" ")[0].split(":").map(Number);if(now.getHours()!==h||now.getMinutes()!==m)continue;const marker="zikra_adhan_played_"+today+"_"+key;if(localStorage.getItem(marker)==="1")continue;localStorage.setItem(marker,"1");const cfg=adhanSettings[key];if(cfg?.enabled){try{adhanAudio.pause();adhanAudio=new Audio(ADHAN_AUDIO_URLS[cfg.voice]||ADHAN_AUDIO_URLS.makkah);adhanAudio.play().catch(()=>{});}catch(e){}}}
+}
+setInterval(checkAutomaticAdhan,5000);
 
 document.addEventListener("keydown",function(event){
   const key=event.key;
+  if($("adhanSettingsModal")?.classList.contains("open")){
+    if(document.activeElement===$("adhanVoiceSelect")&&key.startsWith("Arrow")){event.stopImmediatePropagation();return;}
+    if(key==="Escape"||key==="Backspace"||key==="BrowserBack"||key==="GoBack"||event.keyCode===4){event.preventDefault();event.stopImmediatePropagation();closeAdhanSettings();return;}
+    if(key==="Enter"&&document.activeElement===$("adhanSaveBtn")){event.preventDefault();$("adhanSaveBtn").click();return;}
+    if(key==="ArrowDown"&&document.activeElement===$("adhanVoiceSelect")){event.preventDefault();$("adhanEnabledToggle").focus();return;}
+    if(key==="ArrowUp"&&document.activeElement===$("adhanEnabledToggle")){event.preventDefault();$("adhanVoiceSelect").focus();return;}
+    if(key==="ArrowDown"&&document.activeElement===$("adhanEnabledToggle")){event.preventDefault();$("adhanPreviewBtn").focus();return;}
+    if(key==="ArrowRight"&&document.activeElement===$("adhanPreviewBtn")){event.preventDefault();$("adhanSaveBtn").focus();return;}
+    if(key==="ArrowLeft"&&document.activeElement===$("adhanSaveBtn")){event.preventDefault();$("adhanPreviewBtn").focus();return;}
+    if(key==="ArrowUp"&&document.activeElement===$("adhanPreviewBtn")){event.preventDefault();$("adhanEnabledToggle").focus();return;}
+    if(key==="ArrowUp"&&document.activeElement===$("adhanSaveBtn")){event.preventDefault();$("adhanEnabledToggle").focus();return;}
+    if(key.startsWith("Arrow")){event.preventDefault();event.stopImmediatePropagation();return;}
+  }
   if(["Escape","Backspace","BrowserBack","GoBack"].includes(key)||event.keyCode===4){
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -997,6 +1084,10 @@ document.addEventListener("keydown",function(event){
   const prayerCardsNow=prayerCards();
   const prayerIndex=prayerCardsNow.indexOf(document.activeElement);
   if(prayerIndex>=0){
+    if(key==="Enter"||key===" "){
+      const prayerKey=prayerCardsNow[prayerIndex].id.replace("box-","");
+      if(ADHAN_PRAYERS.includes(prayerKey)){event.preventDefault();event.stopImmediatePropagation();openAdhanSettings(prayerKey);return;}
+    }
     if(key==="ArrowLeft"||key==="ArrowRight"){
       event.preventDefault();event.stopImmediatePropagation();
       // In RTL layout the first prayer is on the right; Left advances toward the left edge and wraps.
@@ -1005,15 +1096,22 @@ document.addEventListener("keydown",function(event){
     }
     if(key==="ArrowUp"){
       event.preventDefault();event.stopImmediatePropagation();
-      const weatherPanel=$("datePanel");weatherPanel?.focus({preventScroll:true});weatherPanel?.scrollIntoView({block:"nearest",behavior:"smooth"});
+      setRemotePrayerSelection(nextPrayerCard());const weatherPanel=$("datePanel");weatherPanel?.focus({preventScroll:true});weatherPanel?.scrollIntoView({block:"nearest",behavior:"smooth"});
       return;
     }
     if(key==="ArrowDown"){
       event.preventDefault();event.stopImmediatePropagation();
-      const memory=$("memoryCard");memory?.focus({preventScroll:true});memory?.scrollIntoView({block:"nearest",behavior:"smooth"});
+      setRemotePrayerSelection(nextPrayerCard());const memory=$("memoryCard");memory?.focus({preventScroll:true});memory?.scrollIntoView({block:"nearest",behavior:"smooth"});
       return;
     }
   }
+  }
+  // When returning from weather or memory, always enter the prayer row on the upcoming prayer.
+  if(key==="ArrowDown"&&document.activeElement===$("datePanel")){
+    const next=nextPrayerCard();if(next){event.preventDefault();event.stopImmediatePropagation();selectPrayerCard(prayerCards().indexOf(next),true);return;}
+  }
+  if(key==="ArrowUp"&&document.activeElement===$("memoryCard")){
+    const next=nextPrayerCard();if(next){event.preventDefault();event.stopImmediatePropagation();selectPrayerCard(prayerCards().indexOf(next),true);return;}
   }
   const direction=ZIKRA_DPAD_KEYS[key];
   if(direction){
@@ -1037,6 +1135,20 @@ document.addEventListener("keydown",function(event){
     event.preventDefault();
     event.stopImmediatePropagation();
     window.handleAndroidMediaKey(mediaCommand);
+  }
+},true);
+
+
+// Returning to the prayer row always lands on the upcoming prayer, never the last manually browsed card.
+document.addEventListener("keydown",function(ev){
+  if($("adhanSettingsModal")?.classList.contains("open")||$("weatherModal")?.classList.contains("open"))return;
+  if(!["ArrowDown","ArrowUp"].includes(ev.key))return;
+  const target=ev.target;
+  if(target===$("datePanel")&&ev.key==="ArrowDown"){
+    const next=nextPrayerCard();if(next){ev.preventDefault();ev.stopImmediatePropagation();selectPrayerCard(prayerCards().indexOf(next),true);}return;
+  }
+  if(target===$("memoryCard")&&ev.key==="ArrowUp"){
+    const next=nextPrayerCard();if(next){ev.preventDefault();ev.stopImmediatePropagation();selectPrayerCard(prayerCards().indexOf(next),true);}return;
   }
 },true);
 
