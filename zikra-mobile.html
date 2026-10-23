@@ -327,6 +327,91 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 }
 </style>
 
+
+<style id="zikra-mobile-ayah-focus">
+@media (max-width:700px), (orientation:portrait) and (max-width:900px) {
+  .player {
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:12px !important;
+    min-height:0 !important;
+    padding:12px !important;
+    border-radius:20px !important;
+  }
+  .player .track-area {
+    order:0 !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+    min-width:0 !important;
+    padding:13px 12px 11px !important;
+    border:2px solid #c5ad70 !important;
+    border-radius:16px !important;
+    background:linear-gradient(145deg,#fffdf3,#f0f2e7) !important;
+    box-shadow:0 3px 12px #263f521c !important;
+  }
+  .player .verse-row {
+    display:flex !important;
+    align-items:flex-start !important;
+    justify-content:center !important;
+    gap:9px !important;
+    margin:0 0 10px !important;
+    direction:rtl !important;
+  }
+  .player .verse {
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    white-space:normal !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    overflow-wrap:anywhere !important;
+    font-size:clamp(20px,5.4vw,28px) !important;
+    line-height:1.9 !important;
+    font-weight:700 !important;
+    text-align:center !important;
+    color:#243f52 !important;
+    padding:2px 0 !important;
+  }
+  .player .ayah-number {
+    flex:0 0 34px !important;
+    width:34px !important;
+    height:34px !important;
+    box-sizing:border-box !important;
+    font-size:15px !important;
+    margin-top:3px !important;
+    border:2px solid #b69b58 !important;
+    background:#e8dfc0 !important;
+    color:#263f52 !important;
+  }
+  .player .progress { height:6px !important; }
+  .player .quran-entry-caption {
+    order:1 !important;
+    width:100% !important;
+    text-align:center !important;
+    padding:3px 0 !important;
+  }
+  .player .quran-entry-caption strong { font-size:18px !important; }
+  .player .quran-entry-caption small { font-size:12px !important; }
+  .player .controls {
+    order:2 !important;
+    width:100% !important;
+    gap:12px !important;
+    padding:2px 0 0 !important;
+  }
+  .player .control { width:42px !important; height:42px !important; }
+  .player .control.main { width:54px !important; height:54px !important; }
+  .player .quran-logo-button {
+    order:3 !important;
+    align-self:center !important;
+    margin:0 !important;
+  }
+  .player .quran-logo-button .quran-calligraphy {
+    width:68px !important;
+    height:68px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="zikraSplash" aria-label="ذِكرى"><img src="zikra_logo.png" alt="ذِكرى | Zikra"></div>
