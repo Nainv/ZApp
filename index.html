@@ -1038,14 +1038,15 @@ function openAdhanVoiceList(){const list=$("adhanVoiceOptions"),button=$("adhanV
 function closeAdhanVoiceList(returnFocus=true){adhanPreviewSequence++;try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(e){}const list=$("adhanVoiceOptions");if(list.hidden)return false;list.hidden=true;$("adhanVoiceButton").setAttribute("aria-expanded","false");if(returnFocus)$("adhanVoiceButton").focus({preventScroll:true});return true;}
 $("adhanVoiceButton").addEventListener("click",()=>adhanVoiceListOpen()?closeAdhanVoiceList(false):openAdhanVoiceList());
 $("adhanVoiceOptions").querySelectorAll("[data-voice]").forEach((button,index,all)=>{
-  button.addEventListener("click",()=>{setAdhanVoice(button.dataset.voice);previewAdhan(button.dataset.voice);});
+  button.addEventListener("click",()=>{setAdhanVoice(button.dataset.voice);closeAdhanVoiceList(true);});
   // Preview immediately when the TV remote moves focus to a voice.
   button.addEventListener("focus",()=>{
     if(!adhanVoiceListOpen() || !$("adhanSettingsModal").classList.contains("open"))return;
+    setAdhanVoice(button.dataset.voice);
     previewAdhan(button.dataset.voice);
   });
 });
-function openAdhanSettings(prayerKey){if(!ADHAN_PRAYERS.includes(prayerKey))return;adhanEditingPrayer=prayerKey;adhanModalReturnFocus=document.activeElement;const modal=$("adhanSettingsModal");$("adhanSettingsPrayerName").textContent=prayerDisplayName(prayerKey);setAdhanVoice(adhanSettings[prayerKey].voice);$("adhanEnabledToggle").checked=adhanSettings[prayerKey].enabled;$("adhanStatus").textContent="تنقّل بالأسهم، OK للاختيار، وحفظ لتثبيت التغييرات.";modal.classList.add("open");const list=$("adhanVoiceOptions");list.hidden=false;$("adhanVoiceButton").setAttribute("aria-expanded","true");const chosen=list.querySelector('[data-voice="'+adhanSettings[prayerKey].voice+'"]')||list.querySelector('[data-voice]');chosen?.focus({preventScroll:true});}
+function openAdhanSettings(prayerKey){if(!ADHAN_PRAYERS.includes(prayerKey))return;adhanEditingPrayer=prayerKey;adhanModalReturnFocus=document.activeElement;const modal=$("adhanSettingsModal");$("adhanSettingsPrayerName").textContent=prayerDisplayName(prayerKey);setAdhanVoice(adhanSettings[prayerKey].voice);$("adhanEnabledToggle").checked=adhanSettings[prayerKey].enabled;$("adhanStatus").textContent="اختيارات كل صلاة محفوظة بشكل مستقل، ولا تتغير عند تحديث البيانات.";modal.classList.add("open");$("adhanVoiceButton").focus({preventScroll:true});}
 function closeAdhanSettings(){adhanPreviewSequence++;const modal=$("adhanSettingsModal");if(!modal.classList.contains("open"))return;modal.classList.remove("open");try{adhanAudio.pause();adhanAudio.currentTime=0;}catch(e){}if(adhanModalReturnFocus&&adhanModalReturnFocus.isConnected)adhanModalReturnFocus.focus({preventScroll:true});else nextPrayerCard()?.focus({preventScroll:true});}
 let adhanPreviewSequence=0;
 async function previewAdhan(voiceOverride){
@@ -1065,7 +1066,7 @@ async function previewAdhan(voiceOverride){
 $("adhanCloseBtn").addEventListener("click",closeAdhanSettings);
 $("adhanSettingsModal").addEventListener("click",e=>{if(e.target===$("adhanSettingsModal"))closeAdhanSettings();});
 $("adhanPreviewBtn").addEventListener("click",previewAdhan);
-$("adhanSaveBtn").addEventListener("click",()=>{adhanSettings[adhanEditingPrayer]={enabled:$("adhanEnabledToggle").checked,voice:adhanDraftVoice};saveAdhanSettings();closeAdhanSettings();});
+$("adhanSaveBtn").addEventListener("click",()=>{adhanSettings[adhanEditingPrayer]={enabled:$("adhanEnabledToggle").checked,voice:adhanDraftVoice};saveAdhanSettings();$("adhanStatus").textContent="تم حفظ إعدادات صلاة "+prayerDisplayName(adhanEditingPrayer)+".";});
 function installPrayerCardInteraction(){
   const cards=prayerCards();
   cards.forEach((card,i)=>{
@@ -1174,8 +1175,10 @@ document.addEventListener("keydown",function(event){
       return;
     }
     if(key==="ArrowDown"){
-      event.preventDefault();event.stopImmediatePropagation();
-      setRemotePrayerSelection(nextPrayerCard());const memory=$("memoryCard");memory?.focus({preventScroll:true});memory?.scrollIntoView({block:"nearest",behavior:"smooth"});
+      if(prayerIndex===prayerCardsNow.length-1){
+        event.preventDefault();event.stopImmediatePropagation();
+        setRemotePrayerSelection(null);const memory=$("memoryCard");memory?.focus({preventScroll:true});memory?.scrollIntoView({block:"nearest",behavior:"smooth"});
+      }
       return;
     }
   }
@@ -1185,7 +1188,7 @@ document.addEventListener("keydown",function(event){
     const next=nextPrayerCard();if(next){event.preventDefault();event.stopImmediatePropagation();selectPrayerCard(prayerCards().indexOf(next),true);return;}
   }
   if(key==="ArrowUp"&&document.activeElement===$("memoryCard")){
-    const next=nextPrayerCard();if(next){event.preventDefault();event.stopImmediatePropagation();selectPrayerCard(prayerCards().indexOf(next),true);return;}
+    const first=prayerCards()[0];if(first){event.preventDefault();event.stopImmediatePropagation();selectPrayerCard(0,true);return;}
   }
   const direction=ZIKRA_DPAD_KEYS[key];
   if(direction){
@@ -1213,18 +1216,6 @@ document.addEventListener("keydown",function(event){
 },true);
 
 
-// Returning to the prayer row always lands on the upcoming prayer, never the last manually browsed card.
-document.addEventListener("keydown",function(ev){
-  if($("adhanSettingsModal")?.classList.contains("open")||$("weatherModal")?.classList.contains("open"))return;
-  if(!["ArrowDown","ArrowUp"].includes(ev.key))return;
-  const target=ev.target;
-  if(target===$("datePanel")&&ev.key==="ArrowDown"){
-    const next=nextPrayerCard();if(next){ev.preventDefault();ev.stopImmediatePropagation();selectPrayerCard(prayerCards().indexOf(next),true);}return;
-  }
-  if(target===$("memoryCard")&&ev.key==="ArrowUp"){
-    const next=nextPrayerCard();if(next){ev.preventDefault();ev.stopImmediatePropagation();selectPrayerCard(prayerCards().indexOf(next),true);}return;
-  }
-},true);
 
 /* زر التحديث يعيد تحميل صفحة التطبيق كاملة مع تجاوز كاش الصفحة، لتظهر نسخة index.html المنشورة حديثاً. */
 $("refreshBtn").addEventListener("click",()=>{
@@ -1716,441 +1707,113 @@ html[data-layout-mode="tv"] .footer,body[data-layout-mode="tv"] .footer{flex:0 0
 })();
 </script>
 
-<style id="prayer-cards-weather-day-style-v2">
-/* Prayer cards visually match the light, clean weather-day cards: no enclosing cell frame. */
-.prayer-strip,
-html[data-layout-mode="tv"] .prayer-strip,
-body[data-layout-mode="tv"] .prayer-strip{
-  border:0!important;background:transparent!important;box-shadow:none!important;
-  border-radius:0!important;padding:clamp(7px,1vh,12px) 3px!important;
-  gap:clamp(6px,.8vw,11px)!important;overflow:visible!important;
-}
-.prayer-strip .prayer,
-html[data-layout-mode="tv"] .prayer-strip .prayer,
-body[data-layout-mode="tv"] .prayer-strip .prayer{
-  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
-  min-width:0!important;min-height:clamp(82px,11.5vh,116px)!important;
-  padding:clamp(7px,.9vw,11px) 4px!important;gap:5px!important;
-  border:1px solid transparent!important;border-radius:14px!important;
-  background:rgba(255,255,255,.40)!important;box-shadow:none!important;
-  transform:scale(1)!important;outline:none!important;position:relative!important;z-index:1;
-  transition:transform .16s ease,box-shadow .16s ease,background .16s ease!important;
-}
-.prayer-strip .prayer .p-icon{font-size:clamp(19px,2vw,27px)!important;line-height:1.1}
-.prayer-strip .prayer .p-name{font-size:clamp(10px,1.05vw,14px)!important;font-weight:700!important;color:#657563!important}
-.prayer-strip .prayer .p-time{font-size:clamp(13px,1.45vw,19px)!important;font-weight:800!important;color:#263c32!important;font-variant-numeric:tabular-nums}
-.prayer-strip .prayer .p-countdown{font-size:clamp(8px,.8vw,10px)!important;min-height:1em;color:#526e4d!important}
-.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus){
-  background:rgba(230,238,220,.55)!important;box-shadow:0 3px 11px rgba(38,61,37,.08)!important;transform:scale(1)!important;
-}
-.prayer-strip .prayer.remote-selected,
-.prayer-strip .prayer:focus,
-.prayer-strip .prayer:focus-visible{
-  transform:scale(1.075)!important;z-index:5!important;
-  background:rgba(255,255,255,.78)!important;
-  border-color:transparent!important;outline:none!important;
-  box-shadow:0 8px 20px rgba(30,50,32,.18)!important;
-}
-@media(max-width:700px){
-  .prayer-strip{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important}
-  .prayer-strip .prayer{min-height:86px!important;padding:7px 2px!important;border-radius:12px!important}
-  .prayer-strip .prayer .p-name{font-size:10px!important}
-  .prayer-strip .prayer .p-time{font-size:12px!important}
-}
+<style id="prayer-cards-single-source-of-truth">
+/* One authoritative visual layer for all six prayer cards. */
+.prayer-strip{overflow:visible!important;isolation:isolate!important;gap:clamp(8px,1vw,14px)!important;padding:clamp(12px,1.6vh,18px) 8px!important}
+.prayer-strip .prayer{position:relative!important;z-index:1!important;min-width:0!important;transform-origin:center center!important;will-change:transform,box-shadow!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,filter .18s ease!important;border:0!important;outline:0!important;}
+/* Upcoming prayer keeps its own blue appearance when not selected. */
+.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible){z-index:3!important;transform:perspective(700px) translateY(-5px) scale(1.055)!important;background:linear-gradient(110deg,#15324d 0%,#204e70 52%,#25699a 100%)!important;color:#fff!important;box-shadow:0 6px 18px #10243838,0 0 16px #3e83b755,inset 0 1px 0 #ffffff55!important;filter:saturate(1.08)!important}
+.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-name,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-time,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-countdown,.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-icon{color:#fff!important;text-shadow:0 1px 3px #10243866!important;font-weight:900!important}
+/* The remote selection travels to whichever card is focused; no gold border or outline. */
+.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{position:relative!important;z-index:30!important;transform:perspective(700px) translateY(-9px) scale(1.12)!important;outline:none!important;border:0!important;background:linear-gradient(145deg,#fffefb 0%,#f1f9eb 45%,#d7ebca 100%)!important;color:#244b22!important;box-shadow:0 5px 0 rgba(74,110,60,.48),0 16px 30px rgba(28,55,28,.36),0 0 24px rgba(208,244,185,.78),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.2)!important;filter:saturate(1.12) brightness(1.03)!important}
+/* If the selected card is also the upcoming prayer, retain blue fill and use only lift/shadow for selection. */
+.prayer-strip .prayer.next-prayer.remote-selected,.prayer-strip .prayer.next-prayer:focus,.prayer-strip .prayer.next-prayer:focus-visible{background:linear-gradient(110deg,#15324d 0%,#204e70 52%,#25699a 100%)!important;color:#fff!important;outline:none!important;border:0!important;transform:perspective(700px) translateY(-9px) scale(1.12)!important;box-shadow:0 6px 0 rgba(16,36,56,.42),0 16px 30px rgba(16,36,56,.38),0 0 25px rgba(62,131,183,.72)!important}
+.prayer-strip .prayer.next-prayer.remote-selected .p-name,.prayer-strip .prayer.next-prayer.remote-selected .p-time,.prayer-strip .prayer.next-prayer.remote-selected .p-countdown,.prayer-strip .prayer.next-prayer.remote-selected .p-icon,.prayer-strip .prayer.next-prayer:focus .p-name,.prayer-strip .prayer.next-prayer:focus .p-time,.prayer-strip .prayer.next-prayer:focus .p-countdown,.prayer-strip .prayer.next-prayer:focus .p-icon{color:#fff!important;text-shadow:0 1px 3px #10243888!important}
+.prayer-strip .prayer.remote-selected .p-name,.prayer-strip .prayer.remote-selected .p-time,.prayer-strip .prayer.remote-selected .p-countdown,.prayer-strip .prayer.remote-selected .p-icon,.prayer-strip .prayer:focus .p-name,.prayer-strip .prayer:focus .p-time,.prayer-strip .prayer:focus .p-countdown,.prayer-strip .prayer:focus .p-icon{font-weight:900!important}
 @media(prefers-reduced-motion:reduce){.prayer-strip .prayer{transition:none!important}}
 </style>
 
-
-<style id="prayer-3d-upcoming-v5">
-/* Make the upcoming prayer unmistakably raised, illuminated and zoomed, without a border frame. */
-.prayer-strip .prayer.next-prayer:not(:focus):not(.remote-selected){
-  transform:perspective(650px) translateY(-4px) scale(1.055)!important;
-  background:linear-gradient(150deg,rgba(255,255,255,.98),rgba(220,238,205,.90) 58%,rgba(191,216,177,.78))!important;
-  box-shadow:0 3px 0 rgba(91,122,75,.28),0 9px 17px rgba(39,68,37,.22),inset 0 2px 5px rgba(255,255,255,.95),inset 0 -3px 6px rgba(83,120,69,.12)!important;
-  z-index:4!important;
-}
-.prayer-strip .prayer.next-prayer .p-name{color:#365d31!important;font-weight:900!important;text-shadow:0 1px 0 rgba(255,255,255,.9)!important}
-.prayer-strip .prayer.next-prayer .p-time{color:#203e24!important;text-shadow:0 1px 0 rgba(255,255,255,.8)!important}
-.prayer-strip .prayer.remote-selected,
-.prayer-strip .prayer:focus,
-.prayer-strip .prayer:focus-visible{
-  transform:perspective(650px) translateY(-6px) scale(1.10)!important;
-  background:linear-gradient(150deg,#ffffff,rgba(236,247,226,.98) 55%,rgba(205,229,190,.92))!important;
-  box-shadow:0 4px 0 rgba(79,112,65,.34),0 12px 24px rgba(32,58,30,.28),0 0 20px rgba(210,244,183,.58),inset 0 2px 7px rgba(255,255,255,.98),inset 0 -4px 8px rgba(78,115,62,.13)!important;
-  border:0!important;outline:none!important;z-index:10!important;
-}
-.prayer-strip{overflow:visible!important;isolation:isolate!important}
-.prayer-strip .prayer{transform-origin:center center!important;will-change:transform,box-shadow!important}
+<style id="zikra-adhan-remote-final">
+#adhanSettingsModal .adhan-dialog{width:min(430px,92vw)!important;max-height:82vh!important;overflow:auto!important;padding:14px 16px!important;border-radius:16px!important}
+#adhanSettingsModal .adhan-head{margin-bottom:8px!important}
+#adhanSettingsModal .adhan-head h2{font-size:19px!important}
+#adhanSettingsModal #adhanVoiceButton{display:none!important}
+#adhanSettingsModal #adhanVoiceOptions{display:flex!important;visibility:visible!important;position:static!important;max-height:none!important;overflow:visible!important;flex-direction:column;gap:5px;margin:5px 0 10px;padding:0;border:0;background:transparent}
+#adhanSettingsModal #adhanVoiceOptions[hidden]{display:flex!important}
+#adhanSettingsModal #adhanVoiceOptions [data-voice]{display:flex!important;align-items:center;gap:10px;min-height:36px!important;padding:7px 10px!important;border:1px solid #d8dfd1!important;border-radius:10px!important;background:#fffef9!important;color:#304b3a!important;text-align:right!important}
+#adhanSettingsModal #adhanVoiceOptions [data-voice]::before{content:"";display:inline-block;flex:0 0 16px;width:16px;height:16px;border:2px solid #8b9a86;border-radius:50%;box-sizing:border-box}
+#adhanSettingsModal #adhanVoiceOptions [data-voice][aria-selected="true"]::before{border-color:#3d8b50;background:radial-gradient(circle,#3d8b50 0 4px,transparent 4.5px)}
+#adhanSettingsModal #adhanVoiceOptions [data-voice]:focus,#adhanSettingsModal #adhanEnabledToggle:focus-visible,#adhanSettingsModal #adhanSaveBtn:focus-visible,#adhanSettingsModal #adhanCloseBtn:focus-visible{outline:2px solid #6b9b72!important;outline-offset:2px!important;box-shadow:0 0 0 3px #6b9b7233!important}
+#adhanSettingsModal .adhan-switch-row{margin:8px 0!important;padding:9px 11px!important}
+#adhanSettingsModal .adhan-actions{margin-top:8px!important}
+#adhanSettingsModal #adhanSaveBtn{min-height:38px!important}
+.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{outline:0!important;border:0!important}
+.prayer-strip .prayer.next-prayer.remote-selected,.prayer-strip .prayer.next-prayer:focus,.prayer-strip .prayer.next-prayer:focus-visible{outline:0!important;border:0!important}
 </style>
-<script id="prayer-remote-hard-fix-v13">
+<script id="zikra-remote-adhan-single-controller">
 (function(){
  'use strict';
- const el=id=>document.getElementById(id);
+ const $=id=>document.getElementById(id);
+ const modal=$('adhanSettingsModal'), list=$('adhanVoiceOptions');
+ if(!modal||!list)return;
+ const options=()=>Array.from(list.querySelectorAll('button[data-voice]'));
  const cards=()=>Array.from(document.querySelectorAll('.prayer-strip .prayer'));
- const modal=()=>el('adhanSettingsModal');
- const isModalOpen=()=>!!modal()?.classList.contains('open');
- const voiceList=()=>el('adhanVoiceOptions');
- const voiceOptions=()=>Array.from(voiceList()?.querySelectorAll('button[data-voice]')||[]);
- const focus=target=>{if(!target)return;try{target.focus({preventScroll:true});}catch(_){target.focus();}};
- let selectedCard=null;
- let returnCard=null;
- const adhanPrayers=new Set(['Fajr','Dhuhr','Asr','Maghrib','Isha']);
- function normalize(e){
-   const raw=String(e.key||e.code||'').toLowerCase().replace(/[ _-]/g,'');
-   const byName={arrowleft:'ArrowLeft',left:'ArrowLeft',dpadleft:'ArrowLeft',keyleft:'ArrowLeft',arrowright:'ArrowRight',right:'ArrowRight',dpadright:'ArrowRight',keyright:'ArrowRight',arrowup:'ArrowUp',up:'ArrowUp',dpadup:'ArrowUp',arrowdown:'ArrowDown',down:'ArrowDown',dpaddown:'ArrowDown',enter:'Enter',select:'Enter',numpadenter:'Enter',' ':'Enter',escape:'Escape',backspace:'Escape',browserback:'Escape',goback:'Escape'};
-   const code=e.keyCode||e.which||0;
-   const byCode={4:'Escape',8:'Escape',27:'Escape',19:'ArrowUp',20:'ArrowDown',21:'ArrowLeft',22:'ArrowRight',23:'Enter',66:'Enter',13:'Enter',37:'ArrowLeft',38:'ArrowUp',39:'ArrowRight',40:'ArrowDown'};
-   return byCode[code]||byName[raw]||e.key||'';
+ const memory=$('memoryCard'), date=$('datePanel');
+ let returnCard=null, savedSnapshot=null, committedVoice='makkah', committedEnabled=true, selectedVoice='makkah';
+ function focus(el){if(!el)return;try{el.focus({preventScroll:true})}catch(_){el.focus()}}
+ function selectVisual(voice){options().forEach(b=>b.setAttribute('aria-selected',String(b.dataset.voice===voice)));}
+ function preview(voice){try{if(typeof previewAdhan==='function')previewAdhan(voice)}catch(_){}}
+ function openFor(card){
+   if(!card)return;const key=card.id.replace('box-','');
+   if(!['Fajr','Dhuhr','Asr','Maghrib','Isha'].includes(key))return;
+   returnCard=card;committedVoice=(adhanSettings[key]&&adhanSettings[key].voice)||'makkah';committedEnabled=adhanSettings[key]?adhanSettings[key].enabled:true;
+   selectedVoice=committedVoice;savedSnapshot={key,voice:committedVoice,enabled:committedEnabled};
+   adhanEditingPrayer=key;adhanDraftVoice=selectedVoice;
+   $('adhanSettingsPrayerName').textContent=typeof prayerDisplayName==='function'?prayerDisplayName(key):key;
+   $('adhanEnabledToggle').checked=committedEnabled;
+   list.hidden=false;$('adhanVoiceButton').setAttribute('aria-expanded','true');
+   selectVisual(selectedVoice);modal.classList.add('open');focus(options().find(b=>b.dataset.voice===selectedVoice)||options()[0]);
  }
- function setSelected(card){
-   const all=cards();
-   all.forEach(c=>c.classList.toggle('remote-selected',c===card));
-   selectedCard=card||null;
+ function close(save){
+   if(!modal.classList.contains('open'))return;
+   if(save){adhanSettings[savedSnapshot.key]={voice:selectedVoice,enabled:$('adhanEnabledToggle').checked};saveAdhanSettings();}
+   else if(savedSnapshot){adhanSettings[savedSnapshot.key]={voice:savedSnapshot.voice,enabled:savedSnapshot.enabled};adhanDraftVoice=savedSnapshot.voice;}
+   try{adhanPreviewSequence++;adhanAudio.pause();adhanAudio.currentTime=0}catch(_){ }
+   modal.classList.remove('open');list.hidden=false;
+   if(returnCard&&returnCard.isConnected){returnCard.classList.add('remote-selected');focus(returnCard)}
+   else focus(cards()[0]);
  }
- function focusCard(card){if(!card)return;setSelected(card);focus(card);try{card.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});}catch(_){} }
- function cardIndex(card){return cards().indexOf(card);}
- function openForCard(card){
-   const key=String(card?.id||'').replace(/^box-/,'');
-   if(!adhanPrayers.has(key)||typeof window.openAdhanSettings!=='function')return;
-   returnCard=card;window.openAdhanSettings(key);
- }
- function closeSettings(){
-   const wasOpen=isModalOpen();
-   if(wasOpen&&typeof window.closeAdhanSettings==='function')window.closeAdhanSettings();
-   else if(wasOpen)modal().classList.remove('open');
-   if(returnCard&&returnCard.isConnected){const target=returnCard;setTimeout(()=>focusCard(target),0);}
- }
- function hideVoiceList(){
-   const list=voiceList(),button=el('adhanVoiceButton');
-   if(!list)return;
-   list.hidden=true;button?.setAttribute('aria-expanded','false');
- }
- function chooseVoice(option){
-   if(!option)return;
-   if(typeof window.setAdhanVoice==='function')window.setAdhanVoice(option.dataset.voice);
-   if(typeof window.previewAdhan==='function')window.previewAdhan(option.dataset.voice);
-   focus(option);
- }
- function modalKey(e,key){
-   const active=document.activeElement, list=voiceList(), opts=voiceOptions(), idx=opts.indexOf(active), listOpen=!!list&&!list.hidden;
-   const close=el('adhanCloseBtn'), toggle=el('adhanEnabledToggle'), save=el('adhanSaveBtn');
-   if(key==='Escape'||key==='Back'||key==='Backspace'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();closeSettings();return true;}
-   if(key==='Enter'||key===' '){
-     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-     if(idx>=0){chooseVoice(active);return true;}
-     if(active===close){closeSettings();return true;}
-     if(active===save){save.click();return true;}
-     if(active===toggle){toggle.checked=!toggle.checked;return true;}
-     return true;
-   }
-   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)){
-     e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-     if(idx>=0){
-       if(key==='ArrowDown') { if(idx<opts.length-1) focus(opts[idx+1]); else focus(toggle); return true; }
-       if(key==='ArrowUp') { if(idx>0) focus(opts[idx-1]); else focus(close); return true; }
-       if(key==='ArrowRight'||key==='ArrowLeft') { const delta=key==='ArrowRight'?1:-1; focus(opts[(idx+delta+opts.length)%opts.length]); return true; }
-     }
-     if(active===close){if(key==='ArrowDown')focus(opts[0]);return true;}
-     if(active===toggle){if(key==='ArrowDown')focus(save);else if(key==='ArrowUp')focus(opts[opts.length-1]);return true;}
-     if(active===save){if(key==='ArrowUp')focus(toggle);return true;}
-     if(active===el('adhanVoiceButton')){focus(opts[0]);return true;}
-     focus(opts[0]);return true;
-   }
-   return false;
- }
- function onKey(e){
-   const key=normalize(e);
-   if(isModalOpen()){modalKey(e,key);return;}
-   if(el('weatherModal')?.classList.contains('open'))return;
-   const all=cards();if(!all.length)return;
-   const activeCard=e.target?.closest?.('.prayer-strip .prayer')||document.activeElement?.closest?.('.prayer-strip .prayer');
-   if(activeCard&&all.includes(activeCard))selectedCard=activeCard;
-   let current=activeCard&&all.includes(activeCard)?activeCard:(selectedCard&&all.includes(selectedCard)?selectedCard:null);
-   if(current){
-     const idx=all.indexOf(current);
-     if(key==='ArrowLeft'||key==='ArrowRight'){
-       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-       // RTL screen: Right from the rightmost/first card wraps to the leftmost/last card.
-       const delta=key==='ArrowRight'?-1:1;
-       focusCard(all[(idx+delta+all.length)%all.length]);return;
-     }
-     if(key==='ArrowUp'){
-       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focus(el('datePanel'));setSelected(null);return;
-     }
-     if(key==='ArrowDown'){
-       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-       if(idx===all.length-1){setSelected(null);focus(el('memoryCard'));}
-       return;
-     }
-     if(key==='Enter'||key===' '){
-       const k=String(current.id||'').replace(/^box-/,'');
-       if(adhanPrayers.has(k)){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openForCard(current);return;}
-     }
-   }
-   if(key==='ArrowDown'&&(e.target===el('datePanel')||document.activeElement===el('datePanel'))){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focusCard(all[0]);return;}
-   if(key==='ArrowUp'&&(e.target===el('memoryCard')||document.activeElement===el('memoryCard'))){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();focusCard(all[0]);return;}
- }
- window.addEventListener('keydown',onKey,true);
- document.addEventListener('focusin',e=>{
-   const card=e.target?.closest?.('.prayer-strip .prayer');
-   if(card&&cards().includes(card))setSelected(card);
-   else if(isModalOpen()||e.target===el('datePanel')||e.target===el('memoryCard'))setSelected(null);
+ $('adhanSaveBtn').addEventListener('click',e=>{e.stopImmediatePropagation();close(true)},true);
+ $('adhanCloseBtn').addEventListener('click',e=>{e.stopImmediatePropagation();close(false)},true);
+ // Keep focus-preview separate from the committed radio selection.
+ window.setAdhanVoice=function(voice){if(!ADHAN_AUDIO_URLS[voice])voice='makkah';adhanDraftVoice=voice;$('adhanVoiceButton').textContent=(ADHAN_VOICE_LABELS[voice]||ADHAN_VOICE_LABELS.makkah)+'　⌄';};
+ options().forEach(b=>b.addEventListener('click',e=>{e.stopImmediatePropagation();if(!modal.classList.contains('open'))return;selectedVoice=b.dataset.voice;adhanDraftVoice=selectedVoice;selectVisual(selectedVoice);preview(selectedVoice)},true));
+ modal.addEventListener('click',e=>{if(e.target===modal)close(false)});
+ options().forEach(b=>{
+   b.addEventListener('focus',()=>{if(modal.classList.contains('open'))preview(b.dataset.voice)});
+   b.addEventListener('click',()=>{if(!modal.classList.contains('open'))return;selectedVoice=b.dataset.voice;adhanDraftVoice=selectedVoice;selectVisual(selectedVoice);preview(selectedVoice)});
  });
- function init(){
-   const all=cards();all.forEach(c=>{if(!c.hasAttribute('tabindex'))c.tabIndex=0;});
-   const voice=el('adhanVoiceButton'),list=voiceList();
-   if(voice&&list)voice.setAttribute('aria-expanded',String(!list.hidden));
-   setSelected(null);
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+ // One capture-phase controller owns D-pad input before older handlers can intercept it.
+ window.addEventListener('keydown',function(e){
+   const k=e.key, arrows=['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
+   if(modal.classList.contains('open')){
+     if(k==='Escape'||k==='Backspace'||k==='BrowserBack'||k==='GoBack'||e.keyCode===4){e.preventDefault();e.stopImmediatePropagation();close(false);return}
+     if(!arrows.includes(k)&&k!=='Enter'&&k!==' '&&e.keyCode!==23&&e.keyCode!==66)return;
+     e.preventDefault();e.stopImmediatePropagation();
+     const opts=options(), ix=opts.indexOf(document.activeElement), active=document.activeElement;
+     if(ix>=0){
+       if(k==='ArrowDown'){if(ix<opts.length-1)focus(opts[ix+1]);else focus($('adhanEnabledToggle'));return}
+       if(k==='ArrowUp'){if(ix>0)focus(opts[ix-1]);else focus($('adhanCloseBtn'));return}
+       if(k==='ArrowLeft'||k==='ArrowRight'){let n=ix+(k==='ArrowRight'?-1:1);if(n<0)n=opts.length-1;if(n>=opts.length)n=0;focus(opts[n]);return}
+       if(k==='Enter'||k===' '||e.keyCode===23||e.keyCode===66){selectedVoice=active.dataset.voice;adhanDraftVoice=selectedVoice;selectVisual(selectedVoice);preview(selectedVoice);return}
+     }
+     if(active===$('adhanCloseBtn')){if(k==='ArrowDown')focus(opts.find(b=>b.dataset.voice===selectedVoice)||opts[0]);else if(k==='Enter'||k===' '||e.keyCode===23||e.keyCode===66)close(false);return}
+     if(active===$('adhanEnabledToggle')){if(k==='ArrowUp')focus(opts[opts.length-1]);else if(k==='ArrowDown')focus($('adhanSaveBtn'));else if(k==='Enter'||k===' '||e.keyCode===23||e.keyCode===66)$('adhanEnabledToggle').checked=!$('adhanEnabledToggle').checked;return}
+     if(active===$('adhanSaveBtn')){if(k==='ArrowUp')focus($('adhanEnabledToggle'));else if(k==='ArrowDown')focus($('adhanCloseBtn'));else if(k==='Enter'||k===' '||e.keyCode===23||e.keyCode===66)close(true);return}
+     focus(opts.find(b=>b.dataset.voice===selectedVoice)||opts[0]);return;
+   }
+   const all=cards(), ix=all.indexOf(document.activeElement);
+   if(ix>=0){
+     if(k==='ArrowLeft'||k==='ArrowRight'){e.preventDefault();e.stopImmediatePropagation();let next=ix+(k==='ArrowLeft'?1:-1);if(next<0)next=all.length-1;if(next>=all.length)next=0;all.forEach(c=>c.classList.toggle('remote-selected',c===all[next]));focus(all[next]);return}
+     if(k==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();focus(date);return}
+     if(k==='ArrowDown'&&ix===all.length-1){e.preventDefault();e.stopImmediatePropagation();all.forEach(c=>c.classList.remove('remote-selected'));focus(memory);return}
+     if((k==='Enter'||k===' '||e.keyCode===23||e.keyCode===66)){e.preventDefault();e.stopImmediatePropagation();openFor(all[ix]);return}
+   }
+   if(document.activeElement===memory&&k==='ArrowUp'){e.preventDefault();e.stopImmediatePropagation();all.forEach(c=>c.classList.remove('remote-selected'));focus(all[0]);return}
+   if(document.activeElement===date&&k==='ArrowDown'){e.preventDefault();e.stopImmediatePropagation();all.forEach(c=>c.classList.toggle('remote-selected',c===all[0]));focus(all[0]);return}
+ },true);
 })();
 </script>
-<style id="zikra-final-remote-repair-v13">
-.prayer-strip{direction:rtl;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));overflow:visible!important;isolation:isolate!important;gap:clamp(8px,1vw,14px)!important;border:0!important;background:transparent!important;box-shadow:none!important}
-.prayer-strip .prayer{position:relative;outline:0!important;border:0!important;border-radius:16px!important;transform-origin:center center!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease!important;will-change:transform,box-shadow!important}
-/* Upcoming prayer has its own weather-like blue treatment and stays raised even without focus. */
-.prayer-strip .prayer.next-prayer{z-index:5!important;transform:perspective(700px) translateY(-5px) scale(1.055)!important;background:linear-gradient(145deg,#79a9d7 0%,#397bb9 55%,#285d91 100%)!important;color:#fff!important;box-shadow:0 4px 0 rgba(24,62,101,.42),0 10px 20px rgba(20,57,92,.30),0 0 18px rgba(95,165,229,.58),inset 0 2px 6px rgba(255,255,255,.32)!important}
-.prayer-strip .prayer.next-prayer .p-name,.prayer-strip .prayer.next-prayer .p-time,.prayer-strip .prayer.next-prayer .p-countdown,.prayer-strip .prayer.next-prayer .p-icon{color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.22)!important}
-/* Remote-selected card is visually different; when it is also upcoming, retain the blue fill and add a clear focus halo. */
-.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{z-index:12!important;transform:perspective(700px) translateY(-8px) scale(1.10)!important;outline:3px solid #e7c66c!important;outline-offset:2px!important;background:linear-gradient(145deg,#fffefb 0%,#f1f9eb 45%,#d7ebca 100%)!important;color:#243b2b!important;box-shadow:0 4px 0 rgba(74,110,60,.44),0 14px 26px rgba(28,55,28,.31),0 0 22px rgba(208,244,185,.72),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.2)!important}
-.prayer-strip .prayer.next-prayer.remote-selected,.prayer-strip .prayer.next-prayer:focus,.prayer-strip .prayer.next-prayer:focus-visible{background:linear-gradient(145deg,#79a9d7 0%,#397bb9 55%,#285d91 100%)!important;color:#fff!important;outline:3px solid #ffe08a!important;outline-offset:3px!important;box-shadow:0 4px 0 rgba(24,62,101,.42),0 14px 26px rgba(20,57,92,.34),0 0 0 6px rgba(255,224,138,.22),0 0 22px rgba(95,165,229,.65)!important}
-#adhanSettingsModal .adhan-dialog{overflow-y:auto!important;max-height:88vh!important;overflow-x:hidden!important}
-#adhanSettingsModal .adhan-head{position:sticky;top:0;z-index:3;background:linear-gradient(150deg,#fffef8,#eef1e5);padding-bottom:8px}
-#adhanSettingsModal #adhanPreviewBtn{display:none!important}
-#adhanSettingsModal #adhanCloseBtn,#adhanSettingsModal #adhanVoiceButton,#adhanSettingsModal #adhanSaveBtn{position:relative;z-index:5;min-height:44px}
-#adhanSettingsModal #adhanVoiceOptions{position:relative;z-index:4;max-height:210px;overflow-y:auto}
-#adhanSettingsModal #adhanVoiceOptions[hidden]{display:none!important}
-#adhanSettingsModal #adhanCloseBtn:focus-visible,#adhanSettingsModal #adhanVoiceButton:focus-visible,#adhanSettingsModal #adhanVoiceOptions button:focus-visible,#adhanSettingsModal #adhanEnabledToggle:focus-visible,#adhanSettingsModal #adhanSaveBtn:focus-visible{outline:3px solid #b4c9a8!important;outline-offset:2px!important}
-</style>
 
-
-
-
-
-<style id="prayer-card-selection-single-final-fix">
-/* Apply the same lift/zoom/light/shadow to whichever of the six prayer cards is selected. */
-.prayer-strip { overflow: visible !important; isolation: isolate !important; }
-.prayer-strip .prayer {
-  border: 0 !important;
-  outline: none !important;
-  outline-offset: 0 !important;
-  transform-origin: center center !important;
-  transition: transform .18s ease, box-shadow .18s ease, background .18s ease, filter .18s ease !important;
-  will-change: transform, box-shadow !important;
-}
-.prayer-strip .prayer.remote-selected,
-.prayer-strip .prayer:focus,
-.prayer-strip .prayer:focus-visible {
-  position: relative !important;
-  z-index: 30 !important;
-  transform: perspective(700px) translateY(-9px) scale(1.12) !important;
-  border: 0 !important;
-  outline: none !important;
-  outline-offset: 0 !important;
-  background: linear-gradient(145deg, #fffefb 0%, #f1f9eb 45%, #d7ebca 100%) !important;
-  color: #243b2b !important;
-  box-shadow: 0 5px 0 rgba(74,110,60,.48), 0 16px 30px rgba(28,55,28,.36), 0 0 24px rgba(208,244,185,.78), inset 0 3px 8px #fff, inset 0 -5px 9px rgba(68,108,52,.2) !important;
-  filter: saturate(1.12) brightness(1.03) !important;
-}
-.prayer-strip .prayer.remote-selected .p-name,
-.prayer-strip .prayer.remote-selected .p-time,
-.prayer-strip .prayer.remote-selected .p-countdown,
-.prayer-strip .prayer.remote-selected .p-icon,
-.prayer-strip .prayer:focus .p-name,
-.prayer-strip .prayer:focus .p-time,
-.prayer-strip .prayer:focus .p-countdown,
-.prayer-strip .prayer:focus .p-icon {
-  color: #244b22 !important;
-  font-weight: 900 !important;
-  text-shadow: 0 1px 0 #fff !important;
-}
-/* The upcoming prayer keeps its blue fill when not selected; never show a gold frame. */
-.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) {
-  border: 0 !important;
-  outline: none !important;
-}
-.prayer-strip .prayer.next-prayer.remote-selected,
-.prayer-strip .prayer.next-prayer:focus,
-.prayer-strip .prayer.next-prayer:focus-visible {
-  background: linear-gradient(110deg, #15324d 0%, #204e70 52%, #25699a 100%) !important;
-  color: #fff !important;
-  border: 0 !important;
-  outline: none !important;
-  outline-offset: 0 !important;
-  transform: perspective(700px) translateY(-9px) scale(1.12) !important;
-  box-shadow: 0 6px 0 rgba(16,36,56,.42), 0 16px 30px rgba(16,36,56,.38), 0 0 25px rgba(62,131,183,.72) !important;
-}
-.prayer-strip .prayer.next-prayer.remote-selected .p-name,
-.prayer-strip .prayer.next-prayer.remote-selected .p-time,
-.prayer-strip .prayer.next-prayer.remote-selected .p-countdown,
-.prayer-strip .prayer.next-prayer.remote-selected .p-icon,
-.prayer-strip .prayer.next-prayer:focus .p-name,
-.prayer-strip .prayer.next-prayer:focus .p-time,
-.prayer-strip .prayer.next-prayer:focus .p-countdown,
-.prayer-strip .prayer.next-prayer:focus .p-icon { color: #fff !important; text-shadow: 0 1px 3px #10243888 !important; }
-</style>
 </body>
 </html>
-
-<style id="adhan-remote-and-prayer-polish-v3">
-#adhanSettingsModal .adhan-voice-picker{position:relative;width:100%;}
-#adhanSettingsModal #adhanVoiceButton{width:100%;min-height:48px;text-align:right;border:0;border-radius:13px;padding:10px 14px;background:#fffef9;color:#304b3a;font-size:15px;font-weight:700;}
-#adhanSettingsModal #adhanVoiceOptions{position:relative;margin-top:7px;padding:5px;display:flex;flex-direction:column;gap:4px;background:#e9eee2;border-radius:13px;max-height:210px;overflow:auto;}
-#adhanSettingsModal #adhanVoiceOptions[hidden]{display:none!important;}
-#adhanSettingsModal #adhanVoiceOptions [data-voice]{width:100%;min-height:42px;text-align:right;border:0;border-radius:9px;padding:8px 11px;background:transparent;color:#304b3a;font-size:14px;}
-#adhanSettingsModal #adhanVoiceOptions [data-voice][aria-selected="true"]{background:#d6e2cf;font-weight:800;}
-#adhanSettingsModal #adhanVoiceButton:focus,#adhanSettingsModal #adhanVoiceOptions [data-voice]:focus,#adhanSettingsModal button:focus-visible,#adhanSettingsModal input:focus-visible{outline:none!important;box-shadow:0 0 0 3px #b4c9a8!important;}
-#adhanSettingsModal .adhan-dialog{overflow:visible!important;}
-#adhanSettingsModal{z-index:99999!important;}
-.prayer-strip,html[data-layout-mode="tv"] .prayer-strip,body[data-layout-mode="tv"] .prayer-strip{gap:clamp(7px,.9vw,13px)!important;padding:clamp(7px,1vh,12px) 4px!important;}
-.prayer-strip .prayer,html[data-layout-mode="tv"] .prayer-strip .prayer,body[data-layout-mode="tv"] .prayer-strip .prayer{border:0!important;min-height:clamp(78px,10.7vh,108px)!important;padding:clamp(6px,.7vw,9px) 3px!important;border-radius:12px!important;background:rgba(255,255,255,.34)!important;}
-.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{outline:none!important;border:0!important;transform:scale(1.045)!important;box-shadow:0 5px 14px rgba(30,50,32,.16)!important;background:rgba(255,255,255,.72)!important;}
-.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus){background:rgba(230,238,220,.48)!important;box-shadow:none!important;}
-</style>
-
-<style id="prayer-cards-unified-3d-v7">
-/* Unified final visual layer: upcoming prayer is raised and softly illuminated; remote focus gets a stronger lift. */
-.prayer-strip, html[data-layout-mode="tv"] .prayer-strip, body[data-layout-mode="tv"] .prayer-strip {
-  display:grid!important; gap:clamp(8px,1vw,14px)!important; padding:clamp(12px,1.6vh,18px) 8px!important;
-  border:0!important; outline:0!important; background:transparent!important; box-shadow:none!important;
-  overflow:visible!important; isolation:isolate!important;
-}
-.prayer-strip .prayer, html[data-layout-mode="tv"] .prayer-strip .prayer, body[data-layout-mode="tv"] .prayer-strip .prayer {
-  position:relative!important; z-index:1!important; min-width:0!important; min-height:clamp(82px,11vh,112px)!important;
-  display:flex!important; flex-direction:column!important; align-items:center!important; justify-content:center!important; gap:5px!important;
-  padding:clamp(7px,.8vw,10px) 4px!important; border:0!important; outline:0!important; border-radius:15px!important;
-  background:linear-gradient(155deg,rgba(255,255,255,.58),rgba(237,242,231,.36))!important;
-  box-shadow:0 2px 4px rgba(28,48,29,.05),inset 0 1px 0 rgba(255,255,255,.7)!important;
-  transform:perspective(700px) translateY(0) scale(1)!important; transform-origin:center center!important;
-  transition:transform .18s ease,box-shadow .18s ease,background .18s ease,filter .18s ease!important;
-  will-change:transform,box-shadow!important;
-}
-.prayer-strip .prayer .p-icon {filter:drop-shadow(0 2px 2px rgba(30,50,30,.12))!important;}
-.prayer-strip .prayer.next-prayer:not(:focus):not(.remote-selected) {
-  z-index:3!important; transform:perspective(700px) translateY(-5px) scale(1.055)!important;
-  background:linear-gradient(145deg,#ffffff 0%,#edf8e5 42%,#cfe6c1 100%)!important;
-  box-shadow:0 3px 0 rgba(83,119,68,.36),0 10px 19px rgba(42,72,36,.23),0 0 17px rgba(202,239,181,.48),
-    inset 0 2px 6px rgba(255,255,255,.98),inset 0 -4px 7px rgba(73,113,57,.15)!important;
-  filter:saturate(1.08)!important;
-}
-.prayer-strip .prayer.next-prayer .p-name {color:#315b2a!important;font-weight:900!important;text-shadow:0 1px 0 #fff!important;}
-.prayer-strip .prayer.next-prayer .p-time {color:#1f4020!important;font-weight:900!important;text-shadow:0 1px 0 rgba(255,255,255,.95)!important;}
-.prayer-strip .prayer.remote-selected, .prayer-strip .prayer:focus, .prayer-strip .prayer:focus-visible {
-  z-index:10!important; transform:perspective(700px) translateY(-7px) scale(1.105)!important;
-  border:0!important; outline:0!important;
-  background:linear-gradient(145deg,#fff 0%,#f1f9eb 45%,#d7ebca 100%)!important;
-  box-shadow:0 4px 0 rgba(74,110,60,.42),0 14px 26px rgba(28,55,28,.30),0 0 22px rgba(208,244,185,.68),
-    inset 0 3px 8px rgba(255,255,255,1),inset 0 -5px 9px rgba(68,108,52,.18)!important;
-  filter:saturate(1.12) brightness(1.025)!important;
-}
-.prayer-strip .prayer.remote-selected .p-name, .prayer-strip .prayer:focus .p-name {color:#285127!important;font-weight:900!important;}
-.prayer-strip .prayer.remote-selected .p-time, .prayer-strip .prayer:focus .p-time {color:#173b1c!important;font-weight:900!important;}
-@media(max-width:700px){.prayer-strip{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}.prayer-strip .prayer{min-height:84px!important;border-radius:13px!important}}
-@media(prefers-reduced-motion:reduce){.prayer-strip .prayer{transition:none!important}}
-</style>
-
-<style id="prayer-final-highlight-v8">
-/* Keep upcoming prayer visibly raised even when the remote is elsewhere. */
-.prayer-strip .prayer.next-prayer {
-  position:relative!important;z-index:4!important;transform:perspective(700px) translateY(-5px) scale(1.055)!important;
-  background:linear-gradient(145deg,#fff 0%,#edf8e5 42%,#cfe6c1 100%)!important;
-  box-shadow:0 4px 0 rgba(83,119,68,.4),0 10px 20px rgba(42,72,36,.24),0 0 18px rgba(202,239,181,.62),inset 0 2px 6px rgba(255,255,255,.98),inset 0 -4px 7px rgba(73,113,57,.17)!important;
-}
-.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible {
-  z-index:12!important;transform:perspective(700px) translateY(-8px) scale(1.105)!important;
-  background:linear-gradient(145deg,#fff 0%,#f1f9eb 45%,#d7ebca 100%)!important;
-  box-shadow:0 4px 0 rgba(74,110,60,.44),0 14px 26px rgba(28,55,28,.31),0 0 22px rgba(208,244,185,.72),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.2)!important;
-}
-#adhanSettingsModal #adhanPreviewBtn{display:none!important}
-#adhanSettingsModal #adhanSaveBtn{min-width:150px;font-weight:900}
-</style>
-
-<style id="prayer-final-highlight-v11">
-.prayer-strip .prayer.next-prayer{position:relative!important;z-index:4!important;transform:translateY(-5px) scale(1.055)!important;background:linear-gradient(145deg,#fff 0%,#edf8e5 42%,#cfe6c1 100%)!important;box-shadow:0 4px 0 rgba(83,119,68,.4),0 10px 20px rgba(42,72,36,.24),0 0 18px rgba(202,239,181,.62),inset 0 2px 6px rgba(255,255,255,.98),inset 0 -4px 7px rgba(73,113,57,.17)!important;filter:saturate(1.08)!important}
-.prayer-strip .prayer.next-prayer .p-name,.prayer-strip .prayer.next-prayer .p-time{color:#244b22!important;font-weight:900!important}
-.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{z-index:12!important;transform:translateY(-7px) scale(1.09)!important;background:linear-gradient(145deg,#fff 0%,#f1f9eb 45%,#d7ebca 100%)!important;box-shadow:0 4px 0 rgba(74,110,60,.44),0 14px 26px rgba(28,55,28,.31),0 0 22px rgba(208,244,185,.72)!important;outline:none!important}
-</style>
-
-<style id="prayer-remote-visuals-v12">
-.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible){
- position:relative!important;z-index:4!important;transform:perspective(700px) translateY(-5px) scale(1.055)!important;
- background:linear-gradient(110deg,#15324d 0%,#204e70 52%,#25699a 100%)!important;
- color:#fff!important;border:1px solid #ffffff78!important;
- box-shadow:0 6px 18px #10243838,0 0 16px #3e83b755,inset 0 1px 0 #ffffff55!important;
- filter:saturate(1.08)!important;
-}
-.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-name,
-.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-time,
-.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-countdown,
-.prayer-strip .prayer.next-prayer:not(.remote-selected):not(:focus):not(:focus-visible) .p-icon{color:#fff!important;text-shadow:0 1px 3px #10243866!important;font-weight:900!important}
-.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{
- z-index:12!important;transform:perspective(700px) translateY(-8px) scale(1.105)!important;
- background:linear-gradient(145deg,#fff 0%,#f1f9eb 45%,#d7ebca 100%)!important;
- color:#244b22!important;border:0!important;outline:none!important;
- box-shadow:0 4px 0 rgba(74,110,60,.44),0 14px 26px rgba(28,55,28,.31),0 0 22px rgba(208,244,185,.72),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.2)!important;
-}
-.prayer-strip .prayer.remote-selected .p-name,.prayer-strip .prayer:focus .p-name,.prayer-strip .prayer.remote-selected .p-time,.prayer-strip .prayer:focus .p-time,.prayer-strip .prayer.remote-selected .p-countdown,.prayer-strip .prayer:focus .p-countdown,.prayer-strip .prayer.remote-selected .p-icon,.prayer-strip .prayer:focus .p-icon{color:#244b22!important;text-shadow:0 1px 0 #fff!important;font-weight:900!important}
-</style>
-
-<style id="prayer-next-and-focus-distinction-v12">
-.prayer-strip .prayer.next-prayer.remote-selected,.prayer-strip .prayer.next-prayer:focus,.prayer-strip .prayer.next-prayer:focus-visible{border:2px solid #25699a!important;box-shadow:0 4px 0 rgba(74,110,60,.44),0 14px 26px rgba(28,55,28,.31),0 0 0 3px rgba(37,105,154,.32),0 0 22px rgba(208,244,185,.72)!important}
-</style>
-
-<style id="prayer-focus-zoom-final-v14">
-/* The focused remote card must visibly lift, zoom, and differ from the upcoming-prayer highlight. */
-.prayer-strip .prayer.remote-selected,
-.prayer-strip .prayer:focus,
-.prayer-strip .prayer:focus-visible {
-  position:relative!important; z-index:30!important;
-  transform:perspective(700px) translateY(-9px) scale(1.12)!important;
-  outline:3px solid #ffe08a!important; outline-offset:3px!important;
-  background:linear-gradient(145deg,#fffefb 0%,#f1f9eb 45%,#d7ebca 100%)!important;
-  color:#243b2b!important;
-  box-shadow:0 5px 0 rgba(74,110,60,.48),0 16px 30px rgba(28,55,28,.36),0 0 0 4px rgba(255,224,138,.22),0 0 24px rgba(208,244,185,.78),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.2)!important;
-  filter:saturate(1.12) brightness(1.03)!important;
-}
-.prayer-strip .prayer.remote-selected .p-name,
-.prayer-strip .prayer.remote-selected .p-time,
-.prayer-strip .prayer.remote-selected .p-countdown,
-.prayer-strip .prayer.remote-selected .p-icon,
-.prayer-strip .prayer:focus .p-name,
-.prayer-strip .prayer:focus .p-time,
-.prayer-strip .prayer:focus .p-countdown,
-.prayer-strip .prayer:focus .p-icon { color:#244b22!important; font-weight:900!important; text-shadow:0 1px 0 #fff!important; }
-/* If the upcoming prayer is also selected, keep its blue fill and show selection with a gold halo + stronger zoom. */
-.prayer-strip .prayer.next-prayer.remote-selected,
-.prayer-strip .prayer.next-prayer:focus,
-.prayer-strip .prayer.next-prayer:focus-visible {
-  background:linear-gradient(110deg,#15324d 0%,#204e70 52%,#25699a 100%)!important;
-  color:#fff!important; border:1px solid #ffe08a!important;
-  transform:perspective(700px) translateY(-9px) scale(1.12)!important;
-  outline:3px solid #ffe08a!important; outline-offset:3px!important;
-  box-shadow:0 6px 0 rgba(16,36,56,.42),0 16px 30px rgba(16,36,56,.38),0 0 0 5px rgba(255,224,138,.3),0 0 25px rgba(62,131,183,.72)!important;
-}
-.prayer-strip .prayer.next-prayer.remote-selected .p-name,
-.prayer-strip .prayer.next-prayer.remote-selected .p-time,
-.prayer-strip .prayer.next-prayer.remote-selected .p-countdown,
-.prayer-strip .prayer.next-prayer.remote-selected .p-icon,
-.prayer-strip .prayer.next-prayer:focus .p-name,
-.prayer-strip .prayer.next-prayer:focus .p-time,
-.prayer-strip .prayer.next-prayer:focus .p-countdown,
-.prayer-strip .prayer.next-prayer:focus .p-icon { color:#fff!important; text-shadow:0 1px 3px #10243888!important; }
-</style>
-
-<style id="adhan-and-prayer-final-conflict-fix">
-/* Final card selection: no gold outline; upcoming prayer stays blue unless independently selected. */
-.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible,
-.prayer-strip .prayer.next-prayer.remote-selected,.prayer-strip .prayer.next-prayer:focus,.prayer-strip .prayer.next-prayer:focus-visible{outline:none!important;outline-offset:0!important;border:0!important;}
-.prayer-strip .prayer.remote-selected,.prayer-strip .prayer:focus,.prayer-strip .prayer:focus-visible{transform:perspective(700px) translateY(-9px) scale(1.12)!important;box-shadow:0 5px 0 rgba(74,110,60,.48),0 16px 30px rgba(28,55,28,.36),0 0 24px rgba(208,244,185,.78),inset 0 3px 8px #fff,inset 0 -5px 9px rgba(68,108,52,.2)!important;}
-#adhanSettingsModal .adhan-dialog{width:min(420px,92vw)!important;max-height:82vh!important;overflow-y:auto!important;padding:14px 16px!important;border-radius:16px!important;}
-#adhanSettingsModal .adhan-head{margin-bottom:6px!important;}
-#adhanSettingsModal #adhanVoiceButton{display:none!important;}
-#adhanSettingsModal #adhanVoiceOptions{display:flex!important;position:relative!important;max-height:none!important;overflow:visible!important;margin-top:4px!important;padding:4px!important;gap:3px!important;}
-#adhanSettingsModal #adhanVoiceOptions[hidden]{display:flex!important;}
-#adhanSettingsModal #adhanVoiceOptions [data-voice]{display:flex!important;align-items:center!important;gap:10px!important;min-height:34px!important;padding:5px 8px!important;text-align:right!important;}
-#adhanSettingsModal #adhanVoiceOptions [data-voice]::before{content:"";width:15px;height:15px;flex:0 0 15px;border:2px solid #8a9b86;border-radius:50%;box-sizing:border-box;background:transparent;}
-#adhanSettingsModal #adhanVoiceOptions [data-voice][aria-selected="true"]::before{border-color:#43834b;background:radial-gradient(circle,#43834b 0 4px,transparent 4.5px);}
-#adhanSettingsModal #adhanVoiceOptions [data-voice]:focus-visible,#adhanSettingsModal #adhanEnabledToggle:focus-visible,#adhanSettingsModal #adhanSaveBtn:focus-visible,#adhanSettingsModal #adhanCloseBtn:focus-visible{outline:2px solid #719b70!important;outline-offset:1px!important;}
-#adhanSettingsModal .adhan-switch-row{margin:7px 0!important;padding:8px 10px!important;}
-#adhanSettingsModal .adhan-actions{margin-top:8px!important;}
-</style>
