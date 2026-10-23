@@ -190,7 +190,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
     <div id="languageMenu" class="language-menu" hidden><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button><button type="button" data-lang="de">Deutsch</button></div>
   </div>
 </header>
-<section class="date-panel weather-unified sunny" id="datePanel" role="button" tabindex="0" aria-label="فتح لوحة الطقس" title="فتح لوحة الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><div class="clock" id="clock">--:--</div><div class="date-weather-widget" id="weatherCard"><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></div><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">المدينة: إرفورت</div></div></section>
+<section class="date-panel weather-unified sunny" id="datePanel" role="button" tabindex="0" aria-label="فتح لوحة الطقس" title="فتح لوحة الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><div class="clock" id="clock">--:--</div><div class="date-weather-widget" id="weatherCard"><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></div><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">إرفورت</div></div></section>
 <section class="prayer-strip">
   <div class="prayer" id="box-Fajr"><span class="p-icon">☾</span><div class="p-name" data-prayer="Fajr" data-ar="الفجر" data-en="Fajr" data-de="Fadschr">الفجر</div><div class="p-time" id="fajr">--:--</div><div class="p-countdown" id="cd-Fajr"></div></div>
   <div class="prayer" id="box-Sunrise"><span class="p-icon">☀</span><div class="p-name" data-prayer="Sunrise" data-ar="الشروق" data-en="Sunrise" data-de="Sonnenaufgang">الشروق</div><div class="p-time" id="sunrise">--:--</div><div class="p-countdown" id="cd-Sunrise"></div></div>
@@ -200,10 +200,10 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
   <div class="prayer" id="box-Isha"><span class="p-icon">☾</span><div class="p-name" data-prayer="Isha" data-ar="العشاء" data-en="Isha" data-de="Ischa">العشاء</div><div class="p-time" id="isha">--:--</div><div class="p-countdown" id="cd-Isha"></div></div>
 </section>
 <main class="tiles">
-  <button class="tile tile-memory" id="memoryCard" aria-label="تبديل الذكرى"><span class="memory-brand"><span class="tile-icon" aria-hidden="true">۞</span><span class="tile-title" id="memoryCardTitle">ذِكرى قرآنية ونبوية</span></span><span class="memory-center"><span class="memory-preview-text" id="memoryPreviewText"></span></span><span class="memory-source-side"><span class="memory-preview-source" id="memoryPreviewSource"></span><span class="memory-preview-benefit" id="memoryPreviewBenefit"></span></span></button>
+  <button class="tile tile-memory" id="memoryCard" aria-label="تبديل الذكرى"><span class="memory-brand"><span class="tile-icon memory-emblem" aria-hidden="true"><svg viewBox="0 0 48 48" role="img" aria-label="كتاب مفتوح"><path d="M24 17.5C19 13.5 12.8 13 7.5 15v18c5.5-2 11.5-1.4 16.5 2.7V17.5Z"/><path d="M24 17.5C29 13.5 35.2 13 40.5 15v18c-5.5-2-11.5-1.4-16.5 2.7V17.5Z"/><path d="M11 20.5c3.4-.8 6.7-.3 9.4 1.2M11 25c3.4-.8 6.7-.3 9.4 1.2M37 20.5c-3.4-.8-6.7-.3-9.4 1.2M37 25c-3.4-.8-6.7-.3-9.4 1.2"/><path d="M24 8.5l1.6 3.2 3.5.5-2.5 2.4.6 3.4-3.2-1.7-3.2 1.7.6-3.4-2.5-2.4 3.5-.5L24 8.5Z"/></svg></span><span class="tile-title" id="memoryCardTitle">ذِكرى قرآنية ونبوية</span></span><span class="memory-center"><span class="memory-preview-text" id="memoryPreviewText"></span></span><span class="memory-source-side"><span class="memory-preview-source" id="memoryPreviewSource"></span><span class="memory-preview-benefit" id="memoryPreviewBenefit"></span></span></button>
 </main>
 <section class="player">
-  <div class="now-reading focusable" id="openQuranFromPlayer" tabindex="0" role="button" aria-label="افتح فهرس القرآن"><div class="mini-mushaf">۞</div><div><strong id="miniSurah">اختر سورة من الفهرس</strong><small id="miniReader">اضغط هنا لفتح الفهرس 📖</small></div></div>
+  <div class="now-reading focusable" id="openQuranFromPlayer" tabindex="0" role="button" aria-label="افتح فهرس القرآن"><div class="mini-mushaf mini-quran-logo" aria-hidden="true"><svg viewBox="0 0 60 52"><path d="M5 7h50v38H5zM10 12h40v28H10zM15 17h30v18H15z"/><path d="M20 22h20M20 26h20M20 30h20"/></svg><span class="mini-kufi">القرآن<br>الكريم</span></div><div><strong id="miniSurah">اختر سورة من الفهرس</strong><small id="miniReader">اضغط هنا لفتح الفهرس 📖</small></div></div>
   <div class="track-area"><div class="verse-row"><div class="verse" id="miniVerse">اختر سورة لبدء التلاوة</div><span class="ayah-number" id="miniAyah">١</span></div><div class="progress"><div class="progress-fill" id="progressFill"></div></div></div>
   <div class="controls"><button class="control" id="miniPrev" aria-label="الآية السابقة">⏮</button><button class="control main" id="miniPlay" aria-label="تشغيل أو إيقاف القرآن">▶</button><button class="control" id="miniNext" aria-label="الآية التالية">⏭</button></div>
 </section>
@@ -264,7 +264,7 @@ de:{title:"Zikra",subtitle:"Ruhe für das Herz, jeden Tag",city:"Stadt: ",loadin
 async function fetchJSON(url){const r=await fetch(url);if(!r.ok)throw Error("HTTP "+r.status);return r.json()}
 function updateClock(){const n=new Date(),locale=lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB";$("clock").textContent=new Intl.DateTimeFormat(locale,{hour:"2-digit",minute:"2-digit",hour12:false}).format(n);$("dateText").textContent=new Intl.DateTimeFormat(locale,{weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(n)}
 setInterval(updateClock,1000);updateClock();
-function updateCityLabel(){$("cityLabel").textContent=T[lang].city+city.name}
+function updateCityLabel(){$("cityLabel").textContent=city.name}
 async function loadPrayerTimes(){const n=new Date(),date=[String(n.getDate()).padStart(2,"0"),String(n.getMonth()+1).padStart(2,"0"),n.getFullYear()].join("-");try{const res=await fetchJSON(`https://api.aladhan.com/v1/timings/${date}?latitude=${city.latitude}&longitude=${city.longitude}&method=3`);prayerTimesObj=res.data.timings;const keys=["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"],ids=["fajr","sunrise","dhuhr","asr","maghrib","isha"];keys.forEach((k,i)=>$(ids[i]).textContent=(prayerTimesObj[k]||"--:--").split(" ")[0]);const h=res.data.date.hijri;$("hijriText").textContent=lang==="ar"?`${h.day} ${h.month.ar||h.month.en} ${h.year} هـ`:`${h.day} ${h.month.en} ${h.year} AH`}catch(e){$("hijriText").textContent=""}}
 function updatePrayerCountdowns(){if(!prayerTimesObj)return;const now=new Date(),keys=["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"];let nextKey=null,nextDate=null;for(const k of keys){const [hrs,mins]=prayerTimesObj[k].split(" ")[0].split(":").map(Number),pDate=new Date(now.getFullYear(),now.getMonth(),now.getDate(),hrs,mins);if(pDate>now){nextKey=k;nextDate=pDate;break}}if(!nextDate){const [hrs,mins]=prayerTimesObj.Fajr.split(":").map(Number);nextDate=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,hrs,mins);nextKey="Fajr"}document.querySelectorAll(".prayer").forEach(el=>el.classList.remove("next-prayer"));document.querySelectorAll(".p-countdown").forEach(el=>el.textContent="");$("box-"+nextKey)?.classList.add("next-prayer");const diff=nextDate-now,h=Math.floor(diff/3600000),m=Math.floor(diff/60000%60),s=Math.floor(diff/1000%60),pad=n=>String(n).padStart(2,"0");$("cd-"+nextKey).textContent=`-${pad(h)}:${pad(m)}:${pad(s)}`}
 setInterval(updatePrayerCountdowns,1000);
@@ -276,6 +276,8 @@ function renderWeather(){
   const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard"),panel=$("datePanel"),effects=$("weatherTileEffects"),hour=new Date().getHours();
   const isNight=(hour>=20||hour<6)&&!['rainy','snowy','storm'].includes(desc.cls);
   const cardScene=isNight?'night':desc.cls;
+  document.body.classList.remove('weather-theme-sunny','weather-theme-cloudy','weather-theme-rainy','weather-theme-snowy','weather-theme-storm','weather-theme-night');
+  document.body.classList.add('weather-theme-'+cardScene);
   panel.className="date-panel weather-unified "+cardScene;
   panel.setAttribute("aria-label",lang==="ar"?"فتح لوحة الطقس":lang==="de"?"Wettervorhersage öffnen":"Open weather forecast");
   card.className="date-weather-widget";
@@ -688,6 +690,64 @@ updateCityLabel();renderMemory();updatePlayButton();loadPrayerTimes();loadWeathe
  .tile-memory{min-height:clamp(175px,24vh,250px)}
  .zikra-footer{gap:8px;padding:7px 9px}
  .zikra-footer .footer-creator,.zikra-footer .footer-rights{font-size:9px}
+}
+</style>
+
+
+<style id="zikra-weather-layout-v7">
+/* Stable three-zone weather header: time right, live weather center, date and selected city left. */
+#datePanel.date-panel.weather-unified{
+ display:grid!important;grid-template-columns:minmax(0,1fr) minmax(300px,42%) minmax(0,1fr);grid-template-areas:"date weather clock";
+ direction:ltr;align-items:center;justify-content:stretch;gap:clamp(10px,2vw,28px);
+ min-height:clamp(132px,17vh,158px);height:auto;padding:clamp(12px,1.7vh,18px) clamp(14px,2.4vw,34px);
+}
+#datePanel.date-panel.weather-unified .clock{grid-area:clock;justify-self:end;align-self:center;margin:0;min-width:0;max-width:100%;text-align:right;font-size:clamp(28px,4vw,48px);line-height:1.05;white-space:nowrap}
+#datePanel.date-panel.weather-unified .date-weather-widget{grid-area:weather;position:relative!important;left:auto!important;top:auto!important;transform:none!important;justify-self:stretch;width:100%!important;min-width:0;max-width:none;height:auto;min-height:clamp(100px,13vh,124px);padding:7px clamp(6px,1vw,14px);margin:0;display:grid;grid-template-columns:auto auto minmax(0,1fr);grid-template-rows:auto auto;align-items:center;justify-content:center;gap:3px clamp(5px,.9vw,14px);border:0;border-radius:14px;background:transparent;box-shadow:none;isolation:auto;text-align:right;color:#fff;direction:rtl}
+#datePanel.date-panel.weather-unified .date-info{grid-area:date;justify-self:start;align-self:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;width:100%;max-width:none;min-width:0;margin:0;text-align:center;direction:rtl}
+#datePanel.date-panel.weather-unified .date-text{text-align:center;white-space:normal;overflow-wrap:anywhere}
+#datePanel.date-panel.weather-unified .city-label{font-size:clamp(10px,1vw,13px);font-weight:800;text-align:center}
+/* Keep all text readable while carrying a subtle tint from the active weather scene into the rest of the UI. */
+body.weather-theme-sunny{--green:#416f82;--dark:#284655;--gold:#c19a50;--muted:#647f87;background:radial-gradient(ellipse at 50% 45%,#d9eef3,transparent 52%),linear-gradient(145deg,#f8f7eb,#e5eff0)}
+body.weather-theme-cloudy{--green:#526b7a;--dark:#354855;--gold:#b3a16e;--muted:#71808a;background:radial-gradient(ellipse at 50% 45%,#d9e1e5,transparent 52%),linear-gradient(145deg,#f4f5f2,#e3e8e8)}
+body.weather-theme-rainy{--green:#3f6c8c;--dark:#263f53;--gold:#94b9d1;--muted:#6c8597;background:radial-gradient(ellipse at 50% 45%,#d2e1ec,transparent 52%),linear-gradient(145deg,#eff4f6,#dbe7ed)}
+body.weather-theme-snowy{--green:#507a91;--dark:#294654;--gold:#b6a56d;--muted:#718995;background:radial-gradient(ellipse at 50% 45%,#edf7fa,transparent 52%),linear-gradient(145deg,#f8fcfc,#e0edf2)}
+body.weather-theme-storm{--green:#575c83;--dark:#343a56;--gold:#b3a0d3;--muted:#777d98;background:radial-gradient(ellipse at 50% 45%,#d9dce9,transparent 52%),linear-gradient(145deg,#f1f0f7,#e0e2ec)}
+body.weather-theme-night{--green:#3f6281;--dark:#283f57;--gold:#c6ad73;--muted:#71849a;background:radial-gradient(ellipse at 50% 45%,#d8e2ee,transparent 52%),linear-gradient(145deg,#f1f4f8,#dce5ef)}
+body.weather-theme-sunny .prayer-strip,body.weather-theme-sunny .player,body.weather-theme-sunny .dua-bar,body.weather-theme-sunny .tile-memory{border-color:#c8dce0;background:linear-gradient(140deg,#fffef8ed,#edf5f0ed)}
+body.weather-theme-cloudy .prayer-strip,body.weather-theme-cloudy .player,body.weather-theme-cloudy .dua-bar,body.weather-theme-cloudy .tile-memory{border-color:#cbd5d9;background:linear-gradient(140deg,#fffef9ed,#edf1f1ed)}
+body.weather-theme-rainy .prayer-strip,body.weather-theme-rainy .player,body.weather-theme-rainy .dua-bar,body.weather-theme-rainy .tile-memory{border-color:#c0d5e2;background:linear-gradient(140deg,#fcfefeef,#eaf2f7ed)}
+body.weather-theme-snowy .prayer-strip,body.weather-theme-snowy .player,body.weather-theme-snowy .dua-bar,body.weather-theme-snowy .tile-memory{border-color:#d0e3ea;background:linear-gradient(140deg,#ffffffef,#eef7faed)}
+body.weather-theme-storm .prayer-strip,body.weather-theme-storm .player,body.weather-theme-storm .dua-bar,body.weather-theme-storm .tile-memory{border-color:#d0d0e0;background:linear-gradient(140deg,#fffefbed,#eeedf6ed)}
+body.weather-theme-night .prayer-strip,body.weather-theme-night .player,body.weather-theme-night .dua-bar,body.weather-theme-night .tile-memory{border-color:#c7d6e5;background:linear-gradient(140deg,#fffefced,#eaf0f7ed)}
+.tile.tile-memory{height:clamp(130px,22vh,186px);min-height:0;padding:clamp(10px,1.5vh,17px) clamp(12px,2vw,26px);gap:7px}
+.tile-memory .memory-brand .memory-emblem{background:linear-gradient(145deg,#f6f0d9,#dce7d6);border-color:#c7ac67;box-shadow:inset 0 0 0 2px #ffffff80,0 3px 8px #2f4d3714;color:#48664f}
+.tile-memory .memory-emblem svg{width:82%;height:82%;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mini-quran-logo{position:relative;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:0;width:58px!important;height:52px!important;min-width:58px;border-radius:9px!important;background:linear-gradient(145deg,#f4e9c8,#d7c28c)!important;border:1px solid #ae8d48!important;box-shadow:inset 0 0 0 2px #fff8e8,0 2px 5px #243e2b20;color:#3b4b38!important;overflow:hidden;padding:4px}
+.mini-quran-logo svg{position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px);fill:none;stroke:#9f854d;stroke-width:.7;opacity:.6;pointer-events:none}
+.mini-kufi{position:relative;z-index:1;font-family:"Noto Sans Arabic","Arial Black",Arial,sans-serif;font-weight:900;font-size:11px;line-height:1.1;text-align:center;letter-spacing:-.3px;text-shadow:0 1px #fff6df}
+/* On narrow portrait phones, retain three columns, compressing the weather typography rather than overlapping it. */
+@media(max-width:700px){
+ #datePanel.date-panel.weather-unified{grid-template-columns:minmax(62px,.82fr) minmax(0,2fr) minmax(72px,.9fr);grid-template-areas:"date weather clock";gap:5px;padding:10px 8px;min-height:clamp(136px,17vh,164px);height:auto;flex-wrap:initial}
+ #datePanel.date-panel.weather-unified .clock{font-size:clamp(18px,5vw,29px);white-space:nowrap}
+ #datePanel.date-panel.weather-unified .date-info{min-width:0;max-width:100%;gap:4px}
+ #datePanel.date-panel.weather-unified .date-text{font-size:clamp(8px,2.4vw,11px);line-height:1.3}
+ #datePanel.date-panel.weather-unified .hijri{font-size:clamp(9px,2.5vw,11px);line-height:1.25}
+ #datePanel.date-panel.weather-unified .city-label{font-size:clamp(9px,2.4vw,11px)}
+ #datePanel.date-panel.weather-unified .date-weather-widget{min-height:106px;padding:4px 3px;grid-template-columns:auto auto minmax(0,1fr);gap:2px 4px;border:0}
+ #datePanel.date-panel.weather-unified .weather-icon{font-size:clamp(23px,6vw,34px)}
+ #datePanel.date-panel.weather-unified .weather-temp{font-size:clamp(20px,5.2vw,29px)}
+ #datePanel.date-panel.weather-unified .weather-condition{font-size:clamp(8px,2.3vw,11px);line-height:1.25;overflow-wrap:anywhere}
+ #datePanel.date-panel.weather-unified .weather-extra{font-size:clamp(7px,1.9vw,9px);line-height:1.25;white-space:normal;text-align:center}
+ .tile.tile-memory{height:auto;min-height:180px;padding:12px}
+ .tile-memory .memory-preview-text{font-size:clamp(15px,4vw,20px)}
+ .mini-quran-logo{width:52px!important;min-width:52px;height:49px!important}
+ .mini-kufi{font-size:10px}
+}
+@media(max-width:360px){
+ #datePanel.date-panel.weather-unified{grid-template-columns:minmax(54px,.75fr) minmax(0,1.8fr) minmax(64px,.82fr);gap:3px;padding:8px 5px}
+ #datePanel.date-panel.weather-unified .clock{font-size:18px}
+ #datePanel.date-panel.weather-unified .weather-icon{font-size:22px}
+ #datePanel.date-panel.weather-unified .weather-temp{font-size:18px}
 }
 </style>
 
