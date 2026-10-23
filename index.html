@@ -184,7 +184,107 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 .quran-entry .quran-entry-text small{display:none!important}
 .now-reading.quran-entry:focus-visible{outline:3px solid var(--green);outline-offset:3px}
 @media(max-width:700px){.quran-entry .quran-calligraphy{width:58px;height:58px}.quran-entry .quran-entry-text strong{font-size:14px}}
-</style></head>
+</style>
+<style id="zikra-weather-modal-fix-v13">
+/* Modal overlays must cover the app toolbar and its language/location controls. */
+.modal-backdrop{z-index:2000!important}
+.modal-backdrop.open{isolation:isolate}
+.modal-backdrop .modal{position:relative;z-index:1}
+.topbar,.tools,.language-menu{z-index:auto}
+.language-menu{z-index:2100}
+#weatherModal .modal{
+  display:flex;flex-direction:column;overflow:hidden;
+  height:min(94dvh,900px);max-height:94dvh;
+  padding:clamp(8px,1.2vw,14px);
+}
+#weatherModal .weather-modal-content{
+  display:flex;flex-direction:column;min-height:0;height:100%;gap:clamp(3px,.55vh,6px);
+}
+#weatherModal .modal-head{flex:0 0 auto;margin-bottom:0}
+#weatherModal .weather-current-summary{
+  flex:0 0 auto;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;
+  align-items:center;justify-items:center;column-gap:10px;row-gap:0;
+  padding:2px 8px 4px;text-align:center;
+}
+#weatherModal .weather-current-summary .weather-icon{grid-column:1;grid-row:1/3;font-size:clamp(25px,3.3vw,38px);line-height:1}
+#weatherModal .weather-current-summary .weather-temp{grid-column:2;grid-row:1;font-size:clamp(30px,4vw,46px);line-height:1;font-weight:800}
+#weatherModal #modalCondition{grid-column:2;grid-row:2;font-size:clamp(11px,1.15vw,14px);line-height:1.15}
+#weatherModal #modalFeels{font-size:clamp(9px,.95vw,11px);line-height:1.1;margin-top:2px}
+#weatherModal .section-title{font-size:clamp(10px,1.05vw,13px);margin:2px 0 0;line-height:1.15}
+#weatherModal .weather-days{flex:0 0 auto;gap:5px;padding:4px 2px 6px;overflow-x:auto;overflow-y:hidden}
+#weatherModal .weather-day{flex:0 0 clamp(58px,7.5vw,78px);min-height:clamp(58px,8.2vh,76px);gap:3px;padding:4px 3px;font-size:clamp(9px,.9vw,11px);border-radius:10px}
+#weatherModal .weather-day .day-icon{font-size:clamp(16px,1.7vw,21px)}
+#weatherModal .weather-day .day-range{font-size:clamp(8px,.8vw,10px)}
+#weatherModal .weather-selected-date{flex:0 0 auto;font-size:10px;margin:0;line-height:1.1}
+#weatherModal #hourlyTitle{flex:0 0 auto}
+#weatherModal .hourly{flex:0 0 auto;display:flex;gap:5px;overflow-x:auto;overflow-y:hidden;padding:4px 2px 6px;max-width:100%;scrollbar-width:thin}
+#weatherModal .hour{flex:0 0 clamp(45px,5.4vw,60px);padding:5px 3px;border-radius:9px;min-height:0;font-size:9px}
+#weatherModal .hour-icon{font-size:17px;line-height:1.2}
+#weatherModal .hour strong{font-size:11px}
+#weatherModal #detailsTitle{flex:0 0 auto}
+#weatherModal .weather-stats{flex:0 0 auto;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+#weatherModal .stat{min-height:0;padding:6px 4px;border-radius:9px}
+#weatherModal .stat-label{font-size:clamp(8px,.78vw,10px);line-height:1.15}
+#weatherModal .stat-value{font-size:clamp(11px,1.1vw,15px);margin-top:3px;line-height:1.1}
+#weatherModal #dailyTitle,#weatherModal #dailyForecast{display:none!important}
+#weatherModal .weather-scene{z-index:0}
+@media(max-width:700px){
+  #weatherModal .modal{width:100%;height:96dvh;max-height:96dvh;border-radius:14px;padding:8px}
+  #weatherModal .weather-current-summary .weather-temp{font-size:32px}
+  #weatherModal .weather-days{gap:4px}
+  #weatherModal .weather-day{flex-basis:56px;min-height:60px}
+  #weatherModal .weather-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  #weatherModal .stat{padding:5px 3px}
+  #weatherModal .stat-label{font-size:9px}
+  #weatherModal .stat-value{font-size:12px}
+  #weatherModal .hour{flex-basis:46px}
+}
+@media(max-height:650px){
+  #weatherModal .modal{height:96dvh;max-height:96dvh}
+  #weatherModal .weather-day{min-height:52px}
+  #weatherModal .weather-current-summary .weather-icon{font-size:25px}
+  #weatherModal .weather-current-summary .weather-temp{font-size:29px}
+  #weatherModal .weather-stats .stat{padding:4px 3px}
+}
+</style>
+
+
+<style id="prayer-next-soft-highlight-v14">
+/* Upcoming prayer: subtle zoom and shadow, no rectangular outline. */
+.prayer-item.next-prayer,
+.prayer-time-item.next-prayer,
+.prayer-card.next-prayer,
+.prayer-item.upcoming,
+.prayer-time-item.upcoming,
+.prayer-card.upcoming,
+.prayer-item[aria-current="true"],
+.prayer-time-item[aria-current="true"]{
+  outline:none!important;
+  border-color:transparent!important;
+  box-shadow:0 7px 18px rgba(24,54,34,.18),0 2px 6px rgba(24,54,34,.10)!important;
+  transform:scale(1.045);
+  z-index:2;
+  position:relative;
+  transition:transform .22s ease,box-shadow .22s ease;
+}
+.prayer-item.next-prayer *,
+.prayer-time-item.next-prayer *,
+.prayer-card.next-prayer *,
+.prayer-item.upcoming *,
+.prayer-time-item.upcoming *,
+.prayer-card.upcoming *,
+.prayer-item[aria-current="true"] *,
+.prayer-time-item[aria-current="true"] *{
+  font-size:1.07em;
+}
+@media(prefers-reduced-motion:reduce){
+  .prayer-item.next-prayer,.prayer-time-item.next-prayer,.prayer-card.next-prayer,
+  .prayer-item.upcoming,.prayer-time-item.upcoming,.prayer-card.upcoming,
+  .prayer-item[aria-current="true"],.prayer-time-item[aria-current="true"]{transition:none}
+}
+</style>
+
+</head>
 <body>
 <div id="zikraSplash" aria-label="ذِكرى"><img src="zikra_logo.png" alt="ذِكرى | Zikra"></div>
 <div class="app">
@@ -234,14 +334,15 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
   <div class="weather-scene night" id="weatherScene" aria-hidden="true"></div>
   <div class="weather-modal-content">
     <div class="modal-head"><h2 id="weatherTitle">الطقس والتوقعات</h2><button class="close-modal" id="closeWeather" aria-label="إغلاق">×</button></div>
+    <div class="weather-current-summary"><div class="weather-icon" id="modalIcon">🌙</div><div class="weather-temp" id="modalTemp">--°</div><div id="modalCondition"></div><div id="modalFeels"></div></div>
     <div class="section-title" id="daysTitle">الأيام القادمة</div><div class="weather-days" id="weatherDays" role="listbox" aria-label="اختر اليوم"></div>
     <div class="weather-selected-date" id="weatherSelectedDate"></div>
-    <div style="text-align:center;padding:5px 8px 12px"><div class="weather-icon" id="modalIcon">🌙</div><div class="weather-temp" id="modalTemp">--°</div><div id="modalCondition"></div><div id="modalFeels"></div></div>
+    <div class="section-title" id="hourlyTitle">توقعات الساعات القادمة</div><div class="hourly" id="hourlyForecast"></div>
     <div class="section-title" id="detailsTitle">تفاصيل اليوم</div>
     <div class="weather-stats">
       <div class="stat"><div class="stat-label" id="humidityLabel">الرطوبة</div><div class="stat-value" id="humidityValue">--</div></div><div class="stat"><div class="stat-label" id="windLabel">سرعة الرياح</div><div class="stat-value" id="windValue">--</div></div><div class="stat"><div class="stat-label" id="maxLabel">العظمى</div><div class="stat-value" id="maxValue">--</div></div><div class="stat"><div class="stat-label" id="minLabel">الصغرى</div><div class="stat-value" id="minValue">--</div></div><div class="stat"><div class="stat-label" id="rainLabel">احتمال الهطول</div><div class="stat-value" id="rainValue">--</div></div><div class="stat"><div class="stat-label" id="uvLabel">مؤشر الأشعة فوق البنفسجية</div><div class="stat-value" id="uvValue">--</div></div>
     </div>
-    <div class="section-title" id="hourlyTitle">توقعات الساعات القادمة</div><div class="hourly" id="hourlyForecast"></div><div class="section-title" id="dailyTitle">توقعات الأيام القادمة</div><div class="daily-list" id="dailyForecast"></div>
+<div class="section-title" id="dailyTitle" style="display:none">توقعات الأيام القادمة</div><div class="daily-list" id="dailyForecast" style="display:none"></div>
   </div>
 </section></div>
 
@@ -386,8 +487,27 @@ function renderWeatherModal(){
     const ic=document.createElement("div");ic.className="hour-icon";ic.textContent=condition(h.weather_code[i]).icon;const te=document.createElement("strong");te.textContent=temp(h.temperature_2m[i]);const ra=document.createElement("div");ra.textContent=(h.precipitation_probability?.[i]??0)+"%";item.append(tm,ic,te,ra);$("hourlyForecast").append(item);
   }
 }
-function openModal(id){previousFocus=document.activeElement;$(id).classList.add("open");if(id==="quranModal"&&!loaded){$("surahIndexGrid").style.display="grid";$("versesView").style.display="none"}if(id==="weatherModal"){const selected=$("weatherDays").querySelector(`[data-day="${selectedWeatherDay}"]`);if(selected){selected.focus({preventScroll:true});scrollWeatherDayIntoView(selected);return}}const first=$(id).querySelector("button:not(:disabled),select,input,.surah-item");first?.focus()}
-function closeModal(id){$(id).classList.remove("open");if(previousFocus?.isConnected)previousFocus.focus()}
+function openModal(id){
+  previousFocus=document.activeElement;
+  $(id).classList.add("open");
+  if(id==="quranModal"&&!loaded){$("surahIndexGrid").style.display="grid";$("versesView").style.display="none"}
+  if(id==="weatherModal"){
+    selectedWeatherDay=0;
+    if(weatherData)renderWeatherModal();
+    const selected=$("weatherDays").querySelector('[data-day="0"]');
+    if(selected){selected.focus({preventScroll:true});scrollWeatherDayIntoView(selected);return}
+  }
+  const first=$(id).querySelector("button:not(:disabled),select,input,.surah-item");
+  first?.focus();
+}
+function closeModal(id){
+  $(id).classList.remove("open");
+  if(id==="weatherModal"&&weatherData){
+    selectedWeatherDay=0;
+    renderWeatherModal();
+  }
+  if(previousFocus?.isConnected)previousFocus.focus();
+}
 function openCityModal(){ $("cityInput").value=city.name;$("cityStatus").textContent="";openModal("cityModal")}
 async function geocodeCity(name){const data=await fetchJSON("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(name.trim())+"&count=1&language="+(lang==="ar"?"ar":lang==="de"?"de":"en")+"&format=json");if(!data.results?.length)throw Error(T[lang].cityNotFound);const f=data.results[0];city={name:f.name,latitude:f.latitude,longitude:f.longitude};localStorage.setItem("zikra_city",city.name);localStorage.setItem("zikra_lat",String(city.latitude));localStorage.setItem("zikra_lon",String(city.longitude));updateCityLabel();await Promise.all([loadPrayerTimes(),loadWeather()])}
 $("locationBtn").addEventListener("click",openCityModal);$("closeCity").addEventListener("click",()=>closeModal("cityModal"));
