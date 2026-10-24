@@ -1,81 +1,15 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#304b3a">
-  <title>ذِكرى — الإعدادات التجريبية</title>
-  <style>
-    :root { color-scheme: light; }
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #f7f4e9; }
-    #settingsCell { display: block; width: 100%; height: 100%; border: 0; background: #f7f4e9; }
-    #loadError { display: none; position: fixed; inset: 0; padding: 24px; align-items: center; justify-content: center; text-align: center; font: 18px/1.8 Arial, sans-serif; color: #304b3a; background: #f7f4e9; }
-    #loadError.show { display: flex; }
-  </style>
-</head>
-<body>
-  <!-- Test harness for CELL 1 only. The legacy app code is intentionally not loaded. -->
-  <iframe id="settingsCell" src="./settings.html" title="إعدادات ذِكرى" allow="geolocation" tabindex="0"></iframe>
-  <div id="loadError" role="alert">تعذّر تحميل خلية الإعدادات. تأكد أن الملف settings.html موجود بجانب index.html.</div>
-  <script>
-  (function () {
-    'use strict';
-    const frame = document.getElementById('settingsCell');
-    const error = document.getElementById('loadError');
-
-    frame.addEventListener('load', function () {
-      try {
-        const doc = frame.contentDocument;
-        if (!doc || !doc.documentElement || !doc.documentElement.innerHTML.trim()) {
-          error.classList.add('show');
-          return;
-        }
-        error.classList.remove('show');
-        // Start keyboard/remote interaction inside the settings cell.
-        frame.focus({ preventScroll: true });
-        const first = doc.querySelector('.view.active button, .view.active select, .view.active input, button');
-        if (first) first.focus({ preventScroll: true });
-      } catch (_) {
-        // Cross-origin restrictions are expected if settings is hosted on another origin.
-        // The iframe remains usable; its own document manages focus internally.
-        frame.focus({ preventScroll: true });
-      }
-    });
-
-    frame.addEventListener('error', function () { error.classList.add('show'); });
-
-    // Keep Back/Escape handling scoped to this test cell. Do not load legacy app handlers.
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' || event.key === 'Backspace' || event.key === 'BrowserBack') {
-        try {
-          const doc = frame.contentDocument;
-          const activeView = doc && doc.querySelector('.view.active');
-          if (activeView && activeView.id !== 'settingsHome') {
-            event.preventDefault();
-            const back = activeView.querySelector('[data-back]');
-            if (back) back.click();
-            return;
-          }
-        } catch (_) {}
-      }
-    }, true);
-
-    window.addEventListener('message', function (event) {
-      if (event.source !== frame.contentWindow || !event.data || typeof event.data.type !== 'string') return;
-      // This test index deliberately supports only the settings cell close message.
-      if (event.data.type === 'zikra-settings-close') {
-        const doc = frame.contentDocument;
-        const home = doc && doc.getElementById('settingsHome');
-        if (home) {
-          doc.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
-          home.classList.add('active');
-          const first = home.querySelector('button');
-          if (first) first.focus({ preventScroll: true });
-        }
-      }
-    });
-  })();
-  </script>
-</body>
-</html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#10231e"><title>ذِكرى | Zikra</title><link rel="stylesheet" href="assets/css/app.css"></head>
+<body class="home"><header class="topbar"><div class="brand"><img src="zikra_icon.png" alt="" onerror="this.style.display='none'"><div><strong>ذِكرى</strong><small>رفيقك للذكر والقرآن</small></div></div><div id="homeClock" class="clock">أهلاً بك</div></header>
+<main id="homeScreen"><section class="hero"><div><p class="eyebrow">السلام عليكم ورحمة الله وبركاته</p><h1>طمأنينةٌ تبدأ بذكر الله</h1><p>قرآن كريم، مواقيت الصلاة، أذكار، وطقس مدينتك في مكان واحد.</p><div class="hero-actions"><button class="primary" data-open="quran">استمع للقرآن <span>▶</span></button><button class="secondary" data-open="prayer">مواقيت الصلاة</button></div></div><div class="hero-art" aria-hidden="true">۞</div></section>
+<section class="section-head"><div><h2>مساحتك اليومية</h2><p>اختر الخدمة باستخدام الريموت أو اللمس</p></div><span class="pill" id="cityBadge">المدينة غير محددة</span></section>
+<section class="tile-grid" aria-label="الخدمات">
+<button class="tile tile-quran" data-open="quran"><span class="tile-icon">☾</span><strong>القرآن الكريم</strong><small>السور والاستماع</small><span class="tile-arrow">←</span></button>
+<button class="tile" data-open="prayer"><span class="tile-icon">◷</span><strong>مواقيت الصلاة</strong><small>المواقيت حسب المدينة</small><span class="tile-arrow">←</span></button>
+<button class="tile" data-open="zikra"><span class="tile-icon">۞</span><strong>الأذكار والمسبحة</strong><small>أذكار يومية وعدّاد</small><span class="tile-arrow">←</span></button>
+<button class="tile" data-open="weather"><span class="tile-icon">☼</span><strong>الطقس</strong><small>حالة الجو والتوقعات</small><span class="tile-arrow">←</span></button>
+<button class="tile" data-open="dua-bar"><span class="tile-icon">❝</span><strong>دعاء اليوم</strong><small>دعاء ومعنى قصير</small><span class="tile-arrow">←</span></button>
+<button class="tile" data-open="settings"><span class="tile-icon">⚙</span><strong>الإعدادات</strong><small>اللغة والمدينة والقارئ</small><span class="tile-arrow">←</span></button>
+</section><footer class="home-footer"><span>﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</span><span>ذِكرى • إصدار تجريبي</span></footer></main>
+<section id="cellScreen" class="cell-screen" hidden><div class="cell-toolbar"><button id="homeButton" class="back-button">→ الرئيسية</button><span id="cellTitle">ذِكرى</span><span class="toolbar-mark">۞</span></div><iframe id="cellFrame" title="محتوى الخلية" src="about:blank"></iframe></section>
+<script src="assets/js/app.js"></script></body></html>

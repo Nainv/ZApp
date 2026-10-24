@@ -97,7 +97,18 @@ jobs:
 
           cp zikra_icon.png app/src/main/res/drawable/zikra_icon.png
           cp zikra_banner.png app/src/main/res/drawable-nodpi/zikra_banner.png
+          # Copy the complete modular web app so relative cell and asset paths work offline in WebView.
           cp index.html app/src/main/assets/index.html
+          test -d cells
+          test -d assets/css
+          test -d assets/js
+          cp -R cells app/src/main/assets/cells
+          cp -R assets app/src/main/assets/assets
+          for asset in zikra_icon.png zikra_logo.png zikra_banner.png favicon.png favicon.ico; do
+            if [[ -f "$asset" ]]; then cp "$asset" app/src/main/assets/; fi
+          done
+          test -s app/src/main/assets/cells/settings.html
+          test -s app/src/main/assets/assets/js/cell-common.js
 
           cat > settings.gradle <<'EOF_SETTINGS'
           pluginManagement {
@@ -146,7 +157,7 @@ jobs:
                   minSdk 23
                   targetSdk 35
                   versionCode generatedVersionCode
-                  versionName '1.0.5'
+                  versionName '1.0.6'
               }
 
               signingConfigs {
@@ -177,7 +188,7 @@ jobs:
           EOF_APP
 
           echo 'Android project prepared.'
-          echo 'Release name: 1.0.5'
+          echo 'Release name: 1.0.6'
           echo "Generated versionCode: $((1000000 + GITHUB_RUN_NUMBER))"
 
       - name: Validate Android Manifest
@@ -260,7 +271,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Update APK in existing v1.0.5 release
+      - name: Update APK in existing v1.0.6 release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -270,13 +281,15 @@ jobs:
           APK='app/build/outputs/apk/release/app-release.apk'
           test -s "$APK"
 
-          if ! gh release view v1.0.5 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo 'ERROR: GitHub Release v1.0.5 does not exist; APK was not published.'
-            exit 1
+          if ! gh release view v1.0.6 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create v1.0.6 "$APK" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title 'Zikra Android TV v1.0.6' \
+              --notes 'Modular UI rebuild: separate settings, weather, prayer, Quran, dhikr, and dua cells.'
+          else
+            gh release upload v1.0.6 "$APK" \
+              --repo "$GITHUB_REPOSITORY" \
+              --clobber
           fi
 
-          gh release upload v1.0.5 "$APK" \
-            --repo "$GITHUB_REPOSITORY" \
-            --clobber
-
-          echo 'Updated app-release.apk in the existing v1.0.5 release.'
+          echo 'Published app-release.apk to GitHub Release v1.0.6.'
