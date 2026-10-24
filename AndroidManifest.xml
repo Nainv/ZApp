@@ -4,6 +4,7 @@
     <!-- Network: optional online data and content updates. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- Location: Android will still ask the user at runtime when the feature is used. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -23,6 +24,15 @@
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:theme="@style/ZikraTheme">
+
+        <provider
+            android:name=".UpdateFileProvider"
+            android:authorities="${applicationId}.updates"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+        <receiver android:name=".UpdateRestartReceiver" android:exported="false">
+            <intent-filter><action android:name="android.intent.action.MY_PACKAGE_REPLACED" /></intent-filter>
+        </receiver>
 
         <activity
             android:name=".MainActivity"

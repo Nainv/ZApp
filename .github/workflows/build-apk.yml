@@ -27,6 +27,13 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Check update source and digest policy
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/zikra-update-tests"
+          javac -d "$RUNNER_TEMP/zikra-update-tests" UpdatePolicy.java tests/UpdatePolicyTest.java
+          java -cp "$RUNNER_TEMP/zikra-update-tests" com.zikra.tv.UpdatePolicyTest
+
       - name: Set up Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -103,6 +110,9 @@ jobs:
           fi
 
           test -s "app/src/main/java/com/zikra/tv/MainActivity.java"
+          for SOURCE in AppUpdater UpdatePolicy UpdateFileProvider UpdateRestartReceiver; do
+            cp "./$SOURCE.java" "app/src/main/java/com/zikra/tv/$SOURCE.java"
+          done
           test -s "app/src/main/AndroidManifest.xml"
 
           if [[ -s "./zikra_icon.png" ]]; then
@@ -302,12 +312,21 @@ jobs:
 
           "$APKSIGNER" verify --verbose "$APK"
           echo 'APK signature verified.'
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          apk = Path('app/build/outputs/apk/release/app-release.apk')
+          manifest = dict(packageName='com.zikra.tv', versionCode=1000000 + int(os.environ['GITHUB_RUN_NUMBER']), versionName='1.0.5', apkName=apk.name, sha256=hashlib.sha256(apk.read_bytes()).hexdigest())
+          apk.with_name('update.json').write_text(json.dumps(manifest), encoding='utf-8')
+          PY
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: zikra-android-tv-apk
-          path: app/build/outputs/apk/release/app-release.apk
+          path: |
+            app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/apk/release/update.json
           if-no-files-found: error
           retention-days: 7
 
@@ -326,7 +345,7 @@ jobs:
             exit 1
           fi
 
-          gh release upload v1.0.5 "$APK" \
+          gh release upload v1.0.5 "$APK" 'app/build/outputs/apk/release/update.json' \
             --repo "$GITHUB_REPOSITORY" \
             --clobber
 

@@ -50,9 +50,11 @@ public class MainActivity extends Activity {
     private static final String TAG = "ZikraRemote";
     private boolean pageReady = false;
     private static final int LOCATION_PERMISSION_REQUEST = 4101;
+    private AppUpdater appUpdater;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        appUpdater = new AppUpdater(this);
         if (Build.VERSION.SDK_INT >= 33) getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::sendBackToWeb);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         hideSystemBars();
@@ -193,6 +195,8 @@ public class MainActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
     }
     private class AndroidBridge {
+        @JavascriptInterface public void updateApp() { if (appUpdater != null) appUpdater.start(); }
+        @JavascriptInterface public String getUpdateState() { return appUpdater == null ? "{}" : appUpdater.getState(); }
         @JavascriptInterface public String getLegacyStorage() { return getPreferences(MODE_PRIVATE).getString("legacyStorage", "{}"); }
         @JavascriptInterface public void exitApp() { runOnUiThread(() -> finish()); }
         // Call this from JavaScript only when the user selects a location-based feature.
@@ -210,6 +214,7 @@ public class MainActivity extends Activity {
     }
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == AppUpdater.INSTALL_REQUEST && appUpdater != null) appUpdater.onInstallResult(resultCode);
         if (requestCode == OPEN_TIMETABLE_REQUEST && fileResult != null) {
             fileResult.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
             fileResult = null;
@@ -361,12 +366,17 @@ public class MainActivity extends Activity {
         super.onResume();
         hideSystemBars();
         if (webView != null) webView.onResume();
+        if (appUpdater != null) appUpdater.onResume();
+    }
+    public void deliverUpdateState(String json) {
+        if (webView == null || !pageReady) return;
+        webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:app-update',{detail:JSON.parse(" + org.json.JSONObject.quote(json) + ")}));", null);
     }
     @Override public void onBackPressed() { sendBackToWeb(); }
-    @Override protected void onPause() { if (webView != null) webView.onPause(); super.onPause(); }
+    @Override protected void onPause() { if (appUpdater != null) appUpdater.onPause(); if (webView != null) webView.onPause(); super.onPause(); }
     @Override protected void onSaveInstanceState(Bundle outState) {
         // The bundled page is loaded on creation; don't restore a stale remote page state.
         super.onSaveInstanceState(outState);
     }
-    @Override protected void onDestroy() { if (webView != null) { webView.stopLoading(); webView.destroy(); webView = null; } super.onDestroy(); }
+    @Override protected void onDestroy() { if (appUpdater != null) appUpdater.close(); if (webView != null) { webView.stopLoading(); webView.destroy(); webView = null; } super.onDestroy(); }
 }

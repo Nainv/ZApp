@@ -8,6 +8,7 @@
   function context(){return {preferences:preferences(),prayer:window.zikraPrayerSnapshot?.()||{zone:prayerTimeZone,date:prayerDataDate,timings:prayerTimesObj,schedule:prayerSchedule},weather:weatherData}}
   function send(target,type='zikra:context'){target?.contentWindow?.postMessage({type,...context()},'*')}
   window.zikraBroadcastContext=()=>frames.forEach(target=>send(target));
+  window.addEventListener('zikra:app-update',event=>frames.get('settings')?.contentWindow?.postMessage({type:'zikra:app-update-state',state:event.detail},'*'));
   function ensureOverlay(){if(overlay)return;overlay=document.createElement('div');overlay.id='zikraCellOverlay';overlay.hidden=true;overlay.style.cssText='position:fixed;inset:0;z-index:30000;background:#101b23;overflow:hidden';document.body.append(overlay)}
   function openCell(id,trigger){
     if(id==='quran'){openModal('quranModal');return}

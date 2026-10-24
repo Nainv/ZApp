@@ -19,3 +19,13 @@ Automatic retrieval of MAWAQIT mosque timetables is not implemented. MAWAQIT's o
 Run `node --test tests/prayer-model.test.cjs` for DST conversion, day rollover, prayer boundaries, missing official data, and timetable import validation. Browser integration checks should cover independent cell origins, identical displayed times, save acknowledgments, Back, frame reuse, and a 960×540 TV viewport. These checks do not establish performance on physical televisions. Native origin migration, D-pad delivery, file selection, and Android permission flows require device/emulator validation.
 
 The current deliverable is an Android package and a browser interface. Apple, Samsung Tizen, and LG webOS packaging/store publication remain separate platform work.
+
+## In-app updates
+
+The settings footer has a two-column Update action on the right and Save on the left. Update first saves any pending settings without closing the panel. Android queries this repository's latest stable GitHub release, checks `update.json`, and downloads `app-release.apk` only when a newer build is available. The release workflow publishes the APK and its version code / SHA-256 manifest together.
+
+The native updater streams to private storage, limits size/redirects/timeouts, validates the SHA-256 digest, package name, newer version code, and the installed signing certificate before handing the APK to Android's installer through a read-only single-file content provider. Downloading and verification run off the UI thread. No generic URL-download or arbitrary-file bridge is exposed.
+
+Android may require the user to allow Zikra as an installation source and confirm installation. A protected package-replaced receiver attempts to reopen only an update initiated through this button, with an expiring version marker. Android/OEM background launch restrictions can require pressing Open or reopening the app manually. Browser previews can download an APK but cannot install or restart an Android application.
+
+`tests/UpdatePolicyTest.java` exercises HTTPS/source restrictions, lookalike/redirect hosts, traversal, and digest checks. CI compiles and runs it with Java 17 before building Android. Browser checks exercise save-before-update acknowledgment, progress forwarding, duplicate-request prevention, retry state, and remote navigation. Actual installer permission, install/cancel, and post-update reopening still require physical-device or emulator validation.
