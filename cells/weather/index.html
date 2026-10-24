@@ -1,331 +1,443 @@
-function condition(code){
-  const c=T[lang].conditions;
-  if(code===0)return{text:c.clear,icon:"☀️",cls:"sunny"};
-  if(code===1)return{text:c.mainly,icon:"🌤️",cls:"sunny"};
-  if(code===2)return{text:c.partly,icon:"⛅",cls:"cloudy"};
-  if(code===3)return{text:c.cloudy,icon:"☁️",cls:"cloudy"};
-  if([45,48].includes(code))return{text:c.fog,icon:"🌫️",cls:"cloudy"};
-  if([51,53,55,56,57].includes(code))return{text:c.drizzle,icon:"🌦️",cls:"rainy"};
-  if([61,63,65,66,67,80,81,82].includes(code))return{text:c.rain,icon:"🌧️",cls:"rainy"};
-  if([71,73,75,77,85,86].includes(code))return{text:c.snow,icon:"❄️",cls:"snowy"};
-  if([95,96,99].includes(code))return{text:c.storm,icon:"⛈️",cls:"storm"};
-  return{text:c.other,icon:"🌥️",cls:"cloudy"};
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ذِكرى | أوقات الصلاة</title>
+
+<style>
+:root {
+  --green: #496d55;
+  --dark: #243b2d;
+  --gold: #d6b66e;
+  --cream: #f7f5eb;
 }
 
-function weatherIcon(code){
-  const c=condition(code),h=new Date().getHours();
-  return(h>=20||h<6)&&c.cls==="sunny"?"🌙":c.icon;
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(ellipse at 50% 20%, #e7eddf, transparent 65%),
+    #f5f2e7;
+  color: var(--dark);
+  font-family: Arial, sans-serif;
 }
 
-const temp=v=>v==null?"--":Math.round(v)+"°";
+.prayer-cell {
+  width: min(1100px, 96vw);
+  padding: 24px;
+}
 
-async function loadWeather(){
-  $("weatherCondition").textContent=T[lang].loading;
-  try{
-    weatherData=await fetchJSON(
-      `https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=auto&forecast_days=14`
-    );
-    renderWeather();
-  }catch(e){
-    $("weatherCondition").textContent=T[lang].unavailable;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(23px, 3vw, 34px);
+}
+
+.header p {
+  margin: 7px 0 0;
+  color: #778276;
+  font-size: 15px;
+}
+
+.status {
+  border: 1px solid #d9dfd0;
+  border-radius: 30px;
+  padding: 9px 15px;
+  background: #ffffffa8;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.prayer-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  direction: rtl;
+}
+
+.prayer {
+  position: relative;
+  min-width: 0;
+  min-height: 190px;
+  padding: 19px 7px;
+  border: 2px solid #e1e3d7;
+  border-radius: 19px;
+  background: #fffdf7;
+  color: var(--dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  transform: scale(1);
+  transition:
+    transform .2s ease,
+    background .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+.prayer-icon {
+  font-size: 29px;
+  line-height: 1;
+}
+
+.prayer-name {
+  font-size: clamp(14px, 1.5vw, 19px);
+  font-weight: 700;
+}
+
+.prayer-time {
+  font-size: clamp(17px, 1.8vw, 22px);
+  font-weight: 700;
+  direction: ltr;
+}
+
+.prayer-countdown {
+  font-size: 12px;
+  color: #758174;
+  direction: ltr;
+  min-height: 15px;
+}
+
+/* الصلاة القادمة */
+.prayer.next-prayer {
+  background: linear-gradient(155deg, #496d55, #304b3a);
+  border-color: var(--gold);
+  color: white;
+  box-shadow: 0 8px 24px #304b3a25;
+}
+
+.next-prayer .prayer-countdown {
+  color: #f3dfaa;
+}
+
+.next-label {
+  display: none;
+  font-size: 11px;
+  color: #f3dfaa;
+  font-weight: bold;
+}
+
+.next-prayer .next-label {
+  display: block;
+}
+
+/* التركيز والتحكم بالريموت */
+.prayer:focus,
+.prayer.selected {
+  outline: none;
+  z-index: 2;
+  transform: scale(1.07);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px #d6b66e55, 0 12px 28px #243b2d22;
+}
+
+.prayer.next-prayer:focus,
+.prayer.next-prayer.selected {
+  box-shadow: 0 0 0 4px #d6b66e88, 0 12px 28px #243b2d30;
+}
+
+.footer {
+  margin-top: 22px;
+  padding: 17px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  border: 1px solid #e1e3d7;
+  border-radius: 16px;
+  background: #ffffffa8;
+}
+
+.footer-title {
+  font-size: 14px;
+  color: #788276;
+}
+
+#nextPrayerName {
+  margin-top: 5px;
+  font-size: 21px;
+  font-weight: bold;
+}
+
+#mainCountdown {
+  font-size: clamp(23px, 3vw, 34px);
+  font-weight: bold;
+  direction: ltr;
+  color: var(--green);
+}
+
+.help {
+  margin-top: 14px;
+  text-align: center;
+  color: #7b8477;
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .prayer-cell { padding: 12px; }
+  .prayer-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 12px;
   }
+  .prayer { min-height: 145px; }
+  .footer { flex-wrap: wrap; }
 }
 
-function renderWeather(){
-  if(!weatherData)return;
+@media (prefers-reduced-motion: reduce) {
+  .prayer { transition: none; }
+}
+</style>
+</head>
 
-  const d=weatherData,c=d.current,desc=condition(c.weather_code);
-  const card=$("weatherCard"),panel=$("datePanel");
-  const effects=$("weatherTileEffects"),hour=new Date().getHours();
-  const isNight=(hour>=20||hour<6)&&
-    !["rainy","snowy","storm"].includes(desc.cls);
-  const cardScene=isNight?"night":desc.cls;
+<body>
+<main class="prayer-cell">
 
-  document.body.classList.remove(
-    "weather-theme-sunny","weather-theme-cloudy",
-    "weather-theme-rainy","weather-theme-snowy",
-    "weather-theme-storm","weather-theme-night"
-  );
-  document.body.classList.add("weather-theme-"+cardScene);
+  <header class="header">
+    <div>
+      <h1>🕌 أوقات الصلاة</h1>
+      <p id="todayDate">ذِكرى — مواقيت اليوم</p>
+    </div>
+    <div class="status" id="status">الصلاة القادمة</div>
+  </header>
 
-  panel.className="date-panel weather-unified "+cardScene;
-  panel.setAttribute("aria-label",
-    lang==="ar"?"فتح لوحة الطقس":
-    lang==="de"?"Wettervorhersage öffnen":"Open weather forecast"
-  );
-  card.className="date-weather-widget";
-  effects.replaceChildren();
+  <section class="prayer-strip" id="prayerStrip"
+           aria-label="بطاقات أوقات الصلاة">
 
-  if(["rainy","storm"].includes(cardScene)){
-    const count=cardScene==="storm"?112:84;
-    for(let i=0;i<count;i++){
-      const drop=document.createElement("span");
-      drop.className="tile-rain-drop";
-      drop.style.left=((i*43+7)%100)+"%";
-      drop.style.setProperty("--tile-rain-delay",(-((i*11)%31)/10)+"s");
-      drop.style.setProperty(
-        "--tile-rain-duration",
-        (cardScene==="storm"?.43:.67)+((i*7)%38)/100+"s"
-      );
-      drop.style.opacity=String(.42+((i*13)%48)/100);
-      effects.append(drop);
-    }
-  }else if(cardScene==="snowy"){
-    for(let i=0;i<30;i++){
-      const flake=document.createElement("span");
-      flake.className="tile-snow-flake";
-      flake.textContent="❄";
-      flake.style.left=((i*29+5)%100)+"%";
-      flake.style.setProperty("--tile-snow-delay",(-((i*7)%35)/10)+"s");
-      flake.style.setProperty("--tile-snow-duration",(2.7+((i*5)%28)/10)+"s");
-      effects.append(flake);
-    }
-  }else if(cardScene==="cloudy"){
-    for(let i=0;i<6;i++){
-      const cloud=document.createElement("span");
-      cloud.className="tile-cloud";
-      cloud.style.left=((i*19+4)%92)+"%";
-      cloud.style.top=(8+(i%3)*31)+"%";
-      cloud.style.opacity=String(.3+(i%4)*.12);
-      cloud.style.animationDelay=(-i*1.6)+"s";
-      effects.append(cloud);
-    }
-  }else if(cardScene==="night"){
-    for(let i=0;i<24;i++){
-      const star=document.createElement("span");
-      star.className="tile-star";
-      star.style.left=((i*31+6)%98)+"%";
-      star.style.top=((i*19+7)%84)+"%";
-      star.style.animationDelay=(-i*.23)+"s";
-      effects.append(star);
-    }
-  }else if(cardScene==="sunny"){
-    for(let i=0;i<5;i++){
-      const glint=document.createElement("span");
-      glint.className="tile-sun-glint";
-      glint.style.left=(60+i*7)+"%";
-      glint.style.top=(10+(i%3)*22)+"%";
-      glint.style.animationDelay=(-i*.45)+"s";
-      effects.append(glint);
-    }
+    <button class="prayer focusable" data-prayer="Fajr">
+      <span class="prayer-icon">🌙</span>
+      <span class="prayer-name">الفجر</span>
+      <span class="prayer-time" id="time-Fajr">05:00</span>
+      <span class="next-label">الصلاة القادمة</span>
+      <span class="prayer-countdown" id="cd-Fajr"></span>
+    </button>
+
+    <button class="prayer focusable" data-prayer="Dhuhr">
+      <span class="prayer-icon">☀️</span>
+      <span class="prayer-name">الظهر</span>
+      <span class="prayer-time" id="time-Dhuhr">12:30</span>
+      <span class="next-label">الصلاة القادمة</span>
+      <span class="prayer-countdown" id="cd-Dhuhr"></span>
+    </button>
+
+    <button class="prayer focusable" data-prayer="Asr">
+      <span class="prayer-icon">🌤️</span>
+      <span class="prayer-name">العصر</span>
+      <span class="prayer-time" id="time-Asr">15:45</span>
+      <span class="next-label">الصلاة القادمة</span>
+      <span class="prayer-countdown" id="cd-Asr"></span>
+    </button>
+
+    <button class="prayer focusable" data-prayer="Maghrib">
+      <span class="prayer-icon">🌅</span>
+      <span class="prayer-name">المغرب</span>
+      <span class="prayer-time" id="time-Maghrib">18:30</span>
+      <span class="next-label">الصلاة القادمة</span>
+      <span class="prayer-countdown" id="cd-Maghrib"></span>
+    </button>
+
+    <button class="prayer focusable" data-prayer="Isha">
+      <span class="prayer-icon">🌌</span>
+      <span class="prayer-name">العشاء</span>
+      <span class="prayer-time" id="time-Isha">20:00</span>
+      <span class="next-label">الصلاة القادمة</span>
+      <span class="prayer-countdown" id="cd-Isha"></span>
+    </button>
+
+    <button class="prayer focusable" data-prayer="Sunrise">
+      <span class="prayer-icon">🌄</span>
+      <span class="prayer-name">الشروق</span>
+      <span class="prayer-time" id="time-Sunrise">06:45</span>
+      <span class="next-label">الشروق</span>
+      <span class="prayer-countdown" id="cd-Sunrise"></span>
+    </button>
+
+  </section>
+
+  <section class="footer">
+    <div>
+      <div class="footer-title">الوقت المتبقي للصلاة القادمة</div>
+      <div id="nextPrayerName">—</div>
+    </div>
+    <div id="mainCountdown">--:--:--</div>
+  </section>
+
+  <div class="help">
+    التحكم بالريموت: الأسهم للتنقل · OK للتحديد · Back للخروج من التركيز
+  </div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const prayers = [
+    { id: "Fajr", name: "الفجر" },
+    { id: "Sunrise", name: "الشروق" },
+    { id: "Dhuhr", name: "الظهر" },
+    { id: "Asr", name: "العصر" },
+    { id: "Maghrib", name: "المغرب" },
+    { id: "Isha", name: "العشاء" }
+  ];
+
+  const cards = [...document.querySelectorAll(".prayer")];
+  const strip = document.getElementById("prayerStrip");
+  let nextId = null;
+
+  // الأوقات هنا تجريبية؛ اربطها بمصدر مواقيت مدينتك لاحقاً.
+  function getPrayerDate(id, baseDate = new Date()) {
+    const text = document.getElementById("time-" + id).textContent.trim();
+    const match = text.match(/^(\d{1,2}):(\d{2})$/);
+
+    if (!match) return null;
+
+    const date = new Date(baseDate);
+    date.setHours(Number(match[1]), Number(match[2]), 0, 0);
+    return date;
   }
 
-  $("weatherIcon").textContent=weatherIcon(c.weather_code);
-  $("weatherTemp").textContent=temp(c.temperature_2m);
-  $("weatherCondition").textContent=desc.text;
-  $("weatherExtra").textContent=
-    `↑ ${temp(d.daily.temperature_2m_max[0])} ↓ ${temp(d.daily.temperature_2m_min[0])} · ${T[lang].feels}: ${temp(c.apparent_temperature)}`;
-
-  renderWeatherModal();
-}
-
-function weatherSceneClass(code,dateString){
-  const info=condition(code);
-  const today=new Date().toISOString().slice(0,10);
-  const night=dateString===today&&
-    (new Date().getHours()>=20||new Date().getHours()<6);
-
-  return night&&!["rainy","snowy","storm"].includes(info.cls)
-    ?"night":info.cls;
-}
-
-function scrollWeatherDayIntoView(button){
-  if(!button)return;
-  const box=$("weatherDays");
-  const targetLeft=button.offsetLeft-box.offsetLeft-
-    (box.clientWidth-button.offsetWidth)/2;
-
-  box.scrollTo({
-    left:Math.max(0,Math.min(box.scrollWidth-box.clientWidth,targetLeft)),
-    behavior:"smooth"
-  });
-}
-
-function selectWeatherDay(index,focusButton=true){
-  if(!weatherData?.daily)return;
-
-  selectedWeatherDay=Math.max(
-    0,Math.min(index,weatherData.daily.time.length-1)
-  );
-  renderWeatherModal();
-
-  const button=$("weatherDays").querySelector(
-    `[data-day="${selectedWeatherDay}"]`
-  );
-
-  if(focusButton){
-    button?.focus({preventScroll:true});
-    scrollWeatherDayIntoView(button);
+  function formatRemaining(ms) {
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const hours = String(Math.floor(total / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+    const seconds = String(total % 60).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
   }
-}
 
-function renderWeatherDays(){
-  if(!weatherData?.daily)return;
+  function findNextPrayer(now) {
+    // الشروق ليس صلاة مفروضة، لذلك لا يظهر كالصلاة القادمة.
+    const prayerIds = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
-  const d=weatherData.daily;
-  const locale=lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB";
-  const box=$("weatherDays");
-  box.replaceChildren();
+    for (const id of prayerIds) {
+      const date = getPrayerDate(id, now);
+      if (date && date > now) return { id, date };
+    }
 
-  d.time.forEach((date,i)=>{
-    const dayDate=new Date(date+"T12:00:00");
-    const label=i===0?T[lang].today:
-      i===1?T[lang].tomorrow:
-      new Intl.DateTimeFormat(locale,{weekday:"short"}).format(dayDate);
+    // بعد العشاء، صلاة الفجر القادمة هي في اليوم التالي.
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const b=document.createElement("button");
-    b.type="button";
-    b.className="weather-day"+(i===selectedWeatherDay?" selected":"");
-    b.dataset.day=String(i);
-    b.setAttribute("role","option");
-    b.setAttribute("aria-selected",String(i===selectedWeatherDay));
+    const fajr = getPrayerDate("Fajr", tomorrow);
+    return fajr ? { id: "Fajr", date: fajr } : null;
+  }
 
-    const name=document.createElement("span");
-    name.textContent=label;
+  function updatePrayerTimes() {
+    const now = new Date();
+    const next = findNextPrayer(now);
 
-    const icon=document.createElement("span");
-    icon.className="day-icon";
-    icon.textContent=condition(d.weather_code[i]).icon;
+    document.getElementById("todayDate").textContent =
+      new Intl.DateTimeFormat("ar", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }).format(now);
 
-    const range=document.createElement("span");
-    range.className="day-range";
-    range.textContent=
-      temp(d.temperature_2m_min[i])+" / "+temp(d.temperature_2m_max[i]);
+    cards.forEach(card => {
+      card.classList.remove("next-prayer");
 
-    b.append(name,icon,range);
-    b.addEventListener("click",()=>selectWeatherDay(i,true));
-    box.append(b);
-  });
-}
+      const id = card.dataset.prayer;
+      const countdown = document.getElementById("cd-" + id);
+      const date = getPrayerDate(id, now);
 
-function renderWeatherModal(){
-  if(!weatherData)return;
-
-  const d=weatherData,c=d.current,t=T[lang],daily=d.daily;
-  const idx=Math.max(0,Math.min(selectedWeatherDay,daily.time.length-1));
-  const date=daily.time[idx],isToday=idx===0;
-  const code=daily.weather_code[idx],desc=condition(code);
-
-  $("weatherTitle").textContent=
-    lang==="ar"?"الطقس والتوقعات":
-    lang==="de"?"Wetter und Vorhersage":"Weather forecast";
-
-  $("daysTitle").textContent=
-    lang==="ar"?"الأيام القادمة":
-    lang==="de"?"Die nächsten Tage":"Coming days";
-
-  $("detailsTitle").textContent=
-    lang==="ar"?"تفاصيل اليوم":
-    lang==="de"?"Tagesdetails":"Day details";
-
-  $("weatherSelectedDate").textContent=
-    new Intl.DateTimeFormat(
-      lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",
-      {weekday:"long",day:"numeric",month:"long"}
-    ).format(new Date(date+"T12:00:00"));
-
-  $("modalIcon").textContent=
-    condition(isToday?c.weather_code:code).icon;
-
-  $("modalTemp").textContent=
-    isToday?temp(c.temperature_2m):temp(daily.temperature_2m_max[idx]);
-
-  $("modalCondition").textContent=desc.text;
-
-  $("modalFeels").textContent=isToday
-    ?`${t.feels}: ${temp(c.apparent_temperature)}`
-    :(lang==="ar"?"العظمى / الصغرى: ":
-      lang==="de"?"Höchst-/Tiefstwert: ":"High / low: ")+
-      temp(daily.temperature_2m_max[idx])+" / "+
-      temp(daily.temperature_2m_min[idx]);
-
-  const scene=$("weatherScene");
-  const sceneClass="weather-scene "+weatherSceneClass(code,date);
-
-  if(scene.className!==sceneClass){
-    scene.className=sceneClass;
-    scene.replaceChildren();
-
-    if(["rainy","storm"].includes(sceneClass.replace("weather-scene ",""))){
-      const count=sceneClass.endsWith("storm")?42:32;
-
-      for(let i=0;i<count;i++){
-        const drop=document.createElement("span");
-        drop.className="rain-drop";
-        drop.style.left=((i*37+9)%100)+"%";
-        drop.style.setProperty("--rain-delay",(-((i*17)%29)/10)+"s");
-        drop.style.setProperty(
-          "--rain-duration",
-          (sceneClass.endsWith("storm")?.48:.72)+((i*13)%42)/100+"s"
-        );
-        drop.style.opacity=String(.42+((i*7)%50)/100);
-        scene.append(drop);
+      if (id === "Sunrise") {
+        countdown.textContent = "";
+        return;
       }
-    }else if(sceneClass.endsWith("snowy")){
-      for(let i=0;i<32;i++){
-        const flake=document.createElement("span");
-        flake.className="modal-snow-flake";
-        flake.textContent="❄";
-        flake.style.left=((i*31+4)%100)+"%";
-        flake.style.setProperty("--rain-delay",(-((i*13)%35)/10)+"s");
-        flake.style.setProperty("--snow-duration",(3+((i*7)%30)/10)+"s");
-        scene.append(flake);
+
+      if (next && id === next.id) {
+        card.classList.add("next-prayer");
+        countdown.textContent = formatRemaining(next.date - now);
+      } else if (date && date > now) {
+        countdown.textContent = "";
+      } else {
+        countdown.textContent = "";
       }
+    });
+
+    if (next) {
+      const name = prayers.find(p => p.id === next.id)?.name || "";
+      document.getElementById("nextPrayerName").textContent = name;
+      document.getElementById("mainCountdown").textContent =
+        formatRemaining(next.date - now);
+      document.getElementById("status").textContent = "القادمة: " + name;
+      nextId = next.id;
     }
   }
 
-  [["humidityLabel","humidity"],["windLabel","wind"],
-   ["maxLabel","max"],["minLabel","min"],
-   ["rainLabel","rain"],["uvLabel","uv"]]
-    .forEach(([id,k])=>$(id).textContent=t[k]);
-
-  $("humidityValue").textContent=isToday?c.relative_humidity_2m+"%":"—";
-  $("windValue").textContent=isToday?Math.round(c.wind_speed_10m)+" km/h":"—";
-  $("maxValue").textContent=temp(daily.temperature_2m_max[idx]);
-  $("minValue").textContent=temp(daily.temperature_2m_min[idx]);
-  $("rainValue").textContent=(daily.precipitation_probability_max?.[idx]??0)+"%";
-  $("uvValue").textContent=daily.uv_index_max?.[idx]??"--";
-
-  $("hourlyTitle").textContent=t.hourly;
-  $("dailyTitle").textContent=t.daily;
-  renderWeatherDays();
-
-  const h=d.hourly,now=new Date();
-  let start=isToday
-    ?h.time.findIndex(x=>new Date(x)>=now)
-    :h.time.findIndex(x=>x.slice(0,10)===date);
-
-  if(start<0)start=0;
-
-  $("hourlyForecast").replaceChildren();
-
-  for(let i=start;
-      i<Math.min(start+(isToday?12:24),h.time.length)&&
-      h.time[i].slice(0,10)===date;
-      i++){
-
-    const item=document.createElement("div");
-    item.className="hour";
-    item.tabIndex=0;
-    item.setAttribute("role","group");
-
-    const tm=document.createElement("div");
-    tm.textContent=new Intl.DateTimeFormat(
-      lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB",
-      {hour:"2-digit",minute:"2-digit"}
-    ).format(new Date(h.time[i]));
-
-    const ic=document.createElement("div");
-    ic.className="hour-icon";
-    ic.textContent=condition(h.weather_code[i]).icon;
-
-    const te=document.createElement("strong");
-    te.textContent=temp(h.temperature_2m[i]);
-
-    const ra=document.createElement("div");
-    ra.textContent=(h.precipitation_probability?.[i]??0)+"%";
-
-    item.append(tm,ic,te,ra);
-    $("hourlyForecast").append(item);
+  // التركيز الافتراضي على أول بطاقة.
+  function focusFirstCard() {
+    const current = document.activeElement;
+    if (!cards.includes(current)) cards[0]?.focus();
   }
-}
+
+  cards.forEach(card => {
+    card.addEventListener("click", () => {
+      cards.forEach(item => item.classList.remove("selected"));
+      card.classList.add("selected");
+      card.focus();
+    });
+
+    card.addEventListener("focus", () => {
+      cards.forEach(item => item.classList.remove("selected"));
+      card.classList.add("selected");
+    });
+
+    card.addEventListener("blur", () => {
+      card.classList.remove("selected");
+    });
+  });
+
+  // أسهم الريموت: يمين ويسار بين البطاقات.
+  document.addEventListener("keydown", event => {
+    const currentIndex = cards.indexOf(document.activeElement);
+    if (currentIndex < 0) return;
+
+    let targetIndex = currentIndex;
+
+    if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+      targetIndex = Math.min(cards.length - 1, currentIndex + 1);
+    } else if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+      targetIndex = Math.max(0, currentIndex - 1);
+    } else if (event.key === "Escape" || event.key === "Backspace") {
+      cards[currentIndex].blur();
+      return;
+    } else if (event.key === "Enter" || event.key === " ") {
+      // OK يحدد البطاقة؛ لا يفتح إعدادات أو صفحات إضافية.
+      cards[currentIndex].classList.add("selected");
+      event.preventDefault();
+      return;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    cards[targetIndex]?.focus();
+  });
+
+  updatePrayerTimes();
+  setInterval(updatePrayerTimes, 1000);
+
+  // تركيز أولي لتسهيل التجربة على التلفزيون.
+  window.addEventListener("load", () => {
+    setTimeout(focusFirstCard, 100);
+  });
+})();
+</script>
+</body>
+</html>
