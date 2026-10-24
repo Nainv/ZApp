@@ -1,3 +1,4 @@
+
 name: Build Zikra Android TV APK
 
 on:
@@ -35,27 +36,37 @@ jobs:
         run: |
           set -euo pipefail
 
+          echo "Repository directory: $PWD"
+
           mkdir -p app/src/main/java/com/zikra/tv
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/drawable
           mkdir -p app/src/main/res/drawable-nodpi
           mkdir -p app/src/main/assets
 
-          if [[ -f MainActivity.java ]]; then
-            cp MainActivity.java app/src/main/java/com/zikra/tv/MainActivity.java
-          elif [[ ! -s app/src/main/java/com/zikra/tv/MainActivity.java ]]; then
-            echo 'ERROR: MainActivity.java is missing.'
+          if [[ -s "./MainActivity.java" ]]; then
+            cp "./MainActivity.java" "app/src/main/java/com/zikra/tv/MainActivity.java"
+          elif [[ -s "./app/src/main/java/com/zikra/tv/MainActivity.java" ]]; then
+            echo "Using existing MainActivity.java"
+          else
+            echo "ERROR: MainActivity.java not found."
+            echo "Current directory:"
+            pwd
+            echo "Java files found:"
+            find . -type f -name 'MainActivity.java' -print
             exit 1
           fi
 
-          if [[ -f AndroidManifest.xml ]]; then
-            cp AndroidManifest.xml app/src/main/AndroidManifest.xml
-          elif [[ ! -s app/src/main/AndroidManifest.xml ]]; then
+          if [[ -f "./AndroidManifest.xml" ]]; then
+            cp "./AndroidManifest.xml" "app/src/main/AndroidManifest.xml"
+          elif [[ ! -s "./app/src/main/AndroidManifest.xml" ]]; then
             cat > app/src/main/AndroidManifest.xml <<'EOF_MANIFEST'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET" />
               <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
               <uses-feature android:name="android.software.leanback" android:required="false" />
               <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
               <application
@@ -69,7 +80,6 @@ jobs:
                   <activity
                       android:name=".MainActivity"
                       android:exported="true"
-                      android:screenOrientation="landscape"
                       android:configChanges="orientation|screenSize|keyboardHidden">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -85,19 +95,45 @@ jobs:
           EOF_MANIFEST
           fi
 
-          if [[ -f styles.xml ]]; then
-            cp styles.xml app/src/main/res/values/styles.xml
+          if [[ -f "./styles.xml" ]]; then
+            cp "./styles.xml" "app/src/main/res/values/styles.xml"
           fi
 
-          test -s app/src/main/java/com/zikra/tv/MainActivity.java
-          test -s app/src/main/AndroidManifest.xml
-          test -s zikra_icon.png
-          test -s zikra_banner.png
-          test -s index.html
+          test -s "app/src/main/java/com/zikra/tv/MainActivity.java"
+          test -s "app/src/main/AndroidManifest.xml"
 
-          cp zikra_icon.png app/src/main/res/drawable/zikra_icon.png
-          cp zikra_banner.png app/src/main/res/drawable-nodpi/zikra_banner.png
-          cp index.html app/src/main/assets/index.html
+          if [[ -s "./zikra_icon.png" ]]; then
+            cp "./zikra_icon.png" "app/src/main/res/drawable/zikra_icon.png"
+          elif [[ ! -s "app/src/main/res/drawable/zikra_icon.png" ]]; then
+            echo "ERROR: zikra_icon.png not found."
+            find . -type f -iname '*zikra*icon*.png' -print
+            exit 1
+          fi
+
+          if [[ -s "./zikra_banner.png" ]]; then
+            cp "./zikra_banner.png" "app/src/main/res/drawable-nodpi/zikra_banner.png"
+          elif [[ ! -s "app/src/main/res/drawable-nodpi/zikra_banner.png" ]]; then
+            echo "ERROR: zikra_banner.png not found."
+            find . -type f -iname '*zikra*banner*.png' -print
+            exit 1
+          fi
+
+          if [[ ! -s "./index.html" ]]; then
+            echo "ERROR: index.html not found in repository root."
+            find . -maxdepth 5 -type f -name 'index.html' -print
+            exit 1
+          fi
+
+          cp "./index.html" "app/src/main/assets/index.html"
+
+          # Include supporting web resources for the bundled WebView.
+          if [[ -d "./assets" ]]; then
+            cp -R "./assets/." "app/src/main/assets/"
+          fi
+
+          if [[ -d "./cells" ]]; then
+            cp -R "./cells" "app/src/main/assets/"
+          fi
 
           cat > settings.gradle <<'EOF_SETTINGS'
           pluginManagement {
@@ -135,6 +171,7 @@ jobs:
           if (runNumber == null || !runNumber.isInteger()) {
               throw new GradleException('GITHUB_RUN_NUMBER is missing or invalid')
           }
+
           def generatedVersionCode = 1000000 + runNumber.toInteger()
 
           android {
@@ -157,7 +194,9 @@ jobs:
                       def keyPass = System.getenv('ANDROID_KEY_PASSWORD')
 
                       if (!keystorePath || !storePass || !aliasName || !keyPass) {
-                          throw new GradleException('One or more Android signing environment variables are missing')
+                          throw new GradleException(
+                              'One or more Android signing environment variables are missing'
+                          )
                       }
 
                       storeFile file(keystorePath)
@@ -176,8 +215,8 @@ jobs:
           }
           EOF_APP
 
-          echo 'Android project prepared.'
-          echo 'Release name: 1.0.5'
+          echo "Android project prepared."
+          echo "Release name: 1.0.5"
           echo "Generated versionCode: $((1000000 + GITHUB_RUN_NUMBER))"
 
       - name: Validate Android Manifest
