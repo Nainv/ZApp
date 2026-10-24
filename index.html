@@ -1003,8 +1003,8 @@ function moveDirectionalFocus(direction){
   target.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});
 }
 
-window.handleAndroidDpad=direction=>{const screen=document.getElementById('settingsScreen'),frame=document.getElementById('settingsFrame');if(screen?.classList.contains('open')&&frame?.contentWindow){frame.contentWindow.postMessage({type:'zikra:settings-dpad',direction},'*');return}const key={left:'ArrowLeft',right:'ArrowRight',up:'ArrowUp',down:'ArrowDown'}[String(direction).toLowerCase()];if(!key)return;const target=document.activeElement&&document.activeElement!==document.documentElement?document.activeElement:document.body;const event=new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true});target.dispatchEvent(event);if(!event.defaultPrevented){event.preventDefault();moveDirectionalFocus(String(direction).toLowerCase())}};
-window.handleAndroidOk=()=>{const screen=document.getElementById('settingsScreen'),frame=document.getElementById('settingsFrame');if(screen?.classList.contains('open')&&frame?.contentWindow){frame.contentWindow.postMessage({type:'zikra:settings-ok'},'*');return}const active=document.activeElement;if(active)active.click();else document.getElementById('quranBtn')?.click()};
+window.handleAndroidDpad=direction=>{const cell=document.getElementById('zikraCellOverlay'),cellFrame=document.getElementById('zikraCellFrame');if(cell&&!cell.hidden&&cellFrame?.contentWindow){cellFrame.contentWindow.postMessage({type:'zikra:cell-dpad',direction},'*');return}const screen=document.getElementById('settingsScreen'),frame=document.getElementById('settingsFrame');if(screen?.classList.contains('open')&&frame?.contentWindow){frame.contentWindow.postMessage({type:'zikra:settings-dpad',direction},'*');return}const key={left:'ArrowLeft',right:'ArrowRight',up:'ArrowUp',down:'ArrowDown'}[String(direction).toLowerCase()];if(!key)return;const target=document.activeElement&&document.activeElement!==document.documentElement?document.activeElement:document.body;const event=new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true});target.dispatchEvent(event);if(!event.defaultPrevented){event.preventDefault();moveDirectionalFocus(String(direction).toLowerCase())}};
+window.handleAndroidOk=()=>{const cell=document.getElementById('zikraCellOverlay'),cellFrame=document.getElementById('zikraCellFrame');if(cell&&!cell.hidden&&cellFrame?.contentWindow){cellFrame.contentWindow.postMessage({type:'zikra:cell-ok'},'*');return}const screen=document.getElementById('settingsScreen'),frame=document.getElementById('settingsFrame');if(screen?.classList.contains('open')&&frame?.contentWindow){frame.contentWindow.postMessage({type:'zikra:settings-ok'},'*');return}const active=document.activeElement;if(active)active.click();else document.getElementById('quranBtn')?.click()};
 
 $("weatherRefresh").addEventListener("click",async()=>{const b=$("weatherRefresh");if(b.dataset.loading==="1")return;b.dataset.loading="1";b.disabled=true;b.textContent="جارٍ التحديث…";try{await loadWeather()}finally{b.dataset.loading="0";b.disabled=false;b.textContent=lang==="ar"?"تحديث ↻":lang==="de"?"Aktualisieren ↻":"Refresh ↻"}});
 $("datePanel").addEventListener("click",()=>openModal("weatherModal"));
@@ -1039,6 +1039,8 @@ function hideExitPrompt(){exitPromptOpen=false;closeModal("exitModal")}
 $("cancelExitBtn").addEventListener("click",hideExitPrompt);
 $("confirmExitBtn").addEventListener("click",()=>{exitPromptOpen=false;if(window.AndroidTV&&typeof window.AndroidTV.exitApp==="function")window.AndroidTV.exitApp();else closeModal("exitModal")});
 function handleBack(){
+  const cellOverlay=document.getElementById('zikraCellOverlay'),cellFrame=document.getElementById('zikraCellFrame');
+  if(cellOverlay&&!cellOverlay.hidden&&cellFrame?.contentWindow){cellFrame.contentWindow.postMessage({type:'zikra:cell-back'},'*');return;}
   if(settingsScreen.classList.contains("open")){settingsFrame.contentWindow?.postMessage({type:"zikra:settings-back"},"*");return;}
   if($("adhanSettingsModal").classList.contains("open")){closeAdhanSettings();return;}
   if(!$("languageMenu").hidden){closeLanguageMenu();$("languageBtn").focus();return;}
@@ -1849,7 +1851,33 @@ html[data-layout-mode="tv"] .footer,body[data-layout-mode="tv"] .footer{flex:0 0
 
 <script id="zikra-seven-cell-navigation">
 (function(){
-  function openCell(id){const routes={settings:'cells/settings/index.html',weather:'cells/weather/index.html',prayer:'cells/prayer/index.html',quran:'cells/quran/index.html',zikra:'cells/zikra/index.html','dua-bar':'cells/dua-bar/index.html'};if(routes[id])location.href=routes[id]}
+  const routes={settings:'cells/settings/index.html?cell=1',weather:'cells/weather/index.html',prayer:'cells/prayer/index.html',quran:'cells/quran/index.html',zikra:'cells/zikra/index.html','dua-bar':'cells/dua-bar/index.html'};
+  let overlay=null,frame=null,returnFocus=null;
+  function ensureOverlay(){
+    if(overlay)return;
+    overlay=document.createElement('div');overlay.id='zikraCellOverlay';overlay.hidden=true;
+    overlay.style.cssText='position:fixed;inset:0;z-index:30000;background:#101b23;overflow:hidden;';
+    frame=document.createElement('iframe');frame.id='zikraCellFrame';frame.title='خلية ذِكرى';frame.setAttribute('allow','geolocation');frame.setAttribute('tabindex','0');
+    frame.style.cssText='display:block;width:100%;height:100%;border:0;background:#101b23;';
+    overlay.append(frame);document.body.append(overlay);
+    frame.addEventListener('load',()=>{if(overlay.hidden)return;frame.contentWindow?.focus();frame.contentWindow?.postMessage({type:'zikra:cell-focus'},'*');});
+  }
+  function openCell(id,trigger){
+    const path=routes[id];if(!path)return;ensureOverlay();returnFocus=trigger||document.activeElement;overlay.hidden=false;
+    frame.title=({settings:'الإعدادات',weather:'الطقس',prayer:'مواقيت الصلاة',quran:'القرآن الكريم',zikra:'الأذكار', 'dua-bar':'دعاء اليوم'})[id]||'خلية ذِكرى';
+    frame.src=path;
+  }
+  function closeCell(){
+    if(!overlay||overlay.hidden)return false;overlay.hidden=true;frame.src='about:blank';
+    const target=returnFocus;returnFocus=null;if(target&&target.isConnected)target.focus({preventScroll:true});return true;
+  }
+  window.zikraCloseCellOverlay=closeCell;
+  const priorBack=window.handleAndroidBack;
+  window.handleAndroidBack=()=>{if(overlay&&!overlay.hidden){frame.contentWindow?.postMessage({type:'zikra:cell-back'},'*');return}if(typeof priorBack==='function')priorBack()};
+  window.addEventListener('message',event=>{
+    if(!frame||event.source!==frame.contentWindow||!event.data||typeof event.data!=='object')return;
+    if(event.data.type==='zikra:cell-close')closeCell();
+  });
   document.addEventListener('click',function(e){
     const t=e.target.closest('[data-cell],[data-open-cell],[data-open],#datePanel,.date-weather-widget,.prayer-strip,.prayer-strip .prayer,#memoryCard,.tile-memory,.player,.now-reading.quran-entry,#openQuranFromPlayer,.dua-bar');
     if(!t)return;
@@ -1861,9 +1889,9 @@ html[data-layout-mode="tv"] .footer,body[data-layout-mode="tv"] .footer{flex:0 0
       else if(t.matches('.player,.now-reading.quran-entry,#openQuranFromPlayer'))id='quran';
       else if(t.matches('.dua-bar'))id='dua-bar';
     }
-    if(id){e.preventDefault();e.stopImmediatePropagation();openCell(id)}
+    if(id){e.preventDefault();e.stopImmediatePropagation();openCell(id,t)}
   },true);
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.key==='Backspace'){if(history.length>1){e.preventDefault();history.back()}}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.key==='Backspace'){if(overlay&&!overlay.hidden){e.preventDefault();e.stopImmediatePropagation();frame.contentWindow?.postMessage({type:'zikra:cell-back'},'*')}else e.preventDefault()}});
 })();
 </script>
 

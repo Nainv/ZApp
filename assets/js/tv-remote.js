@@ -27,6 +27,36 @@
     return event;
   }
 
+  function closeCell() {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'zikra:cell-close' }, '*');
+      return;
+    }
+    if (window.history.length > 1) window.history.back();
+    else window.location.href = '../../index.html';
+  }
+
+  window.closeZikraCell = closeCell;
+
+  const closeButton = document.getElementById('cellHomeButton');
+  if (closeButton) {
+    closeButton.textContent = '×';
+    closeButton.setAttribute('aria-label', 'إغلاق الخلية');
+    closeButton.classList.add('cell-close-button');
+    const style = document.createElement('style');
+    style.textContent = '.cell-close-button{position:fixed!important;top:max(12px,env(safe-area-inset-top))!important;left:max(12px,env(safe-area-inset-left))!important;z-index:99999!important;width:48px!important;height:48px!important;padding:0!important;display:grid!important;place-items:center!important;border:1px solid rgba(255,255,255,.48)!important;border-radius:50%!important;background:rgba(16,27,35,.76)!important;color:#fff!important;font:400 32px/1 Arial,sans-serif!important;box-shadow:0 5px 18px #0003!important;cursor:pointer!important}.cell-close-button:focus-visible{outline:3px solid #ffe08c!important;outline-offset:3px!important}';
+    document.head.append(style);
+  }
+
+  window.addEventListener('message', event => {
+    const message = event.data;
+    if (!message || typeof message !== 'object') return;
+    if (message.type === 'zikra:cell-dpad') window.handleAndroidDpad?.(message.direction);
+    else if (message.type === 'zikra:cell-ok') window.handleAndroidOk?.();
+    else if (message.type === 'zikra:cell-back') window.handleAndroidBack?.();
+    else if (message.type === 'zikra:cell-focus') focusFirst();
+  });
+
   function move(direction) {
     const list = focusables();
     if (!list.length) return;
@@ -82,6 +112,14 @@
     move(direction);
   });
 
+  document.addEventListener('keydown', event => {
+    if (!['Escape', 'Backspace', 'BrowserBack', 'GoBack', 'XF86Back'].includes(event.key) && event.keyCode !== 4) return;
+    if (event.key === 'Backspace' && (document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement || document.activeElement?.isContentEditable)) return;
+    if (event.defaultPrevented) return;
+    event.preventDefault();
+    window.handleAndroidBack?.();
+  });
+
   if (typeof window.handleAndroidDpad !== 'function') {
     window.handleAndroidDpad = direction => {
       const key = keys[String(direction).toLowerCase()];
@@ -102,7 +140,7 @@
   }
 
   if (typeof window.handleAndroidBack !== 'function') {
-    window.handleAndroidBack = () => { dispatch('Escape'); };
+    window.handleAndroidBack = closeCell;
   }
 
   const focusFirst = () => {
