@@ -417,6 +417,38 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 @media(prefers-reduced-motion:reduce){.prayer-strip .prayer{transition:none!important}}
 </style>
 
+<style id="zikra-settings-screen-v1">
+.settings-launch{width:auto!important;min-width:108px;padding:0 13px!important;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:800;font-size:14px}
+.settings-launch span{font-size:12px}
+.settings-screen{position:fixed;inset:0;z-index:1500;display:none;overflow:auto;background:linear-gradient(145deg,#edf1e6,#f9f7ed 55%,#e3e9dc);color:#304b3a;padding:clamp(12px,2vw,28px);overscroll-behavior:contain}
+.settings-screen.open{display:block}.settings-shell{width:min(1120px,100%);min-height:100%;margin:0 auto;display:flex;flex-direction:column;gap:clamp(14px,2vw,24px)}
+.settings-header{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:clamp(14px,2vw,24px);border-radius:20px;background:linear-gradient(120deg,#203c32,#3d6650);color:#fff;box-shadow:0 8px 22px #203c321f}
+.settings-heading{display:flex;align-items:center;gap:13px}.settings-mark{display:grid;place-items:center;width:54px;height:54px;border-radius:15px;background:#ffffff18;border:1px solid #ffffff38;font-size:27px}.settings-header h2{margin:0;font-size:clamp(21px,3vw,30px)}.settings-header p{margin:5px 0 0;color:#e0e9df;font-size:clamp(11px,1.3vw,14px)}
+.settings-close{width:44px;height:44px;flex:0 0 44px;border:1px solid #ffffff45;border-radius:13px;background:#ffffff18;color:#fff;font-size:28px}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.5vw,16px);padding-bottom:16px}
+.settings-card{min-width:0;min-height:112px;display:flex;align-items:center;gap:14px;padding:clamp(13px,1.8vw,22px);border:1px solid #dce2d3;border-radius:17px;background:linear-gradient(145deg,#fffefb,#f7f7ef);color:#304b3a;text-align:start;box-shadow:0 4px 12px #273d2609;transition:transform .14s,box-shadow .14s,border-color .14s}
+button.settings-card{width:100%}.settings-card:focus-visible,.settings-card:focus{outline:3px solid #a3b98e;outline-offset:2px;border-color:#9bb08b;box-shadow:0 7px 18px #273d261c}.settings-card:active{transform:scale(.99)}
+.settings-card-icon{display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:14px;background:#e8eddf;border:1px solid #d9e0ce;font-size:23px}.settings-card-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:6px}.settings-card-copy strong,.settings-card-copy h3{margin:0;font-size:clamp(14px,1.5vw,18px);font-weight:800}.settings-card-copy small,.settings-card-copy p{margin:0;color:#71806d;font-size:clamp(10px,1.1vw,13px);line-height:1.45}.settings-chevron{font-size:28px;color:#8b9a7c;line-height:1}
+.settings-language-card{align-items:flex-start}.settings-language-options{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px}.settings-language-options button{min-height:34px;padding:6px 12px;border:1px solid #d8dfcf;border-radius:9px;background:#fff;color:#304b3a;font-size:12px;font-weight:700}.settings-language-options button.selected,.settings-language-options button:focus-visible{background:#dfe9d6;border-color:#90a982;outline:2px solid #90a982;outline-offset:1px}
+.settings-subview{padding:clamp(16px,2.4vw,28px);border:1px solid #dce2d3;border-radius:18px;background:#fffef9;box-shadow:0 4px 15px #273d2609}.settings-subview[hidden]{display:none}.settings-subview h3{font-size:clamp(18px,2vw,24px);margin:14px 0}.settings-subview p{font-size:13px;line-height:1.7;color:#65745f}.settings-subview label{display:block;margin:15px 0 7px;font-size:13px;font-weight:800}.settings-subview input{width:100%;min-height:42px;border:1px solid #d4dccb;border-radius:10px;padding:9px 12px;background:#fff;color:#304b3a}.settings-subview .action{margin-top:12px;padding:9px 18px;border-radius:10px}.settings-back{min-height:38px;border:1px solid #dce2d3;border-radius:10px;padding:7px 12px;background:#f4f6ee;color:#304b3a;font-weight:700}
+.settings-info-modal{max-width:560px!important}.settings-info-modal p{font-size:14px;line-height:1.8}.settings-info-modal #aboutCredits{color:#78856f;font-size:12px}
+@media(max-width:700px){.settings-screen{padding:10px}.settings-grid{grid-template-columns:1fr;gap:9px}.settings-card{min-height:88px;padding:12px}.settings-card-icon{width:42px;height:42px;flex-basis:42px;font-size:21px}.settings-header{padding:14px;border-radius:15px}.settings-mark{width:45px;height:45px;flex-basis:45px}.settings-close{width:40px;height:40px;flex-basis:40px}}
+@media(orientation:landscape) and (min-width:701px){.settings-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+
+<!-- ZIKRA CELL FILE MAP: file paths reserved for modular design. Existing UI stays active until each cell is implemented and connected. -->
+<script id="zikra-cell-file-map">
+window.ZIKRA_CELL_FILES = Object.freeze({
+  settings:   "cells/settings.html",
+  weather:    "cells/weather.html",
+  prayer:     "cells/prayer.html",
+  zikra:      "cells/zikra.html",
+  quran:      "cells/quran.html",
+  duaBar:     "cells/dua-bar.html",
+  styles:     "shared/cells.css",
+  controller: "shared/cells.js"
+});
+</script>
 </head>
 <body>
 <div id="zikraSplash" aria-label="ذِكرى"><img src="zikra_logo.png" alt="ذِكرى | Zikra"></div>
@@ -424,11 +456,7 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <header class="topbar">
   <div class="brand"><div class="brand-mark" aria-hidden="true">۞</div><div><h1 id="appTitle">ذِكرى</h1><p id="subtitle">طمأنينةٌ للقلب في كل يوم</p></div></div>
   <div class="tools">
-    <button class="icon-btn" id="quranBtn" aria-label="فهرس القرآن" title="فهرس القرآن">📖</button>
-    <button class="icon-btn" id="locationBtn" aria-label="اختيار المدينة" title="الموقع والمدينة">📍</button>
-    <button class="icon-btn" id="refreshBtn" aria-label="تحديث البيانات" title="تحديث الطقس ومواقيت الصلاة">🔄</button>
-    <button class="icon-btn language-toggle" id="languageBtn" aria-label="اختيار اللغة" title="اختيار اللغة">🌐</button>
-    <div id="languageMenu" class="language-menu" hidden><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button><button type="button" data-lang="de">Deutsch</button></div>
+    <button class="icon-btn settings-launch" id="settingsBtn" type="button" aria-label="الإعدادات" title="الإعدادات">⚙️ <span id="settingsBtnLabel">الإعدادات</span></button>
   </div>
 </header>
 <section class="date-panel weather-unified sunny" id="datePanel" role="button" tabindex="0" aria-label="فتح لوحة الطقس" title="فتح لوحة الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><div class="clock" id="clock">--:--</div><div class="date-weather-widget" id="weatherCard"><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></div><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">إرفورت</div></div></section>
@@ -498,6 +526,29 @@ button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation
 <div class="section-title" id="dailyTitle" style="display:none">توقعات الأيام القادمة</div><div class="daily-list" id="dailyForecast" style="display:none"></div>
   </div>
 </section></div>
+
+<div class="settings-screen" id="settingsScreen" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
+  <div class="settings-shell">
+    <header class="settings-header"><div class="settings-heading"><span class="settings-mark">⚙️</span><div><h2 id="settingsTitle">إعدادات ذِكرى</h2><p id="settingsSubtitle">إدارة جميع إعدادات التطبيق</p></div></div><button type="button" class="settings-close" id="closeSettingsBtn" aria-label="إغلاق الإعدادات">×</button></header>
+    <div class="settings-grid" id="settingsGrid">
+      <section class="settings-card settings-language-card"><div class="settings-card-icon">🌐</div><div class="settings-card-copy"><h3 id="settingsLanguageTitle">لغة التطبيق</h3><p id="settingsLanguageDesc">العربية · Deutsch · English</p><div class="settings-language-options" role="group" aria-label="Application language"><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="de">Deutsch</button><button type="button" data-lang="en">English</button></div><button type="button" id="languageBtn" hidden aria-expanded="false">Language</button><div id="languageMenu" class="language-menu" hidden><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button><button type="button" data-lang="de">Deutsch</button></div></div></section>
+      <button type="button" class="settings-card" id="locationBtn"><span class="settings-card-icon">📍</span><span class="settings-card-copy"><strong id="settingsLocationTitle">الموقع والمدينة</strong><small id="settingsLocationDesc">تحديد الموقع أو اختيار المدينة</small></span><span class="settings-chevron">‹</span></button>
+      <button type="button" class="settings-card" id="mosqueSettingsBtn"><span class="settings-card-icon">🕌</span><span class="settings-card-copy"><strong id="settingsMosqueTitle">الجامع ومواقيت الصلاة</strong><small id="settingsMosqueDesc">تفضيلات الجامع وطريقة المواقيت</small></span><span class="settings-chevron">‹</span></button>
+      <button type="button" class="settings-card" id="adhanSettingsLaunchBtn"><span class="settings-card-icon">🔊</span><span class="settings-card-copy"><strong id="settingsAdhanTitle">الأذان والمؤذنون</strong><small id="settingsAdhanDesc">تخصيص صوت كل صلاة</small></span><span class="settings-chevron">‹</span></button>
+      <button type="button" class="settings-card" id="quranBtn"><span class="settings-card-icon">📖</span><span class="settings-card-copy"><strong id="settingsQuranTitle">القرآن والتنزيلات</strong><small id="settingsQuranDesc">اختيار القارئ والاستماع للقرآن</small></span><span class="settings-chevron">‹</span></button>
+      <button type="button" class="settings-card" id="aboutSettingsBtn"><span class="settings-card-icon">ⓘ</span><span class="settings-card-copy"><strong>About Us</strong><small id="settingsAboutDesc">معلومات التطبيق وحقوق النشر</small></span><span class="settings-chevron">‹</span></button>
+      <button type="button" class="settings-card" id="assistantSettingsBtn"><span class="settings-card-icon">✨</span><span class="settings-card-copy"><strong id="settingsAssistantTitle">المساعد الذكي</strong><small id="settingsAssistantDesc">مساعد ذِكرى للقرآن والأذكار</small></span><span class="settings-chevron">‹</span></button>
+      <button type="button" class="settings-card" id="refreshBtn"><span class="settings-card-icon">🔄</span><span class="settings-card-copy"><strong id="settingsRefreshTitle">تحديث التطبيق</strong><small id="settingsRefreshDesc">إعادة تحميل أحدث البيانات</small></span><span class="settings-chevron">‹</span></button>
+    </div>
+    <section class="settings-subview" id="mosqueSettingsView" hidden>
+      <button type="button" class="settings-back" id="backSettingsBtn">← <span id="settingsBackLabel">رجوع للإعدادات</span></button>
+      <h3 id="mosqueViewTitle">الجامع ومواقيت الصلاة</h3><p id="mosqueViewDesc">يمكنك حفظ اسم الجامع المفضل كتفضيل. اختيار جامع لا يغيّر طريقة حساب المواقيت تلقائياً في هذه النسخة.</p>
+      <label id="preferredMosqueLabel" for="preferredMosqueInput">اسم الجامع المفضل (اختياري)</label><input id="preferredMosqueInput" type="text" autocomplete="off" placeholder="اسم الجامع"><button type="button" class="action" id="saveMosqueBtn">حفظ التفضيل</button><p id="mosqueSettingsStatus" role="status"></p>
+    </section>
+  </div>
+</div>
+<div class="modal-backdrop" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle"><section class="modal settings-info-modal"><div class="modal-head"><h2 id="aboutTitle">About Us</h2><button class="close-modal" id="closeAboutBtn" aria-label="Close">×</button></div><p id="aboutText">ذِكرى تطبيق يهدف إلى جمع القرآن الكريم والأذكار ومواقيت الصلاة في مكان واحد.</p><p id="aboutCredits">© 2026 ذِكرى — Directed by Nabil Koukach</p></section></div>
+<div class="modal-backdrop" id="assistantInfoModal" role="dialog" aria-modal="true" aria-labelledby="assistantInfoTitle"><section class="modal settings-info-modal"><div class="modal-head"><h2 id="assistantInfoTitle">المساعد الذكي</h2><button class="close-modal" id="closeAssistantInfoBtn" aria-label="Close">×</button></div><p id="assistantInfoText">واجهة المساعد قيد التجهيز. المحادثة الذكية غير مفعّلة في هذه النسخة.</p></section></div>
 
 <div class="modal-backdrop" id="exitModal" role="dialog" aria-modal="true" aria-labelledby="exitTitle"><section class="modal" style="max-width:440px">
   <div class="modal-head"><h2 id="exitTitle">الخروج من التطبيق</h2></div>
@@ -959,12 +1010,31 @@ function closeLanguageMenu(){const m=$("languageMenu");m.hidden=true;$("language
 $("languageBtn").addEventListener("click",()=>{const m=$("languageMenu");m.hidden=!m.hidden;$("languageBtn").setAttribute("aria-expanded",String(!m.hidden));if(!m.hidden)m.querySelector(`[data-lang="${lang}"]`)?.focus();});
 $("languageMenu").querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>{changeLanguage(b.dataset.lang);closeLanguageMenu();$("languageBtn").focus();}));
 document.addEventListener("click",e=>{if(!e.target.closest("#languageMenu")&&!e.target.closest("#languageBtn"))closeLanguageMenu();});
+
+// Full-screen settings hub: existing features remain connected to their original handlers.
+const settingsScreen=$("settingsScreen"),settingsGrid=$("settingsGrid"),mosqueSettingsView=$("mosqueSettingsView");
+function openSettings(){settingsScreen.classList.add("open");settingsScreen.setAttribute("aria-hidden","false");settingsGrid.hidden=false;mosqueSettingsView.hidden=true;$("settingsBtn").setAttribute("aria-expanded","true");$("closeSettingsBtn").focus({preventScroll:true});}
+function closeSettings(){settingsScreen.classList.remove("open");settingsScreen.setAttribute("aria-hidden","true");$("settingsBtn").setAttribute("aria-expanded","false");$("settingsBtn").focus({preventScroll:true});}
+$("settingsBtn").addEventListener("click",openSettings);
+$("closeSettingsBtn").addEventListener("click",closeSettings);
+$("mosqueSettingsBtn").addEventListener("click",()=>{settingsGrid.hidden=true;mosqueSettingsView.hidden=false;$("preferredMosqueInput").value=localStorage.getItem("zikra_preferred_mosque")||"";$("preferredMosqueInput").focus({preventScroll:true});});
+$("backSettingsBtn").addEventListener("click",()=>{mosqueSettingsView.hidden=true;settingsGrid.hidden=false;$("mosqueSettingsBtn").focus({preventScroll:true});});
+$("saveMosqueBtn").addEventListener("click",()=>{const value=$("preferredMosqueInput").value.trim();localStorage.setItem("zikra_preferred_mosque",value);$("mosqueSettingsStatus").textContent=lang==="ar"?"تم حفظ اسم الجامع كتفضيل فقط. لم تتغير طريقة حساب المواقيت.":lang==="de"?"Moschee-Präferenz gespeichert. Die Berechnung der Gebetszeiten wurde nicht geändert.":"Mosque preference saved. Prayer-time calculation has not changed.";});
+$("settingsLanguageTitle").textContent=lang==="ar"?"لغة التطبيق":lang==="de"?"App-Sprache":"App language";
+function updateSettingsLabels(){const words={ar:{title:"إعدادات ذِكرى",subtitle:"إدارة جميع إعدادات التطبيق",language:"لغة التطبيق",location:"الموقع والمدينة",locationDesc:"تحديد الموقع أو اختيار المدينة",mosque:"الجامع ومواقيت الصلاة",mosqueDesc:"تفضيلات الجامع وطريقة المواقيت",adhan:"الأذان والمؤذنون",adhanDesc:"تخصيص صوت كل صلاة",quran:"القرآن والتنزيلات",quranDesc:"اختيار القارئ والاستماع للقرآن",about:"معلومات التطبيق وحقوق النشر",assistant:"المساعد الذكي",assistantDesc:"مساعد ذِكرى للقرآن والأذكار",refresh:"تحديث التطبيق",refreshDesc:"إعادة تحميل أحدث البيانات",back:"رجوع للإعدادات",mosqueHelp:"يمكنك حفظ اسم الجامع المفضل كتفضيل. اختيار جامع لا يغيّر طريقة حساب المواقيت تلقائياً في هذه النسخة.",mosqueLabel:"اسم الجامع المفضل (اختياري)",save:"حفظ التفضيل",assistantInfo:"واجهة المساعد قيد التجهيز. المحادثة الذكية غير مفعّلة في هذه النسخة."},de:{title:"Zikra-Einstellungen",subtitle:"Alle App-Einstellungen verwalten",language:"App-Sprache",location:"Standort und Stadt",locationDesc:"Standort bestimmen oder Stadt wählen",mosque:"Moschee und Gebetszeiten",mosqueDesc:"Moschee-Präferenz und Zeitberechnung",adhan:"Adhan und Gebetsrufer",adhanDesc:"Audio für jedes Gebet einstellen",quran:"Koran und Downloads",quranDesc:"Rezitator auswählen und Koran hören",about:"App-Informationen und Rechte",assistant:"Intelligenter Assistent",assistantDesc:"Zikra-Assistent für Koran und Dhikr",refresh:"App aktualisieren",refreshDesc:"Aktuelle Daten neu laden",back:"Zurück zu Einstellungen",mosqueHelp:"Du kannst eine bevorzugte Moschee speichern. Die Auswahl ändert die Berechnung der Gebetszeiten in dieser Version nicht automatisch.",mosqueLabel:"Bevorzugte Moschee (optional)",save:"Einstellung speichern",assistantInfo:"Die Assistentenoberfläche wird vorbereitet. Der intelligente Chat ist in dieser Version noch nicht aktiviert."},en:{title:"Zikra Settings",subtitle:"Manage all app settings",language:"App language",location:"Location and city",locationDesc:"Detect location or choose a city",mosque:"Mosque and prayer times",mosqueDesc:"Mosque preference and time calculation",adhan:"Adhan and callers",adhanDesc:"Choose audio for each prayer",quran:"Quran and downloads",quranDesc:"Choose a reciter and listen to Quran",about:"App information and rights",assistant:"Smart assistant",assistantDesc:"Zikra assistant for Quran and remembrance",refresh:"Refresh app",refreshDesc:"Reload the latest data",back:"Back to settings",mosqueHelp:"You can save a preferred mosque. Selecting a mosque does not automatically change prayer-time calculation in this version.",mosqueLabel:"Preferred mosque (optional)",save:"Save preference",assistantInfo:"The assistant interface is being prepared. Smart chat is not enabled in this version."}}[lang]||{};const set=(id,v)=>{const el=$(id);if(el&&v!==undefined)el.textContent=v};set("settingsTitle",words.title);set("settingsSubtitle",words.subtitle);set("settingsLanguageTitle",words.language);set("settingsLocationTitle",words.location);set("settingsLocationDesc",words.locationDesc);set("settingsMosqueTitle",words.mosque);set("settingsMosqueDesc",words.mosqueDesc);set("settingsAdhanTitle",words.adhan);set("settingsAdhanDesc",words.adhanDesc);set("settingsQuranTitle",words.quran);set("settingsQuranDesc",words.quranDesc);set("settingsAboutDesc",words.about);set("settingsAssistantTitle",words.assistant);set("settingsAssistantDesc",words.assistantDesc);set("settingsRefreshTitle",words.refresh);set("settingsRefreshDesc",words.refreshDesc);set("settingsBackLabel",words.back);set("mosqueViewTitle",words.mosque);set("mosqueViewDesc",words.mosqueHelp);set("preferredMosqueLabel",words.mosqueLabel);set("saveMosqueBtn",words.save);set("assistantInfoTitle",words.assistant);set("assistantInfoText",words.assistantInfo);document.querySelectorAll(".settings-language-options [data-lang]").forEach(b=>{b.classList.toggle("selected",b.dataset.lang===lang);b.setAttribute("aria-pressed",String(b.dataset.lang===lang))});}
+document.querySelectorAll(".settings-language-options [data-lang]").forEach(b=>b.addEventListener("click",()=>{changeLanguage(b.dataset.lang);updateSettingsLabels();}));
+$("adhanSettingsLaunchBtn").addEventListener("click",()=>{openAdhanSettings("Fajr");});
+$("aboutSettingsBtn").addEventListener("click",()=>openModal("aboutModal"));$("closeAboutBtn").addEventListener("click",()=>closeModal("aboutModal"));
+$("assistantSettingsBtn").addEventListener("click",()=>openModal("assistantInfoModal"));$("closeAssistantInfoBtn").addEventListener("click",()=>closeModal("assistantInfoModal"));
+updateSettingsLabels();
+
 let lastHomeBackAt=0, exitPromptOpen=false;
 function showExitPrompt(){exitPromptOpen=true;openModal("exitModal");$("cancelExitBtn").focus()}
 function hideExitPrompt(){exitPromptOpen=false;closeModal("exitModal")}
 $("cancelExitBtn").addEventListener("click",hideExitPrompt);
 $("confirmExitBtn").addEventListener("click",()=>{exitPromptOpen=false;if(window.AndroidTV&&typeof window.AndroidTV.exitApp==="function")window.AndroidTV.exitApp();else closeModal("exitModal")});
 function handleBack(){
+  if(settingsScreen.classList.contains("open")){if(!mosqueSettingsView.hidden){mosqueSettingsView.hidden=true;settingsGrid.hidden=false;$("mosqueSettingsBtn").focus();}else closeSettings();return;}
   if($("adhanSettingsModal").classList.contains("open")){closeAdhanSettings();return;}
   if(!$("languageMenu").hidden){closeLanguageMenu();$("languageBtn").focus();return;}
   if(exitPromptOpen||$("exitModal").classList.contains("open")){hideExitPrompt();return}
