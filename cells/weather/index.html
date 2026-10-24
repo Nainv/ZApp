@@ -20,4 +20,5 @@ document.getElementById('greg').textContent=new Intl.DateTimeFormat('ar',{day:'n
 document.getElementById('hijri').textContent=new Intl.DateTimeFormat('ar-SA-u-ca-islamic',{day:'numeric',month:'short',year:'numeric'}).format(now);
 function tick(){document.getElementById('clock').textContent=new Intl.DateTimeFormat('de-DE',{hour:'2-digit',minute:'2-digit'}).format(new Date())}tick();setInterval(tick,1000);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();goHome()}});
-</script></body></html>
+</script><script src="../../assets/js/tv-remote.js"></script>
+</body></html>

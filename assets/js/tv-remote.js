@@ -1,0 +1,114 @@
+/* Shared Android TV remote routing for standalone cells. */
+(() => {
+  'use strict';
+
+  const keys = { left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown' };
+  const focusableSelector = 'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])';
+
+  function visible(element) {
+    if (!element || element.disabled || element.getAttribute('aria-hidden') === 'true' || element.closest('[aria-hidden="true"], [hidden]')) return false;
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+  }
+
+  function focusables() {
+    const dialogs = [...document.querySelectorAll('[aria-modal="true"], dialog[open], .modal-backdrop.open, .settings-screen.open')].filter(visible);
+    const scope = dialogs[dialogs.length - 1] || document;
+    return [...scope.querySelectorAll(focusableSelector)].filter(visible);
+  }
+
+  function dispatch(key) {
+    const target = document.activeElement && document.activeElement !== document.documentElement
+      ? document.activeElement
+      : document.body;
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+    target.dispatchEvent(event);
+    return event;
+  }
+
+  function move(direction) {
+    const list = focusables();
+    if (!list.length) return;
+    const current = document.activeElement;
+    if (!list.includes(current)) {
+      list[0].focus({ preventScroll: true });
+      return;
+    }
+
+    if (current instanceof HTMLInputElement && ['text', 'search', 'email', 'url', 'tel', 'password'].includes((current.type || 'text').toLowerCase()) && (direction === 'left' || direction === 'right')) return;
+    if (current instanceof HTMLSelectElement && (direction === 'up' || direction === 'down')) {
+      const next = Math.max(0, Math.min(current.options.length - 1, current.selectedIndex + (direction === 'down' ? 1 : -1)));
+      if (next !== current.selectedIndex) {
+        current.selectedIndex = next;
+        current.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      return;
+    }
+
+    const vector = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] }[direction];
+    if (!vector) return;
+    const [dx, dy] = vector;
+    const from = current.getBoundingClientRect();
+    const sx = from.left + from.width / 2;
+    const sy = from.top + from.height / 2;
+    const candidates = list.filter(element => element !== current).map(element => {
+      const rect = element.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const primary = dx ? (x - sx) * dx : (y - sy) * dy;
+      const cross = dx ? Math.abs(y - sy) : Math.abs(x - sx);
+      const overlap = dx
+        ? Math.min(from.bottom, rect.bottom) - Math.max(from.top, rect.top)
+        : Math.min(from.right, rect.right) - Math.max(from.left, rect.left);
+      return { element, primary, cross, aligned: overlap > 1, score: primary + cross * 1.7 };
+    }).filter(item => item.primary > 1);
+
+    const aligned = candidates.filter(item => item.aligned);
+    const choices = aligned.length ? aligned : candidates;
+    choices.sort((a, b) => (aligned.length ? a.primary - b.primary || a.cross - b.cross : a.score - b.score));
+    const target = choices[0]?.element;
+    if (target) {
+      target.focus({ preventScroll: true });
+      target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+    }
+  }
+
+  // Page-specific handlers get first chance to implement local controls.
+  document.addEventListener('keydown', event => {
+    const direction = Object.keys(keys).find(name => keys[name] === event.key);
+    if (!direction || event.defaultPrevented) return;
+    event.preventDefault();
+    move(direction);
+  });
+
+  if (typeof window.handleAndroidDpad !== 'function') {
+    window.handleAndroidDpad = direction => {
+      const key = keys[String(direction).toLowerCase()];
+      if (!key) return;
+      const event = dispatch(key);
+      if (!event.defaultPrevented) {
+        event.preventDefault();
+        move(String(direction).toLowerCase());
+      }
+    };
+  }
+
+  if (typeof window.handleAndroidOk !== 'function') {
+    window.handleAndroidOk = () => {
+      const event = dispatch('Enter');
+      if (!event.defaultPrevented) document.activeElement?.click();
+    };
+  }
+
+  if (typeof window.handleAndroidBack !== 'function') {
+    window.handleAndroidBack = () => { dispatch('Escape'); };
+  }
+
+  const focusFirst = () => {
+    const list = focusables();
+    if (list.length && !list.includes(document.activeElement)) list[0].focus({ preventScroll: true });
+  };
+  if (document.readyState === 'complete') setTimeout(focusFirst, 0);
+  else window.addEventListener('load', focusFirst, { once: true });
+})();

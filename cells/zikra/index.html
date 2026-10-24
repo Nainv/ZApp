@@ -13,8 +13,9 @@ let index=0;const card=document.getElementById('memoryCard');
 function render(){const m=memories[index];document.getElementById('memoryPreviewText').textContent=m.text;document.getElementById('memoryPreviewSource').textContent=m.kind+' — المصدر: '+m.source;document.getElementById('memoryPreviewBenefit').textContent='الشرح: '+m.explanation+' الفائدة: '+m.benefit;document.getElementById('counter').textContent=`${index+1} / ${memories.length}`;document.getElementById('kind').textContent='مكتبة ذِكرى: '+memories.length+' مادة';card.setAttribute('aria-label',`الذكرى ${index+1} من ${memories.length}. ${m.text}. اضغط للتبديل`)}
 function next(){index=(index+1)%memories.length;render()}function prev(){index=(index-1+memories.length)%memories.length;render()}
 card.addEventListener('click',next);document.getElementById('nextBtn').addEventListener('click',next);document.getElementById('prevBtn').addEventListener('click',prev);
-document.addEventListener('keydown',e=>{if(['ArrowRight','ArrowDown'].includes(e.key)){e.preventDefault();next()}else if(['ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();prev()}else if(e.key==='Enter'||e.key===' '){if(document.activeElement===card){e.preventDefault();next()}}});setInterval(next,45000);render();
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&document.activeElement===card){e.preventDefault();next()}});setInterval(next,45000);render();
 </script>
 <button id="cellHomeButton" type="button" aria-label="العودة للرئيسية" style="position:fixed;top:12px;left:12px;z-index:99999;padding:10px 14px;border:0;border-radius:10px;background:#496d55;color:#fff;font:inherit;cursor:pointer">⌂ الرئيسية</button>
 <script id="cellHomeNavigation">(function(){function home(){location.href='../../index.html'}var b=document.getElementById('cellHomeButton');if(b)b.addEventListener('click',home);document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();home()}})})();</script>
+<script src="../../assets/js/tv-remote.js"></script>
 </body></html>
