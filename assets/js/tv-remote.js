@@ -100,12 +100,18 @@
     const target = choices[0]?.element;
     if (target) {
       target.focus({ preventScroll: true });
-      target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+      const bounds=target.getBoundingClientRect();if(bounds.top<0||bounds.bottom>innerHeight||bounds.left<0||bounds.right>innerWidth)target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
     }
   }
 
   // Page-specific handlers get first chance to implement local controls.
   document.addEventListener('keydown', event => {
+    if(event.key==='Tab'){
+      const list=focusables(),first=list[0],last=list[list.length-1];
+      if(first&&event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus({preventScroll:true})}
+      else if(first&&!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus({preventScroll:true})}
+      return;
+    }
     const direction = Object.keys(keys).find(name => keys[name] === event.key);
     if (!direction || event.defaultPrevented) return;
     event.preventDefault();

@@ -155,3 +155,7 @@ html body .cell-close-button:focus, html body .cell-close-button:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   button, input, select, textarea, [tabindex="0"] { transition: none !important; }
 }
+
+button:not(:focus),[tabindex="0"]:not(:focus){transform:none!important}button,[tabindex="0"]{transition:transform 80ms ease,box-shadow 80ms ease!important}.prayer-cell .prayer{min-height:172px!important;overflow:hidden;gap:7px!important}.prayer-cell .prayer:focus{animation:none!important;transform:translateY(-4px) scale(1.025)!important}.prayer-cell .prayer:not(:focus){transform:none!important}
+
+.prayer-cell .footer{background:linear-gradient(145deg,#1c3038,#17262e)!important;border-color:var(--cell-line)!important;color:var(--cell-text)!important}.prayer-cell .footer-title{color:var(--cell-muted)!important}.prayer-cell #mainCountdown{color:var(--cell-teal)!important}

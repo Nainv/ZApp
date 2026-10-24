@@ -563,6 +563,69 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
 .dua-entry { position: absolute; top: 50%; left: 0; display: inline-flex; align-items: center; gap: 30px; width: max-content; max-width: none; white-space: nowrap; direction: rtl; will-change: transform; }
 .dua-entry .dua-item { display: block; flex: 0 0 auto; width: max-content; max-width: none; direction: rtl; unicode-bidi: isolate; white-space: nowrap; line-height: 1.5; }
 .dua-entry .dua-separator { display: block; flex: 0 0 auto; line-height: 1; }
+/* Stable media rows and immediate, temporary focus feedback. */
+.player { grid-template-rows: 84px minmax(0,1fr) 42px !important; overflow: hidden; }
+.player .quran-entry-caption { height: 84px; align-self: start; }
+.player .quran-entry-copy { overflow: hidden; }
+.player .quran-entry-copy strong, .player #miniReader { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.player .quran-meta-markers { flex-wrap: nowrap; }
+.player .track-area { min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+.player .controls { grid-row: 3; height: 42px; align-self: end; }
+.player .verse { max-height: 3.2em; overflow: hidden; }
+.app button, .app [tabindex="0"], .app [role="button"] { transition: transform 75ms ease, box-shadow 75ms ease !important; }
+.app button:not(:focus), .app [tabindex="0"]:not(:focus) { transform: none !important; }
+body:not(.remote-focus-active) .app :focus, .app[inert] :focus { transform: none !important; box-shadow: none !important; }
+.prayer-strip .prayer { min-height: 94px !important; overflow: hidden; gap: 2px !important; line-height: 1.2; }
+.prayer-strip .prayer.next-prayer { padding-top: 22px !important; }
+.prayer-strip .prayer .p-icon { font-size: 15px !important; }
+.prayer-strip .prayer .p-name { font-size: 10px !important; white-space: nowrap; }
+.prayer-strip .prayer .p-time { font-size: 16px !important; white-space: nowrap; }
+.prayer-strip .prayer .p-countdown { font-size: 11px !important; white-space: nowrap; min-height: 13px; }
+.prayer-strip .prayer.next-prayer::before { font-size: 8px; line-height: 1.2; top: 4px; }
+.home-tasbeeh { overflow: hidden; display: grid; grid-template-columns: minmax(0,1fr) 80px; grid-template-rows: auto auto auto auto; gap: 4px 12px; align-content: center; }
+.home-tasbeeh h2 { grid-column: 1; grid-row: 1; line-height: 1.2; }
+.home-tasbeeh p { grid-column: 1; grid-row: 2; line-height: 1.3; overflow-wrap: anywhere; }
+.home-tasbeeh-count { grid-column: 2; grid-row: 1 / 5; justify-self: center; align-self: center; overflow: hidden; }
+.home-tasbeeh-progress { grid-column: 1; grid-row: 3; line-height: 1.2; }
+.home-tasbeeh-reset { grid-column: 1; grid-row: 4; justify-self: center; min-height: 25px; line-height: 1.2; }
+.tile-weather-effects > :nth-child(n+13) { display: none !important; }
+@media(max-width:700px) {
+  .player { grid-template-rows: 84px minmax(0,1fr) 34px !important; }
+  .player .controls { height: 34px; }
+  .home-tasbeeh { display: flex; flex-direction: column; gap: 3px; padding: 9px 5px; }
+  .home-tasbeeh-count { width: 54px; height: 54px; font-size: 22px; }
+  .home-tasbeeh h2, .home-tasbeeh p { font-size: 10px; line-height: 1.2; }
+  .home-tasbeeh-progress { font-size: 9px; line-height: 1.1; }
+  .home-tasbeeh-reset { font-size: 9px; min-height: 23px; padding: 3px 6px; }
+}
+@media(max-height:650px) and (min-width:901px) {
+  .player { padding: 8px 12px !important; gap: 4px !important; grid-template-rows: 64px minmax(0,1fr) 32px !important; }
+  .player .quran-entry-caption { height: 64px; }
+  .player .quran-logo-button { height: 50px !important; width: 50px !important; flex-basis: 50px; }
+  .player .quran-entry-caption #miniSurah { font-size: 13px; }
+  .player .quran-entry-caption #miniReader { font-size: 10px; margin-top: 0; }
+  .player .quran-meta-markers { margin-top: 1px; }
+  .player .controls { height: 32px; }
+  .player .controls .quran-transport-button { height: 32px !important; width: 32px !important; min-height: 32px; min-width: 32px; }
+  .app { padding: 10px 18px; gap: 6px; grid-template-rows: 40px minmax(110px,.8fr) 82px minmax(160px,1fr) 32px auto; }
+  .brand-mark { width: 40px; height: 40px; flex-basis: 40px; }
+  .icon-btn { min-height: 36px; }
+  #datePanel, .home-tasbeeh { min-height: 110px !important; }
+  .player, .tiles .tile-memory { min-height: 160px !important; }
+  .prayer-strip .prayer { min-height: 82px !important; }
+}
+@media(max-height:560px) and (min-width:901px) {
+  .app { gap: 5px; grid-template-rows: 38px minmax(95px,.8fr) 75px minmax(140px,1fr) 30px auto; }
+  .brand-mark { width: 38px; height: 38px; flex-basis: 38px; }
+  #datePanel, .home-tasbeeh { min-height: 95px !important; }
+  .player, .tiles .tile-memory { min-height: 140px !important; }
+  .prayer-strip .prayer { min-height: 75px !important; padding: 5px !important; gap: 1px !important; }
+  .prayer-strip .prayer.next-prayer { padding-top: 18px !important; }
+  .prayer-strip .prayer .p-icon { font-size: 12px !important; }
+  .prayer-strip .prayer .p-time { font-size: 14px !important; }
+  .prayer-strip .prayer .p-countdown { font-size: 10px !important; }
+  .home-tasbeeh-count { width: 53px; height: 53px; }
+}
 @media(max-width:700px) {
   #quranModal { padding: 9px; }
   #quranModal > .modal { width: 100%; height: 94dvh; max-height: 94dvh; padding: 13px; gap: 10px; border-radius: 17px; }
@@ -581,3 +644,5 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   .mushaf-page-text { font-size: 25px; line-height: 2.45; }
   .player .quran-meta-markers { gap: 4px; }
 }
+
+@media(min-width:901px){.app{height:100vh;height:100dvh}}@media(max-width:900px){.app{min-height:100vh;min-height:100dvh}}#quranModal>.modal{height:92vh;height:min(780px,92dvh)}

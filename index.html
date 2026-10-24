@@ -14,7 +14,7 @@
 <link rel="manifest" href="site.webmanifest">
 
 <title>ذِكرى | Zikra</title>
-<link rel="stylesheet" href="assets/css/home-theme.css?v=20261024-5">
+<link rel="stylesheet" href="assets/css/home-theme.css?v=20261024-6">
 <script src="assets/js/duas-ar.js?v=20261024-3"></script>
 </head>
 <body>
@@ -146,25 +146,36 @@ async function fetchJSON(url){const r=await fetch(url);if(!r.ok)throw Error("HTT
 function updateClock(){const n=new Date(),locale=lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB";$("clock").textContent=new Intl.DateTimeFormat(locale,{hour:"2-digit",minute:"2-digit",hour12:false}).format(n);$("dateText").textContent=new Intl.DateTimeFormat(locale,{weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(n)}
 setInterval(updateClock,1000);updateClock();
 function updateCityLabel(){$("cityLabel").textContent=city.name}
-async function loadPrayerTimes(){const n=new Date(),date=[String(n.getDate()).padStart(2,"0"),String(n.getMonth()+1).padStart(2,"0"),n.getFullYear()].join("-");try{const res=await fetchJSON(`https://api.aladhan.com/v1/timings/${date}?latitude=${city.latitude}&longitude=${city.longitude}&method=3`);prayerTimesObj=res.data.timings;prayerTimeZone=res.data.meta?.timezone||Intl.DateTimeFormat().resolvedOptions().timeZone;const keys=["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"],ids=["fajr","sunrise","dhuhr","asr","maghrib","isha"];keys.forEach((k,i)=>$(ids[i]).textContent=(prayerTimesObj[k]||"--:--").split(" ")[0]);const h=res.data.date.hijri;$("hijriText").textContent=lang==="ar"?`${h.day} ${h.month.ar||h.month.en} ${h.year} هـ`:`${h.day} ${h.month.en} ${h.year} AH`}catch(e){$("hijriText").textContent=""}}
+let prayerSchedule=[],prayerDataDate='',prayerLoading=false,prayerRequest=0,lastPrayerLoadAttempt=0,prayerNextMarker='';
+const prayerDateFormats=new Map();
+function prayerParts(date,zone){let format=prayerDateFormats.get(zone);if(!format){format=new Intl.DateTimeFormat('en-GB',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});prayerDateFormats.set(zone,format)}return Object.fromEntries(format.formatToParts(date).filter(p=>p.type!=='literal').map(p=>[p.type,Number(p.value)]))}
+function prayerDateString(parts){return parts.year+'-'+String(parts.month).padStart(2,'0')+'-'+String(parts.day).padStart(2,'0')}
+function prayerEpoch(date,time,zone){const [year,month,day]=date.split('-').map(Number),[hour,minute]=time.split(' ')[0].split(':').map(Number);const wanted=Date.UTC(year,month-1,day,hour,minute);let result=wanted;for(let i=0;i<3;i++){const p=prayerParts(new Date(result),zone);result+=wanted-Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute,p.second)}return result}
+function scheduleFor(date,timings,zone){return ['Fajr','Dhuhr','Asr','Maghrib','Isha'].filter(key=>/^\d{1,2}:\d{2}/.test(timings[key]||'')).map(key=>({key,date,time:timings[key].split(' ')[0],epoch:prayerEpoch(date,timings[key],zone)}))}
+async function loadPrayerTimes(){
+  const request=++prayerRequest;prayerLoading=true;lastPrayerLoadAttempt=Date.now();
+  const method=Number(localStorage.getItem('zikra_prayer_method')||3),endpoint=date=>'https://api.aladhan.com/v1/timings/'+date.split('-').reverse().join('-')+'?latitude='+city.latitude+'&longitude='+city.longitude+'&method='+method;
+  try{
+    let date=prayerDateString(prayerParts(new Date(),prayerTimeZone||Intl.DateTimeFormat().resolvedOptions().timeZone));let result=await fetchJSON(endpoint(date));
+    const zone=result.data.meta.timezone,actual=prayerDateString(prayerParts(new Date(),zone));if(actual!==date){date=actual;result=await fetchJSON(endpoint(date))}
+    if(request!==prayerRequest)return;
+    prayerTimeZone=zone;prayerDataDate=date;prayerTimesObj=result.data.timings;prayerSchedule=scheduleFor(date,prayerTimesObj,zone);prayerNextMarker='';
+    const ids={Fajr:'fajr',Sunrise:'sunrise',Dhuhr:'dhuhr',Asr:'asr',Maghrib:'maghrib',Isha:'isha'};Object.entries(ids).forEach(([key,id])=>$(id).textContent=(prayerTimesObj[key]||'--:--').split(' ')[0]);
+    const h=result.data.date.hijri;$('hijriText').textContent=lang==='ar'?h.day+' '+(h.month.ar||h.month.en)+' '+h.year+' هـ':h.day+' '+h.month.en+' '+h.year+' AH';
+    const [y,m,d]=date.split('-').map(Number),tomorrow=new Date(Date.UTC(y,m-1,d+1)),nextDate=tomorrow.toISOString().slice(0,10);
+    const next=await fetchJSON(endpoint(nextDate));if(request!==prayerRequest)return;prayerSchedule.push(...scheduleFor(nextDate,next.data.timings,next.data.meta.timezone||zone));prayerSchedule.sort((a,b)=>a.epoch-b.epoch);
+  }catch(error){console.warn('Prayer data unavailable',error.message)}finally{if(request===prayerRequest){prayerLoading=false;updatePrayerCountdowns()}}
+}
 function updatePrayerCountdowns(){
-  if(!prayerTimesObj)return;
-  const zone=prayerTimeZone||Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const formatter=new Intl.DateTimeFormat("en-GB",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"});
-  const partsFor=date=>Object.fromEntries(formatter.formatToParts(date).map(part=>[part.type,Number(part.value)]));
-  const now=new Date(),localNow=partsFor(now),prayers=["Fajr","Dhuhr","Asr","Maghrib","Isha"];
-  const localToEpoch=(year,month,day,hour,minute)=>{
-    const desired=Date.UTC(year,month-1,day,hour,minute,0);let guess=desired;
-    for(let attempt=0;attempt<3;attempt++){const local=partsFor(new Date(guess)),asUtc=Date.UTC(local.year,local.month-1,local.day,local.hour,local.minute,local.second);guess+=desired-asUtc}
-    return guess;
-  };
-  let nextKey=null,nextEpoch=0;
-  for(const key of prayers){const [hour,minute]=prayerTimesObj[key].split(" ")[0].split(":").map(Number),candidate=localToEpoch(localNow.year,localNow.month,localNow.day,hour,minute);if(candidate>now.getTime()){nextKey=key;nextEpoch=candidate;break}}
-  if(!nextEpoch){const tomorrow=new Date(Date.UTC(localNow.year,localNow.month-1,localNow.day+1)),[hour,minute]=(prayerTimesObj.Fajr||"05:00").split(" ")[0].split(":").map(Number);nextKey="Fajr";nextEpoch=localToEpoch(tomorrow.getUTCFullYear(),tomorrow.getUTCMonth()+1,tomorrow.getUTCDate(),hour,minute)}
-  document.querySelectorAll(".prayer").forEach(el=>el.classList.remove("next-prayer"));document.querySelectorAll(".p-countdown").forEach(el=>el.textContent="");$("box-"+nextKey)?.classList.add("next-prayer");
-  const total=Math.max(0,Math.floor((nextEpoch-now.getTime())/1000)),hours=Math.floor(total/3600),minutes=Math.floor(total/60%60),seconds=total%60,pad=value=>String(value).padStart(2,"0");$("cd-"+nextKey).textContent=`${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  const now=Date.now();if(!prayerTimesObj)return;
+  const localDate=prayerDateString(prayerParts(new Date(now),prayerTimeZone));if(localDate!==prayerDataDate&&!prayerLoading&&now-lastPrayerLoadAttempt>30000)loadPrayerTimes();
+  const next=prayerSchedule.find(prayer=>prayer.epoch>now);
+  if(!next){if(!prayerLoading&&now-lastPrayerLoadAttempt>30000)loadPrayerTimes();document.querySelectorAll('.p-countdown').forEach(node=>node.textContent='');return}
+  const marker=next.key+'-'+next.date;if(marker!==prayerNextMarker){prayerNextMarker=marker;document.querySelectorAll('.prayer-strip .prayer').forEach(node=>node.classList.toggle('next-prayer',node.id==='box-'+next.key));document.querySelectorAll('.p-countdown').forEach(node=>node.textContent='');if(next.key==='Fajr')$('fajr').textContent=next.time}
+  const total=Math.max(0,Math.ceil((next.epoch-now)/1000)),pad=n=>String(n).padStart(2,'0');$('cd-'+next.key).textContent=pad(Math.floor(total/3600))+':'+pad(Math.floor(total/60)%60)+':'+pad(total%60);
 }
 setInterval(updatePrayerCountdowns,1000);
+
 function condition(code){const c=T[lang].conditions;if(code===0)return{text:c.clear,icon:"☀️",cls:"sunny"};if(code===1)return{text:c.mainly,icon:"🌤️",cls:"sunny"};if(code===2)return{text:c.partly,icon:"⛅",cls:"cloudy"};if(code===3)return{text:c.cloudy,icon:"☁️",cls:"cloudy"};if([45,48].includes(code))return{text:c.fog,icon:"🌫️",cls:"cloudy"};if([51,53,55,56,57].includes(code))return{text:c.drizzle,icon:"🌦️",cls:"rainy"};if([61,63,65,66,67,80,81,82].includes(code))return{text:c.rain,icon:"🌧️",cls:"rainy"};if([71,73,75,77,85,86].includes(code))return{text:c.snow,icon:"❄️",cls:"snowy"};if([95,96,99].includes(code))return{text:c.storm,icon:"⛈️",cls:"storm"};return{text:c.other,icon:"🌥️",cls:"cloudy"}}
 function weatherIcon(code){const c=condition(code),h=new Date().getHours();return(h>=20||h<6)&&c.cls==="sunny"?"🌙":c.icon}const temp=v=>v==null?"--":Math.round(v)+"°";
 async function loadWeather(){ $("weatherCondition").textContent=T[lang].loading;try{weatherData=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=14`);renderWeather()}catch(e){$("weatherCondition").textContent=T[lang].unavailable}}
@@ -556,8 +567,8 @@ const ZIKRA_DPAD_KEYS={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDow
 const ZIKRA_FOCUSABLE_SELECTOR='button:not(:disabled),select:not(:disabled),input:not(:disabled),textarea:not(:disabled),a[href],[tabindex]:not([tabindex="-1"])';
 
 function getVisibleFocusable(root){
-  return Array.from(root.querySelectorAll(ZIKRA_FOCUSABLE_SELECTOR)).filter(el=>{
-    if(el.disabled||el.getAttribute("aria-hidden")==="true"||el.closest('[aria-hidden="true"]'))return false;
+  return Array.from((root===document?document.querySelector(".app"):root).querySelectorAll(ZIKRA_FOCUSABLE_SELECTOR)).filter(el=>{
+    if(el.disabled||el.closest('[hidden],[aria-hidden="true"]'))return false;
     const rect=el.getBoundingClientRect(),style=getComputedStyle(el);
     return rect.width>0&&rect.height>0&&style.display!=="none"&&style.visibility!=="hidden";
   });
@@ -632,6 +643,9 @@ function moveDirectionalFocus(direction){
     return;
   }
 
+  if(!modal&&current===$("datePanel")&&direction==="down"){nextPrayerCard()?.focus({preventScroll:true});return}
+  if(!modal&&current===$("datePanel")&&direction==="left"){$("homeTasbeehCount").focus({preventScroll:true});return}
+  if(!modal&&current.closest?.(".home-tasbeeh")&&direction==="right"){$("datePanel").focus({preventScroll:true});return}
   const source=current.getBoundingClientRect();
   const sx=source.left+source.width/2,sy=source.top+source.height/2;
   const horizontal=direction==="left"||direction==="right";
@@ -663,7 +677,7 @@ function moveDirectionalFocus(direction){
   });
   const target=pool[0].el;
   target.focus({preventScroll:true});
-  target.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});
+  const bounds=target.getBoundingClientRect();if(bounds.top<0||bounds.bottom>innerHeight||bounds.left<0||bounds.right>innerWidth)target.scrollIntoView({block:"nearest",inline:"nearest",behavior:"instant"});
 }
 
 window.handleAndroidDpad=direction=>{const cell=document.getElementById('zikraCellOverlay'),cellFrame=document.getElementById('zikraCellFrame');if(cell&&!cell.hidden&&cellFrame?.contentWindow){cellFrame.contentWindow.postMessage({type:'zikra:cell-dpad',direction},'*');return}const screen=document.getElementById('settingsScreen'),frame=document.getElementById('settingsFrame');if(screen?.classList.contains('open')&&frame?.contentWindow){frame.contentWindow.postMessage({type:'zikra:settings-dpad',direction},'*');return}const key={left:'ArrowLeft',right:'ArrowRight',up:'ArrowUp',down:'ArrowDown'}[String(direction).toLowerCase()];if(!key)return;const target=document.activeElement&&document.activeElement!==document.documentElement?document.activeElement:document.body;const event=new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true});target.dispatchEvent(event);if(!event.defaultPrevented){event.preventDefault();moveDirectionalFocus(String(direction).toLowerCase())}};
@@ -848,11 +862,7 @@ function zikraRemoteKey(event){
 }
 // Trigger each enabled adhan at most once per local date; refreshes do not reset per-prayer preferences or played markers.
 let lastAdhanMinute="";
-function checkAutomaticAdhan(){
-  if(!prayerTimesObj)return;const now=new Date(),minuteKey=[now.getFullYear(),now.getMonth(),now.getDate(),now.getHours(),now.getMinutes()].join("-");if(minuteKey===lastAdhanMinute)return;lastAdhanMinute=minuteKey;
-  const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
-  for(const key of ADHAN_PRAYERS){const raw=prayerTimesObj[key];if(!raw)continue;const [h,m]=raw.split(" ")[0].split(":").map(Number);if(now.getHours()!==h||now.getMinutes()!==m)continue;const marker="zikra_adhan_played_"+today+"_"+key;if(localStorage.getItem(marker)==="1")continue;localStorage.setItem(marker,"1");const cfg=adhanSettings[key];if(cfg?.enabled){try{adhanAudio.pause();adhanAudio=new Audio(ADHAN_AUDIO_URLS[cfg.voice]||ADHAN_AUDIO_URLS.makkah);adhanAudio.play().catch(()=>{});}catch(e){}}}
-}
+function checkAutomaticAdhan(){const now=Date.now();for(const entry of prayerSchedule){if(now-entry.epoch<0||now-entry.epoch>=60000)continue;const marker="zikra_adhan_played_"+entry.date+"_"+entry.key;if(localStorage.getItem(marker)==="1")continue;localStorage.setItem(marker,"1");const cfg=adhanSettings[entry.key];if(cfg?.enabled){adhanAudio.pause();adhanAudio=new Audio(ADHAN_AUDIO_URLS[cfg.voice]||ADHAN_AUDIO_URLS.makkah);adhanAudio.play().catch(()=>{});}}}
 setInterval(checkAutomaticAdhan,5000);
 
 document.addEventListener("keydown",function(event){
@@ -1043,13 +1053,13 @@ updateCityLabel();renderMemory();updatePlayButton();loadPrayerTimes();loadWeathe
     frame.addEventListener('load',()=>{if(overlay.hidden)return;frame.dataset.ready='true';frame.contentWindow?.focus();frame.contentWindow?.postMessage({type:'zikra:cell-focus'},'*');});
   }
   function openCell(id,trigger){if(id==="quran"){openModal("quranModal");return;}
-    const path=routes[id];if(!path)return;ensureOverlay();returnFocus=trigger||document.activeElement;overlay.hidden=false;
+    const path=routes[id];if(!path)return;ensureOverlay();returnFocus=trigger?.matches('button,[tabindex]')?trigger:(trigger?.querySelector('button,[tabindex]')||document.activeElement);document.querySelector('.app').inert=true;document.body.classList.remove('remote-focus-active');overlay.hidden=false;frame.focus({preventScroll:true});
     frame.dataset.cell=id;frame.dataset.ready='false';
     frame.title=({settings:'الإعدادات',weather:'الطقس',prayer:'مواقيت الصلاة',quran:'القرآن الكريم',zikra:'الأذكار'})[id]||'خلية ذِكرى';
     frame.src=path;
   }
   function closeCell(){
-    if(!overlay||overlay.hidden)return false;overlay.hidden=true;frame.src='about:blank';
+    if(!overlay||overlay.hidden)return false;const settingsClosed=frame.dataset.cell==='settings';overlay.hidden=true;document.querySelector('.app').inert=false;document.body.classList.add('remote-focus-active');frame.src='about:blank';if(settingsClosed)window.zikraApplySavedSettings?.();
     const target=returnFocus;returnFocus=null;if(target&&target.isConnected)target.focus({preventScroll:true});return true;
   }
   window.zikraCloseCellOverlay=closeCell;
@@ -1088,7 +1098,8 @@ updateCityLabel();renderMemory();updatePlayButton();loadPrayerTimes();loadWeathe
 </script>
 
 
-<script src="assets/js/home-tasbeeh.js?v=20261024-1"></script>
+<script src="assets/js/home-focus.js?v=1"></script>
+<script src="assets/js/home-tasbeeh.js?v=20261024-2"></script>
 <script src="assets/js/dua-ticker.js?v=20261024-3"></script>
 </body>
 </html>

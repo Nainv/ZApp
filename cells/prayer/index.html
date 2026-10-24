@@ -205,7 +205,7 @@ body {
   .prayer { transition: none; animation: none !important; }
 }
 </style>
-<link rel="stylesheet" href="../../assets/css/cell-theme.css">
+<link rel="stylesheet" href="../../assets/css/cell-theme.css?v=6">
 </head>
 
 <body class="cell-prayer">
@@ -225,7 +225,7 @@ body {
     <button class="prayer focusable" data-prayer="Fajr">
       <span class="prayer-icon">🌙</span>
       <span class="prayer-name">الفجر</span>
-      <span class="prayer-time" id="time-Fajr">05:00</span>
+      <span class="prayer-time" id="time-Fajr">--:--</span>
       <span class="next-label">الصلاة القادمة</span>
       <span class="prayer-countdown" id="cd-Fajr"></span>
     </button>
@@ -233,7 +233,7 @@ body {
     <button class="prayer focusable" data-prayer="Dhuhr">
       <span class="prayer-icon">☀️</span>
       <span class="prayer-name">الظهر</span>
-      <span class="prayer-time" id="time-Dhuhr">12:30</span>
+      <span class="prayer-time" id="time-Dhuhr">--:--</span>
       <span class="next-label">الصلاة القادمة</span>
       <span class="prayer-countdown" id="cd-Dhuhr"></span>
     </button>
@@ -241,7 +241,7 @@ body {
     <button class="prayer focusable" data-prayer="Asr">
       <span class="prayer-icon">🌤️</span>
       <span class="prayer-name">العصر</span>
-      <span class="prayer-time" id="time-Asr">15:45</span>
+      <span class="prayer-time" id="time-Asr">--:--</span>
       <span class="next-label">الصلاة القادمة</span>
       <span class="prayer-countdown" id="cd-Asr"></span>
     </button>
@@ -249,7 +249,7 @@ body {
     <button class="prayer focusable" data-prayer="Maghrib">
       <span class="prayer-icon">🌅</span>
       <span class="prayer-name">المغرب</span>
-      <span class="prayer-time" id="time-Maghrib">18:30</span>
+      <span class="prayer-time" id="time-Maghrib">--:--</span>
       <span class="next-label">الصلاة القادمة</span>
       <span class="prayer-countdown" id="cd-Maghrib"></span>
     </button>
@@ -257,7 +257,7 @@ body {
     <button class="prayer focusable" data-prayer="Isha">
       <span class="prayer-icon">🌌</span>
       <span class="prayer-name">العشاء</span>
-      <span class="prayer-time" id="time-Isha">20:00</span>
+      <span class="prayer-time" id="time-Isha">--:--</span>
       <span class="next-label">الصلاة القادمة</span>
       <span class="prayer-countdown" id="cd-Isha"></span>
     </button>
@@ -265,7 +265,7 @@ body {
     <button class="prayer focusable" data-prayer="Sunrise">
       <span class="prayer-icon">🌄</span>
       <span class="prayer-name">الشروق</span>
-      <span class="prayer-time" id="time-Sunrise">06:45</span>
+      <span class="prayer-time" id="time-Sunrise">--:--</span>
       <span class="next-label">الشروق</span>
       <span class="prayer-countdown" id="cd-Sunrise"></span>
     </button>
@@ -298,84 +298,21 @@ body {
   const cards = [...document.querySelectorAll(".prayer")];
   const strip = document.getElementById("prayerStrip");
 
-  // الأوقات هنا تجريبية؛ اربطها بمصدر مواقيت مدينتك لاحقاً.
-  function getPrayerDate(id, baseDate = new Date()) {
-    const text = document.getElementById("time-" + id).textContent.trim();
-    const match = text.match(/^(\d{1,2}):(\d{2})$/);
-
-    if (!match) return null;
-
-    const date = new Date(baseDate);
-    date.setHours(Number(match[1]), Number(match[2]), 0, 0);
-    return date;
-  }
-
-  function formatRemaining(ms) {
-    const total = Math.max(0, Math.floor(ms / 1000));
-    const hours = String(Math.floor(total / 3600)).padStart(2, "0");
-    const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
-    const seconds = String(total % 60).padStart(2, "0");
-    return `${hours}:${minutes}:${seconds}`;
-  }
-
-  function findNextPrayer(now) {
-    // الشروق ليس صلاة مفروضة، لذلك لا يظهر كالصلاة القادمة.
-    const prayerIds = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
-
-    for (const id of prayerIds) {
-      const date = getPrayerDate(id, now);
-      if (date && date > now) return { id, date };
-    }
-
-    // بعد العشاء، صلاة الفجر القادمة هي في اليوم التالي.
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const fajr = getPrayerDate("Fajr", tomorrow);
-    return fajr ? { id: "Fajr", date: fajr } : null;
-  }
-
-  function updatePrayerTimes() {
-    const now = new Date();
-    const next = findNextPrayer(now);
-
-    document.getElementById("todayDate").textContent =
-      new Intl.DateTimeFormat("ar", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-      }).format(now);
-
-    cards.forEach(card => {
-      card.classList.remove("next-prayer");
-
-      const id = card.dataset.prayer;
-      const countdown = document.getElementById("cd-" + id);
-      const date = getPrayerDate(id, now);
-
-      if (id === "Sunrise") {
-        countdown.textContent = "";
-        return;
-      }
-
-      if (next && id === next.id) {
-        card.classList.add("next-prayer");
-        countdown.textContent = formatRemaining(next.date - now);
-      } else if (date && date > now) {
-        countdown.textContent = "";
-      } else {
-        countdown.textContent = "";
-      }
-    });
-
-    if (next) {
-      const name = prayers.find(p => p.id === next.id)?.name || "";
-      document.getElementById("nextPrayerName").textContent = name;
-      document.getElementById("mainCountdown").textContent =
-        formatRemaining(next.date - now);
-      document.getElementById("status").textContent = "القادمة: " + name;
-    }
+  let schedule=[],zone=Intl.DateTimeFormat().resolvedOptions().timeZone,loadedDate='',loading=false,lastAttempt=0;
+  const formats=new Map();
+  function parts(date,tz){let f=formats.get(tz);if(!f){f=new Intl.DateTimeFormat('en-GB',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});formats.set(tz,f)}return Object.fromEntries(f.formatToParts(date).filter(p=>p.type!=='literal').map(p=>[p.type,Number(p.value)]))}
+  function dateString(date){return date.year+'-'+String(date.month).padStart(2,'0')+'-'+String(date.day).padStart(2,'0')}
+  function epoch(date,time,tz){const [y,m,d]=date.split('-').map(Number),[h,min]=time.split(' ')[0].split(':').map(Number),wanted=Date.UTC(y,m-1,d,h,min);let result=wanted;for(let i=0;i<3;i++){const p=parts(new Date(result),tz);result+=wanted-Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute,p.second)}return result}
+  function apply(snapshot){if(!snapshot?.timings)return false;zone=snapshot.zone;loadedDate=snapshot.date;schedule=snapshot.schedule;prayers.forEach(prayer=>{const time=snapshot.timings[prayer.id];if(time)document.getElementById('time-'+prayer.id).textContent=time.split(' ')[0]});return true}
+  async function loadStandalone(){if(loading)return;loading=true;lastAttempt=Date.now();try{const lat=localStorage.getItem('zikra_lat')||50.9848,lon=localStorage.getItem('zikra_lon')||11.0299,method=localStorage.getItem('zikra_prayer_method')||3;const fetchDay=async date=>{const response=await fetch('https://api.aladhan.com/v1/timings/'+date.split('-').reverse().join('-')+'?latitude='+lat+'&longitude='+lon+'&method='+method);if(!response.ok)throw Error('prayer');return (await response.json()).data};let date=dateString(parts(new Date(),zone)),today=await fetchDay(date);zone=today.meta.timezone;const actual=dateString(parts(new Date(),zone));if(actual!==date){date=actual;today=await fetchDay(date)}const [y,m,d]=date.split('-').map(Number),tomorrowDate=new Date(Date.UTC(y,m-1,d+1)).toISOString().slice(0,10),tomorrow=await fetchDay(tomorrowDate);const build=(day,data)=>['Fajr','Dhuhr','Asr','Maghrib','Isha'].map(key=>({key,date:day,time:data.timings[key].split(' ')[0],epoch:epoch(day,data.timings[key],data.meta.timezone)}));apply({zone,date,timings:today.timings,schedule:[...build(date,today),...build(tomorrowDate,tomorrow)]})}catch(_){document.getElementById('status').textContent='تعذّر جلب مواقيت الصلاة.'}finally{loading=false;updatePrayerTimes()}}
+  function formatRemaining(ms){const total=Math.max(0,Math.ceil(ms/1000));return [Math.floor(total/3600),Math.floor(total/60)%60,total%60].map(value=>String(value).padStart(2,'0')).join(':')}
+  function updatePrayerTimes(){
+    let shared=null;try{if(parent!==window)shared=parent.zikraPrayerSnapshot?.()}catch(_){}
+    if(shared?.schedule?.length)apply(shared);else if(!loading&&(!schedule.length||loadedDate!==dateString(parts(new Date(),zone)))&&Date.now()-lastAttempt>30000)loadStandalone();
+    const now=Date.now(),next=schedule.find(item=>item.epoch>now);
+    document.getElementById('todayDate').textContent=new Intl.DateTimeFormat('ar',{timeZone:zone,dateStyle:'full'}).format(new Date());
+    cards.forEach(card=>{const selected=next?.key===card.dataset.prayer;card.classList.toggle('next-prayer',selected);document.getElementById('cd-'+card.dataset.prayer).textContent=selected?formatRemaining(next.epoch-now):''});
+    if(next){document.getElementById('time-'+next.key).textContent=next.time;const name=prayers.find(prayer=>prayer.id===next.key)?.name||'';document.getElementById('nextPrayerName').textContent=name;document.getElementById('mainCountdown').textContent=formatRemaining(next.epoch-now);document.getElementById('status').textContent='القادمة: '+name}
   }
 
   // التركيز الافتراضي على أول بطاقة.
@@ -455,6 +392,6 @@ body {
 
 <button id="cellHomeButton" type="button" aria-label="إغلاق الخلية" class="cell-close-button">×</button>
 <script id="cellHomeNavigation">(function(){function close(){if(window.closeZikraCell)window.closeZikraCell();else if(history.length>1)history.back()}var b=document.getElementById('cellHomeButton');if(b)b.addEventListener('click',close);document.addEventListener('keydown',function(e){if(['Escape','Backspace','BrowserBack','GoBack'].includes(e.key)||e.keyCode===4){e.preventDefault();e.stopImmediatePropagation();close()}},true)})();</script>
-<script src="../../assets/js/tv-remote.js"></script>
+<script src="../../assets/js/tv-remote.js?v=6"></script>
 </body>
 </html>

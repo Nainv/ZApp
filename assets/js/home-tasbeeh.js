@@ -23,6 +23,7 @@
     document.getElementById('homeTasbeehResetLabel').textContent = ar ? 'تصفير' : language === 'de' ? 'Zurücksetzen' : 'Reset';
     reset.setAttribute('aria-label', ar ? 'تصفير عداد المسبحة' : 'Reset tasbih counter');
     button.setAttribute('aria-label', phrase + '، ' + format.format(count) + (ar ? ' تسبيحة. اضغط للإضافة' : '. Add one'));
+    button.style.fontSize=Math.min(button.clientWidth<70?24:29,(button.clientWidth-16)/String(count).length*1.4)+'px';
     button.style.setProperty('--tasbeeh-progress', (count % 33) / 33 * 360 + 'deg');
   }
   function save() {

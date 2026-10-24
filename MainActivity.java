@@ -151,7 +151,7 @@ public class MainActivity extends Activity {
         }
         webView.evaluateJavascript(
             "(function(){if(typeof window.handleAndroidDpad==='function'){window.handleAndroidDpad('" + direction + "');return 'handled';}return 'handler-missing';})()",
-            value -> { if ("\"handler-missing\"".equals(value)) Log.w(TAG, "HTML DPAD handler is missing"); }
+            null
         );
     }
 
@@ -185,10 +185,7 @@ public class MainActivity extends Activity {
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
         int code = event.getKeyCode();
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            Log.d(TAG, "Remote key: " + KeyEvent.keyCodeToString(code)
-                    + " (code=" + code + ", repeat=" + event.getRepeatCount() + ")");
-        }
+
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
             // Consume matching key-up events for keys handled below so WebView does not
             // receive a second, inconsistent navigation event.
