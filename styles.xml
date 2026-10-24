@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ZikraTheme" parent="android:style/Theme.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">#101b23</item>
+        <item name="android:colorAccent">#79c9b2</item>
+        <item name="android:windowSplashScreenBackground">#101b23</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
+    </style>
+</resources>

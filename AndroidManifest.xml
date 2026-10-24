@@ -22,7 +22,7 @@
         android:usesCleartextTraffic="true"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
-        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        android:theme="@style/ZikraTheme">
 
         <activity
             android:name=".MainActivity"

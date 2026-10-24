@@ -501,3 +501,83 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   .home-tasbeeh-count { width: 60px; height: 60px; font-size: 23px; }
   .player, .tiles .tile-memory { min-height: 155px !important; }
 }
+
+/* The index, reading pages and exit prompt share the dashboard palette. */
+#quranModal > .modal {
+  width: min(1100px,96vw); height: min(780px,92dvh); max-height: 92dvh;
+  display: flex; flex-direction: column; gap: 12px; padding: 22px; overflow: hidden;
+  background: linear-gradient(145deg,#1c3038,#14242c); border-color: var(--zikra-line);
+}
+#quranModal .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#quranModal h2 { font-size: clamp(18px,2vw,25px); color: var(--zikra-gold); }
+#quranModal .close-modal { flex: 0 0 42px; width: 42px; height: 42px; border-radius: 50%; font-size: 27px; }
+#quranModal .form-row { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap: 14px; align-items: end; }
+#quranModal label { display: block; margin-bottom: 6px; color: var(--zikra-muted); font-size: 12px; }
+.reader-picker-wrap { position: relative; min-width: 0; }
+#quranModal .reader-picker-button { display: block; position: relative; width: 100%; min-height: 46px; padding: 10px 14px 10px 35px; text-align: right; font-size: 14px; background: #15272f; border-color: #3a565d; }
+.reader-picker-button::after { content: "⌄"; position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--zikra-teal); font-size: 21px; }
+.reader-picker-menu { position: absolute; top: calc(100% + 8px); right: 0; left: 0; z-index: 100; max-height: min(48vh,360px); overflow-y: auto; padding: 7px; background: #14262e; border: 1px solid #3a565d; border-radius: 14px; box-shadow: 0 20px 45px #0008; overscroll-behavior: contain; scrollbar-color: #648b80 #14262e; }
+.reader-picker-menu[hidden] { display: none !important; }
+#quranModal .reader-option { display: flex; flex-direction: column; align-items: stretch; gap: 3px; width: 100%; min-height: 53px; margin: 2px 0; padding: 9px 12px; text-align: right; border-color: transparent; border-radius: 9px; background: transparent; }
+.reader-option strong { color: var(--zikra-text); font-size: 14px; }
+.reader-option small { color: var(--zikra-muted); font-size: 11px; }
+#quranModal .reader-option:focus, #quranModal .reader-option[aria-selected="true"] { background: #79c9b22b; border-color: transparent; outline: none !important; transform: none !important; box-shadow: none !important; }
+#resumeLastReadBtn { width: 100%; min-height: 46px; padding: 9px 12px; text-align: center; color: var(--zikra-teal); font-size: 12px; }
+#resumeLastReadBtn:disabled { color: var(--zikra-muted); opacity: .6; }
+#quranStatus { color: var(--zikra-muted); font-size: 12px; line-height: 1.5; }
+#surahContainer { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 5px 5px 14px; scrollbar-color: #648b80 #14262e; }
+.surah-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(190px,1fr)); gap: 11px; }
+#quranModal .surah-item { display: flex; align-items: center; gap: 12px; min-height: 87px; padding: 12px; text-align: right; background: linear-gradient(145deg,#213941,#192c34); border: 1px solid var(--zikra-line); border-radius: 15px; }
+.surah-info { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; gap: 3px; }
+.surah-num { display: grid; place-items: center; flex: 0 0 35px; width: 35px; height: 35px; color: var(--zikra-gold); background: url('../images/ayah-medallion.svg') center/contain no-repeat; font-size: 13px; font-weight: 700; }
+.surah-title { color: var(--zikra-text); font-size: 17px; line-height: 1.7; }
+.surah-meta { color: var(--zikra-muted); font-size: 11px; }
+.surah-last-position { color: var(--zikra-teal); font-size: 11px; }
+#quranModal .surah-item.has-bookmark { background: linear-gradient(145deg,#2c5145,#1b3438); }
+#quranModal .surah-item:disabled { opacity: .38; cursor: default; }
+#quranModal .quran-modal-player { flex: 0 0 auto; margin: 0; padding: 11px 14px; border-color: var(--zikra-line); background: #10232b; }
+.quran-modal-player strong { color: var(--zikra-text); font-size: 13px; font-weight: 500; }
+#backToIndex { min-height: 38px; margin-bottom: 12px; padding: 8px 15px; color: var(--zikra-teal); }
+.mushaf-page { margin: 0 auto 18px; padding: clamp(15px,2vw,28px); border: 1px solid #3b565a; border-radius: 17px; background: linear-gradient(145deg,#1d343b,#182a32); color: var(--zikra-text); }
+.mushaf-page-text { direction: rtl; text-align: center; font-family: 'Traditional Arabic','Noto Naskh Arabic',Amiri,serif; font-size: clamp(24px,2.4vw,33px); line-height: 2.5; }
+.ayah { border-radius: 6px; padding: 2px 3px; cursor: pointer; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background .16s,color .16s; }
+.ayah.active { background: #79c9b237; color: #f6fff8; }
+#quranModal .ayah:focus { background: #e5c77b26; color: var(--zikra-gold); outline: none !important; transform: none !important; box-shadow: none !important; }
+.waqf { display: inline-grid; place-items: center; width: 30px; height: 30px; margin: 0 4px; vertical-align: middle; background: url('../images/ayah-medallion.svg') center/contain no-repeat; color: var(--zikra-gold); font: 12px/1 Tahoma,Arial,sans-serif; }
+.mushaf-page-number { margin-top: 17px; text-align: center; color: var(--zikra-gold); font-size: 17px; }
+.player .quran-entry-caption #miniPage { font-size: clamp(15px,1.4vw,19px) !important; line-height: 1.5; margin: 0; white-space: nowrap; }
+.player .quran-meta-markers { align-items: center; }
+.player .controls, .quran-modal-controls { direction: rtl; }
+#miniPrev svg, #miniNext svg, #modalPrev svg, #modalNext svg { transform: scaleX(-1); }
+#exitModal > .modal { width: min(440px,92vw) !important; max-width: 440px !important; padding: 28px; border-radius: 22px; background: linear-gradient(145deg,#1e353d,#14242c); text-align: center; }
+.exit-ornament { margin: 0 auto 12px; color: var(--zikra-gold); font-size: 36px; line-height: 1; }
+#exitModal .modal-head { justify-content: center; margin-bottom: 12px; }
+#exitModal h2 { font-size: 22px; color: var(--zikra-text); }
+#exitModal p { color: var(--zikra-muted); }
+#exitModal .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+#exitModal button { min-height: 47px; padding: 10px 14px; font-size: 14px; font-weight: 700; }
+#exitModal #confirmExitBtn { background: linear-gradient(135deg,#8dd2b7,#62b69b); color: #10221d; border-color: #80cbb0; }
+#exitModal #cancelExitBtn { background: var(--zikra-panel-2); color: var(--zikra-text); }
+/* Cancel all older long-track animations; measured entries cannot overlap. */
+.dua-track { position: relative !important; display: block !important; width: 100% !important; height: 100%; min-height: 30px; animation: none !important; transform: none !important; will-change: auto; }
+.dua-entry { position: absolute; top: 50%; left: 0; display: inline-flex; align-items: center; gap: 30px; width: max-content; max-width: none; white-space: nowrap; direction: rtl; will-change: transform; }
+.dua-entry .dua-item { display: block; flex: 0 0 auto; width: max-content; max-width: none; direction: rtl; unicode-bidi: isolate; white-space: nowrap; line-height: 1.5; }
+.dua-entry .dua-separator { display: block; flex: 0 0 auto; line-height: 1; }
+@media(max-width:700px) {
+  #quranModal { padding: 9px; }
+  #quranModal > .modal { width: 100%; height: 94dvh; max-height: 94dvh; padding: 13px; gap: 10px; border-radius: 17px; }
+  #quranModal .form-row { grid-template-columns: minmax(0,1fr); gap: 9px; }
+  #quranModal .reader-picker-button { min-height: 42px; font-size: 12px; }
+  .reader-picker-menu { max-height: 40dvh; }
+  #resumeLastReadBtn { min-height: 37px; font-size: 11px; }
+  .surah-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  #quranModal .surah-item { min-height: 80px; padding: 9px 7px; gap: 7px; border-radius: 12px; }
+  .surah-num { width: 30px; height: 30px; flex-basis: 30px; font-size: 11px; }
+  .surah-title { font-size: 15px; }
+  .surah-meta, .surah-last-position { font-size: 10px; }
+  .quran-modal-player strong { font-size: 11px; text-align: center; }
+  #quranStatus { font-size: 10px; }
+  .mushaf-page { padding: 13px 10px; border-radius: 13px; }
+  .mushaf-page-text { font-size: 25px; line-height: 2.45; }
+  .player .quran-meta-markers { gap: 4px; }
+}

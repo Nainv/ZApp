@@ -43,6 +43,8 @@ public class MainActivity extends Activity {
                 : ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         root = new FrameLayout(this);
         webView = new WebView(this);
+        root.setBackgroundColor(Color.rgb(16, 27, 35));
+        webView.setBackgroundColor(Color.rgb(16, 27, 35));
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
