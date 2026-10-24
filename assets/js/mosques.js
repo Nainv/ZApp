@@ -1,0 +1,14 @@
+/* Public directory lookup; a directory record is never treated as an official timetable. */
+(() => {
+  'use strict';
+  async function get(url){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);try{const r=await fetch(url,{signal:controller.signal});if(!r.ok)throw Error('تعذّر الاتصال بدليل المساجد.');return await r.json()}catch(error){throw Error(error.name==='AbortError'?'استغرق البحث وقتًا طويلًا. حاول مجددًا.':error.message)}finally{clearTimeout(timer)}}
+  async function cities(name){if(!name.trim())throw Error('اكتب اسم المدينة أولًا.');const result=await get('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(name.trim())+'&count=6&language=ar&format=json');if(!result.results?.length)throw Error('لم يتم العثور على المدينة.');return result.results}
+  async function nearby(lat,lon){const native=location.origin==='https://appassets.androidplatform.net',url=native?'/assets/_api/mosques?lat='+lat+'&lon='+lon:'https://pray.zone/api/mosques/nearby?longitude='+lon+'&latitude='+lat+'&maxDistance=25000';let result;try{result=await get(url)}catch(error){throw Error(native?error.message:'البحث المباشر متاح في تطبيق أندرويد. المتصفح يحتاج خدمة دليل تدعم الاتصال من المواقع.')}if(!Array.isArray(result))throw Error('استجابة دليل المساجد غير صالحة.');return result.filter(item=>typeof item.slug==='string'&&typeof item.title==='string'&&Number.isFinite(item.distance)).map(item=>({id:item.slug,title:item.title,city:item.city,distance:item.distance,provider:'PrayerZone'})).sort((a,b)=>a.distance-b.distance)}
+  function parseCalendar(text){
+    const lines=text.replace(/^\uFEFF/,'').trim().split(/\r?\n/),separator=lines[0].includes(';')?';':',',head=lines.shift().split(separator).map(v=>v.trim().toLowerCase()),required=['date','fajr','dhuhr','asr','maghrib','isha'];
+    if(!required.every(key=>head.includes(key)))throw Error('عناوين الملف غير صحيحة. المطلوب Date,Fajr,Dhuhr,Asr,Maghrib,Isha.');
+    const calendar={};for(const line of lines){if(!line.trim())continue;const fields=line.split(separator).map(v=>v.trim()),day=fields[head.indexOf('date')];if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||new Date(day).toISOString().slice(0,10)!==day)throw Error('تاريخ غير صالح في الملف.');const times={};for(const key of ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha']){const index=head.indexOf(key.toLowerCase());if(index<0&&key==='Sunrise')continue;const value=fields[index];if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(value||''))throw Error('وقت غير صالح في '+day+' · '+key);times[key]=value}calendar[day]=times}
+    if(!Object.keys(calendar).length||Object.keys(calendar).length>740)throw Error('الملف فارغ أو يتجاوز سنتين.');return calendar;
+  }
+  window.ZikraMosques={cities,nearby,parseCalendar};
+})();

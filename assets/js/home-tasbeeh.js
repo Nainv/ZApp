@@ -1,48 +1,15 @@
-/* The home counter shares its saved total with the remembrance cell. */
 (() => {
   'use strict';
-  const key = 'zikra_tasbeeh';
-  const button = document.getElementById('homeTasbeehCount');
-  const reset = document.getElementById('homeTasbeehReset');
-  if (!button || !reset) return;
-  const phrases = ['سبحان الله', 'الحمد لله', 'الله أكبر'];
-  let count = 0;
-  function readCount() {
-    try { return Math.max(0, Math.trunc(Number(localStorage.getItem(key)) || 0)); }
-    catch (_) { return count; }
-  }
-  function render() {
-    const language = document.documentElement.lang || 'ar';
-    const ar = language === 'ar';
-    const format = new Intl.NumberFormat(ar ? 'ar-u-nu-arab' : 'en', { useGrouping: false });
-    const phrase = phrases[Math.floor(count / 33) % phrases.length];
-    document.getElementById('homeTasbeehValue').textContent = format.format(count);
-    document.getElementById('homeTasbeehPhrase').textContent = phrase;
-    document.getElementById('homeTasbeehProgress').textContent = format.format(count % 33) + ' / ' + format.format(33);
-    document.getElementById('homeTasbeehTitle').textContent = ar ? 'المسبحة' : language === 'de' ? 'Tasbih-Zähler' : 'Tasbih';
-    document.getElementById('homeTasbeehResetLabel').textContent = ar ? 'تصفير' : language === 'de' ? 'Zurücksetzen' : 'Reset';
-    reset.setAttribute('aria-label', ar ? 'تصفير عداد المسبحة' : 'Reset tasbih counter');
-    button.setAttribute('aria-label', phrase + '، ' + format.format(count) + (ar ? ' تسبيحة. اضغط للإضافة' : '. Add one'));
-    button.style.fontSize=Math.min(button.clientWidth<70?24:29,(button.clientWidth-16)/String(count).length*1.4)+'px';
-    button.style.setProperty('--tasbeeh-progress', (count % 33) / 33 * 360 + 'deg');
-  }
-  function save() {
-    try { localStorage.setItem(key, String(count)); } catch (_) {}
-    render();
-  }
-  button.addEventListener('click', () => { count = Math.min(Number.MAX_SAFE_INTEGER, count + 1); save(); });
-  reset.addEventListener('click', () => { count = 0; save(); });
-  for (const control of [button, reset]) {
-    control.addEventListener('keydown', event => {
-      if (event.key !== 'Select' && event.key !== 'OK' && event.keyCode !== 23) return;
-      event.preventDefault();
-      event.stopPropagation();
-      control.click();
-    });
-  }
-  window.addEventListener('storage', event => { if (event.key === key || event.key === null) { count = readCount(); render(); } });
-  window.addEventListener('pageshow', () => { count = readCount(); render(); });
-  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-  count = readCount();
-  render();
+  const key='zikra_tasbeeh',$=id=>document.getElementById(id),button=$('homeTasbeehCount'),reset=$('homeTasbeehReset');if(!button||!reset)return;
+  const value=$('homeTasbeehValue'),phrase=$('homeTasbeehPhrase'),progress=$('homeTasbeehProgress'),phrases=['سبحان الله','الحمد لله','الله أكبر'];
+  let count=Math.max(0,Math.trunc(Number(localStorage.getItem(key))||0)),timer=0,formatter,width=54,lastDigits=0;
+  function flush(){clearTimeout(timer);timer=0;try{localStorage.setItem(key,String(count))}catch(_){}}
+  function render(){const text=formatter.format(count);value.textContent=text;phrase.textContent=phrases[Math.floor(count/33)%3];progress.textContent=formatter.format(count%33)+' / '+formatter.format(33);button.style.setProperty('--tasbeeh-progress',(count%33)/33*360+'deg');if(text.length!==lastDigits){lastDigits=text.length;button.style.fontSize=Math.min(width<70?24:29,(width-16)/text.length*1.4)+'px'}button.setAttribute('aria-label',phrase.textContent+'، '+text)}
+  function locale(){const lang=document.documentElement.lang||'ar';formatter=new Intl.NumberFormat(lang==='ar'?'ar-u-nu-arab':'en',{useGrouping:false});$('homeTasbeehTitle').textContent=lang==='ar'?'المسبحة':lang==='de'?'Tasbih-Zähler':'Tasbih';$('homeTasbeehResetLabel').textContent=lang==='ar'?'تصفير':lang==='de'?'Zurücksetzen':'Reset';lastDigits=0;render()}
+  function change(next){count=next;render();clearTimeout(timer);timer=setTimeout(flush,180)}
+  button.addEventListener('click',()=>change(Math.min(Number.MAX_SAFE_INTEGER,count+1)));reset.addEventListener('click',()=>change(0));
+  window.addEventListener('pagehide',flush);document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
+  window.addEventListener('storage',event=>{if(event.key===key){count=Math.max(0,Math.trunc(Number(event.newValue)||0));render()}});
+  new MutationObserver(locale).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+  const resize=()=>{width=button.clientWidth||54;lastDigits=0;render()};locale();window.addEventListener('resize',resize,{passive:true});resize();
 })();

@@ -13,8 +13,11 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 
+<script src="assets/js/storage-bootstrap.js?v=1"></script>
+<script src="assets/js/fast-navigation.js?v=1"></script>
+<script src="assets/js/prayer-model.js?v=1"></script>
 <title>ذِكرى | Zikra</title>
-<link rel="stylesheet" href="assets/css/home-theme.css?v=20261024-6">
+<link rel="stylesheet" href="assets/css/home-theme.css?v=20261025-1">
 <script src="assets/js/duas-ar.js?v=20261024-3"></script>
 </head>
 <body>
@@ -26,7 +29,7 @@
     <button class="icon-btn refresh-launch" id="homeRefreshBtn" type="button" aria-label="تحديث التطبيق" title="تحديث التطبيق">↻</button>
   </div>
 </header>
-<section class="date-panel weather-unified sunny" id="datePanel" role="button" tabindex="0" aria-label="فتح لوحة الطقس" title="فتح لوحة الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><div class="clock" id="clock">--:--</div><div class="date-weather-widget" id="weatherCard"><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></div><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">إرفورت</div></div></section>
+<section class="date-panel weather-unified sunny" id="datePanel" role="button" tabindex="0" aria-label="فتح لوحة الطقس" title="فتح لوحة الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><div class="clock" id="clock">--:--</div><div class="date-weather-widget" id="weatherCard"><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></div><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">إرفورت</div><small id="prayerSource" class="prayer-source"></small></div></section>
 <section class="home-tasbeeh" aria-labelledby="homeTasbeehTitle"><h2 id="homeTasbeehTitle">المسبحة</h2><p id="homeTasbeehPhrase">سبحان الله</p><button type="button" class="home-tasbeeh-count" id="homeTasbeehCount" aria-label="إضافة تسبيحة"><span id="homeTasbeehValue">٠</span></button><span class="home-tasbeeh-progress" id="homeTasbeehProgress" dir="ltr">٠ / ٣٣</span><button type="button" class="home-tasbeeh-reset" id="homeTasbeehReset" aria-label="تصفير عداد المسبحة"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span id="homeTasbeehResetLabel">تصفير</span></button></section>
 <section class="prayer-strip">
   <div class="prayer" id="box-Fajr" tabindex="0" role="button" aria-label="Fajr"><span class="p-icon">☾</span><div class="p-name" data-prayer="Fajr" data-ar="الفجر" data-en="Fajr" data-de="Fadschr">الفجر</div><div class="p-time" id="fajr">--:--</div><div class="p-countdown" id="cd-Fajr"></div></div>
@@ -134,7 +137,7 @@ const $=id=>document.getElementById(id);
 const API="https://mp3quran.net/api/v3";
 let lang=localStorage.getItem("zikra_language")||"ar";
 if(!["ar","en","de"].includes(lang))lang="ar";
-let weatherData=null,selectedWeatherDay=0,prayerTimesObj=null,prayerTimeZone=null,city={name:localStorage.getItem("zikra_city")||"Erfurt",latitude:Number(localStorage.getItem("zikra_lat"))||50.9848,longitude:Number(localStorage.getItem("zikra_lon"))||11.0299};
+let weatherData=null,selectedWeatherDay=0,prayerTimesObj=null,prayerTimeZone=null,city={name:localStorage.getItem("zikra_city")||"Erfurt",latitude:Number(localStorage.getItem("zikra_lat")??50.9848),longitude:Number(localStorage.getItem("zikra_lon")??11.0299)};
 let previousFocus=null,readers=[],times=[],read=null,loaded=false,currentSurahNum=1,surahListCache=[],lastBookmarkTime=0;
 const audio=$("audio"),versesBox=$("verses"),statusBox=$("quranStatus");
 const T={
@@ -143,42 +146,37 @@ en:{title:"Zikra",subtitle:"Peace for the heart, every day",city:"City: ",loadin
 de:{title:"Zikra",subtitle:"Ruhe für das Herz, jeden Tag",city:"Stadt: ",loading:"Wetter wird geladen…",unavailable:"Wetter nicht verfügbar",locationPrompt:"Stadt eingeben:",cityNotFound:"Stadt nicht gefunden.",cityError:"Stadtsuche fehlgeschlagen.",details:"Wetterdetails",feels:"Gefühlt",humidity:"Luftfeuchtigkeit",wind:"Windgeschwindigkeit",max:"Tageshöchstwert",min:"Tagestiefstwert",rain:"Niederschlagswahrscheinlichkeit",uv:"UV-Index",hourly:"Stündliche Vorhersage",daily:"Vorhersage für die nächsten Tage",today:"Heute",tomorrow:"Morgen",quranTitle:"Koran-Index",reciterLabel:"Rezitator wählen:",resumeLabel:"Fortsetzen:",noResume:"Kein Leseverlauf",defaultSurah:"Sure wählen und Rezitation starten",openPrompt:"Sure wählen und Rezitation starten",startPrompt:"Sure wählen und Rezitation starten",memoryTitle:"Koranische & Prophetische Weisheit",sourceLabel:"Quelle: ",rights:"© 2026 Zikra — Alle Rechte vorbehalten",conditions:{clear:"Klarer Himmel",mainly:"Überwiegend klar",partly:"Teilweise bewölkt",cloudy:"Bewölkt",fog:"Nebel",drizzle:"Nieselregen",rain:"Regen",snow:"Schnee",storm:"Gewitter",other:"Wechselhaft"},days:["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"],memories:[{text:"Mit der Erschwernis kommt Erleichterung.",source:"Sure Asch-Scharh, 94:5",benefit:"Schwierigkeiten sind nicht von Dauer."},{text:"Die Taten werden nach den Absichten bemessen.",source:"Sahih al-Bukhari 1; Sahih Muslim 1907",benefit:"Eine aufrichtige Absicht ist wichtig."},{text:"Durch Gottes Gedenken kommen die Herzen zur Ruhe.",source:"Sure Ar-Ra'd, 13:28",benefit:"Gedenken an Gott schenkt inneren Frieden."},{text:"Wer keine Barmherzigkeit zeigt, dem wird keine erwiesen.",source:"Sahih al-Bukhari 6013; Sahih Muslim 2319",benefit:"Sei barmherzig zu anderen."},{text:"Mein Herr, mehre mein Wissen.",source:"Sure Ta-Ha, 20:114",benefit:"Strebe nach nützlichem Wissen."}]}
 };
 async function fetchJSON(url){const r=await fetch(url);if(!r.ok)throw Error("HTTP "+r.status);return r.json()}
-function updateClock(){const n=new Date(),locale=lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB";$("clock").textContent=new Intl.DateTimeFormat(locale,{hour:"2-digit",minute:"2-digit",hour12:false}).format(n);$("dateText").textContent=new Intl.DateTimeFormat(locale,{weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(n)}
-setInterval(updateClock,1000);updateClock();
+function updateClock(){const n=new Date(),locale=lang==="ar"?"ar":lang==="de"?"de-DE":"en-GB";$("clock").textContent=new Intl.DateTimeFormat(locale,{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:prayerTimeZone||Intl.DateTimeFormat().resolvedOptions().timeZone}).format(n);$("dateText").textContent=new Intl.DateTimeFormat(locale,{weekday:"long",year:"numeric",month:"long",day:"numeric",timeZone:prayerTimeZone||Intl.DateTimeFormat().resolvedOptions().timeZone}).format(n)}
+setInterval(updateClock,1000);
 function updateCityLabel(){$("cityLabel").textContent=city.name}
-let prayerSchedule=[],prayerDataDate='',prayerLoading=false,prayerRequest=0,lastPrayerLoadAttempt=0,prayerNextMarker='';
-const prayerDateFormats=new Map();
-function prayerParts(date,zone){let format=prayerDateFormats.get(zone);if(!format){format=new Intl.DateTimeFormat('en-GB',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});prayerDateFormats.set(zone,format)}return Object.fromEntries(format.formatToParts(date).filter(p=>p.type!=='literal').map(p=>[p.type,Number(p.value)]))}
-function prayerDateString(parts){return parts.year+'-'+String(parts.month).padStart(2,'0')+'-'+String(parts.day).padStart(2,'0')}
-function prayerEpoch(date,time,zone){const [year,month,day]=date.split('-').map(Number),[hour,minute]=time.split(' ')[0].split(':').map(Number);const wanted=Date.UTC(year,month-1,day,hour,minute);let result=wanted;for(let i=0;i<3;i++){const p=prayerParts(new Date(result),zone);result+=wanted-Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute,p.second)}return result}
-function scheduleFor(date,timings,zone){return ['Fajr','Dhuhr','Asr','Maghrib','Isha'].filter(key=>/^\d{1,2}:\d{2}/.test(timings[key]||'')).map(key=>({key,date,time:timings[key].split(' ')[0],epoch:prayerEpoch(date,timings[key],zone)}))}
+let prayerSchedule=[],prayerDataDate='',prayerLoading=false,prayerRequest=0,lastPrayerLoadAttempt=0,prayerNextMarker='',prayerSnapshot=null,prayerConfig='';
+function prayerPreferences(){let mosque=null;try{mosque=JSON.parse(localStorage.getItem('zikra_mosque')||'null')}catch(_){}return {lat:city.latitude,lon:city.longitude,method:localStorage.getItem('zikra_prayer_method')||3,mosque}}
 async function loadPrayerTimes(){
-  const request=++prayerRequest;prayerLoading=true;lastPrayerLoadAttempt=Date.now();
-  const method=Number(localStorage.getItem('zikra_prayer_method')||3),endpoint=date=>'https://api.aladhan.com/v1/timings/'+date.split('-').reverse().join('-')+'?latitude='+city.latitude+'&longitude='+city.longitude+'&method='+method;
+  const request=++prayerRequest;prayerLoading=true;lastPrayerLoadAttempt=Date.now();const config=JSON.stringify(prayerPreferences());if(config!==prayerConfig){prayerConfig=config;prayerTimeZone=localStorage.getItem('zikra_timezone')||prayerTimeZone;prayerSnapshot={zone:prayerTimeZone||Intl.DateTimeFormat().resolvedOptions().timeZone,date:'',timings:{},schedule:[],error:'جارٍ تحميل مواقيت الصلاة…'};prayerTimesObj={};prayerSchedule=[];prayerDataDate='';prayerNextMarker='';updatePrayerCountdowns();window.zikraBroadcastContext?.()}
   try{
-    let date=prayerDateString(prayerParts(new Date(),prayerTimeZone||Intl.DateTimeFormat().resolvedOptions().timeZone));let result=await fetchJSON(endpoint(date));
-    const zone=result.data.meta.timezone,actual=prayerDateString(prayerParts(new Date(),zone));if(actual!==date){date=actual;result=await fetchJSON(endpoint(date))}
-    if(request!==prayerRequest)return;
-    prayerTimeZone=zone;prayerDataDate=date;prayerTimesObj=result.data.timings;prayerSchedule=scheduleFor(date,prayerTimesObj,zone);prayerNextMarker='';
-    const ids={Fajr:'fajr',Sunrise:'sunrise',Dhuhr:'dhuhr',Asr:'asr',Maghrib:'maghrib',Isha:'isha'};Object.entries(ids).forEach(([key,id])=>$(id).textContent=(prayerTimesObj[key]||'--:--').split(' ')[0]);
-    const h=result.data.date.hijri;$('hijriText').textContent=lang==='ar'?h.day+' '+(h.month.ar||h.month.en)+' '+h.year+' هـ':h.day+' '+h.month.en+' '+h.year+' AH';
-    const [y,m,d]=date.split('-').map(Number),tomorrow=new Date(Date.UTC(y,m-1,d+1)),nextDate=tomorrow.toISOString().slice(0,10);
-    const next=await fetchJSON(endpoint(nextDate));if(request!==prayerRequest)return;prayerSchedule.push(...scheduleFor(nextDate,next.data.timings,next.data.meta.timezone||zone));prayerSchedule.sort((a,b)=>a.epoch-b.epoch);
-  }catch(error){console.warn('Prayer data unavailable',error.message)}finally{if(request===prayerRequest){prayerLoading=false;updatePrayerCountdowns()}}
+    const snapshot=await ZikraPrayer.load(prayerPreferences());if(request!==prayerRequest)return;
+    prayerSnapshot=snapshot;prayerTimeZone=snapshot.zone;prayerDataDate=snapshot.date;prayerTimesObj=snapshot.timings;prayerSchedule=snapshot.schedule;prayerNextMarker='';
+    $('prayerSource').textContent=snapshot.source;const h=snapshot.hijri;if(h)$('hijriText').textContent=lang==='ar'?h.day+' '+(h.month.ar||h.month.en)+' '+h.year+' هـ':h.day+' '+h.month.en+' '+h.year+' AH';
+  }catch(error){if(request!==prayerRequest)return;prayerSnapshot={zone:prayerTimeZone||Intl.DateTimeFormat().resolvedOptions().timeZone,date:'',timings:{},schedule:[],error:error.message};prayerTimesObj={};prayerSchedule=[];prayerDataDate='';prayerNextMarker='';$('prayerSource').textContent=error.message}
+  finally{if(request===prayerRequest){prayerLoading=false;updatePrayerCountdowns();updateClock();window.zikraBroadcastContext?.()}}
 }
 function updatePrayerCountdowns(){
-  const now=Date.now();if(!prayerTimesObj)return;
-  const localDate=prayerDateString(prayerParts(new Date(now),prayerTimeZone));if(localDate!==prayerDataDate&&!prayerLoading&&now-lastPrayerLoadAttempt>30000)loadPrayerTimes();
-  const next=prayerSchedule.find(prayer=>prayer.epoch>now);
-  if(!next){if(!prayerLoading&&now-lastPrayerLoadAttempt>30000)loadPrayerTimes();document.querySelectorAll('.p-countdown').forEach(node=>node.textContent='');return}
-  const marker=next.key+'-'+next.date;if(marker!==prayerNextMarker){prayerNextMarker=marker;document.querySelectorAll('.prayer-strip .prayer').forEach(node=>node.classList.toggle('next-prayer',node.id==='box-'+next.key));document.querySelectorAll('.p-countdown').forEach(node=>node.textContent='');if(next.key==='Fajr')$('fajr').textContent=next.time}
-  const total=Math.max(0,Math.ceil((next.epoch-now)/1000)),pad=n=>String(n).padStart(2,'0');$('cd-'+next.key).textContent=pad(Math.floor(total/3600))+':'+pad(Math.floor(total/60)%60)+':'+pad(total%60);
+  if(!prayerSnapshot)return;const now=Date.now(),model=ZikraPrayer.display(prayerSnapshot,now),next=model.next;
+  if(prayerDataDate&&ZikraPrayer.date(new Date(now),prayerSnapshot.zone)!==prayerDataDate&&!prayerLoading&&now-lastPrayerLoadAttempt>60000)loadPrayerTimes();
+  const marker=next?next.key+'-'+next.date:'none';
+  if(marker!==prayerNextMarker){prayerNextMarker=marker;for(const [key,id] of Object.entries({Fajr:'fajr',Sunrise:'sunrise',Dhuhr:'dhuhr',Asr:'asr',Maghrib:'maghrib',Isha:'isha'})){
+    $(id).textContent=(model.timings[key]||'--:--').split(' ')[0];const card=$('box-'+key);card.classList.toggle('next-prayer',next?.key===key);card.classList.toggle('next-day',next?.key===key&&!!model.nextDay);$('cd-'+key).textContent='';
+  }}
+  if(next)$('cd-'+next.key).textContent=ZikraPrayer.remaining(next.epoch-now);else if(prayerSnapshot.kind==='calculation'&&!prayerLoading&&now-lastPrayerLoadAttempt>60000)loadPrayerTimes();
 }
 setInterval(updatePrayerCountdowns,1000);
 
+
 function condition(code){const c=T[lang].conditions;if(code===0)return{text:c.clear,icon:"☀️",cls:"sunny"};if(code===1)return{text:c.mainly,icon:"🌤️",cls:"sunny"};if(code===2)return{text:c.partly,icon:"⛅",cls:"cloudy"};if(code===3)return{text:c.cloudy,icon:"☁️",cls:"cloudy"};if([45,48].includes(code))return{text:c.fog,icon:"🌫️",cls:"cloudy"};if([51,53,55,56,57].includes(code))return{text:c.drizzle,icon:"🌦️",cls:"rainy"};if([61,63,65,66,67,80,81,82].includes(code))return{text:c.rain,icon:"🌧️",cls:"rainy"};if([71,73,75,77,85,86].includes(code))return{text:c.snow,icon:"❄️",cls:"snowy"};if([95,96,99].includes(code))return{text:c.storm,icon:"⛈️",cls:"storm"};return{text:c.other,icon:"🌥️",cls:"cloudy"}}
 function weatherIcon(code){const c=condition(code),h=new Date().getHours();return(h>=20||h<6)&&c.cls==="sunny"?"🌙":c.icon}const temp=v=>v==null?"--":Math.round(v)+"°";
-async function loadWeather(){ $("weatherCondition").textContent=T[lang].loading;try{weatherData=await fetchJSON(`https://api.open-meteo.com/v1/forecast?latitude=${city.latitude}&longitude=${city.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset&timezone=auto&forecast_days=14`);renderWeather()}catch(e){$("weatherCondition").textContent=T[lang].unavailable}}
+let weatherRequest=0;
+async function loadWeather(){const request=++weatherRequest;$('weatherCondition').textContent=T[lang].loading;try{const result=await fetchJSON('https://api.open-meteo.com/v1/forecast?latitude='+city.latitude+'&longitude='+city.longitude+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset,wind_speed_10m_max&timezone=auto&forecast_days=14');if(request!==weatherRequest)return;weatherData=result;renderWeather();window.zikraBroadcastContext?.()}catch(error){if(request===weatherRequest)$('weatherCondition').textContent=T[lang].unavailable}}
+
 function renderWeather(){
   if(!weatherData)return;
   const d=weatherData,c=d.current,desc=condition(c.weather_code),card=$("weatherCard"),panel=$("datePanel"),effects=$("weatherTileEffects"),hour=new Date().getHours();
@@ -575,6 +573,7 @@ function getVisibleFocusable(root){
 }
 
 function moveDirectionalFocus(direction){
+  if(window.ZikraNavigation?.move(direction))return;
   if(!Object.values(ZIKRA_DPAD_KEYS).includes(direction))return;
   // Adhan navigation is handled only by the central remote-key controller below.
   // Language dropdown is a focus trap: never let the remote jump to weather or other page controls.
@@ -961,7 +960,7 @@ function refreshZikraApp(btn){
 }
 $("refreshBtn").addEventListener("click",()=>refreshZikraApp($("refreshBtn")));
 $("homeRefreshBtn").addEventListener("click",()=>refreshZikraApp($("homeRefreshBtn")));
-updateCityLabel();renderMemory();updatePlayButton();loadPrayerTimes();loadWeather();loadReaders();checkResumeBookmark();
+updateClock();updateCityLabel();renderMemory();updatePlayButton();loadPrayerTimes();loadWeather();loadReaders();checkResumeBookmark();
 </script>
 
 
@@ -1039,67 +1038,11 @@ updateCityLabel();renderMemory();updatePlayButton();loadPrayerTimes();loadWeathe
 </script>
 
 
-<script id="zikra-seven-cell-navigation">
-(function(){
-  const routes={settings:'cells/settings/index.html?cell=1',weather:'cells/weather/index.html',prayer:'cells/prayer/index.html',quran:'cells/quran/index.html',zikra:'cells/zikra/index.html'};
-  let overlay=null,frame=null,returnFocus=null;
-  function ensureOverlay(){
-    if(overlay)return;
-    overlay=document.createElement('div');overlay.id='zikraCellOverlay';overlay.hidden=true;
-    overlay.style.cssText='position:fixed;inset:0;z-index:30000;background:#101b23;overflow:hidden;';
-    frame=document.createElement('iframe');frame.id='zikraCellFrame';frame.title='خلية ذِكرى';frame.setAttribute('allow','geolocation');frame.setAttribute('tabindex','0');
-    frame.style.cssText='display:block;width:100%;height:100%;border:0;background:#101b23;';
-    overlay.append(frame);document.body.append(overlay);
-    frame.addEventListener('load',()=>{if(overlay.hidden)return;frame.dataset.ready='true';frame.contentWindow?.focus();frame.contentWindow?.postMessage({type:'zikra:cell-focus'},'*');});
-  }
-  function openCell(id,trigger){if(id==="quran"){openModal("quranModal");return;}
-    const path=routes[id];if(!path)return;ensureOverlay();returnFocus=trigger?.matches('button,[tabindex]')?trigger:(trigger?.querySelector('button,[tabindex]')||document.activeElement);document.querySelector('.app').inert=true;document.body.classList.remove('remote-focus-active');overlay.hidden=false;frame.focus({preventScroll:true});
-    frame.dataset.cell=id;frame.dataset.ready='false';
-    frame.title=({settings:'الإعدادات',weather:'الطقس',prayer:'مواقيت الصلاة',quran:'القرآن الكريم',zikra:'الأذكار'})[id]||'خلية ذِكرى';
-    frame.src=path;
-  }
-  function closeCell(){
-    if(!overlay||overlay.hidden)return false;const settingsClosed=frame.dataset.cell==='settings';overlay.hidden=true;document.querySelector('.app').inert=false;document.body.classList.add('remote-focus-active');frame.src='about:blank';if(settingsClosed)window.zikraApplySavedSettings?.();
-    const target=returnFocus;returnFocus=null;if(target&&target.isConnected)target.focus({preventScroll:true});return true;
-  }
-  window.zikraCloseCellOverlay=closeCell;
-  const priorBack=window.handleAndroidBack;
-  function backToHome(){
-    if(overlay&&!overlay.hidden){
-      if(frame.dataset.cell==='settings'&&frame.dataset.ready==='true')frame.contentWindow?.postMessage({type:'zikra:settings-back'},'*');
-      else closeCell();
-      return;
-    }
-    const settingsScreen=document.getElementById('settingsScreen'),settingsFrame=document.getElementById('settingsFrame');
-    if(settingsScreen?.classList.contains('open')){settingsFrame?.contentWindow?.postMessage({type:'zikra:settings-back'},'*');return;}
-    if(typeof priorBack==='function')priorBack();
-  }
-  window.zikraBackFromRemote=backToHome;
-  window.handleAndroidBack=backToHome;
-  window.addEventListener('message',event=>{
-    if(!frame||event.source!==frame.contentWindow||!event.data||typeof event.data!=='object')return;
-    if(event.data.type==='zikra:cell-close')closeCell();
-  });
-  document.addEventListener('click',function(e){
-    if(e.target.closest('#miniPrev,#miniPlay,#miniNext'))return;
-    const t=e.target.closest('[data-cell],[data-open-cell],[data-open],#settingsBtn,#datePanel,.date-weather-widget,.prayer-strip,.prayer-strip .prayer,#memoryCard,.tile-memory,.player,.now-reading.quran-entry,#openQuranFromPlayer');
-    if(!t)return;
-    let id=t.getAttribute('data-cell')||t.getAttribute('data-open-cell')||t.getAttribute('data-open');
-    if(!id){
-      if(t.matches('#datePanel,.date-weather-widget'))id='weather';
-      else if(t.matches('.prayer-strip,.prayer-strip .prayer'))id='prayer';
-      else if(t.matches('#memoryCard,.tile-memory'))id='zikra';
-      else if(t.matches('.player,.now-reading.quran-entry,#openQuranFromPlayer'))id='quran';
-    }
-    if(id){e.preventDefault();e.stopImmediatePropagation();openCell(id,t)}
-  },true);
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.key==='Backspace'||e.key==='BrowserBack'||e.key==='GoBack'||e.key==='XF86Back'||e.keyCode===4){if(overlay&&!overlay.hidden){e.preventDefault();e.stopImmediatePropagation();backToHome()}else if(e.key!=='Backspace')e.preventDefault()}});
-})();
-</script>
+<script src="assets/js/cell-host.js?v=1"></script>
 
 
-<script src="assets/js/home-focus.js?v=1"></script>
-<script src="assets/js/home-tasbeeh.js?v=20261024-2"></script>
-<script src="assets/js/dua-ticker.js?v=20261024-3"></script>
+<script src="assets/js/home-focus.js?v=2"></script>
+<script src="assets/js/home-tasbeeh.js?v=20261025-1"></script>
+<script src="assets/js/dua-ticker.js?v=20261025-1"></script>
 </body>
 </html>

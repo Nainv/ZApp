@@ -205,7 +205,7 @@ body {
   .prayer { transition: none; animation: none !important; }
 }
 </style>
-<link rel="stylesheet" href="../../assets/css/cell-theme.css?v=6">
+<link rel="stylesheet" href="../../assets/css/cell-theme.css?v=7">
 </head>
 
 <body class="cell-prayer">
@@ -282,6 +282,7 @@ body {
 
 </main>
 
+<script src="../../assets/js/prayer-model.js?v=1"></script>
 <script>
 (() => {
   "use strict";
@@ -298,22 +299,21 @@ body {
   const cards = [...document.querySelectorAll(".prayer")];
   const strip = document.getElementById("prayerStrip");
 
-  let schedule=[],zone=Intl.DateTimeFormat().resolvedOptions().timeZone,loadedDate='',loading=false,lastAttempt=0;
-  const formats=new Map();
-  function parts(date,tz){let f=formats.get(tz);if(!f){f=new Intl.DateTimeFormat('en-GB',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});formats.set(tz,f)}return Object.fromEntries(f.formatToParts(date).filter(p=>p.type!=='literal').map(p=>[p.type,Number(p.value)]))}
-  function dateString(date){return date.year+'-'+String(date.month).padStart(2,'0')+'-'+String(date.day).padStart(2,'0')}
-  function epoch(date,time,tz){const [y,m,d]=date.split('-').map(Number),[h,min]=time.split(' ')[0].split(':').map(Number),wanted=Date.UTC(y,m-1,d,h,min);let result=wanted;for(let i=0;i<3;i++){const p=parts(new Date(result),tz);result+=wanted-Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute,p.second)}return result}
-  function apply(snapshot){if(!snapshot?.timings)return false;zone=snapshot.zone;loadedDate=snapshot.date;schedule=snapshot.schedule;prayers.forEach(prayer=>{const time=snapshot.timings[prayer.id];if(time)document.getElementById('time-'+prayer.id).textContent=time.split(' ')[0]});return true}
-  async function loadStandalone(){if(loading)return;loading=true;lastAttempt=Date.now();try{const lat=localStorage.getItem('zikra_lat')||50.9848,lon=localStorage.getItem('zikra_lon')||11.0299,method=localStorage.getItem('zikra_prayer_method')||3;const fetchDay=async date=>{const response=await fetch('https://api.aladhan.com/v1/timings/'+date.split('-').reverse().join('-')+'?latitude='+lat+'&longitude='+lon+'&method='+method);if(!response.ok)throw Error('prayer');return (await response.json()).data};let date=dateString(parts(new Date(),zone)),today=await fetchDay(date);zone=today.meta.timezone;const actual=dateString(parts(new Date(),zone));if(actual!==date){date=actual;today=await fetchDay(date)}const [y,m,d]=date.split('-').map(Number),tomorrowDate=new Date(Date.UTC(y,m-1,d+1)).toISOString().slice(0,10),tomorrow=await fetchDay(tomorrowDate);const build=(day,data)=>['Fajr','Dhuhr','Asr','Maghrib','Isha'].map(key=>({key,date:day,time:data.timings[key].split(' ')[0],epoch:epoch(day,data.timings[key],data.meta.timezone)}));apply({zone,date,timings:today.timings,schedule:[...build(date,today),...build(tomorrowDate,tomorrow)]})}catch(_){document.getElementById('status').textContent='تعذّر جلب مواقيت الصلاة.'}finally{loading=false;updatePrayerTimes()}}
-  function formatRemaining(ms){const total=Math.max(0,Math.ceil(ms/1000));return [Math.floor(total/3600),Math.floor(total/60)%60,total%60].map(value=>String(value).padStart(2,'0')).join(':')}
+  let snapshot=null,active=true,lastAttempt=0,loading=false,rendered='';
+  const embedded=parent!==window,dateFormatters=new Map();
+  function apply(value){if(!value)return;snapshot=value;rendered='';updatePrayerTimes()}
+  async function loadStandalone(){if(loading||embedded)return;loading=true;lastAttempt=Date.now();try{let mosque=null;try{mosque=JSON.parse(localStorage.getItem('zikra_mosque')||'null')}catch(_){}apply(await ZikraPrayer.load({lat:Number(localStorage.getItem('zikra_lat')??50.9848),lon:Number(localStorage.getItem('zikra_lon')??11.0299),method:localStorage.getItem('zikra_prayer_method')||3,mosque}))}catch(error){apply({zone:Intl.DateTimeFormat().resolvedOptions().timeZone,date:'',timings:{},schedule:[],error:error.message})}finally{loading=false}}
   function updatePrayerTimes(){
-    let shared=null;try{if(parent!==window)shared=parent.zikraPrayerSnapshot?.()}catch(_){}
-    if(shared?.schedule?.length)apply(shared);else if(!loading&&(!schedule.length||loadedDate!==dateString(parts(new Date(),zone)))&&Date.now()-lastAttempt>30000)loadStandalone();
-    const now=Date.now(),next=schedule.find(item=>item.epoch>now);
-    document.getElementById('todayDate').textContent=new Intl.DateTimeFormat('ar',{timeZone:zone,dateStyle:'full'}).format(new Date());
-    cards.forEach(card=>{const selected=next?.key===card.dataset.prayer;card.classList.toggle('next-prayer',selected);document.getElementById('cd-'+card.dataset.prayer).textContent=selected?formatRemaining(next.epoch-now):''});
-    if(next){document.getElementById('time-'+next.key).textContent=next.time;const name=prayers.find(prayer=>prayer.id===next.key)?.name||'';document.getElementById('nextPrayerName').textContent=name;document.getElementById('mainCountdown').textContent=formatRemaining(next.epoch-now);document.getElementById('status').textContent='القادمة: '+name}
+    if(!active||!snapshot)return;const now=Date.now(),model=ZikraPrayer.display(snapshot,now),next=model.next,zone=snapshot.zone;
+    if(!embedded&&snapshot.date&&snapshot.date!==ZikraPrayer.date(new Date(now),zone)&&now-lastAttempt>60000)loadStandalone();
+    if(!dateFormatters.has(zone))dateFormatters.set(zone,new Intl.DateTimeFormat('ar',{timeZone:zone,dateStyle:'full'}));document.getElementById('todayDate').textContent=dateFormatters.get(zone).format(new Date(now));
+    const marker=snapshot.date+'-'+next?.key+'-'+next?.date;
+    if(marker!==rendered){rendered=marker;cards.forEach(card=>{const key=card.dataset.prayer;document.getElementById('time-'+key).textContent=(model.timings[key]||'--:--').split(' ')[0];card.classList.toggle('next-prayer',next?.key===key);card.classList.toggle('next-day',next?.key===key&&!!model.nextDay);document.getElementById('cd-'+key).textContent=''})}
+    if(next){document.getElementById('cd-'+next.key).textContent=ZikraPrayer.remaining(next.epoch-now);document.getElementById('nextPrayerName').textContent=prayers.find(p=>p.id===next.key)?.name||'';document.getElementById('mainCountdown').textContent=ZikraPrayer.remaining(next.epoch-now)}else {document.getElementById('nextPrayerName').textContent='—';document.getElementById('mainCountdown').textContent='--:--:--'}
+    document.getElementById('status').textContent=snapshot.error||snapshot.source+(model.nextDay?' · الصلاة القادمة غدًا':'')+(!next&&!snapshot.error?' · مواقيت اليوم التالي غير متاحة':'');
   }
+  window.addEventListener('message',event=>{if(event.source!==parent)return;const data=event.data;if(data?.type==='zikra:context'||data?.type==='zikra:session-start')apply(data.prayer);else if(data?.type==='zikra:cell-active'){active=data.active;updatePrayerTimes()}});
+  if(embedded)parent.postMessage({type:'zikra:context-request'},'*');else loadStandalone();
 
   // التركيز الافتراضي على أول بطاقة.
   function focusFirstCard() {
@@ -322,6 +322,7 @@ body {
   }
 
   function moveFocus(direction) {
+    if(window.ZikraNavigation?.move(direction))return;
     const items = [...document.querySelectorAll('button:not(:disabled),a[href],[tabindex]:not([tabindex="-1"])')].filter(el => {
       if (el.getAttribute('aria-hidden') === 'true' || el.closest('[hidden],[aria-hidden="true"]')) return false;
       const rect = el.getBoundingClientRect(), style = getComputedStyle(el);
@@ -392,6 +393,6 @@ body {
 
 <button id="cellHomeButton" type="button" aria-label="إغلاق الخلية" class="cell-close-button">×</button>
 <script id="cellHomeNavigation">(function(){function close(){if(window.closeZikraCell)window.closeZikraCell();else if(history.length>1)history.back()}var b=document.getElementById('cellHomeButton');if(b)b.addEventListener('click',close);document.addEventListener('keydown',function(e){if(['Escape','Backspace','BrowserBack','GoBack'].includes(e.key)||e.keyCode===4){e.preventDefault();e.stopImmediatePropagation();close()}},true)})();</script>
-<script src="../../assets/js/tv-remote.js?v=6"></script>
+<script src="../../assets/js/fast-navigation.js?v=1"></script><script src="../../assets/js/tv-remote.js?v=7"></script>
 </body>
 </html>

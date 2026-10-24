@@ -1,43 +1,21 @@
-/* One measured lane: every prayer owns its full width and a separate Zikra mark. */
+/* Compositor animations; no animation-frame script or per-frame layout reads. */
 (() => {
-  'use strict';
-  window.zikraDuaTicker?.destroy();
-  const track = document.getElementById('duaTrack');
-  const viewport = track?.parentElement;
-  if (!track || !viewport) return;
-  track.replaceChildren();
-  const source = [...new Set((window.ZIKRA_DUAS_AR || []).filter(value => typeof value === 'string' && value.trim()).map(value => value.trim()))];
-  if (!source.length) return;
-  const speed = 31.5, gap = 34;
-  let entries = [], next = 0, frame = 0, previousTime = 0, stopped = false;
-  function addBefore(rightEdge) {
-    const element = document.createElement('div');element.className = 'dua-entry';element.setAttribute('aria-hidden','true');
-    const text = document.createElement('span');text.className = 'dua-item';text.dir = 'rtl';text.textContent = source[next++ % source.length];
-    const separator = document.createElement('span');separator.className = 'dua-separator';separator.textContent = '۞';
-    element.append(text,separator);track.append(element);
-    const width = Math.ceil(element.getBoundingClientRect().width);
-    const item = {element,width,x:rightEdge-width};entries.push(item);
-    element.style.transform = 'translate3d('+item.x+'px,-50%,0)';
-    return item;
+  'use strict';window.zikraDuaTicker?.destroy();
+  const track=document.getElementById('duaTrack'),viewport=track?.parentElement;if(!track||!viewport)return;
+  track.replaceChildren();const source=[...new Set((window.ZIKRA_DUAS_AR||[]).filter(v=>typeof v==='string'&&v.trim()).map(v=>v.trim()))];if(!source.length)return;
+  const speed=31.5,gap=34;let entries=[],next=0,width=0,stopped=false,paused=false;
+  const position=item=>item.start+Number(item.animation.currentTime||0)/1000*speed;
+  function append(right){
+    const element=document.createElement('div');element.className='dua-entry';element.setAttribute('aria-hidden','true');const text=document.createElement('span'),mark=document.createElement('span');text.className='dua-item';text.dir='rtl';text.textContent=source[next++%source.length];mark.className='dua-separator';mark.textContent='۞';element.append(text,mark);track.append(element);
+    const size=Math.ceil(element.getBoundingClientRect().width),start=right-size,end=width+gap,duration=(end-start)/speed*1000;
+    const animation=element.animate([{transform:'translate3d('+start+'px,-50%,0)'},{transform:'translate3d('+end+'px,-50%,0)'}],{duration,easing:'linear',fill:'forwards'}),item={element,start,animation};entries.push(item);if(paused)animation.pause();
+    animation.onfinish=()=>{if(stopped)return;element.remove();entries=entries.filter(e=>e!==item);fill()};return start;
   }
-  function fill() {
-    const width = viewport.clientWidth;
-    if (!width) return;
-    if (!entries.length) addBefore(width);
-    let left = Math.min(...entries.map(item=>item.x));
-    while (left > -width && entries.length < 60) left = addBefore(left-gap).x;
-  }
-  function layout() { if(stopped)return;entries.forEach(item=>item.element.remove());entries=[];previousTime=0;fill(); }
-  function animate(time) {
-    if (stopped) return;
-    const seconds = previousTime && !document.hidden ? Math.min(50,time-previousTime)/1000 : 0;previousTime=time;
-    const width = viewport.clientWidth;
-    entries = entries.filter(item=>{item.x+=seconds*speed;if(item.x>width+gap){item.element.remove();return false}item.element.style.transform='translate3d('+item.x+'px,-50%,0)';return true});
-    fill();frame=requestAnimationFrame(animate);
-  }
-  const observer = typeof ResizeObserver==='function'?new ResizeObserver(layout):null;
-  observer?.observe(viewport);
-  if (!observer) window.addEventListener('resize',layout);
-  window.zikraDuaTicker = {destroy(){stopped=true;cancelAnimationFrame(frame);observer?.disconnect();window.removeEventListener('resize',layout);track.replaceChildren()}};
-  Promise.resolve(document.fonts?.ready).then(()=>{if(!stopped){layout();frame=requestAnimationFrame(animate)}});
+  function fill(){if(stopped||!width)return;let left=entries.length?Math.min(...entries.map(position)):width;while(left>-width&&entries.length<60)left=append(left-gap)}
+  function layout(){if(stopped)return;entries.forEach(item=>{item.animation.cancel();item.element.remove()});entries=[];width=viewport.clientWidth;fill()}
+  function suspend(){const nextPaused=document.hidden||document.body.classList.contains('cell-open')||!!document.querySelector('.modal-backdrop.open');if(nextPaused===paused)return;paused=nextPaused;entries.forEach(item=>paused?item.animation.pause():item.animation.play())}
+  const resize=typeof ResizeObserver==='function'?new ResizeObserver(layout):null;resize?.observe(viewport);if(!resize)window.addEventListener('resize',layout,{passive:true});
+  const state=new MutationObserver(suspend);state.observe(document.body,{attributes:true,attributeFilter:['class']});document.querySelectorAll('.modal-backdrop').forEach(modal=>state.observe(modal,{attributes:true,attributeFilter:['class']}));document.addEventListener('visibilitychange',suspend);
+  window.zikraDuaTicker={destroy(){stopped=true;entries.forEach(item=>item.animation.cancel());resize?.disconnect();state.disconnect();document.removeEventListener('visibilitychange',suspend);window.removeEventListener('resize',layout);track.replaceChildren()}};
+  Promise.resolve(document.fonts?.ready).then(()=>{if(!stopped){layout();suspend()}});
 })();

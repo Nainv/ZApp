@@ -6,10 +6,10 @@
   const degrees=value=>Math.round(value)+'°',clock=value=>value?.slice(11,16)||'—';
   function condition(code){if(code<=1)return['☀','صحو','sun'];if(code<=3)return['☁','غائم','cloud'];if(code<=48)return['☁','ضباب','cloud'];if(code<=67||code>=80&&code<=82)return['☂','أمطار','rain'];if(code<=77||code>=85&&code<=86)return['❄','ثلوج','cloud'];return['ϟ','عواصف','rain']}
   function metric(label,value){const item=document.createElement('span');item.className='day-metric';const l=document.createElement('small'),v=document.createElement('strong');l.textContent=label;v.textContent=value;item.append(l,v);return item}
-  function select(index,focus){if(!data)return;selected=(index+data.daily.time.length)%data.daily.time.length;const days=[...strip.children];days.forEach((card,i)=>{card.classList.toggle('is-current',i===selected);card.setAttribute('aria-pressed',String(i===selected))});document.body.dataset.scene=condition(data.daily.weather_code[selected])[2];if(focus)days[selected].focus({preventScroll:true});days[selected].scrollIntoView({block:'nearest',inline:'center',behavior:'instant'})}
+  function select(index,focus){if(!data)return;selected=(index+Math.min(10,data.daily.time.length))%Math.min(10,data.daily.time.length);const days=[...strip.children];days.forEach((card,i)=>{card.classList.toggle('is-current',i===selected);card.setAttribute('aria-pressed',String(i===selected))});document.body.dataset.scene=condition(data.daily.weather_code[selected])[2];if(focus)days[selected].focus({preventScroll:true});days[selected].scrollIntoView({block:'nearest',inline:'center',behavior:'instant'})}
   function build(){
     strip.replaceChildren();const daily=data.daily,hourly=data.hourly;
-    daily.time.forEach((date,index)=>{
+    daily.time.slice(0,10).forEach((date,index)=>{
       const button=document.createElement('button');button.type='button';button.className='forecast-day';button.dataset.day=String(index);button.dir='rtl';
       const name=document.createElement('span');name.className='day-name';name.textContent=index===0?'اليوم':index===1?'غدًا':dayFormat.format(new Date(date+'T12:00:00'));
       const stamp=document.createElement('span');stamp.className='day-date';stamp.textContent=dateFormat.format(new Date(date+'T12:00:00'));
@@ -29,5 +29,12 @@
   document.addEventListener('keydown',event=>{const direction={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[event.key];if(direction){event.preventDefault();event.stopImmediatePropagation();navigate(direction)}},true);
   $('cellHomeButton').addEventListener('click',()=>window.handleAndroidBack());
   async function load(){try{const lat=Number(localStorage.getItem('zikra_lat')||50.9848),lon=Number(localStorage.getItem('zikra_lon')||11.0299);$('place').textContent=localStorage.getItem('zikra_city')||'إرفورت';const url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset&hourly=temperature_2m,relative_humidity_2m&timezone=auto&forecast_days=10';const result=await fetch(url);if(!result.ok)throw Error('weather');data=await result.json();$('date').textContent=new Intl.DateTimeFormat(locale,{dateStyle:'full',timeZone:data.timezone}).format(new Date());build();$('weatherStatus').textContent='المواقيت بحسب '+data.timezone+' · توقعات عشرة أيام'}catch(_){$('weatherStatus').textContent='تعذّر جلب الطقس. تحقق من الإنترنت ثم افتح الخلية مجددًا.'}}
-  load();
+  let placeKey='';
+  window.addEventListener('message',event=>{if(event.source!==parent)return;const message=event.data;
+    if(message?.type==='zikra:context'||message?.type==='zikra:session-start'){
+      const p=message.preferences;if(p)$('place').textContent=p.city;
+      if(message.weather){const nextKey=p.lat+','+p.lon+':'+message.weather.daily.time[0];if(nextKey!==placeKey){placeKey=nextKey;data=message.weather;$('date').textContent=new Intl.DateTimeFormat(locale,{dateStyle:'full',timeZone:data.timezone}).format(new Date());build();$('weatherStatus').textContent='المواقيت بحسب '+data.timezone+' · توقعات عشرة أيام'}}
+    }else if(message?.type==='zikra:cell-active')document.body.classList.toggle('cell-inactive',!message.active);
+  });
+  if(parent!==window)parent.postMessage({type:'zikra:context-request'},'*');else load();
 })();

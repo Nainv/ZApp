@@ -50,7 +50,7 @@
 
   window.addEventListener('message', event => {
     const message = event.data;
-    if (!message || typeof message !== 'object') return;
+    if (event.source !== parent || !message || typeof message !== 'object') return;
     if (message.type === 'zikra:cell-dpad') window.handleAndroidDpad?.(message.direction);
     else if (message.type === 'zikra:cell-ok') window.handleAndroidOk?.();
     else if (message.type === 'zikra:cell-back') window.handleAndroidBack?.();
@@ -58,6 +58,7 @@
   });
 
   function move(direction) {
+    if (window.ZikraNavigation?.move(direction)) return;
     const list = focusables();
     if (!list.length) return;
     const current = document.activeElement;
