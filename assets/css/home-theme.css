@@ -299,14 +299,14 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   align-items: center;
   width: 100% !important;
   min-width: 0;
-  min-height: 42px !important;
+  min-height: 36px !important;
   box-sizing: border-box;
   margin: 0 !important;
   padding: 0 !important;
   gap: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
+  border: 1px solid rgba(121,201,178,.22) !important;
+  border-radius: 9px !important;
+  background: rgba(255,255,255,.025) !important;
   box-shadow: none !important;
   overflow: hidden !important;
   contain: paint;
@@ -315,11 +315,11 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   user-select: none;
   cursor: default;
 }
-.dua-viewport { grid-column: 1; grid-row: 1; position: relative; width: 100%; min-width: 0; max-width: 100%; height: 100%; min-height: 38px; overflow: hidden !important; clip-path: inset(0); contain: layout paint; display: flex; align-items: center; direction: ltr; }
+.dua-viewport { grid-column: 1; grid-row: 1; position: relative; width: 100%; min-width: 0; max-width: 100%; height: 100%; min-height: 30px; overflow: hidden !important; clip-path: inset(0); contain: layout paint; display: flex; align-items: center; direction: ltr; }
 .dua-track { width: max-content; max-width: none; display: flex; flex: 0 0 auto; align-items: center; direction: ltr; white-space: nowrap; animation: zikra-dua-marquee var(--dua-duration,240s) linear infinite; will-change: transform; }
 .dua-group { width: max-content; max-width: none; flex: 0 0 auto; display: flex; align-items: center; direction: ltr; gap: clamp(22px,3vw,44px); padding-inline-end: clamp(22px,3vw,44px); white-space: nowrap; }
-.dua-item { flex: 0 0 auto; max-width: none; color: var(--zikra-text); font-family: Tahoma,"Segoe UI",Arial,sans-serif; font-size: clamp(15px,1.4vw,20px); line-height: 1.6; direction: rtl; unicode-bidi: plaintext; white-space: nowrap; }
-.dua-separator { flex: 0 0 auto; color: var(--zikra-gold); font-family: inherit; font-size: clamp(21px,2vw,28px); line-height: 1; direction: ltr; }
+.dua-item { flex: 0 0 auto; max-width: none; color: var(--zikra-text); font-family: Tahoma,"Segoe UI",Arial,sans-serif; font-size: clamp(13px,1.1vw,16px); line-height: 1.3; direction: rtl; unicode-bidi: plaintext; white-space: nowrap; }
+.dua-separator { flex: 0 0 auto; color: var(--zikra-gold); font-family: inherit; font-size: clamp(18px,1.55vw,22px); line-height: 1; direction: ltr; }
 @keyframes zikra-dua-marquee { from { transform: translateX(-50%); } to { transform: translateX(0); } }
 @media (max-height: 650px) and (min-width: 901px) {
   .app { grid-template-rows: auto minmax(82px,.8fr) minmax(56px,.55fr) minmax(120px,1.05fr) minmax(68px,.6fr) minmax(38px,.38fr) auto; }
@@ -344,7 +344,7 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   #datePanel { min-height: 122px !important; }
   .prayer-strip { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
   .player, .tile-memory { min-height: 150px !important; }
-  .dua-bar { min-height: 62px !important; }
+  .dua-bar { min-height: 36px !important; padding: 0 !important; }
 }
 @media (max-width: 560px) {
   .app {
@@ -366,8 +366,8 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   #datePanel > .date-weather-widget { grid-column: 2; grid-row: 1 / 3; }
   .prayer-strip { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
   .prayer-strip .prayer { min-height: 70px !important; }
-  .dua-bar { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(36px,1fr); }
-  .dua-viewport { grid-column: 1; grid-row: 1; min-height: 36px; }
+  .dua-bar { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(30px,1fr); }
+  .dua-viewport { grid-column: 1; grid-row: 1; min-height: 28px; }
   .footer { font-size: 8px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
