@@ -237,7 +237,7 @@ public class MainActivity extends Activity {
             case KeyEvent.KEYCODE_ENTER:
                 if (webView != null && pageReady) {
                     webView.evaluateJavascript(
-                        "(function(){var e=document.activeElement;if(e){if(e.tagName==='SELECT'){e.click();}else{e.click();}}else{var b=document.querySelector('#quranBtn');if(b)b.click();}})();",
+                        "(function(){if(typeof window.handleAndroidOk==='function'){window.handleAndroidOk();return;}var e=document.activeElement;if(e){e.click();}else{var b=document.querySelector('#quranBtn');if(b)b.click();}})();",
                         null
                     );
                 }

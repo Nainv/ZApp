@@ -13,13 +13,16 @@
     @media(max-width:1000px){.layout{grid-template-columns:1fr}.sidebar{position:static;display:grid;grid-template-columns:1fr 1fr}.prayer-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
     @media(max-width:700px){.app{padding:20px 16px}.content{grid-template-columns:1fr}.card.wide{grid-column:auto}.sidebar{grid-template-columns:1fr}.prayer-list{grid-template-columns:repeat(2,minmax(0,1fr))}.actions{align-items:stretch;flex-direction:column}.buttons{width:100%}.buttons button{flex:1;min-width:0}.hint{display:none}}
     @media(min-width:1500px){.app{padding-top:48px;gap:26px}.card{padding:24px}.prayer{padding:17px 14px}}
+    /* Compact TV layout: keep the whole settings panel balanced within the screen. */
+    .app{height:100dvh;min-height:0;max-width:1320px;padding:18px 30px 14px;gap:14px;overflow:auto}.topbar{padding-bottom:12px}.card{padding:16px}.card-head{margin-bottom:12px}.control,.locate{min-height:46px}.prayer{padding:10px 9px;gap:8px}.prayer select{min-height:38px;padding:0 8px;font-size:12px}.sidebar{margin-top:12px}.welcome{padding:14px}.actions{gap:10px}
+    @media(max-height:760px){.app{padding:10px 18px;gap:8px}.topbar{padding-bottom:8px}.card{padding:12px}.card-head{margin-bottom:8px}.control,.locate{min-height:40px}.prayer-list{gap:7px}.prayer{padding:8px;gap:6px}.welcome{padding:10px}.welcome .ornament{margin-bottom:4px}.welcome p{margin-top:4px}.primary,.secondary{min-height:42px}}
   </style>
 </head>
 <body>
   <main class="app" id="settingsApp" aria-labelledby="pageTitle">
     <header class="topbar">
       <div class="brand"><div class="brand-mark" aria-hidden="true">☾</div><div><h1 id="pageTitle">إعدادات ذِكرى</h1><p>خصص تجربتك اليومية بكل سهولة</p></div></div>
-      <div class="top-actions"><span class="hint">استخدم الأسهم للتنقل و OK للاختيار</span><button class="icon-button" id="closeTop" type="button" aria-label="إغلاق الإعدادات">×</button></div>
+      <div class="top-actions"><button class="icon-button" id="closeTop" type="button" aria-label="إغلاق الإعدادات">×</button></div>
     </header>
     <div class="layout">
       <section class="content" aria-label="خيارات الإعدادات">
@@ -56,7 +59,7 @@
       try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');applyData(data);if(!data.language){const appLanguage=localStorage.getItem('zikra_language');if(appLanguage&&['ar','de','en'].includes(appLanguage))document.getElementById('language').value=appLanguage}if(!data.manualCity)document.getElementById('manualCity').value=localStorage.getItem('zikra_city')||'';saved=readForm()}catch{saved=readForm()}
       const announce=message=>{const toast=document.getElementById('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2300)};
       const save=async()=>{const data=readForm();try{const cityName=data.manualCity.trim()||document.getElementById('location').selectedOptions[0]?.textContent.trim()||'';localStorage.setItem('zikra_language',data.language);localStorage.setItem('zikra_quran_selection',data.quranSelection);localStorage.setItem('zikra_quran_recitation',data.quranRecitation);if(cityName){let coordinates=pendingCoordinates;const currentCity=localStorage.getItem('zikra_city')||'';if(coordinates){localStorage.setItem('zikra_city',cityName)}else if(currentCity.toLocaleLowerCase()!==cityName.toLocaleLowerCase()){const response=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(cityName)+'&count=1&language='+data.language+'&format=json');if(!response.ok)throw new Error('تعذّر الاتصال بخدمة تحديد المدينة.');const result=await response.json();const place=result.results?.[0];if(!place)throw new Error('لم يتم العثور على المدينة. تحقق من الاسم وحاول مرة أخرى.');coordinates={latitude:place.latitude,longitude:place.longitude};localStorage.setItem('zikra_city',place.name)}else if(currentCity)localStorage.setItem('zikra_city',currentCity);if(coordinates){localStorage.setItem('zikra_lat',String(coordinates.latitude));localStorage.setItem('zikra_lon',String(coordinates.longitude))}}const adhan={};for(const [key,prayer] of Object.entries(data.prayers||{})){const names={fajr:'Fajr',dhuhr:'Dhuhr',asr:'Asr',maghrib:'Maghrib',isha:'Isha'};const appKey=names[key];if(appKey)adhan[appKey]={enabled:Boolean(prayer.enabled)&&prayer.type!=='silent',voice:['makkah','madinah','alafasy','syria'].includes(prayer.type)?prayer.type:'makkah'}}localStorage.setItem('zikra_adhan_settings_v1',JSON.stringify(adhan));localStorage.setItem(STORAGE_KEY,JSON.stringify(data));saved=data;pendingCoordinates=null;announce('تم حفظ الإعدادات');updateDirty();return true}catch(error){announce(error.message||'تعذر حفظ الإعدادات');const status=document.getElementById('locationStatus');if(status)status.textContent=error.message||'تعذر حفظ الإعدادات';return false}};
-      const goHome=()=>{window.location.href='../../index.html'};
+      const goHome=()=>{if(window.parent!==window)window.parent.postMessage({type:'zikra:settings-close'},'*');else window.location.href='../../index.html'};
       const closeSettings=()=>{if(updateDirty()){closeOrigin=document.activeElement;dialog.showModal();document.getElementById('confirmYes').focus()}else goHome()};
       document.getElementById('saveBtn').addEventListener('click',async()=>{if(await save())goHome()});
       document.getElementById('closeTop').addEventListener('click',closeSettings);
@@ -70,20 +73,23 @@
       app.addEventListener('click',e=>{const toggle=e.target.closest('.toggle');if(toggle){toggle.setAttribute('aria-checked',String(toggle.getAttribute('aria-checked')!=='true'));updateDirty()}});
       const isFocusable=el=>el instanceof HTMLElement&&el.getClientRects().length>0&&!el.disabled&&el.tabIndex>=0;
       const focusables=()=>[...(dialog.open?dialog.querySelectorAll('button,[href],input,textarea,select,[tabindex]:not([tabindex="-1"])'):app.querySelectorAll('button,input,textarea,select,[href],[tabindex]:not([tabindex="-1"])'))].filter(isFocusable);
-      app.addEventListener('focusin',e=>{if(dialog.open&&!dialog.contains(e.target)){document.getElementById('confirmYes').focus();return}if(!dialog.open&&!app.contains(e.target)){(focusables()[0]||app).focus()}});
+      let remoteSelect=null;
+      const moveFocus=key=>{const list=focusables();if(!list.length)return;const current=document.activeElement;if(!list.includes(current)){list[0].focus();return}const from=current.getBoundingClientRect(),cx=from.left+from.width/2,cy=from.top+from.height/2,horizontal=key==='ArrowLeft'||key==='ArrowRight',sign=(key==='ArrowRight'||key==='ArrowDown')?1:-1;const candidates=list.filter(el=>el!==current).map(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,primary=(horizontal?x-cx:y-cy)*sign,cross=horizontal?Math.abs(y-cy):Math.abs(x-cx);return{el,primary,score:primary+cross*2.2}}).filter(item=>item.primary>2).sort((a,b)=>a.score-b.score);if(candidates[0])candidates[0].el.focus()};
+      app.addEventListener('focusin',e=>{if(remoteSelect&&e.target!==remoteSelect)remoteSelect=null;if(dialog.open&&!dialog.contains(e.target)){document.getElementById('confirmYes').focus();return}if(!dialog.open&&!app.contains(e.target)){(focusables()[0]||app).focus()}});
       document.addEventListener('keydown',e=>{
         const key=e.key;
+        if(key==='Backspace'&&document.activeElement.matches('input,textarea,[contenteditable="true"]'))return;
         if(key==='Escape'||key==='Backspace'||key==='BrowserBack'||key==='GoBack'||key==='XF86Back'||e.keyCode===4){e.preventDefault();e.stopPropagation();if(dialog.open){dialog.close();goHome()}else closeSettings();return}
         if(key==='Tab'){const list=focusables(),first=list[0],last=list[list.length-1];if(list.length&&e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(list.length&&!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}return}
         if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key))return;
         if(document.activeElement instanceof HTMLSelectElement&&(key==='ArrowUp'||key==='ArrowDown'))return;
-        const list=focusables();if(!list.length)return;const current=document.activeElement;const from=current.getBoundingClientRect();const cx=from.left+from.width/2,cy=from.top+from.height/2;const horizontal=key==='ArrowLeft'||key==='ArrowRight';const sign=(key==='ArrowRight'||key==='ArrowDown')?1:-1;
-        const candidates=list.filter(el=>el!==current).map(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,primary=horizontal?(x-cx)*sign:(y-cy)*sign,cross=horizontal?Math.abs(y-cy):Math.abs(x-cx);return{el,primary,cross,score:primary+cross*1.8}}).filter(x=>x.primary>1).sort((a,b)=>a.score-b.score);
-        if(candidates[0]){e.preventDefault();candidates[0].el.focus()}else{const ordered=list.map(el=>({el,r:el.getBoundingClientRect()})).sort((a,b)=>horizontal?a.r.top-b.r.top||a.r.left-b.r.left:a.r.top-b.r.top||a.r.left-b.r.left);e.preventDefault();(sign>0?ordered[0]:ordered.at(-1))?.el.focus()}
+        e.preventDefault();moveFocus(key);
       },true);
       // Android MainActivity sends D-pad and Back events through these bridge hooks.
-      window.handleAndroidDpad=direction=>{const keys={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'};const key=keys[String(direction).toLowerCase()];if(key)document.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true}))};
+      window.handleAndroidDpad=direction=>{const keys={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'},key=keys[String(direction).toLowerCase()],active=document.activeElement;if(!key)return;if(remoteSelect===active&&active instanceof HTMLSelectElement){if(key==='ArrowUp'||key==='ArrowDown'){active.selectedIndex=Math.max(0,Math.min(active.options.length-1,active.selectedIndex+(key==='ArrowDown'?1:-1)));active.dispatchEvent(new Event('change',{bubbles:true}));return}remoteSelect=null}moveFocus(key)};
+      window.handleAndroidOk=()=>{const active=document.activeElement;if(active instanceof HTMLSelectElement){if(remoteSelect===active){remoteSelect=null;announce('تم اختيار القيمة');}else{remoteSelect=active;announce('استخدم الأسهم للاختيار ثم OK للتأكيد');}return}active?.click()};
       window.handleAndroidBack=()=>{if(dialog.open){dialog.close();goHome()}else closeSettings()};
+      window.addEventListener('message',event=>{const message=event.data;if(message?.type==='zikra:settings-dpad')window.handleAndroidDpad(message.direction);else if(message?.type==='zikra:settings-ok')window.handleAndroidOk();else if(message?.type==='zikra:settings-back')window.handleAndroidBack();else if(message?.type==='zikra:settings-focus')document.getElementById('language').focus()});
       updateDirty();
       document.getElementById('language').focus();
     })();
