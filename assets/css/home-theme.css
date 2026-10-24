@@ -239,3 +239,122 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* Updated home layout: weather first, five prayer cards, wide Quran player, daily remembrance and dua ticker. */
+.app {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto minmax(104px, .85fr) minmax(74px, .62fr) minmax(145px, 1.15fr) minmax(86px, .7fr) minmax(48px, .42fr) auto;
+  grid-template-areas:
+    "topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar"
+    "weather weather weather weather weather weather weather weather weather weather weather weather"
+    "prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers"
+    "quran quran quran quran quran quran quran quran quran quran quran quran"
+    "dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr"
+    "dua dua dua dua dua dua dua dua dua dua dua dua"
+    "footer footer footer footer footer footer footer footer footer footer footer footer";
+  gap: clamp(6px, 1vh, 11px);
+}
+.home-cell-nav, .home-next-card, .home-settings-card { display: none !important; }
+#datePanel {
+  grid-area: weather;
+  min-height: 104px !important;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);
+  grid-template-rows: 1fr;
+  gap: 8px 18px !important;
+  padding: clamp(12px,1.4vw,20px) clamp(18px,2.2vw,30px) !important;
+}
+#datePanel > .clock { grid-column: 1; grid-row: 1; justify-self: start; align-self: center; font-size: clamp(27px,3.2vw,45px) !important; }
+#datePanel > .date-weather-widget { grid-column: 2; grid-row: 1; align-self: center; }
+#datePanel > .date-info { grid-column: 3; grid-row: 1; justify-self: end; align-self: center; align-items: flex-end !important; text-align: right !important; }
+#datePanel .date-text, #datePanel .hijri, #datePanel .city-label { text-align: right !important; }
+.prayer-strip { grid-area: prayers; grid-template-columns: repeat(5,minmax(0,1fr)) !important; gap: clamp(6px,.8vw,12px) !important; }
+.prayer-strip #box-Sunrise { display: none !important; }
+.prayer-strip .prayer { position: relative; min-height: clamp(58px,8.4vh,82px) !important; }
+.prayer-strip .prayer.next-prayer { border-color: rgba(121,201,178,.62) !important; background: linear-gradient(145deg,rgba(40,75,66,.9),rgba(23,38,46,.96)) !important; }
+.prayer-strip .prayer.next-prayer::before {
+  content: "القادمة";
+  position: absolute;
+  top: 5px;
+  inset-inline-start: 8px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: rgba(121,201,178,.14);
+  color: var(--zikra-teal);
+  font-size: 9px;
+  font-weight: 700;
+}
+.prayer-strip .prayer.next-prayer .p-countdown { color: var(--zikra-gold) !important; direction: ltr; font-variant-numeric: tabular-nums; }
+.tiles { grid-area: dhikr; }
+.tile-memory { min-height: 0 !important; }
+.player { grid-area: quran; min-height: 0 !important; }
+.dua-bar {
+  grid-area: dua;
+  min-width: 0;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 9px clamp(12px,1.4vw,20px) !important;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(10px,1.4vw,18px) !important;
+  overflow: hidden;
+  cursor: pointer;
+}
+.dua-label { flex: 0 0 auto; color: var(--zikra-gold); font-size: clamp(11px,.95vw,14px); font-weight: 700; white-space: nowrap; }
+.dua-viewport { flex: 1 1 auto; min-width: 0; height: 100%; min-height: 38px; overflow: hidden; display: flex; align-items: center; direction: ltr; }
+.dua-track { width: max-content; display: flex; flex: 0 0 auto; align-items: center; direction: ltr; animation: zikra-dua-marquee var(--dua-duration,240s) linear infinite; will-change: transform; }
+.dua-group { width: max-content; flex: 0 0 auto; display: flex; align-items: center; direction: ltr; gap: clamp(16px,2vw,30px); padding-inline-end: clamp(16px,2vw,30px); }
+.dua-item { flex: 0 0 auto; max-width: 70vw; color: var(--zikra-text); font-family: Tahoma,"Segoe UI",Arial,sans-serif; font-size: clamp(14px,1.3vw,19px); line-height: 1.6; direction: rtl; white-space: nowrap; }
+.dua-separator { flex: 0 0 auto; color: var(--zikra-gold); font-size: clamp(20px,1.8vw,26px); line-height: 1; }
+@keyframes zikra-dua-marquee { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@media (max-height: 650px) and (min-width: 901px) {
+  .app { grid-template-rows: auto minmax(82px,.8fr) minmax(56px,.55fr) minmax(120px,1.05fr) minmax(68px,.6fr) minmax(38px,.38fr) auto; }
+  #datePanel { min-height: 82px !important; }
+  .prayer-strip .prayer { min-height: 54px !important; }
+}
+@media (max-width: 900px) {
+  html, body { height: auto; min-height: 100%; overflow: auto; }
+  .app {
+    height: auto;
+    min-height: 100dvh;
+    grid-template-rows: auto auto auto minmax(180px,auto) auto auto auto;
+    grid-template-areas:
+      "topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar"
+      "weather weather weather weather weather weather weather weather weather weather weather weather"
+      "prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers"
+      "quran quran quran quran quran quran quran quran quran quran quran quran"
+      "dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr"
+      "dua dua dua dua dua dua dua dua dua dua dua dua"
+      "footer footer footer footer footer footer footer footer footer footer footer footer";
+  }
+  #datePanel { min-height: 122px !important; }
+  .prayer-strip { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
+  .player, .tile-memory { min-height: 150px !important; }
+  .dua-bar { min-height: 62px !important; }
+}
+@media (max-width: 560px) {
+  .app {
+    padding: 12px;
+    gap: 9px;
+    grid-template-rows: auto auto auto minmax(180px,auto) auto auto auto;
+    grid-template-areas:
+      "topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar"
+      "weather weather weather weather weather weather weather weather weather weather weather weather"
+      "prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers"
+      "quran quran quran quran quran quran quran quran quran quran quran quran"
+      "dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr"
+      "dua dua dua dua dua dua dua dua dua dua dua dua"
+      "footer footer footer footer footer footer footer footer footer footer footer footer";
+  }
+  #datePanel { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; min-height: 136px !important; }
+  #datePanel > .clock { grid-column: 1; grid-row: 1; font-size: 28px !important; }
+  #datePanel > .date-info { grid-column: 1; grid-row: 2; justify-self: start; align-items: flex-start !important; }
+  #datePanel > .date-weather-widget { grid-column: 2; grid-row: 1 / 3; }
+  .prayer-strip { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
+  .prayer-strip .prayer { min-height: 70px !important; }
+  .dua-bar { align-items: flex-start; flex-direction: column; gap: 5px !important; }
+  .dua-viewport { width: 100%; min-height: 30px; }
+  .footer { font-size: 8px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dua-track { animation: none; transform: none; }
+}
