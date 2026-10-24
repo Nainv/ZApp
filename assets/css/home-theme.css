@@ -242,6 +242,8 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
 
 /* Updated home layout: weather first, five prayer cards, wide Quran player, daily remembrance and dua ticker. */
 .app {
+  width: 100%;
+  max-width: none;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-template-rows: auto minmax(104px, .85fr) minmax(74px, .62fr) minmax(145px, 1.15fr) minmax(86px, .7fr) minmax(48px, .42fr) auto;
   grid-template-areas:
@@ -257,6 +259,9 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
 .home-cell-nav, .home-next-card, .home-settings-card { display: none !important; }
 #datePanel {
   grid-area: weather;
+  grid-column: 1 / -1;
+  width: 100%;
+  box-sizing: border-box;
   min-height: 104px !important;
   grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);
   grid-template-rows: 1fr;
@@ -289,8 +294,11 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
 .player { grid-area: quran; min-height: 0 !important; }
 .dua-bar {
   grid-area: dua;
+  display: flex !important;
+  width: 100%;
   min-width: 0;
-  min-height: 0 !important;
+  min-height: 54px !important;
+  box-sizing: border-box;
   margin: 0 !important;
   padding: 9px clamp(12px,1.4vw,20px) !important;
   flex-direction: row;
@@ -356,5 +364,5 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   .footer { font-size: 8px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .dua-track { animation: none; transform: none; }
+  .dua-track { animation: zikra-dua-marquee var(--dua-duration,240s) linear infinite !important; }
 }
