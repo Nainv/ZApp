@@ -1,0 +1,49 @@
+{
+  "main_bytes": 232562,
+  "cells": {
+    "zikra": {
+      "exists": true,
+      "bytes": 233574,
+      "has_original_app": true,
+      "has_original_script": true,
+      "cell_marker": true
+    },
+    "quran": {
+      "exists": true,
+      "bytes": 233539,
+      "has_original_app": true,
+      "has_original_script": true,
+      "cell_marker": true
+    },
+    "prayer": {
+      "exists": true,
+      "bytes": 233568,
+      "has_original_app": true,
+      "has_original_script": true,
+      "cell_marker": true
+    },
+    "weather": {
+      "exists": true,
+      "bytes": 233605,
+      "has_original_app": true,
+      "has_original_script": true,
+      "cell_marker": true
+    },
+    "settings": {
+      "exists": true,
+      "bytes": 233586,
+      "has_original_app": true,
+      "has_original_script": true,
+      "cell_marker": true
+    },
+    "dua-bar": {
+      "exists": true,
+      "bytes": 233511,
+      "has_original_app": true,
+      "has_original_script": true,
+      "cell_marker": true
+    }
+  },
+  "original_main_sha256": "20b3a31f5c2a519ffb58adc9fe3d97c062d52f0b0649ab2b1136ef2e21135675",
+  "main_matches_original": true
+}
