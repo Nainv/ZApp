@@ -206,7 +206,6 @@ body {
 </head>
 
 <body>
-<button id="zikraHomeButton" type="button" style="position:fixed;top:12px;left:12px;z-index:9999;padding:10px 16px;border:1px solid #bd9b52;border-radius:10px;background:#304b3a;color:#fff;font:inherit;cursor:pointer">⌂ الرئيسية</button>
 <main class="prayer-cell">
 
   <header class="header">
@@ -441,19 +440,7 @@ body {
 })();
 </script>
 
-<script>
-(function(){
- const goHome=()=>{ location.href='../../index.html'; };
- const btn=document.getElementById('zikraHomeButton');
- if(btn) btn.addEventListener('click',goHome);
- document.addEventListener('keydown',function(e){
-   if((e.key==='Escape'||e.key==='Backspace') && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){
-     e.preventDefault(); e.stopImmediatePropagation(); goHome();
-   }
- },true);
- window.addEventListener('load',()=>{if(btn)btn.focus();});
-})();
-</script>
-
+<button id="cellHomeButton" type="button" aria-label="العودة للرئيسية" style="position:fixed;top:12px;left:12px;z-index:99999;padding:10px 14px;border:0;border-radius:10px;background:#496d55;color:#fff;font:inherit;cursor:pointer">⌂ الرئيسية</button>
+<script id="cellHomeNavigation">(function(){function home(){location.href='../../index.html'}var b=document.getElementById('cellHomeButton');if(b)b.addEventListener('click',home);document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();home()}})})();</script>
 </body>
 </html>

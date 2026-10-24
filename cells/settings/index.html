@@ -1,26 +1,117 @@
-<!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ذِكرى | الإعدادات</title><link rel="stylesheet" href="../../assets/css/app.css"><link rel="stylesheet" href="../../assets/css/cell.css"></head>
-<body><main class="wrap" style="max-width:900px;margin:auto"><header class="page-head"><div><p class="eyebrow">ذِكرى • تخصيص التطبيق</p><h1>⚙️ الإعدادات</h1><p class="muted">تُحفظ الإعدادات على هذا الجهاز</p></div></header>
-<section class="panel"><h2>الإعدادات العامة</h2><div class="grid">
-<div class="field"><label for="language">لغة التطبيق</label><select id="language"><option value="ar">العربية</option><option value="de">Deutsch</option><option value="en">English</option></select></div>
-<div class="field"><label for="city">المدينة</label><input id="city" value="Erfurt"></div>
-<div class="field"><label for="country">الدولة</label><input id="country" value="Deutschland"></div>
-<div class="field"><label for="reader">القارئ المفضل</label><select id="reader"><option value="ar.alafasy">مشاري العفاسي</option><option value="ar.abdurrahmaansudais">عبدالرحمن السديس</option><option value="ar.husary">محمود خليل الحصري</option><option value="ar.minshawi">محمد صديق المنشاوي</option><option value="ar.mahermuaiqly">ماهر المعيقلي</option></select></div>
-</div><label class="row" style="margin-top:16px"><input id="adhan" type="checkbox" style="width:auto"> تفعيل تذكير الأذان</label>
-<div class="row" style="margin-top:18px"><button id="save" class="btn primary">حفظ الإعدادات</button><button id="reset" class="btn">استعادة الافتراضي</button></div><p id="status" class="status" role="status"></p></section></main><button id="zikraHomeButton" type="button" style="position:fixed;top:12px;left:12px;z-index:9999;padding:10px 16px;border:1px solid #bd9b52;border-radius:10px;background:#304b3a;color:#fff;font:inherit;cursor:pointer">⌂ الرئيسية</button>
-<script src="../../assets/js/cell-common.js"></script><script src="../../assets/js/settings.js"></script>
-<script>
-(function(){
- const goHome=()=>{ location.href='../../index.html'; };
- const btn=document.getElementById('zikraHomeButton');
- if(btn) btn.addEventListener('click',goHome);
- document.addEventListener('keydown',function(e){
-   if((e.key==='Escape'||e.key==='Backspace') && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){
-     e.preventDefault(); e.stopImmediatePropagation(); goHome();
-   }
- },true);
- window.addEventListener('load',()=>{if(btn)btn.focus();});
-})();
-</script>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ذِكرى | الإعدادات</title><link rel="stylesheet" href="../../assets/css/cell.css"></head><body>
+
+<div class="settings-screen" id="settingsScreen" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
+  <div class="settings-shell">
+    <header class="settings-header">
+      <div class="settings-heading">
+        <span class="settings-mark">⚙️</span>
+        <div>
+          <h2 id="settingsTitle">إعدادات ذِكرى</h2>
+          <p id="settingsSubtitle">إدارة جميع إعدادات التطبيق</p>
+        </div>
+      </div>
+      <button type="button" class="settings-close" id="closeSettingsBtn" aria-label="إغلاق الإعدادات">×</button>
+    </header>
+
+    <div class="settings-grid" id="settingsGrid">
+      <section class="settings-card settings-language-card">
+        <div class="settings-card-icon">🌐</div>
+        <div class="settings-card-copy">
+          <h3 id="settingsLanguageTitle">لغة التطبيق</h3>
+          <p id="settingsLanguageDesc">العربية · Deutsch · English</p>
+          <div class="settings-language-options" role="group" aria-label="Application language">
+            <button type="button" data-lang="ar">العربية</button>
+            <button type="button" data-lang="de">Deutsch</button>
+            <button type="button" data-lang="en">English</button>
+          </div>
+          <button type="button" id="languageBtn" hidden aria-expanded="false">Language</button>
+          <div id="languageMenu" class="language-menu" hidden>
+            <button type="button" data-lang="ar">العربية</button>
+            <button type="button" data-lang="en">English</button>
+            <button type="button" data-lang="de">Deutsch</button>
+          </div>
+        </div>
+      </section>
+
+      <button type="button" class="settings-card" id="locationBtn">
+        <span class="settings-card-icon">📍</span>
+        <span class="settings-card-copy">
+          <strong id="settingsLocationTitle">الموقع والمدينة</strong>
+          <small id="settingsLocationDesc">تحديد الموقع أو اختيار المدينة</small>
+        </span>
+        <span class="settings-chevron">‹</span>
+      </button>
+
+      <button type="button" class="settings-card" id="mosqueSettingsBtn">
+        <span class="settings-card-icon">🕌</span>
+        <span class="settings-card-copy">
+          <strong id="settingsMosqueTitle">الجامع ومواقيت الصلاة</strong>
+          <small id="settingsMosqueDesc">تفضيلات الجامع وطريقة المواقيت</small>
+        </span>
+        <span class="settings-chevron">‹</span>
+      </button>
+
+      <button type="button" class="settings-card" id="adhanSettingsLaunchBtn">
+        <span class="settings-card-icon">🔊</span>
+        <span class="settings-card-copy">
+          <strong id="settingsAdhanTitle">الأذان والمؤذنون</strong>
+          <small id="settingsAdhanDesc">تخصيص صوت كل صلاة</small>
+        </span>
+        <span class="settings-chevron">‹</span>
+      </button>
+
+      <button type="button" class="settings-card" id="quranBtn">
+        <span class="settings-card-icon">📖</span>
+        <span class="settings-card-copy">
+          <strong id="settingsQuranTitle">القرآن والتنزيلات</strong>
+          <small id="settingsQuranDesc">اختيار القارئ والاستماع للقرآن</small>
+        </span>
+        <span class="settings-chevron">‹</span>
+      </button>
+
+      <button type="button" class="settings-card" id="aboutSettingsBtn">
+        <span class="settings-card-icon">ⓘ</span>
+        <span class="settings-card-copy">
+          <strong>About Us</strong>
+          <small id="settingsAboutDesc">معلومات التطبيق وحقوق النشر</small>
+        </span>
+        <span class="settings-chevron">‹</span>
+      </button>
+
+      <button type="button" class="settings-card" id="assistantSettingsBtn">
+        <span class="settings-card-icon">✨</span>
+        <span class="settings-card-copy">
+          <strong id="settingsAssistantTitle">المساعد الذكي</strong>
+          <small id="settingsAssistantDesc">مساعد ذِكرى للقرآن والأذكار</small>
+        </span>
+        <span class="settings-chevron">‹</span>
+      </button>
+
+      <button type="button" class="settings-card" id="refreshBtn">
+        <span class="settings-card-icon">🔄</span>
+        <span class="settings-card-copy">
+          <strong id="settingsRefreshTitle">تحديث التطبيق</strong>
+          <small id="settingsRefreshDesc">إعادة تحميل أحدث البيانات</small>
+        </span>
+        <span class="settings-chevron">‹</span>
+      </button>
+    </div>
+
+    <section class="settings-subview" id="mosqueSettingsView" hidden>
+      <button type="button" class="settings-back" id="backSettingsBtn">
+        ← <span id="settingsBackLabel">رجوع للإعدادات</span>
+      </button>
+      <h3 id="mosqueViewTitle">الجامع ومواقيت الصلاة</h3>
+      <p id="mosqueViewDesc">يمكنك حفظ اسم الجامع المفضل كتفضيل. اختيار جامع لا يغيّر طريقة حساب المواقيت تلقائياً في هذه النسخة.</p>
+      <label id="preferredMosqueLabel" for="preferredMosqueInput">اسم الجامع المفضل (اختياري)</label>
+      <input id="preferredMosqueInput" type="text" autocomplete="off" placeholder="اسم الجامع">
+      <button type="button" class="action" id="saveMosqueBtn">حفظ التفضيل</button>
+      <p id="mosqueSettingsStatus" role="status"></p>
+    </section>
+  </div>
+</div>
+
+<button id="cellHomeButton" type="button" aria-label="العودة للرئيسية" style="position:fixed;top:12px;left:12px;z-index:99999;padding:10px 14px;border:0;border-radius:10px;background:#496d55;color:#fff;font:inherit;cursor:pointer">⌂ الرئيسية</button>
+<script src="../../assets/js/settings.js"></script><script src="../../assets/js/cell-common.js"></script>
+<script>(function(){function home(){location.href='../../index.html'}document.getElementById('cellHomeButton').addEventListener('click',home);document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();home()}})})();</script>
 </body></html>

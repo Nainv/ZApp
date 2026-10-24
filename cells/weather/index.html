@@ -1,24 +1,23 @@
-<!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ذِكرى | الطقس</title><link rel="stylesheet" href="../../assets/css/app.css"><link rel="stylesheet" href="../../assets/css/cell.css"></head>
-<body><main class="wrap" style="max-width:1100px;margin:auto">
-<header class="page-head"><div><p class="eyebrow">ذِكرى • الطقس</p><h1>🌤️ حالة الطقس</h1><p class="muted">الطقس الحالي وتوقعات الأيام القادمة</p></div></header>
-<section class="panel"><div class="row"><div class="field"><label for="city">المدينة</label><input id="city" value="Erfurt" autocomplete="address-level2"></div><button class="btn primary" id="load">تحديث الطقس</button></div><p id="status" class="status" role="status">جاهز لعرض الطقس</p></section>
-<section id="weather" class="panel" hidden><div class="row" style="justify-content:space-between"><div><p class="eyebrow" id="place"></p><div class="big-number" id="temp">--°</div><h2 id="condition">—</h2></div><div><p>المحسوسة</p><strong id="feels">--°</strong><p>الرطوبة: <strong id="humidity">--%</strong></p><p>الرياح: <strong id="wind">-- كم/س</strong></p></div></div></section>
-<section class="panel"><h2>توقعات 5 أيام</h2><div id="forecast" class="list"></div></section>
-</main><button id="zikraHomeButton" type="button" style="position:fixed;top:12px;left:12px;z-index:9999;padding:10px 16px;border:1px solid #bd9b52;border-radius:10px;background:#304b3a;color:#fff;font:inherit;cursor:pointer">⌂ الرئيسية</button>
-<script src="../../assets/js/cell-common.js"></script><script src="../../assets/js/weather.js"></script>
-<script>
-(function(){
- const goHome=()=>{ location.href='../../index.html'; };
- const btn=document.getElementById('zikraHomeButton');
- if(btn) btn.addEventListener('click',goHome);
- document.addEventListener('keydown',function(e){
-   if((e.key==='Escape'||e.key==='Backspace') && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){
-     e.preventDefault(); e.stopImmediatePropagation(); goHome();
-   }
- },true);
- window.addEventListener('load',()=>{if(btn)btn.focus();});
-})();
-</script>
-</body></html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ذِكرى | الطقس والتاريخ</title>
+<style>
+:root{--green:#496d55;--dark:#203b30;--gold:#bd9b52;--cream:#f7f4e9}*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Arial,sans-serif;color:var(--dark);background:linear-gradient(145deg,#eaf2f5,#f8f4e7);padding:18px}
+main{max-width:1000px;margin:auto;background:#ffffffd9;border:1px solid #dce2d7;border-radius:20px;padding:clamp(16px,3vw,30px);box-shadow:0 10px 30px #203b3015}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}h1{font-size:clamp(22px,4vw,34px);margin:0}button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 16px;background:#496d55;color:white}
+.current{margin-top:22px;padding:22px;border-radius:18px;color:white;background:linear-gradient(135deg,#397da5,#142e4d);display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.temp{font-size:clamp(42px,8vw,70px);font-weight:800}.muted{opacity:.8}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-top:18px}.card{background:#f6f6ed;border:1px solid #e0e3d5;border-radius:13px;padding:14px;text-align:center}.card strong{display:block;font-size:18px;margin-top:8px}
+.note{margin-top:16px;color:#697768;font-size:13px;line-height:1.6}
+</style></head><body><main><header><div><h1>🌦️ الطقس والتاريخ</h1><div class="muted" id="date"></div></div><button onclick="goHome()">⌂ الرئيسية</button></header>
+<section class="current"><div><div id="condition">الطقس الحالي</div><div class="temp" id="temp">—°</div><div class="muted" id="place">إرفورت، ألمانيا</div></div><div style="font-size:64px" id="icon">🌤️</div></section>
+<div class="cards"><div class="card">📅 التاريخ الميلادي<strong id="greg"></strong></div><div class="card">🌙 التاريخ الهجري<strong id="hijri">—</strong></div><div class="card">🕒 الوقت<strong id="clock"></strong></div></div>
+<p class="note">صفحة مستقلة للطقس والتاريخ. لإظهار درجات الحرارة الحية والتوقعات، يلزم ربط مصدر بيانات الطقس الموجود في مشروعك؛ لم أضع أرقاماً وهمية.</p>
+</main><script>
+function goHome(){location.href='../../index.html'}
+const now=new Date();document.getElementById('date').textContent=new Intl.DateTimeFormat('ar',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(now);
+document.getElementById('greg').textContent=new Intl.DateTimeFormat('ar',{day:'numeric',month:'short',year:'numeric'}).format(now);
+document.getElementById('hijri').textContent=new Intl.DateTimeFormat('ar-SA-u-ca-islamic',{day:'numeric',month:'short',year:'numeric'}).format(now);
+function tick(){document.getElementById('clock').textContent=new Intl.DateTimeFormat('de-DE',{hour:'2-digit',minute:'2-digit'}).format(new Date())}tick();setInterval(tick,1000);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();goHome()}});
+</script></body></html>

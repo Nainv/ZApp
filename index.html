@@ -1885,35 +1885,26 @@ html[data-layout-mode="tv"] .footer,body[data-layout-mode="tv"] .footer{flex:0 0
 </script>
 
 
-<script id="zikra-cell-navigation-v1">
+<script id="zikra-seven-cell-navigation">
 (function(){
-  const routes = [
-    ['[data-cell="settings"], #settingsBtn, .settings-launch, #settingsButton, #openSettings', 'settings'],
-    ['[data-cell="weather"], #datePanel, .date-weather-widget, #weatherCard, #weatherTile', 'weather'],
-    ['[data-cell="prayer"], .prayer-strip', 'prayer'],
-    ['[data-cell="quran"], .quran-entry, .now-reading, #quranEntry, #openQuran', 'quran'],
-    ['[data-cell="zikra"], .tile-memory, #memoryCard', 'zikra'],
-    ['[data-cell="dua-bar"], .dua-bar, #duaBar', 'dua-bar']
-  ];
-  function navigate(id){ location.href = 'cells/' + id + '/index.html'; }
-  document.addEventListener('click', function(e){
-    const target = e.target && e.target.closest ? e.target.closest('button,a,[role="button"],[role="link"],.tile,.prayer-strip,.date-panel,.player,.dua-bar,.now-reading') : null;
-    if(!target) return;
-    for(const [selector,id] of routes){
-      let matched=false;
-      try { matched=target.matches(selector) || !!target.closest(selector); } catch(_) {}
-      if(matched){ e.preventDefault(); e.stopImmediatePropagation(); navigate(id); return; }
+  function openCell(id){const routes={settings:'cells/settings/index.html',weather:'cells/weather/index.html',prayer:'cells/prayer/index.html',quran:'cells/quran/index.html',zikra:'cells/zikra/index.html','dua-bar':'cells/dua-bar/index.html'};if(routes[id])location.href=routes[id]}
+  document.addEventListener('click',function(e){
+    const t=e.target.closest('[data-cell],[data-open-cell],[data-open],#settingsBtn,.settings-launch,#datePanel,.date-weather-widget,.prayer-strip,.prayer-strip .prayer,#memoryCard,.tile-memory,.player,.now-reading.quran-entry,#openQuranFromPlayer,.dua-bar');
+    if(!t)return;
+    let id=t.getAttribute('data-cell')||t.getAttribute('data-open-cell')||t.getAttribute('data-open');
+    if(!id){
+      if(t.matches('#settingsBtn,.settings-launch'))id='settings';
+      else if(t.matches('#datePanel,.date-weather-widget'))id='weather';
+      else if(t.matches('.prayer-strip,.prayer-strip .prayer'))id='prayer';
+      else if(t.matches('#memoryCard,.tile-memory'))id='zikra';
+      else if(t.matches('.player,.now-reading.quran-entry,#openQuranFromPlayer'))id='quran';
+      else if(t.matches('.dua-bar'))id='dua-bar';
     }
-  }, true);
-  document.addEventListener('keydown', function(e){
-    if(e.key !== 'Enter' && e.key !== ' ') return;
-    const target=e.target; if(!target || !target.closest) return;
-    for(const [selector,id] of routes){
-      let matched=false; try { matched=target.matches(selector) || !!target.closest(selector); } catch(_) {}
-      if(matched){ e.preventDefault(); e.stopImmediatePropagation(); navigate(id); return; }
-    }
-  }, true);
+    if(id){e.preventDefault();e.stopImmediatePropagation();openCell(id)}
+  },true);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.key==='Backspace'){if(history.length>1){e.preventDefault();history.back()}}});
 })();
 </script>
+
 </body>
 </html>
