@@ -126,10 +126,19 @@ jobs:
 
           cp "./index.html" "app/src/main/assets/index.html"
 
-          # Include supporting web resources for the bundled WebView.
+          # Preserve the web app's assets/ prefix. The HTML and cell pages
+          # request paths such as assets/css/home-theme.css and
+          # assets/js/tv-remote.js relative to the Android asset root.
           if [[ -d "./assets" ]]; then
-            cp -R "./assets/." "app/src/main/assets/"
+            cp -R "./assets" "app/src/main/assets/"
           fi
+
+          # Copy files referenced directly from the home page.
+          for file in favicon.ico favicon.png apple-touch-icon.png site.webmanifest zikra_logo.png; do
+            if [[ -f "./$file" ]]; then
+              cp "./$file" "app/src/main/assets/$file"
+            fi
+          done
 
           if [[ -d "./cells" ]]; then
             cp -R "./cells" "app/src/main/assets/"
