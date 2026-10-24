@@ -457,6 +457,7 @@ window.ZIKRA_CELL_FILES = Object.freeze({
   <div class="brand"><div class="brand-mark" aria-hidden="true">۞</div><div><h1 id="appTitle">ذِكرى</h1><p id="subtitle">طمأنينةٌ للقلب في كل يوم</p></div></div>
   <div class="tools">
     <button class="icon-btn settings-launch" id="settingsBtn" type="button" aria-label="الإعدادات" title="الإعدادات">⚙️ <span id="settingsBtnLabel">الإعدادات</span></button>
+    <button class="icon-btn refresh-launch" id="homeRefreshBtn" type="button" aria-label="تحديث التطبيق" title="تحديث التطبيق">↻</button>
   </div>
 </header>
 <section class="date-panel weather-unified sunny" id="datePanel" role="button" tabindex="0" aria-label="فتح لوحة الطقس" title="فتح لوحة الطقس"><span class="tile-weather-effects" id="weatherTileEffects" aria-hidden="true"></span><div class="clock" id="clock">--:--</div><div class="date-weather-widget" id="weatherCard"><span class="weather-icon" id="weatherIcon">🌤️</span><span class="weather-temp" id="weatherTemp">--°</span><span class="weather-condition" id="weatherCondition">جارٍ تحميل الطقس…</span><span class="weather-extra" id="weatherExtra"></span></div><div class="date-info"><div class="date-text" id="dateText"></div><div class="hijri" id="hijriText"></div><div class="city-label" id="cityLabel">إرفورت</div></div></section>
@@ -1290,9 +1291,8 @@ document.addEventListener("keydown",function(event){
 // Returning to the prayer row always lands on the upcoming prayer, never the last manually browsed card.
 
 
-/* زر التحديث يعيد تحميل صفحة التطبيق كاملة مع تجاوز كاش الصفحة، لتظهر نسخة index.html المنشورة حديثاً. */
-$("refreshBtn").addEventListener("click",()=>{
-  const btn=$("refreshBtn");
+/* يعيد تحميل صفحة التطبيق مع رابط جديد لتجاوز كاش الصفحة عند التشغيل من الويب. */
+function refreshZikraApp(btn){
   if(btn.dataset.reloading==="1") return;
   btn.dataset.reloading="1";
   btn.disabled=true;
@@ -1305,7 +1305,9 @@ $("refreshBtn").addEventListener("click",()=>{
   }catch(e){
     window.location.reload();
   }
-});
+}
+$("refreshBtn").addEventListener("click",()=>refreshZikraApp($("refreshBtn")));
+$("homeRefreshBtn").addEventListener("click",()=>refreshZikraApp($("homeRefreshBtn")));
 updateCityLabel();renderMemory();updatePlayButton();loadPrayerTimes();loadWeather();loadReaders();checkResumeBookmark();
 </script>
 
