@@ -1,117 +1,88 @@
-<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ذِكرى | الإعدادات</title><link rel="stylesheet" href="../../assets/css/cell.css"></head><body>
-
-<div class="settings-screen" id="settingsScreen" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
-  <div class="settings-shell">
-    <header class="settings-header">
-      <div class="settings-heading">
-        <span class="settings-mark">⚙️</span>
-        <div>
-          <h2 id="settingsTitle">إعدادات ذِكرى</h2>
-          <p id="settingsSubtitle">إدارة جميع إعدادات التطبيق</p>
-        </div>
-      </div>
-      <button type="button" class="settings-close" id="closeSettingsBtn" aria-label="إغلاق الإعدادات">×</button>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b23">
+  <title>ذِكرى | الإعدادات</title>
+  <style>
+    :root{color-scheme:dark;--bg:#101b23;--panel:#17262e;--panel2:#1c3038;--line:#2b4148;--text:#f3f4e9;--muted:#aebeb8;--gold:#e5c77b;--teal:#79c9b2;--focus:#ffe08c;--danger:#f1a49b}
+    *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100vh;color:var(--text);font-family:Tahoma,"Segoe UI",Arial,sans-serif;background:radial-gradient(ellipse at 18% 5%,rgba(65,124,110,.18),transparent 36%),radial-gradient(ellipse at 88% 95%,rgba(194,153,77,.1),transparent 34%),var(--bg);font-size:17px}
+    button,select{font:inherit;color:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:4px;box-shadow:0 0 0 7px rgba(255,224,140,.14)}
+    .app{min-height:100vh;max-width:1440px;margin:auto;padding:34px 42px 28px;display:flex;flex-direction:column;gap:22px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);padding-bottom:20px}.brand{display:flex;align-items:center;gap:14px}.brand-mark{height:52px;width:52px;border:1px solid rgba(229,199,123,.5);border-radius:17px;display:grid;place-items:center;color:var(--gold);font-size:26px;background:rgba(229,199,123,.08)}h1,h2,h3,p{margin:0}.brand h1{font-size:27px;letter-spacing:.2px}.brand p{color:var(--muted);font-size:14px;margin-top:5px}.top-actions{display:flex;align-items:center;gap:12px}.hint{color:var(--muted);font-size:13px}.icon-button{width:52px;height:52px;border:1px solid var(--line);background:var(--panel);border-radius:16px;font-size:27px;line-height:1}.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}.content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}.card{border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,rgba(31,52,60,.96),rgba(22,37,45,.96));padding:20px;min-width:0;box-shadow:0 14px 34px rgba(0,0,0,.14)}.card.wide{grid-column:1/-1}.card-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}.card-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:rgba(121,201,178,.12);color:var(--teal);font-size:21px;flex:0 0 auto}.card h2{font-size:19px}.card .sub{font-size:13px;color:var(--muted);margin-top:4px}.control{width:100%;min-height:54px;padding:0 16px;border:1px solid #40565c;border-radius:13px;background:#14232a;color:var(--text)}.control:focus{border-color:var(--focus)}.help{color:var(--muted);font-size:12px;margin-top:10px;line-height:1.7}.inline-control{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}.locate{min-height:54px;padding:0 15px;border:1px solid rgba(121,201,178,.45);background:rgba(121,201,178,.1);border-radius:13px;color:#c9f2e6;white-space:nowrap}.status{min-height:22px;color:var(--teal);font-size:13px;margin-top:9px}.prayer-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}.prayer{border:1px solid var(--line);background:rgba(14,26,32,.45);border-radius:15px;padding:14px 12px;display:flex;flex-direction:column;gap:12px;min-width:0}.prayer-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.prayer-name{font-size:15px;font-weight:700}.prayer-icon{font-size:18px;color:var(--gold)}.prayer select{min-height:44px;padding:0 10px;font-size:13px}.toggle{width:56px;height:32px;border-radius:20px;border:1px solid #52656a;background:#34464c;position:relative;padding:0;flex:0 0 auto;transition:.16s}.toggle::after{content:"";position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:#d8e1db;transition:.16s}.toggle[aria-checked="true"]{background:#397b68;border-color:#72c4a8}.toggle[aria-checked="true"]::after{right:28px;background:#fff}.about{background:linear-gradient(140deg,rgba(229,199,123,.13),rgba(229,199,123,.045));border-color:rgba(229,199,123,.32)}.about .card-icon{background:rgba(229,199,123,.13);color:var(--gold)}.about-copy{color:var(--muted);font-size:14px;line-height:1.8}.about strong{color:var(--text)}.actions{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:3px}.save-note{color:var(--muted);font-size:13px}.buttons{display:flex;gap:12px}.primary,.secondary{min-width:150px;min-height:54px;padding:0 22px;border-radius:15px;font-weight:700}.primary{border:1px solid #8bd3ba;background:linear-gradient(135deg,#8dd2b7,#62b69b);color:#10221d}.secondary{border:1px solid #496067;background:var(--panel);color:var(--text)}.primary:focus-visible,.secondary:focus-visible{outline-offset:4px}.sidebar{position:sticky;top:22px;display:flex;flex-direction:column;gap:15px}.welcome{padding:23px;border:1px solid rgba(229,199,123,.28);border-radius:20px;background:linear-gradient(155deg,rgba(118,100,52,.22),rgba(26,44,49,.78))}.welcome .ornament{font-size:27px;color:var(--gold);margin-bottom:14px}.welcome h2{font-size:21px;line-height:1.5}.welcome p{font-size:14px;line-height:1.9;color:var(--muted);margin-top:10px}.remote-help{border:1px solid var(--line);background:rgba(23,38,46,.8);border-radius:18px;padding:17px}.remote-help h3{font-size:14px;margin-bottom:12px}.key-row{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:13px;padding:7px 0}.key{color:var(--text);border:1px solid #52666b;border-radius:7px;min-width:35px;text-align:center;padding:4px 7px;background:#20343b}.dialog{width:min(520px,calc(100% - 32px));padding:0;border:1px solid #5c6b66;border-radius:22px;background:#182930;color:var(--text);box-shadow:0 22px 100px rgba(0,0,0,.75)}.dialog::backdrop{background:rgba(4,10,13,.78);backdrop-filter:blur(5px)}.dialog-inner{padding:27px}.dialog h2{font-size:22px}.dialog p{color:var(--muted);line-height:1.8;margin-top:10px}.dialog-actions{display:flex;gap:12px;margin-top:24px}.dialog-actions button{flex:1;min-height:54px;border-radius:14px;font-weight:700}.yes{border:1px solid #8bd3ba;background:#85cbb1;color:#10221d}.no{border:1px solid #52666b;background:#24373d}.toast{position:fixed;bottom:26px;left:50%;transform:translate(-50%,18px);opacity:0;pointer-events:none;padding:13px 20px;border:1px solid rgba(121,201,178,.55);border-radius:13px;background:#1b3735;color:#d9f5e9;box-shadow:0 12px 35px rgba(0,0,0,.4);transition:.2s;z-index:4}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:1000px){.layout{grid-template-columns:1fr}.sidebar{position:static;display:grid;grid-template-columns:1fr 1fr}.prayer-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:700px){.app{padding:20px 16px}.content{grid-template-columns:1fr}.card.wide{grid-column:auto}.sidebar{grid-template-columns:1fr}.prayer-list{grid-template-columns:repeat(2,minmax(0,1fr))}.actions{align-items:stretch;flex-direction:column}.buttons{width:100%}.buttons button{flex:1;min-width:0}.hint{display:none}}
+    @media(min-width:1500px){.app{padding-top:48px;gap:26px}.card{padding:24px}.prayer{padding:17px 14px}}
+  </style>
+</head>
+<body>
+  <main class="app" id="settingsApp" aria-labelledby="pageTitle">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">☾</div><div><h1 id="pageTitle">إعدادات ذِكرى</h1><p>خصص تجربتك اليومية بكل سهولة</p></div></div>
+      <div class="top-actions"><span class="hint">استخدم الأسهم للتنقل و OK للاختيار</span><button class="icon-button" id="closeTop" type="button" aria-label="إغلاق الإعدادات">×</button></div>
     </header>
-
-    <div class="settings-grid" id="settingsGrid">
-      <section class="settings-card settings-language-card">
-        <div class="settings-card-icon">🌐</div>
-        <div class="settings-card-copy">
-          <h3 id="settingsLanguageTitle">لغة التطبيق</h3>
-          <p id="settingsLanguageDesc">العربية · Deutsch · English</p>
-          <div class="settings-language-options" role="group" aria-label="Application language">
-            <button type="button" data-lang="ar">العربية</button>
-            <button type="button" data-lang="de">Deutsch</button>
-            <button type="button" data-lang="en">English</button>
-          </div>
-          <button type="button" id="languageBtn" hidden aria-expanded="false">Language</button>
-          <div id="languageMenu" class="language-menu" hidden>
-            <button type="button" data-lang="ar">العربية</button>
-            <button type="button" data-lang="en">English</button>
-            <button type="button" data-lang="de">Deutsch</button>
-          </div>
-        </div>
+    <div class="layout">
+      <section class="content" aria-label="خيارات الإعدادات">
+        <section class="card" aria-labelledby="languageTitle"><div class="card-head"><span class="card-icon" aria-hidden="true">文</span><div><h2 id="languageTitle">لغة التطبيق</h2><p class="sub">اختر اللغة التي تفضلها</p></div></div><select class="control" id="language" data-setting aria-label="لغة التطبيق"><option value="ar">العربية</option><option value="de">Deutsch</option><option value="en">English</option></select></section>
+        <section class="card" aria-labelledby="locationTitle"><div class="card-head"><span class="card-icon" aria-hidden="true">⌖</span><div><h2 id="locationTitle">الموقع ومواقيت الصلاة</h2><p class="sub">حدد المدينة لحساب المواقيت</p></div></div><div class="inline-control"><select class="control" id="location" data-setting aria-label="المدينة من القائمة"><option value="berlin">برلين، ألمانيا</option><option value="hamburg">هامبورغ، ألمانيا</option><option value="munich">ميونخ، ألمانيا</option><option value="makkah">مكة المكرمة، السعودية</option><option value="madinah">المدينة المنورة، السعودية</option><option value="amman">عمّان، الأردن</option><option value="damascus">دمشق، سوريا</option><option value="cairo">القاهرة، مصر</option></select><button class="locate" id="locateBtn" type="button">⌖ موقعي</button></div><label class="help" for="manualCity">أو اكتب اسم المدينة يدويًا</label><input class="control" id="manualCity" data-setting type="text" maxlength="80" autocomplete="address-level2" placeholder="مثال: برلين أو مكة المكرمة" aria-label="اكتب اسم المدينة يدويًا"><p class="help">اختر مدينة من القائمة أو اكتب اسمها؛ تُحفظ التفضيلات على هذا الجهاز.</p><p class="status" id="locationStatus" role="status" aria-live="polite"></p></section>
+        <section class="card" aria-labelledby="quranTitle"><div class="card-head"><span class="card-icon" aria-hidden="true">۞</span><div><h2 id="quranTitle">القرآن الكريم</h2><p class="sub">اختر ما يظهر في قسم القرآن</p></div></div><label class="help" for="quranSelection">المصحف أو القراءة المفضلة</label><select class="control" id="quranSelection" data-setting aria-label="اختيار القرآن"><option value="full">القرآن الكريم كاملًا</option><option value="juz-amma">جزء عمّ</option><option value="al-baqarah">سورة البقرة</option><option value="al-kahf">سورة الكهف</option><option value="yasin">سورة يس</option><option value="ar-rahman">سورة الرحمن</option></select><label class="help" for="quranRecitation">الرواية</label><select class="control" id="quranRecitation" data-setting aria-label="رواية القرآن"><option value="hafs">رواية حفص عن عاصم</option><option value="warsh">رواية ورش عن نافع</option></select></section>
+        <section class="card" aria-labelledby="adhanTitle"><div class="card-head"><span class="card-icon" aria-hidden="true">◖</span><div><h2 id="adhanTitle">الأذان لكل صلاة</h2><p class="sub">فعّل التنبيه واختر نوعه لكل وقت</p></div></div><div class="prayer-list" id="prayerList">
+          <div class="prayer"><div class="prayer-top"><span class="prayer-name">الفجر <span class="prayer-icon" aria-hidden="true">☼</span></span><button class="toggle" type="button" role="switch" aria-checked="true" data-setting data-prayer="fajr" aria-label="تفعيل أذان الفجر"></button></div><select class="control" data-setting data-prayer-type="fajr" aria-label="صوت أذان الفجر"><option value="makkah">أذان مكة</option><option value="madinah">أذان المدينة</option><option value="alafasy">أذان مشاري العفاسي</option><option value="syria">أذان سوري</option><option value="silent">بدون أذان</option></select></div>
+          <div class="prayer"><div class="prayer-top"><span class="prayer-name">الظهر <span class="prayer-icon" aria-hidden="true">☀</span></span><button class="toggle" type="button" role="switch" aria-checked="true" data-setting data-prayer="dhuhr" aria-label="تفعيل أذان الظهر"></button></div><select class="control" data-setting data-prayer-type="dhuhr" aria-label="صوت أذان الظهر"><option value="makkah">أذان مكة</option><option value="madinah">أذان المدينة</option><option value="alafasy">أذان مشاري العفاسي</option><option value="syria">أذان سوري</option><option value="silent">بدون أذان</option></select></div>
+          <div class="prayer"><div class="prayer-top"><span class="prayer-name">العصر <span class="prayer-icon" aria-hidden="true">◉</span></span><button class="toggle" type="button" role="switch" aria-checked="true" data-setting data-prayer="asr" aria-label="تفعيل أذان العصر"></button></div><select class="control" data-setting data-prayer-type="asr" aria-label="صوت أذان العصر"><option value="makkah">أذان مكة</option><option value="madinah">أذان المدينة</option><option value="alafasy">أذان مشاري العفاسي</option><option value="syria">أذان سوري</option><option value="silent">بدون أذان</option></select></div>
+          <div class="prayer"><div class="prayer-top"><span class="prayer-name">المغرب <span class="prayer-icon" aria-hidden="true">◒</span></span><button class="toggle" type="button" role="switch" aria-checked="true" data-setting data-prayer="maghrib" aria-label="تفعيل أذان المغرب"></button></div><select class="control" data-setting data-prayer-type="maghrib" aria-label="صوت أذان المغرب"><option value="makkah">أذان مكة</option><option value="madinah">أذان المدينة</option><option value="alafasy">أذان مشاري العفاسي</option><option value="syria">أذان سوري</option><option value="silent">بدون أذان</option></select></div>
+          <div class="prayer"><div class="prayer-top"><span class="prayer-name">العشاء <span class="prayer-icon" aria-hidden="true">☾</span></span><button class="toggle" type="button" role="switch" aria-checked="true" data-setting data-prayer="isha" aria-label="تفعيل أذان العشاء"></button></div><select class="control" data-setting data-prayer-type="isha" aria-label="صوت أذان العشاء"><option value="makkah">أذان مكة</option><option value="madinah">أذان المدينة</option><option value="alafasy">أذان مشاري العفاسي</option><option value="syria">أذان سوري</option><option value="silent">بدون أذان</option></select></div>
+        </div></section>
+        <section class="card about" aria-labelledby="aboutTitle"><div class="card-head"><span class="card-icon" aria-hidden="true">✦</span><div><h2 id="aboutTitle">عن ذِكرى</h2><p class="sub">ذكرٌ يرافق يومك</p></div></div><p class="about-copy"><strong>ذِكرى</strong> مساحة هادئة للقرآن الكريم ومواقيت الصلاة والأذكار.</p><button class="secondary" id="aboutBtn" type="button" aria-expanded="false" aria-controls="aboutDetails">About us · عن ذِكرى</button><p class="about-copy" id="aboutDetails" hidden>صُمم التطبيق ليجمع القرآن الكريم ومواقيت الصلاة والأذكار في تجربة بسيطة ومريحة على شاشة التلفاز.</p></section>
       </section>
-
-      <button type="button" class="settings-card" id="locationBtn">
-        <span class="settings-card-icon">📍</span>
-        <span class="settings-card-copy">
-          <strong id="settingsLocationTitle">الموقع والمدينة</strong>
-          <small id="settingsLocationDesc">تحديد الموقع أو اختيار المدينة</small>
-        </span>
-        <span class="settings-chevron">‹</span>
-      </button>
-
-      <button type="button" class="settings-card" id="mosqueSettingsBtn">
-        <span class="settings-card-icon">🕌</span>
-        <span class="settings-card-copy">
-          <strong id="settingsMosqueTitle">الجامع ومواقيت الصلاة</strong>
-          <small id="settingsMosqueDesc">تفضيلات الجامع وطريقة المواقيت</small>
-        </span>
-        <span class="settings-chevron">‹</span>
-      </button>
-
-      <button type="button" class="settings-card" id="adhanSettingsLaunchBtn">
-        <span class="settings-card-icon">🔊</span>
-        <span class="settings-card-copy">
-          <strong id="settingsAdhanTitle">الأذان والمؤذنون</strong>
-          <small id="settingsAdhanDesc">تخصيص صوت كل صلاة</small>
-        </span>
-        <span class="settings-chevron">‹</span>
-      </button>
-
-      <button type="button" class="settings-card" id="quranBtn">
-        <span class="settings-card-icon">📖</span>
-        <span class="settings-card-copy">
-          <strong id="settingsQuranTitle">القرآن والتنزيلات</strong>
-          <small id="settingsQuranDesc">اختيار القارئ والاستماع للقرآن</small>
-        </span>
-        <span class="settings-chevron">‹</span>
-      </button>
-
-      <button type="button" class="settings-card" id="aboutSettingsBtn">
-        <span class="settings-card-icon">ⓘ</span>
-        <span class="settings-card-copy">
-          <strong>About Us</strong>
-          <small id="settingsAboutDesc">معلومات التطبيق وحقوق النشر</small>
-        </span>
-        <span class="settings-chevron">‹</span>
-      </button>
-
-      <button type="button" class="settings-card" id="assistantSettingsBtn">
-        <span class="settings-card-icon">✨</span>
-        <span class="settings-card-copy">
-          <strong id="settingsAssistantTitle">المساعد الذكي</strong>
-          <small id="settingsAssistantDesc">مساعد ذِكرى للقرآن والأذكار</small>
-        </span>
-        <span class="settings-chevron">‹</span>
-      </button>
-
-      <button type="button" class="settings-card" id="refreshBtn">
-        <span class="settings-card-icon">🔄</span>
-        <span class="settings-card-copy">
-          <strong id="settingsRefreshTitle">تحديث التطبيق</strong>
-          <small id="settingsRefreshDesc">إعادة تحميل أحدث البيانات</small>
-        </span>
-        <span class="settings-chevron">‹</span>
-      </button>
+      <aside class="sidebar" aria-label="معلومات عن الإعدادات"><section class="welcome"><div class="ornament" aria-hidden="true">۞</div><h2>اجعل ذِكرى أقرب لما تحب</h2><p>غيّر اللغة والموقع، واختر ما تريد عرضه من القرآن، واضبط تنبيهات الأذان لكل صلاة.</p></section></aside>
     </div>
-
-    <section class="settings-subview" id="mosqueSettingsView" hidden>
-      <button type="button" class="settings-back" id="backSettingsBtn">
-        ← <span id="settingsBackLabel">رجوع للإعدادات</span>
-      </button>
-      <h3 id="mosqueViewTitle">الجامع ومواقيت الصلاة</h3>
-      <p id="mosqueViewDesc">يمكنك حفظ اسم الجامع المفضل كتفضيل. اختيار جامع لا يغيّر طريقة حساب المواقيت تلقائياً في هذه النسخة.</p>
-      <label id="preferredMosqueLabel" for="preferredMosqueInput">اسم الجامع المفضل (اختياري)</label>
-      <input id="preferredMosqueInput" type="text" autocomplete="off" placeholder="اسم الجامع">
-      <button type="button" class="action" id="saveMosqueBtn">حفظ التفضيل</button>
-      <p id="mosqueSettingsStatus" role="status"></p>
-    </section>
-  </div>
-</div>
-
-<button id="cellHomeButton" type="button" aria-label="العودة للرئيسية" style="position:fixed;top:12px;left:12px;z-index:99999;padding:10px 14px;border:0;border-radius:10px;background:#496d55;color:#fff;font:inherit;cursor:pointer">⌂ الرئيسية</button>
-<script src="../../assets/js/settings.js"></script><script src="../../assets/js/cell-common.js"></script>
-<script>(function(){function home(){location.href='../../index.html'}document.getElementById('cellHomeButton').addEventListener('click',home);document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();home()}})})();</script>
-</body></html>
+    <footer class="actions"><span class="save-note" id="saveNote" role="status" aria-live="polite">التغييرات غير المحفوظة تظهر هنا</span><div class="buttons"><button class="secondary" id="closeBottom" type="button">إغلاق</button><button class="primary" id="saveBtn" type="button">حفظ الإعدادات</button></div></footer>
+  </main>
+  <dialog class="dialog" id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmText"><div class="dialog-inner"><h2 id="confirmTitle">حفظ التغييرات؟</h2><p id="confirmText">عدّلت بعض الإعدادات ولم تحفظها بعد. هل تريد حفظها قبل الإغلاق؟</p><div class="dialog-actions"><button class="yes" id="confirmYes" type="button">نعم، احفظ وأغلق</button><button class="no" id="confirmNo" type="button">لا، أغلق دون حفظ</button></div></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (()=>{
+      'use strict';
+      const STORAGE_KEY='zikraSettings';
+      const app=document.getElementById('settingsApp');
+      const controls=[...app.querySelectorAll('[data-setting]')];
+      const dialog=document.getElementById('confirmDialog');
+      const saveNote=document.getElementById('saveNote');
+      let saved={},closeOrigin=null,toastTimer;
+      const readForm=()=>{const data={};for(const el of controls){if(el.dataset.prayer)data.prayers??={},data.prayers[el.dataset.prayer]={...(data.prayers[el.dataset.prayer]||{}),enabled:el.getAttribute('aria-checked')==='true'};else if(el.dataset.prayerType)data.prayers??={},data.prayers[el.dataset.prayerType]={...(data.prayers[el.dataset.prayerType]||{}),type:el.value};else data[el.id]=el.value}return data};
+      const updateDirty=()=>{const dirty=JSON.stringify(readForm())!==JSON.stringify(saved);saveNote.textContent=dirty?'لديك تغييرات لم تُحفظ':'كل التغييرات محفوظة';saveNote.style.color=dirty?'var(--gold)':'var(--teal)';return dirty};
+      const applyData=data=>{if(!data||typeof data!=='object')return;for(const el of controls){if(el.dataset.prayer){const v=data.prayers?.[el.dataset.prayer]?.enabled;if(typeof v==='boolean')el.setAttribute('aria-checked',String(v))}else if(el.dataset.prayerType){const v=data.prayers?.[el.dataset.prayerType]?.type;if(v&&[...el.options].some(o=>o.value===v))el.value=v}else if(el instanceof HTMLSelectElement){if(typeof data[el.id]==='string'&&[...el.options].some(o=>o.value===data[el.id]))el.value=data[el.id]}else if(typeof data[el.id]==='string'){el.value=data[el.id]}}};
+      try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');applyData(data);saved=readForm()}catch{saved=readForm()}
+      const announce=message=>{const toast=document.getElementById('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2300)};
+      const save=()=>{saved=readForm();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(saved));announce('تم حفظ الإعدادات')}catch{announce('تعذر الحفظ على هذا الجهاز')}updateDirty()};
+      const goHome=()=>{window.location.href='../../index.html'};
+      const closeSettings=()=>{if(updateDirty()){closeOrigin=document.activeElement;dialog.showModal();document.getElementById('confirmYes').focus()}else goHome()};
+      document.getElementById('saveBtn').addEventListener('click',()=>{save();goHome()});
+      document.getElementById('closeTop').addEventListener('click',closeSettings);
+      document.getElementById('closeBottom').addEventListener('click',closeSettings);
+      document.getElementById('confirmYes').addEventListener('click',()=>{save();dialog.close();goHome()});
+      document.getElementById('confirmNo').addEventListener('click',()=>{dialog.close();goHome()});
+      document.getElementById('locateBtn').addEventListener('click',()=>{const status=document.getElementById('locationStatus');if(!navigator.geolocation){status.textContent='تحديد الموقع غير متاح في هذا المتصفح.';return}status.textContent='جارٍ طلب إذن الموقع…';navigator.geolocation.getCurrentPosition(({coords})=>{status.textContent=`تم تحديد موقعك (${coords.latitude.toFixed(2)}, ${coords.longitude.toFixed(2)}). اختر المدينة الأقرب من القائمة.`},()=>{status.textContent='لم يُسمح بالوصول للموقع. يمكنك اختيار المدينة يدويًا.'},{timeout:8000,maximumAge:300000})});
+      document.getElementById('aboutBtn').addEventListener('click',e=>{const button=e.currentTarget,details=document.getElementById('aboutDetails'),open=button.getAttribute('aria-expanded')!=='true';button.setAttribute('aria-expanded',String(open));details.hidden=!open});
+      app.addEventListener('change',updateDirty);
+      app.addEventListener('click',e=>{const toggle=e.target.closest('.toggle');if(toggle){toggle.setAttribute('aria-checked',String(toggle.getAttribute('aria-checked')!=='true'));updateDirty()}});
+      const isFocusable=el=>el instanceof HTMLElement&&el.getClientRects().length>0&&!el.disabled&&el.tabIndex>=0;
+      const focusables=()=>[...(dialog.open?dialog.querySelectorAll('button,[href],select,[tabindex]:not([tabindex="-1"])'):app.querySelectorAll('button,select,[href],[tabindex]:not([tabindex="-1"])'))].filter(isFocusable);
+      app.addEventListener('focusin',e=>{if(dialog.open&&!dialog.contains(e.target)){document.getElementById('confirmYes').focus();return}if(!dialog.open&&!app.contains(e.target)){(focusables()[0]||app).focus()}});
+      document.addEventListener('keydown',e=>{
+        const key=e.key;
+        if(key==='Escape'||key==='Backspace'||key==='BrowserBack'||key==='GoBack'||key==='XF86Back'||e.keyCode===4){e.preventDefault();e.stopPropagation();if(dialog.open){dialog.close();goHome()}else closeSettings();return}
+        if(key==='Tab'){const list=focusables(),first=list[0],last=list[list.length-1];if(list.length&&e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(list.length&&!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}return}
+        if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key))return;
+        if(document.activeElement instanceof HTMLSelectElement&&(key==='ArrowUp'||key==='ArrowDown'))return;
+        const list=focusables();if(!list.length)return;const current=document.activeElement;const from=current.getBoundingClientRect();const cx=from.left+from.width/2,cy=from.top+from.height/2;const horizontal=key==='ArrowLeft'||key==='ArrowRight';const sign=(key==='ArrowRight'||key==='ArrowDown')?1:-1;
+        const candidates=list.filter(el=>el!==current).map(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,primary=horizontal?(x-cx)*sign:(y-cy)*sign,cross=horizontal?Math.abs(y-cy):Math.abs(x-cx);return{el,primary,cross,score:primary+cross*1.8}}).filter(x=>x.primary>1).sort((a,b)=>a.score-b.score);
+        if(candidates[0]){e.preventDefault();candidates[0].el.focus()}else{const ordered=list.map(el=>({el,r:el.getBoundingClientRect()})).sort((a,b)=>horizontal?a.r.top-b.r.top||a.r.left-b.r.left:a.r.top-b.r.top||a.r.left-b.r.left);e.preventDefault();(sign>0?ordered[0]:ordered.at(-1))?.el.focus()}
+      },true);
+      updateDirty();
+      document.getElementById('language').focus();
+    })();
+  </script>
+</body>
+</html>
