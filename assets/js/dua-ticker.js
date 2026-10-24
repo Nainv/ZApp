@@ -41,9 +41,8 @@
     if (!group) return;
     var width = group.getBoundingClientRect().width;
     if (width > 0) {
-      // About 21 CSS pixels per second, with no upper duration cap that could
-      // force a long list to race across the screen.
-      track.style.setProperty('--dua-duration', Math.max(180, Math.round(width / 21)) + 's');
+      // Increase the current movement rate by 1.5 while keeping the loop smooth.
+      track.style.setProperty('--dua-duration', Math.max(120, Math.round(width / 31.5)) + 's');
     }
   }
 

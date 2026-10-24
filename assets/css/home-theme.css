@@ -171,6 +171,7 @@ h1, h2, h3, p { margin: 0; }
 .player .quran-logo-button { grid-column: 2; grid-row: 3; justify-self: end; width: 42px; height: 42px; border: 1px solid var(--zikra-line); border-radius: 12px; background: var(--zikra-panel-2); overflow: hidden; }
 .player .quran-calligraphy { width: 100%; height: 100%; object-fit: contain; }
 
+.player .quran-entry-caption{grid-column:1/-1!important;grid-row:1!important;display:flex;align-items:center;gap:10px;min-width:0}.player .quran-entry-copy{min-width:0;text-align:right}.player .quran-logo-button{grid-column:auto!important;grid-row:auto!important;justify-self:auto!important;flex:0 0 46px;width:46px!important;height:46px!important;filter:brightness(0) invert(1)}.player .quran-entry-caption #miniSurah{font-size:clamp(14px,1.3vw,18px)}.player .quran-entry-caption #miniPage{color:var(--zikra-gold);font-size:12px}.player .ayah-number{width:auto!important;height:auto!important;min-width:0;padding:0 3px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--zikra-gold)!important;font-size:16px}.player [hidden]{display:none!important}
 .dua-bar {
   grid-area: dua; min-width: 0; min-height: 0 !important; margin: 0 !important; padding: clamp(14px,1.5vw,20px) !important;
   display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 8px !important;
@@ -224,7 +225,8 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   html, body { height: auto; min-height: 100%; overflow: auto; }
   .app { height: auto; min-height: 100dvh; grid-template-rows: auto auto auto auto auto auto auto; grid-template-areas: "topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar" "nav nav nav nav nav nav nav nav nav nav nav nav" "weather weather weather weather weather weather next next next next next next" "settings settings settings settings settings settings settings settings settings settings settings settings" "prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers" "quran quran quran quran quran quran dhikr dhikr dhikr dhikr dhikr dhikr" "dua dua dua dua dua dua dua dua dua dua dua dua" "footer footer footer footer footer footer footer footer footer footer footer footer"; }
   .home-next-card, .home-settings-card { min-height: 100px; }
-  .player, .tile-memory, .dua-bar { min-height: 144px !important; }
+  .player, .tile-memory, .player .quran-entry-caption{grid-column:1/-1!important;grid-row:1!important;display:flex;align-items:center;gap:10px;min-width:0}.player .quran-entry-copy{min-width:0;text-align:right}.player .quran-logo-button{grid-column:auto!important;grid-row:auto!important;justify-self:auto!important;flex:0 0 46px;width:46px!important;height:46px!important;filter:brightness(0) invert(1)}.player .quran-entry-caption #miniSurah{font-size:clamp(14px,1.3vw,18px)}.player .quran-entry-caption #miniPage{color:var(--zikra-gold);font-size:12px}.player .ayah-number{width:auto!important;height:auto!important;min-width:0;padding:0 3px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--zikra-gold)!important;font-size:16px}.player [hidden]{display:none!important}
+.dua-bar { min-height: 144px !important; }
 }
 @media (max-width: 560px) {
   .app { padding: 12px; gap: 9px; grid-template-rows: auto auto auto auto auto auto auto auto auto; grid-template-areas: "topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar topbar" "nav nav nav nav nav nav nav nav nav nav nav nav" "weather weather weather weather weather weather weather weather weather weather weather weather" "next next next next next next next next next next next next" "settings settings settings settings settings settings settings settings settings settings settings settings" "prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers prayers" "quran quran quran quran quran quran quran quran quran quran quran quran" "dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr dhikr" "dua dua dua dua dua dua dua dua dua dua dua dua" "footer footer footer footer footer footer footer footer footer footer footer footer"; }
@@ -233,7 +235,8 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   #datePanel { min-height: 118px !important; }
   .prayer-strip { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
   .prayer-strip .prayer { min-height: 68px !important; }
-  .player, .tile-memory, .dua-bar { min-height: 130px !important; }
+  .player, .tile-memory, .player .quran-entry-caption{grid-column:1/-1!important;grid-row:1!important;display:flex;align-items:center;gap:10px;min-width:0}.player .quran-entry-copy{min-width:0;text-align:right}.player .quran-logo-button{grid-column:auto!important;grid-row:auto!important;justify-self:auto!important;flex:0 0 46px;width:46px!important;height:46px!important;filter:brightness(0) invert(1)}.player .quran-entry-caption #miniSurah{font-size:clamp(14px,1.3vw,18px)}.player .quran-entry-caption #miniPage{color:var(--zikra-gold);font-size:12px}.player .ayah-number{width:auto!important;height:auto!important;min-width:0;padding:0 3px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--zikra-gold)!important;font-size:16px}.player [hidden]{display:none!important}
+.dua-bar { min-height: 130px !important; }
   .footer { font-size: 8px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -292,6 +295,7 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
 .tiles { grid-area: dhikr; }
 .tile-memory { min-height: 0 !important; }
 .player { grid-area: quran; min-height: 0 !important; }
+.player .quran-entry-caption{grid-column:1/-1!important;grid-row:1!important;display:flex;align-items:center;gap:10px;min-width:0}.player .quran-entry-copy{min-width:0;text-align:right}.player .quran-logo-button{grid-column:auto!important;grid-row:auto!important;justify-self:auto!important;flex:0 0 46px;width:46px!important;height:46px!important;filter:brightness(0) invert(1)}.player .quran-entry-caption #miniSurah{font-size:clamp(14px,1.3vw,18px)}.player .quran-entry-caption #miniPage{color:var(--zikra-gold);font-size:12px}.player .ayah-number{width:auto!important;height:auto!important;min-width:0;padding:0 3px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--zikra-gold)!important;font-size:16px}.player [hidden]{display:none!important}
 .dua-bar {
   grid-area: dua;
   display: grid !important;
@@ -344,7 +348,8 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   #datePanel { min-height: 122px !important; }
   .prayer-strip { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
   .player, .tile-memory { min-height: 150px !important; }
-  .dua-bar { min-height: 36px !important; padding: 0 !important; }
+  .player .quran-entry-caption{grid-column:1/-1!important;grid-row:1!important;display:flex;align-items:center;gap:10px;min-width:0}.player .quran-entry-copy{min-width:0;text-align:right}.player .quran-logo-button{grid-column:auto!important;grid-row:auto!important;justify-self:auto!important;flex:0 0 46px;width:46px!important;height:46px!important;filter:brightness(0) invert(1)}.player .quran-entry-caption #miniSurah{font-size:clamp(14px,1.3vw,18px)}.player .quran-entry-caption #miniPage{color:var(--zikra-gold);font-size:12px}.player .ayah-number{width:auto!important;height:auto!important;min-width:0;padding:0 3px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--zikra-gold)!important;font-size:16px}.player [hidden]{display:none!important}
+.dua-bar { min-height: 36px !important; padding: 0 !important; }
 }
 @media (max-width: 560px) {
   .app {
@@ -366,7 +371,8 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   #datePanel > .date-weather-widget { grid-column: 2; grid-row: 1 / 3; }
   .prayer-strip { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
   .prayer-strip .prayer { min-height: 70px !important; }
-  .dua-bar { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(30px,1fr); }
+  .player .quran-entry-caption{grid-column:1/-1!important;grid-row:1!important;display:flex;align-items:center;gap:10px;min-width:0}.player .quran-entry-copy{min-width:0;text-align:right}.player .quran-logo-button{grid-column:auto!important;grid-row:auto!important;justify-self:auto!important;flex:0 0 46px;width:46px!important;height:46px!important;filter:brightness(0) invert(1)}.player .quran-entry-caption #miniSurah{font-size:clamp(14px,1.3vw,18px)}.player .quran-entry-caption #miniPage{color:var(--zikra-gold);font-size:12px}.player .ayah-number{width:auto!important;height:auto!important;min-width:0;padding:0 3px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--zikra-gold)!important;font-size:16px}.player [hidden]{display:none!important}
+.dua-bar { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(30px,1fr); }
   .dua-viewport { grid-column: 1; grid-row: 1; min-height: 28px; }
   .footer { font-size: 8px !important; }
 }
