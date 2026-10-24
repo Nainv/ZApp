@@ -294,25 +294,26 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
 .player { grid-area: quran; min-height: 0 !important; }
 .dua-bar {
   grid-area: dua;
-  display: flex !important;
-  width: 100%;
+  display: grid !important;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  width: 100% !important;
   min-width: 0;
   min-height: 54px !important;
   box-sizing: border-box;
   margin: 0 !important;
   padding: 9px clamp(12px,1.4vw,20px) !important;
-  flex-direction: row;
-  align-items: center;
   gap: clamp(10px,1.4vw,18px) !important;
-  overflow: hidden;
+  overflow: hidden !important;
+  contain: paint;
+  isolation: isolate;
   cursor: pointer;
 }
-.dua-label { flex: 0 0 auto; color: var(--zikra-gold); font-size: clamp(11px,.95vw,14px); font-weight: 700; white-space: nowrap; }
-.dua-viewport { flex: 1 1 auto; min-width: 0; height: 100%; min-height: 38px; overflow: hidden; display: flex; align-items: center; direction: ltr; }
-.dua-track { width: max-content; display: flex; flex: 0 0 auto; align-items: center; direction: ltr; animation: zikra-dua-marquee var(--dua-duration,240s) linear infinite; will-change: transform; }
-.dua-group { width: max-content; flex: 0 0 auto; display: flex; align-items: center; direction: ltr; gap: clamp(16px,2vw,30px); padding-inline-end: clamp(16px,2vw,30px); }
-.dua-item { flex: 0 0 auto; max-width: 70vw; color: var(--zikra-text); font-family: Tahoma,"Segoe UI",Arial,sans-serif; font-size: clamp(14px,1.3vw,19px); line-height: 1.6; direction: rtl; white-space: nowrap; }
-.dua-separator { flex: 0 0 auto; color: var(--zikra-gold); font-size: clamp(20px,1.8vw,26px); line-height: 1; }
+.dua-label { grid-column: 1; grid-row: 1; min-width: max-content; color: var(--zikra-gold); font-size: clamp(11px,.95vw,14px); font-weight: 700; white-space: nowrap; }
+.dua-viewport { grid-column: 2; grid-row: 1; position: relative; width: 100%; min-width: 0; max-width: 100%; height: 100%; min-height: 38px; overflow: hidden !important; clip-path: inset(0); contain: layout paint; display: flex; align-items: center; direction: ltr; }
+.dua-track { width: max-content; max-width: none; display: flex; flex: 0 0 auto; align-items: center; direction: ltr; white-space: nowrap; animation: zikra-dua-marquee var(--dua-duration,240s) linear infinite; will-change: transform; }
+.dua-group { display: block; width: max-content; max-width: none; flex: 0 0 auto; color: var(--zikra-text); font-family: Tahoma,"Segoe UI",Arial,sans-serif; font-size: clamp(14px,1.3vw,19px); line-height: 1.6; direction: rtl; unicode-bidi: plaintext; white-space: nowrap; padding-inline-end: clamp(16px,2vw,30px); }
+.dua-group::after { content: " ۞ "; color: var(--zikra-gold); font-size: 1.25em; padding-inline-start: clamp(16px,2vw,30px); }
 @keyframes zikra-dua-marquee { from { transform: translateX(-50%); } to { transform: translateX(0); } }
 @media (max-height: 650px) and (min-width: 901px) {
   .app { grid-template-rows: auto minmax(82px,.8fr) minmax(56px,.55fr) minmax(120px,1.05fr) minmax(68px,.6fr) minmax(38px,.38fr) auto; }
@@ -359,8 +360,9 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
   #datePanel > .date-weather-widget { grid-column: 2; grid-row: 1 / 3; }
   .prayer-strip { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
   .prayer-strip .prayer { min-height: 70px !important; }
-  .dua-bar { align-items: flex-start; flex-direction: column; gap: 5px !important; }
-  .dua-viewport { width: 100%; min-height: 30px; }
+  .dua-bar { grid-template-columns: 1fr; grid-template-rows: auto minmax(30px,1fr); gap: 5px !important; }
+  .dua-label { grid-column: 1; grid-row: 1; }
+  .dua-viewport { grid-column: 1; grid-row: 2; min-height: 30px; }
   .footer { font-size: 8px !important; }
 }
 @media (prefers-reduced-motion: reduce) {

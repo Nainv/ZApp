@@ -5,33 +5,24 @@
   var duas = Array.isArray(window.ZIKRA_DUAS_AR) ? window.ZIKRA_DUAS_AR : [];
   if (!track || !duas.length) return;
 
-  function createGroup() {
-    var group = document.createElement('div');
+  // Keep the text in just two identical nodes. The viewport clips both copies,
+  // so a long dua can never spill over the rest of the dashboard.
+  var text = duas.filter(function (dua) {
+    return typeof dua === 'string' && dua.trim();
+  }).join('  ۞  ');
+  if (!text) return;
+
+  function makeGroup() {
+    var group = document.createElement('span');
     group.className = 'dua-group';
-
-    duas.forEach(function (text, index) {
-      if (index) {
-        var separator = document.createElement('span');
-        separator.className = 'dua-separator';
-        separator.setAttribute('aria-hidden', 'true');
-        separator.textContent = '۞';
-        group.appendChild(separator);
-      }
-
-      var item = document.createElement('span');
-      item.className = 'dua-item';
-      item.textContent = text;
-      group.appendChild(item);
-    });
-
+    group.setAttribute('dir', 'rtl');
+    group.textContent = text;
     return group;
   }
 
-  var fragment = document.createDocumentFragment();
-  fragment.appendChild(createGroup());
-  fragment.appendChild(createGroup());
   while (track.firstChild) track.removeChild(track.firstChild);
-  track.appendChild(fragment);
+  track.appendChild(makeGroup());
+  track.appendChild(makeGroup());
   track.setAttribute('aria-label', 'شريط متحرك يضم ' + duas.length + ' دعاءً');
 
   function updateSpeed() {
@@ -39,7 +30,7 @@
     if (!group) return;
     var width = group.getBoundingClientRect().width;
     if (width > 0) {
-      track.style.setProperty('--dua-duration', Math.min(420, Math.max(90, Math.round(width / 140))) + 's');
+      track.style.setProperty('--dua-duration', Math.min(360, Math.max(90, Math.round(width / 150))) + 's');
     }
   }
 
