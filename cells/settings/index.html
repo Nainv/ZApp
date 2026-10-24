@@ -81,6 +81,9 @@
         const candidates=list.filter(el=>el!==current).map(el=>{const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,primary=horizontal?(x-cx)*sign:(y-cy)*sign,cross=horizontal?Math.abs(y-cy):Math.abs(x-cx);return{el,primary,cross,score:primary+cross*1.8}}).filter(x=>x.primary>1).sort((a,b)=>a.score-b.score);
         if(candidates[0]){e.preventDefault();candidates[0].el.focus()}else{const ordered=list.map(el=>({el,r:el.getBoundingClientRect()})).sort((a,b)=>horizontal?a.r.top-b.r.top||a.r.left-b.r.left:a.r.top-b.r.top||a.r.left-b.r.left);e.preventDefault();(sign>0?ordered[0]:ordered.at(-1))?.el.focus()}
       },true);
+      // Android MainActivity sends D-pad and Back events through these bridge hooks.
+      window.handleAndroidDpad=direction=>{const keys={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'};const key=keys[String(direction).toLowerCase()];if(key)document.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true}))};
+      window.handleAndroidBack=()=>{if(dialog.open){dialog.close();goHome()}else closeSettings()};
       updateDirty();
       document.getElementById('language').focus();
     })();
