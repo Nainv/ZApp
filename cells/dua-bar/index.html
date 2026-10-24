@@ -17,6 +17,7 @@ body{min-height:100vh;display:grid;place-items:center;padding:20px;background:ra
 </style>
 </head>
 <body>
+<button id="zikraHomeButton" type="button" style="position:fixed;top:12px;left:12px;z-index:9999;padding:10px 16px;border:1px solid #bd9b52;border-radius:10px;background:#304b3a;color:#fff;font:inherit;cursor:pointer">⌂ الرئيسية</button>
 <div class="dua-bar" role="status" aria-live="polite" aria-atomic="true">
   <span class="dua-symbol" aria-hidden="true">✧</span>
   <div class="dua-text" id="duaText">🤲 اللهم أعنّا على ذكرك وشكرك وحسن عبادتك</div>
@@ -55,5 +56,20 @@ body{min-height:100vh;display:grid;place-items:center;padding:20px;background:ra
   window.setInterval(nextDua, 5000);
 })();
 </script>
+
+<script>
+(function(){
+ const goHome=()=>{ location.href='../../index.html'; };
+ const btn=document.getElementById('zikraHomeButton');
+ if(btn) btn.addEventListener('click',goHome);
+ document.addEventListener('keydown',function(e){
+   if((e.key==='Escape'||e.key==='Backspace') && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){
+     e.preventDefault(); e.stopImmediatePropagation(); goHome();
+   }
+ },true);
+ window.addEventListener('load',()=>{if(btn)btn.focus();});
+})();
+</script>
+
 </body>
 </html>
