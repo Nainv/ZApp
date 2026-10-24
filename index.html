@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#071c15">
+<title>ذِكرى</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071c15}body{font-family:Arial,sans-serif;color:#fff}.home{position:relative;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:#071c15 url('assets/images/zikra-home-ui.png') center center/100% 100% no-repeat}.hotspot{position:absolute;display:block;border:2px solid transparent;border-radius:2%;background:transparent;color:transparent;cursor:pointer;outline:none;z-index:2;-webkit-tap-highlight-color:transparent}.hotspot:focus,.hotspot:focus-visible{border-color:#ffe3a0;box-shadow:0 0 0 4px #f1c86c99,0 0 24px #ffe5a6;background:#ffffff12}.hotspot:active{background:#ffffff22}.settings{left:5.1%;top:39.2%;width:14.5%;height:34.2%}.weather{left:20.5%;top:39.2%;width:14.3%;height:34.2%}.prayer{left:35.6%;top:39.2%;width:14.3%;height:34.2%}.quran{left:50.7%;top:39.2%;width:14.3%;height:34.2%}.zikra{left:65.7%;top:39.2%;width:14.3%;height:34.2%}.dua{left:80.8%;top:39.2%;width:14.2%;height:34.2%}.next-prayer{left:7%;top:78%;width:23%;height:12%}.dua-today{left:32%;top:78%;width:64%;height:12%}.help{position:absolute;left:1%;bottom:1%;font:12px Arial;color:#ffffff80;z-index:1;pointer-events:none}@media(max-aspect-ratio:1/1){.home{background-size:100% 100%}.hotspot:focus{border-width:1px}}
+</style>
+</head>
+<body>
+<main class="home" aria-label="الواجهة الرئيسية لتطبيق ذِكرى">
+  <button class="hotspot settings" data-cell="settings" aria-label="الإعدادات" title="الإعدادات"></button>
+  <button class="hotspot weather" data-cell="weather" aria-label="الطقس" title="الطقس"></button>
+  <button class="hotspot prayer" data-cell="prayer" aria-label="أوقات الصلاة" title="أوقات الصلاة"></button>
+  <button class="hotspot quran" data-cell="quran" aria-label="القرآن الكريم" title="القرآن الكريم"></button>
+  <button class="hotspot zikra" data-cell="zikra" aria-label="الأحاديث والأذكار" title="الأحاديث والأذكار"></button>
+  <button class="hotspot dua" data-cell="dua-bar" aria-label="الأدعية" title="الأدعية"></button>
+  <button class="hotspot next-prayer" data-cell="prayer" aria-label="الصلاة القادمة" title="الصلاة القادمة"></button>
+  <button class="hotspot dua-today" data-cell="dua-bar" aria-label="دعاء اليوم" title="دعاء اليوم"></button>
+</main>
+<script>
+(()=>{
+ const buttons=[...document.querySelectorAll('[data-cell]')];
+ function openCell(id){
+   const known=['settings','weather','prayer','quran','zikra','dua-bar'];
+   if(!known.includes(id))return;
+   try{localStorage.setItem('zikra_last_cell',id)}catch(e){}
+   // Each cell is stored in its own folder in this repository.
+   location.href='cells/'+id+'/index.html';
+ }
+ buttons.forEach((b,i)=>{
+   b.addEventListener('click',()=>openCell(b.dataset.cell));
+   b.addEventListener('keydown',e=>{
+     const key=e.key;
+     if(key==='Enter'||key===' '){e.preventDefault();openCell(b.dataset.cell);return;}
+     if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(key))return;
+     e.preventDefault();
+     const current=b.getBoundingClientRect(),cx=current.left+current.width/2,cy=current.top+current.height/2;
+     const candidates=buttons.filter(x=>x!==b).map(x=>{const r=x.getBoundingClientRect();return {el:x,x:r.left+r.width/2,y:r.top+r.height/2}}).filter(o=>key==='ArrowLeft'?o.x<cx:key==='ArrowRight'?o.x>cx:key==='ArrowUp'?o.y<cy:o.y>cy);
+     candidates.sort((a,c)=>Math.hypot(a.x-cx,a.y-cy)-Math.hypot(c.x-cx,c.y-cy));
+     if(candidates[0])candidates[0].el.focus();
+   });
+ });
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();}});
+ const last=(()=>{try{return localStorage.getItem('zikra_last_cell')}catch(e){return null}})();
+ const first=buttons.find(b=>b.dataset.cell===last)||document.querySelector('.quran');
+ window.addEventListener('load',()=>first&&first.focus());
+})();
+</script>
+</body>
+</html>
