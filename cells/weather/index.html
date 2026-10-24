@@ -66,8 +66,9 @@ h1{margin:0;font-size:clamp(24px,3vw,38px);line-height:1.1}
 @media(max-width:560px){.weather-app{gap:12px}.topbar{align-items:flex-start}.top-actions{padding-inline-end:0;padding-top:52px}.refresh{min-height:40px;padding:0 10px}.current-card{min-height:175px;padding:18px;border-radius:20px}.temperature{font-size:76px}.hero-icon{font-size:86px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat:last-child{grid-column:1/-1}.day-row{grid-template-columns:minmax(68px,1fr) 34px minmax(54px,.7fr) 40px minmax(72px,.8fr);gap:5px;padding:5px 3px}.day-condition{display:none}.day-range{font-size:12px}.hour-card{flex-basis:78px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 </style>
+<link rel="stylesheet" href="../../assets/css/cell-theme.css">
 </head>
-<body data-scene="cloudy">
+<body class="cell-weather" data-scene="cloudy">
 <div id="weatherScene" class="weather-scene" aria-hidden="true"></div>
 <main class="weather-app">
   <header class="topbar">

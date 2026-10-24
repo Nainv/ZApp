@@ -1,0 +1,138 @@
+/* Shared dark, remote-friendly visual language for Zikra cells. */
+:root {
+  --cell-bg: #101b23;
+  --cell-panel: #17262e;
+  --cell-panel-2: #1c3038;
+  --cell-line: #2b4148;
+  --cell-text: #f3f4e9;
+  --cell-muted: #aebeb8;
+  --cell-gold: #e5c77b;
+  --cell-teal: #79c9b2;
+  --cell-focus-shadow: 0 10px 26px rgba(0, 0, 0, .34), 0 3px 10px rgba(121, 201, 178, .16);
+}
+
+html, body {
+  color: var(--cell-text);
+  background-color: var(--cell-bg);
+}
+
+button, input, select, textarea, [tabindex="0"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform .16s cubic-bezier(.2,.75,.25,1), box-shadow .16s ease, background-color .16s ease;
+}
+
+button:focus, button:focus-visible,
+input:focus, input:focus-visible,
+select:focus, select:focus-visible,
+textarea:focus, textarea:focus-visible,
+[tabindex="0"]:focus, [tabindex="0"]:focus-visible {
+  outline: none !important;
+  transform: translateY(-4px) scale(1.025);
+  box-shadow: var(--cell-focus-shadow) !important;
+  position: relative;
+  z-index: 10;
+}
+
+button:active { transform: translateY(-1px) scale(.99); }
+
+/* Prayer cell */
+body.cell-prayer {
+  background: radial-gradient(ellipse at 50% 8%, rgba(121, 201, 178, .10), transparent 48%), var(--cell-bg);
+  color: var(--cell-text);
+}
+.prayer-cell .header p, .prayer-cell .footer { color: var(--cell-muted) !important; }
+.prayer-cell .status { color: var(--cell-muted) !important; background: var(--cell-panel) !important; border: 1px solid var(--cell-line) !important; }
+.prayer-cell .prayer-strip .prayer {
+  color: var(--cell-text) !important;
+  background: linear-gradient(145deg, var(--cell-panel-2), var(--cell-panel)) !important;
+  border: 1px solid var(--cell-line) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18) !important;
+}
+.prayer-cell .prayer-name, .prayer-cell .prayer-countdown { color: var(--cell-muted) !important; }
+.prayer-cell .prayer-icon, .prayer-cell .prayer-time, .prayer-cell .next-label { color: var(--cell-gold) !important; }
+.prayer-cell .prayer.next-prayer { background: linear-gradient(145deg, #24473f, #1c3038) !important; }
+.prayer-cell .prayer:focus, .prayer-cell .prayer:focus-visible, .prayer-cell .prayer.selected {
+  outline: none !important;
+  border-color: var(--cell-line) !important;
+  background: linear-gradient(145deg, #29463f, #1c3038) !important;
+  box-shadow: var(--cell-focus-shadow) !important;
+}
+
+/* Weather cell: keep its animated weather scene, with deep shared-tone surfaces. */
+.weather-app { color: var(--cell-text) !important; }
+body.cell-weather,
+body.cell-weather[data-scene="sunny"] {
+  background: radial-gradient(ellipse at 85% 0%, rgba(229,199,123,.10), transparent 38%), linear-gradient(145deg, #29332f, #14241f 72%) !important;
+}
+body.cell-weather[data-scene="cloudy"] { background: linear-gradient(145deg,#253139,#14242b 72%) !important; }
+body.cell-weather[data-scene="rainy"] { background: linear-gradient(145deg,#18303a,#101b23 72%) !important; }
+body.cell-weather[data-scene="snowy"] { background: linear-gradient(145deg,#29383b,#15272c 72%) !important; }
+body.cell-weather[data-scene="storm"] { background: linear-gradient(145deg,#292b38,#171d28 72%) !important; }
+body.cell-weather[data-scene="night"] { background: linear-gradient(145deg,#111a28,#101b23 72%) !important; }
+.weather-app .eyebrow, .weather-app .date-line, .weather-app .weather-status,
+.weather-app .panel-hint, .weather-app .stat-label, .weather-app .feels,
+.weather-app .day-rain, .weather-app .hour-feels, .weather-app .hour-rain,
+.weather-app .source-note { color: var(--cell-muted) !important; }
+.weather-app .current-card,
+.weather-app .stat,
+.weather-app .panel,
+.weather-app .hour-card,
+.weather-app .day-row {
+  color: var(--cell-text) !important;
+  background: linear-gradient(145deg, rgba(28,48,56,.96), rgba(23,38,46,.96)) !important;
+  border-color: var(--cell-line) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18) !important;
+}
+.weather-app .panel-head { border-color: var(--cell-line) !important; }
+.weather-app .temperature, .weather-app .stat-value, .weather-app .day-range,
+.weather-app .hour-temp, .weather-app .high-low { color: var(--cell-gold) !important; }
+.weather-app .refresh { color: var(--cell-text) !important; background: var(--cell-panel-2) !important; border-color: var(--cell-line) !important; }
+.weather-app button:focus, .weather-app button:focus-visible,
+.weather-app .hour-card:focus, .weather-app .hour-card:focus-visible,
+.weather-app .day-row:focus, .weather-app .day-row:focus-visible { outline: none !important; }
+
+/* Quran cell */
+body.cell-quran { background: var(--cell-bg) !important; color: var(--cell-text) !important; }
+.quran-app { color: var(--cell-text) !important; }
+.quran-app .btn, .quran-app button, .quran-app select,
+.quran-app #status, .quran-app .surah,
+.quran-app .verses, .quran-app .player {
+  color: var(--cell-text) !important;
+  background: var(--cell-panel) !important;
+  border-color: var(--cell-line) !important;
+}
+.quran-app .surah.selected, .quran-app .ayah.active { background: #24463d !important; color: var(--cell-text) !important; }
+.quran-app .meta, .quran-app #status { color: var(--cell-muted) !important; }
+.quran-app .num, .quran-app .fill { background: var(--cell-teal) !important; color: #10231e !important; }
+.quran-app .progress { background: #0c171d !important; }
+.quran-app .btn.primary, .quran-app button.primary { color: #15221d !important; background: var(--cell-gold) !important; }
+
+/* Adhkar and daily dua cells */
+body.cell-zikra { background: radial-gradient(ellipse at 50% 5%, rgba(121,201,178,.10), transparent 45%), var(--cell-bg) !important; }
+.wrap .heading p, .wrap .hint, .wrap .memory-preview-source, .wrap .memory-preview-benefit { color: var(--cell-muted) !important; }
+.wrap .tile-memory { color: var(--cell-text) !important; background: linear-gradient(145deg, var(--cell-panel-2), var(--cell-panel)) !important; border-color: var(--cell-line) !important; box-shadow: 0 12px 34px rgba(0,0,0,.24) !important; }
+.wrap .tile-memory.selected, .wrap .tile-memory:focus, .wrap .tile-memory:focus-visible { outline: none !important; border-color: var(--cell-line) !important; }
+.wrap .memory-brand-divider, .wrap .counter { color: var(--cell-gold) !important; }
+.wrap .controls button { color: var(--cell-text) !important; background: var(--cell-panel-2) !important; border-color: var(--cell-line) !important; }
+body.cell-dua { background: radial-gradient(ellipse at 50% 75%, rgba(121,201,178,.10), transparent 48%), var(--cell-bg) !important; }
+.dua-bar { color: var(--cell-text) !important; background: linear-gradient(145deg, var(--cell-panel-2), var(--cell-panel)) !important; border: 1px solid var(--cell-line) !important; box-shadow: 0 10px 28px rgba(0,0,0,.22) !important; }
+.dua-symbol { color: var(--cell-gold) !important; }
+
+/* Settings already uses these exact tones; replace its focus frame with the shared lift. */
+.settings-card:focus, .settings-card:focus-visible,
+.settings-language-options button:focus, .settings-language-options button:focus-visible,
+.settings-close:focus, .settings-close:focus-visible,
+.settings-screen button:focus, .settings-screen button:focus-visible,
+.settings-screen input:focus, .settings-screen input:focus-visible,
+.settings-screen select:focus, .settings-screen select:focus-visible {
+  outline: none !important;
+  border-color: var(--cell-line) !important;
+  box-shadow: var(--cell-focus-shadow) !important;
+}
+html body .cell-close-button:focus, html body .cell-close-button:focus-visible { outline: none !important; box-shadow: var(--cell-focus-shadow) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  button, input, select, textarea, [tabindex="0"] { transition: none !important; }
+}
