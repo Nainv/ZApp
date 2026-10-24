@@ -386,7 +386,8 @@ button, [tabindex="0"], [role="button"] { transition: transform .16s cubic-bezie
 .player .quran-entry-caption #miniSurah{font-size:clamp(14px,1.3vw,18px)}
 .player .quran-entry-caption #miniPage{color:var(--zikra-gold);font-size:12px}
 .player .quran-meta-markers{display:flex;align-items:center;gap:8px;margin-top:5px}
-.player .ayah-number{width:auto!important;height:auto!important;min-width:0;padding:0 3px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--zikra-gold)!important;font-size:16px}
+.player .ayah-number{position:relative;isolation:isolate;display:inline-grid!important;place-items:center;flex:0 0 38px;width:38px!important;height:38px!important;min-width:38px;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:var(--zikra-gold)!important;font-family:Tahoma,Arial,sans-serif;font-size:13px;font-weight:700;line-height:1;direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
+.player .ayah-number::before{content:"";position:absolute;inset:0;z-index:-1;background:url("../images/ayah-medallion.svg") center/contain no-repeat;pointer-events:none}
 .player [hidden]{display:none!important}
 .quran-modal-player{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 14px;margin:10px 0;border:1px solid var(--line);border-radius:14px;background:rgba(20,35,42,.85)}
 .quran-modal-controls{display:flex;gap:8px;flex:0 0 auto}
