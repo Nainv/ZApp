@@ -1,0 +1,17 @@
+/* Shared current-weather scene. At most ten particles; compositor transforms only. */
+.weather-backdrop{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:inherit;background:linear-gradient(150deg,#254148,#122730);z-index:0}
+.weather-backdrop[data-scene=night]{background:radial-gradient(ellipse at 80% 15%,#253c64,#101c30 75%)}
+.weather-backdrop[data-scene=sun]{background:radial-gradient(ellipse at 70% 0,#57684c99,#1c3741 70%)}
+.weather-backdrop[data-scene=rain],.weather-backdrop[data-scene=storm]{background:linear-gradient(145deg,#344d64,#152735)}
+.weather-backdrop[data-scene=snow]{background:linear-gradient(145deg,#4a6372,#1a3345)}
+.weather-backdrop[data-scene=fog]{background:linear-gradient(145deg,#4f6467,#23383f)}
+.scene-cloud{position:absolute;width:170px;height:55px;left:calc(var(--i)*35% - 20%);top:calc(14% + var(--i)*20%);border-radius:55%;background:#ccdce51b;box-shadow:32px -12px 0 #ccdce514,-28px 9px 0 #ccdce510;animation:weather-cloud 18s ease-in-out infinite alternate;animation-delay:calc(var(--i)*-7s)}
+.scene-sun{position:absolute;right:14%;top:-28px;width:125px;height:125px;border-radius:50%;background:radial-gradient(circle,#f3d89055,transparent 70%);animation:weather-glow 8s ease-in-out infinite alternate}
+.scene-star{position:absolute;left:var(--x);top:var(--y);width:3px;height:3px;border-radius:50%;background:#fff8;animation:weather-glow 5s ease-in-out infinite alternate;animation-delay:calc(var(--i)*-.6s)}
+.scene-rain{position:absolute;left:var(--x);top:-30px;height:24px;width:1px;background:linear-gradient(transparent,#c9e5ef70);animation:weather-rain 1.6s linear infinite;animation-delay:calc(var(--i)*-.19s)}
+.scene-snow{position:absolute;left:var(--x);top:-10%;width:5px;height:5px;border-radius:50%;background:#edf8edaa;animation:weather-snow 6s linear infinite;animation-delay:calc(var(--i)*-.8s)}
+.weather-backdrop[data-scene=storm]:after{content:'';position:absolute;inset:0;background:#c6dfff;opacity:0;animation:weather-lightning 12s linear infinite}
+.weather-icon svg,.weather-symbol svg,.day-symbol svg,.hour-symbol svg{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;color:inherit}
+@keyframes weather-cloud{to{transform:translateX(60px)}}@keyframes weather-glow{to{opacity:.4;transform:scale(1.06)}}@keyframes weather-rain{to{transform:translate(-50px,800px)}}@keyframes weather-snow{to{transform:translate(30px,600px) rotate(90deg)}}@keyframes weather-lightning{0%,83%,85%,100%{opacity:0}84%{opacity:.14}}
+.cell-inactive .weather-backdrop *,[inert] .weather-backdrop *,.cell-open .app .weather-backdrop *{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.weather-backdrop *,.weather-backdrop:after{animation:none!important}}

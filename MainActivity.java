@@ -18,7 +18,6 @@ import android.webkit.WebViewClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.GeolocationPermissions;
-import android.webkit.ValueCallback;
 import android.content.Intent;
 import android.net.Uri;
 import java.io.ByteArrayInputStream;
@@ -43,14 +42,13 @@ public class MainActivity extends Activity {
     private static final String LEGACY_URL = "file:///android_asset/index.html";
     private static final String LOCAL_URL = ASSET_ORIGIN + "/assets/index.html";
     private boolean migrating = false;
-    private ValueCallback<Uri[]> fileResult;
     private GeolocationPermissions.Callback locationResult;
     private String locationOrigin;
-    private static final int OPEN_TIMETABLE_REQUEST = 4102;
     private static final String TAG = "ZikraRemote";
     private boolean pageReady = false;
     private static final int LOCATION_PERMISSION_REQUEST = 4101;
     private AppUpdater appUpdater;
+    private long keyboardRequest;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +65,12 @@ public class MainActivity extends Activity {
         webView = new WebView(this);
         root.setBackgroundColor(Color.rgb(16, 27, 35));
         webView.setBackgroundColor(Color.rgb(16, 27, 35));
+        long assetBuild = getBuildCode();
+        if (getPreferences(MODE_PRIVATE).getLong("assetBuild", 0) != assetBuild) {
+            webView.clearCache(true);
+            getPreferences(MODE_PRIVATE).edit().putLong("assetBuild", assetBuild).apply();
+            appUpdater.cleanupInstalledDownloads();
+        }
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -92,13 +96,6 @@ public class MainActivity extends Activity {
                 if (hasLocationPermission()) { callback.invoke(origin, true, false); return; }
                 locationResult = callback; locationOrigin = origin;
                 requestLocationPermission();
-            }
-            @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
-                if (fileResult != null) fileResult.onReceiveValue(null);
-                fileResult = callback;
-                try { startActivityForResult(params.createIntent(), OPEN_TIMETABLE_REQUEST); }
-                catch (android.content.ActivityNotFoundException error) { fileResult.onReceiveValue(null); fileResult = null; }
-                return true;
             }
         });
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidTV");
@@ -160,6 +157,7 @@ public class MainActivity extends Activity {
         migrating = !getPreferences(MODE_PRIVATE).getBoolean("storageCaptured", false);
         webView.loadUrl(migrating ? LEGACY_URL + "?storage_migration=1" : bundledUrl());
     }
+    private long getBuildCode() { try { android.content.pm.PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0); return Build.VERSION.SDK_INT >= 28 ? info.getLongVersionCode() : info.versionCode; } catch (Exception ignored) { return 0; } }
     private String bundledUrl() {
         try { return LOCAL_URL + "?build=" + getPackageManager().getPackageInfo(getPackageName(), 0).versionCode; }
         catch (Exception ignored) { return LOCAL_URL; }
@@ -195,6 +193,8 @@ public class MainActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
     }
     private class AndroidBridge {
+        @JavascriptInterface public void showKeyboard() { runOnUiThread(() -> { final long request = ++keyboardRequest; if (webView != null) webView.postDelayed(() -> { if (request == keyboardRequest && webView != null && webView.hasFocus()) ((android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).showSoftInput(webView, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT); }, 80); }); }
+        @JavascriptInterface public void hideKeyboard() { runOnUiThread(() -> { ++keyboardRequest; if (webView != null) ((android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(webView.getWindowToken(), 0); }); }
         @JavascriptInterface public void updateApp() { if (appUpdater != null) appUpdater.start(); }
         @JavascriptInterface public String getUpdateState() { return appUpdater == null ? "{}" : appUpdater.getState(); }
         @JavascriptInterface public String getLegacyStorage() { return getPreferences(MODE_PRIVATE).getString("legacyStorage", "{}"); }
@@ -215,10 +215,6 @@ public class MainActivity extends Activity {
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == AppUpdater.INSTALL_REQUEST && appUpdater != null) appUpdater.onInstallResult(resultCode);
-        if (requestCode == OPEN_TIMETABLE_REQUEST && fileResult != null) {
-            fileResult.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
-            fileResult = null;
-        }
     }
     private void requestLocationPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;

@@ -147,7 +147,7 @@ jobs:
           fi
 
           # Copy files referenced directly from the home page.
-          for file in favicon.ico favicon.png apple-touch-icon.png site.webmanifest zikra_logo.png; do
+          for file in favicon.ico favicon.png apple-touch-icon.png site.webmanifest web-app-icon-192.png; do
             if [[ -f "./$file" ]]; then
               cp "./$file" "app/src/main/assets/$file"
             fi

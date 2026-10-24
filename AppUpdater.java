@@ -44,6 +44,7 @@ public final class AppUpdater {
 
     public AppUpdater(MainActivity owner) { activity = new WeakReference<>(owner); context = owner.getApplicationContext(); }
     public String getState() { return state; }
+    public void cleanupInstalledDownloads() { worker.execute(() -> { try { File file = apkFile(context); if (file.isFile() && validate(file) <= version(installedInfo())) { file.delete(); new File(file.getParentFile(), "latest.part").delete(); } } catch (Exception ignored) {} }); }
     private SharedPreferences preferences() { return context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE); }
     public static File apkFile(Context context) { return new File(context.getFilesDir(), "updates/latest.apk"); }
 

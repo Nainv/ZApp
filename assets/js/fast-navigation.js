@@ -65,13 +65,13 @@
   function move(direction){
     if(!['left','right','up','down'].includes(direction))return false;
     const current=document.activeElement;
-    if(current?.matches('input,textarea,[contenteditable=true]')&&['left','right'].includes(direction))return false;
+    if(current?.matches('input:not([readonly]),textarea,[contenteditable=true]')&&['left','right'].includes(direction))return false;
     const root=scope();if(dirty||cache?.root!==root)rebuild(root);
     if(!cache.list.length)return true;
     if(!cache.edges.has(current)){focus(root.querySelector('#closeQuran')||cache.list[0]);return true}
     focus(cache.edges.get(current)[direction]);return true;
   }
-  window.ZikraNavigation={move,invalidate};
+  window.ZikraNavigation={move,invalidate,list(){const root=scope();if(dirty||cache?.root!==root)rebuild(root);return cache.list}};
   window.addEventListener('resize',invalidate,{passive:true});
   const start=()=>{
     new MutationObserver(records=>{
@@ -82,20 +82,4 @@
     document.fonts?.ready.then(invalidate);
   };
   if(document.body)start();else document.addEventListener('DOMContentLoaded',start,{once:true});
-  if(!location.pathname.includes('/cells/'))document.addEventListener('keydown',event=>{
-    const direction=arrows[event.key],overlay=document.getElementById('zikraCellOverlay');
-    if(overlay&&!overlay.hidden){
-      if(direction){event.preventDefault();event.stopImmediatePropagation();document.getElementById('zikraCellFrame')?.contentWindow?.postMessage({type:'zikra:cell-dpad',direction},'*')}
-      else if(['Enter','Select','OK',' '].includes(event.key)){event.preventDefault();event.stopImmediatePropagation();document.getElementById('zikraCellFrame')?.contentWindow?.postMessage({type:'zikra:cell-ok'},'*')}
-      else if(['Escape','Backspace','BrowserBack','GoBack','XF86Back'].includes(event.key)){event.preventDefault();event.stopImmediatePropagation();window.zikraBackFromRemote?.()}
-      return;
-    }
-    if(['Enter','Select','OK',' '].includes(event.key)&&document.activeElement?.matches('button,[role="button"]')){event.preventDefault();event.stopImmediatePropagation();document.activeElement.click()}
-    else if(direction&&move(direction)){event.preventDefault();event.stopImmediatePropagation()}
-    else if(event.key==='Tab'){
-      const root=scope();if(dirty||cache?.root!==root)rebuild(root);
-      const index=cache.list.indexOf(document.activeElement),next=(index+(event.shiftKey?-1:1)+cache.list.length)%cache.list.length;
-      event.preventDefault();focus(cache.list[next]);
-    }
-  },true);
 })();

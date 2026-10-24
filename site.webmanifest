@@ -17,7 +17,7 @@
       "purpose": "any"
     },
     {
-      "src": "web-app-icon-512.png",
+      "src": "favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"

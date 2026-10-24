@@ -1,40 +1,47 @@
 (() => {
   'use strict';
-  const $=id=>document.getElementById(id),strip=$('weatherDays');let data=null,selected=0;
-  const locale=localStorage.getItem('zikra_language')==='ar'?'ar-u-nu-arab':'ar';
-  const dayFormat=new Intl.DateTimeFormat(locale,{weekday:'long'}),dateFormat=new Intl.DateTimeFormat(locale,{day:'numeric',month:'short'});
-  const degrees=value=>Math.round(value)+'°',clock=value=>value?.slice(11,16)||'—';
-  function condition(code){if(code<=1)return['☀','صحو','sun'];if(code<=3)return['☁','غائم','cloud'];if(code<=48)return['☁','ضباب','cloud'];if(code<=67||code>=80&&code<=82)return['☂','أمطار','rain'];if(code<=77||code>=85&&code<=86)return['❄','ثلوج','cloud'];return['ϟ','عواصف','rain']}
-  function metric(label,value){const item=document.createElement('span');item.className='day-metric';const l=document.createElement('small'),v=document.createElement('strong');l.textContent=label;v.textContent=value;item.append(l,v);return item}
-  function select(index,focus){if(!data)return;selected=(index+Math.min(10,data.daily.time.length))%Math.min(10,data.daily.time.length);const days=[...strip.children];days.forEach((card,i)=>{card.classList.toggle('is-current',i===selected);card.setAttribute('aria-pressed',String(i===selected))});document.body.dataset.scene=condition(data.daily.weather_code[selected])[2];if(focus)days[selected].focus({preventScroll:true});days[selected].scrollIntoView({block:'nearest',inline:'center',behavior:'instant'})}
-  function build(){
-    strip.replaceChildren();const daily=data.daily,hourly=data.hourly;
-    daily.time.slice(0,10).forEach((date,index)=>{
-      const button=document.createElement('button');button.type='button';button.className='forecast-day';button.dataset.day=String(index);button.dir='rtl';
-      const name=document.createElement('span');name.className='day-name';name.textContent=index===0?'اليوم':index===1?'غدًا':dayFormat.format(new Date(date+'T12:00:00'));
-      const stamp=document.createElement('span');stamp.className='day-date';stamp.textContent=dateFormat.format(new Date(date+'T12:00:00'));
-      const info=condition(daily.weather_code[index]),icon=document.createElement('span');icon.className='day-icon';icon.textContent=info[0];icon.setAttribute('aria-hidden','true');
-      const desc=document.createElement('span');desc.className='day-condition';desc.textContent=info[1];
-      const range=document.createElement('span');range.className='day-range';range.innerHTML='<span class="low"></span><span></span>';range.children[0].textContent=degrees(daily.temperature_2m_min[index]);range.children[1].textContent=degrees(daily.temperature_2m_max[index]);
-      const detail=document.createElement('span');detail.className='day-detail';const stats=document.createElement('span');stats.className='day-metrics';
-      const indexes=hourly.time.map((t,i)=>t.startsWith(date)?i:-1).filter(i=>i>=0),humidity=Math.round(indexes.reduce((sum,i)=>sum+hourly.relative_humidity_2m[i],0)/(indexes.length||1));
-      stats.append(metric('الشروق',clock(daily.sunrise[index])),metric('الغروب',clock(daily.sunset[index])),metric('المطر',(daily.precipitation_probability_max[index]||0)+'٪'),metric('الرياح',Math.round(daily.wind_speed_10m_max[index])+' كم/س'),metric('الرطوبة',humidity+'٪'),metric('الحالة',info[1]));
-      const hours=document.createElement('span');hours.className='day-hours';indexes.filter((_,i)=>i%3===0).forEach(i=>{const hour=document.createElement('span');hour.className='day-hour';const time=document.createElement('span'),temp=document.createElement('strong');time.textContent=clock(hourly.time[i]);temp.textContent=degrees(hourly.temperature_2m[i]);hour.append(time,temp);hours.append(hour)});
-      detail.append(stats,hours);button.append(name,stamp,icon,desc,range,detail);button.setAttribute('aria-label',name.textContent+'، '+info[1]+'، العظمى '+degrees(daily.temperature_2m_max[index])+'، الصغرى '+degrees(daily.temperature_2m_min[index]));
-      button.addEventListener('focus',()=>{if(index!==selected)select(index,false)});button.addEventListener('click',()=>select(index,true));strip.append(button);
-    });select(0,true);
+  const $=id=>document.getElementById(id),strip=$('weatherDays'),hours=$('weatherHours');
+  let data=null,selected=0,hourIndex=0,locationKey='',dayButtons=[],hourButtons=[],version='',active=true;
+  const dayFormat=new Intl.DateTimeFormat('ar',{weekday:'long'}),dateFormat=new Intl.DateTimeFormat('ar',{day:'numeric',month:'short'});
+  const degrees=value=>Number.isFinite(value)?Math.round(value)+'°':'—',time=value=>value?.slice(11,16)||'—';
+  function metric(label){const node=document.createElement('div');node.className='day-metric';const name=document.createElement('small'),value=document.createElement('strong');name.textContent=label;node.append(name,value);$('dayMetrics').append(node);return value}
+  const metrics=['الشروق','الغروب','احتمال المطر','الرياح','الرطوبة','الحالة'].map(metric);
+  function focus(node){node?.focus({preventScroll:true});node?.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'})}
+  function selectHour(index,move=false){if(!hourButtons.length)return;hourIndex=(index+hourButtons.length)%hourButtons.length;const i=hourButtons[hourIndex].dataset.index,h=data.hourly;$('selectedHourInfo').textContent=time(h.time[i])+' · '+ZikraWeatherScene.describe(h.weather_code[i]).label+' · المطر '+(h.precipitation_probability[i]||0)+'٪';if(move)focus(hourButtons[hourIndex])}
+  function selectDay(index,move=false){
+    if(!data)return;const old=selected;selected=(index+dayButtons.length)%dayButtons.length;
+    dayButtons[old]?.classList.remove('is-current');dayButtons[selected].classList.add('is-current');
+    dayButtons[old]?.setAttribute('aria-pressed','false');dayButtons[selected].setAttribute('aria-pressed','true');
+    const d=data.daily,date=d.time[selected],info=ZikraWeatherScene.describe(d.weather_code[selected]);
+    $('selectedDayTitle').textContent=dayButtons[selected].querySelector('.day-name').textContent+' · '+dateFormat.format(new Date(date+'T12:00:00'));
+    $('selectedCondition').textContent=info.label;$('selectedSymbol').innerHTML=ZikraWeatherScene.icon(d.weather_code[selected]);$('selectedRange').textContent=degrees(d.temperature_2m_max[selected])+' / '+degrees(d.temperature_2m_min[selected]);
+    const indexes=[];for(let i=0;i<data.hourly.time.length;i++)if(data.hourly.time[i].startsWith(date))indexes.push(i);
+    const humidity=indexes.length?Math.round(indexes.reduce((sum,i)=>sum+data.hourly.relative_humidity_2m[i],0)/indexes.length):null;
+    [time(d.sunrise[selected]),time(d.sunset[selected]),(d.precipitation_probability_max[selected]||0)+'٪',Math.round(d.wind_speed_10m_max[selected])+' كم/س',humidity===null?'—':humidity+'٪',info.label].forEach((v,i)=>metrics[i].textContent=v);
+    indexes.forEach((i,n)=>{let button=hourButtons[n];if(!button){button=document.createElement('button');button.className='weather-hour';const stamp=document.createElement('span'),icon=document.createElement('span'),temp=document.createElement('strong');stamp.className='hour-time';icon.className='hour-symbol';button.append(stamp,icon,temp);button.addEventListener('focus',()=>selectHour(n));button.addEventListener('click',()=>selectHour(n));hours.append(button);hourButtons[n]=button}button.hidden=false;button.dataset.index=i;button.children[0].textContent=time(data.hourly.time[i]);button.children[1].innerHTML=ZikraWeatherScene.icon(data.hourly.weather_code[i]);button.children[2].textContent=degrees(data.hourly.temperature_2m[i]);button.setAttribute('aria-label',time(data.hourly.time[i])+'، '+degrees(data.hourly.temperature_2m[i]))});
+    hourButtons.splice(indexes.length).forEach(node=>node.remove());hourIndex=Math.min(hourIndex,hourButtons.length-1);selectHour(Math.max(0,hourIndex));
+    if(move)focus(dayButtons[selected]);
   }
-  function navigate(direction){if(!data)return;const active=document.activeElement;if(active===$('cellHomeButton')){if(direction==='down')select(selected,true);return}if(direction==='up')$('cellHomeButton').focus({preventScroll:true});else if(direction==='left')select(selected+1,true);else if(direction==='right')select(selected-1,true)}
-  window.handleAndroidDpad=navigate;window.handleAndroidOk=()=>document.activeElement?.click();window.handleAndroidBack=()=>window.closeZikraCell?.();
-  document.addEventListener('keydown',event=>{const direction={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[event.key];if(direction){event.preventDefault();event.stopImmediatePropagation();navigate(direction)}},true);
-  $('cellHomeButton').addEventListener('click',()=>window.handleAndroidBack());
-  async function load(){try{const lat=Number(localStorage.getItem('zikra_lat')||50.9848),lon=Number(localStorage.getItem('zikra_lon')||11.0299);$('place').textContent=localStorage.getItem('zikra_city')||'إرفورت';const url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset&hourly=temperature_2m,relative_humidity_2m&timezone=auto&forecast_days=10';const result=await fetch(url);if(!result.ok)throw Error('weather');data=await result.json();$('date').textContent=new Intl.DateTimeFormat(locale,{dateStyle:'full',timeZone:data.timezone}).format(new Date());build();$('weatherStatus').textContent='المواقيت بحسب '+data.timezone+' · توقعات عشرة أيام'}catch(_){$('weatherStatus').textContent='تعذّر جلب الطقس. تحقق من الإنترنت ثم افتح الخلية مجددًا.'}}
-  let placeKey='';
-  window.addEventListener('message',event=>{if(event.source!==parent)return;const message=event.data;
-    if(message?.type==='zikra:context'||message?.type==='zikra:session-start'){
-      const p=message.preferences;if(p)$('place').textContent=p.city;
-      if(message.weather){const nextKey=p.lat+','+p.lon+':'+message.weather.daily.time[0];if(nextKey!==placeKey){placeKey=nextKey;data=message.weather;$('date').textContent=new Intl.DateTimeFormat(locale,{dateStyle:'full',timeZone:data.timezone}).format(new Date());build();$('weatherStatus').textContent='المواقيت بحسب '+data.timezone+' · توقعات عشرة أيام'}}
-    }else if(message?.type==='zikra:cell-active')document.body.classList.toggle('cell-inactive',!message.active);
-  });
-  if(parent!==window)parent.postMessage({type:'zikra:context-request'},'*');else load();
+  function apply(result,p,session=false){
+    if(!result?.current||!result.daily?.time)return;const nextVersion=p.lat+','+p.lon+'|'+result.current.time+'|'+result.daily.time[0];
+    $('place').textContent=p.city;locationKey=p.lat+','+p.lon;
+    if(nextVersion===version){if(session)focus(dayButtons[selected]);return}
+    version=nextVersion;data=result;strip.replaceChildren();dayButtons=[];
+    result.daily.time.slice(0,10).forEach((date,index)=>{const button=document.createElement('button');button.className='forecast-day';const name=document.createElement('span'),stamp=document.createElement('span'),icon=document.createElement('span'),range=document.createElement('span');name.className='day-name';stamp.className='day-date';icon.className='day-symbol';range.className='day-temp';name.textContent=index===0?'اليوم':index===1?'غدًا':dayFormat.format(new Date(date+'T12:00:00'));stamp.textContent=dateFormat.format(new Date(date+'T12:00:00'));icon.innerHTML=ZikraWeatherScene.icon(result.daily.weather_code[index]);range.textContent=degrees(result.daily.temperature_2m_max[index])+' / '+degrees(result.daily.temperature_2m_min[index]);button.append(name,stamp,icon,range);button.addEventListener('focus',()=>{if(selected!==index)selectDay(index)});button.addEventListener('click',()=>selectDay(index));strip.append(button);dayButtons.push(button)});
+    $('currentTemp').textContent=degrees(result.current.temperature_2m);$('currentCondition').textContent=ZikraWeatherScene.describe(result.current.weather_code,result.current.is_day).label;$('currentSymbol').innerHTML=ZikraWeatherScene.icon(result.current.weather_code,result.current.is_day);ZikraWeatherScene.mount($('weatherBackdrop'),result.current.weather_code,result.current.is_day);
+    $('date').textContent=new Intl.DateTimeFormat('ar',{timeZone:result.timezone,dateStyle:'full'}).format(new Date());$('weatherStatus').textContent=(result.offline?'توقعات محفوظة · ':'')+'الطقس الآن في '+p.city+' · '+result.timezone;selectDay(Math.min(selected,dayButtons.length-1),session||parent===window);
+  }
+  window.zikraRemoteDelegate={move(direction){
+    const current=document.activeElement,di=dayButtons.indexOf(current),hi=hourButtons.indexOf(current);
+    if(current===$('cellHomeButton')){if(direction==='down'&&dayButtons.length)focus(dayButtons[selected]);return true}
+    if(di>=0){if(direction==='left')selectDay(selected+1,true);else if(direction==='right')selectDay(selected-1,true);else if(direction==='up')focus($('cellHomeButton'));else if(direction==='down')selectHour(hourIndex,true);return true}
+    if(hi>=0){if(direction==='left')selectHour(hourIndex+1,true);else if(direction==='right')selectHour(hourIndex-1,true);else if(direction==='up')focus(dayButtons[selected]);return true}
+    if(direction==='up')focus($('cellHomeButton'));else if(dayButtons.length)focus(dayButtons[selected]);return true;
+  },ok(){return document.activeElement!==$('cellHomeButton')}};
+  window.addEventListener('message',event=>{if(event.source!==parent)return;const m=event.data;if(m?.type==='zikra:session-start'||m?.type==='zikra:context'){
+    const p=m.preferences;if(!p)return;$('place').textContent=p.city;
+    const key=p.lat+','+p.lon;if(key!==locationKey&&!m.weather){data=null;version='';strip.replaceChildren();hours.replaceChildren();dayButtons=[];hourButtons=[];$('weatherStatus').textContent='جارٍ جلب طقس '+p.city+'…'}
+    if(m.weather)apply(m.weather,p,m.type==='zikra:session-start');else if(!ZikraLocation.valid(p.lat,p.lon))$('weatherStatus').textContent='اختر الموقع من الإعدادات لإظهار الطقس.';
+  }else if(m?.type==='zikra:cell-active'){active=m.active;document.body.classList.toggle('cell-inactive',!active)}});
+  if(parent!==window)parent.postMessage({type:'zikra:context-request'},'*');else{const p=ZikraLocation.read();$('place').textContent=p.city;ZikraWeatherData.load(p).then(d=>apply(d,p,true)).catch(error=>$('weatherStatus').textContent=error.message)}
 })();
