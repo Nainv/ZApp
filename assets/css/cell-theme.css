@@ -111,6 +111,25 @@ body.cell-quran { background: var(--cell-bg) !important; color: var(--cell-text)
 
 /* Adhkar and daily dua cells */
 body.cell-zikra { background: radial-gradient(ellipse at 50% 5%, rgba(121,201,178,.10), transparent 45%), var(--cell-bg) !important; }
+.wrap { display: flex; flex-direction: column; gap: 12px; }
+.wrap .heading { margin-bottom: 3px !important; text-align: start !important; }
+.wrap .tile-memory {
+  min-height: clamp(250px,48vh,460px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  text-align: start !important;
+}
+.wrap .memory-brand { display: none !important; }
+.wrap .memory-center { min-height: 0; padding: 0 !important; border: 0 !important; text-align: start !important; }
+.wrap .memory-preview-text { color: var(--cell-text) !important; font-size: clamp(22px,3vw,36px) !important; line-height: 1.9 !important; }
+.wrap .memory-source-side { display: flex !important; flex-direction: column; align-items: flex-start !important; gap: 5px; text-align: start !important; }
+.wrap .memory-preview-source { color: var(--cell-gold) !important; font-size: 13px !important; }
+.wrap .memory-preview-benefit { color: var(--cell-muted) !important; font-size: 14px !important; }
+.wrap .controls { justify-content: flex-start !important; }
+.wrap .controls button { min-width: 58px; min-height: 48px; }
 .wrap .heading p, .wrap .hint, .wrap .memory-preview-source, .wrap .memory-preview-benefit { color: var(--cell-muted) !important; }
 .wrap .tile-memory { color: var(--cell-text) !important; background: linear-gradient(145deg, var(--cell-panel-2), var(--cell-panel)) !important; border-color: var(--cell-line) !important; box-shadow: 0 12px 34px rgba(0,0,0,.24) !important; }
 .wrap .tile-memory.selected, .wrap .tile-memory:focus, .wrap .tile-memory:focus-visible { outline: none !important; border-color: var(--cell-line) !important; }

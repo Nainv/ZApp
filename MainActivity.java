@@ -128,7 +128,7 @@ public class MainActivity extends Activity {
 
     private void sendBackToWeb() {
         if (webView == null || !pageReady) return;
-        webView.evaluateJavascript("(function(){if(typeof window.handleAndroidBack==='function'){window.handleAndroidBack();}})();", null);
+        webView.evaluateJavascript("(function(){if(typeof window.zikraBackFromRemote==='function'){window.zikraBackFromRemote();return;}if(typeof window.handleAndroidBack==='function'){window.handleAndroidBack();}})();", null);
     }
     private void showError() {
         if (errorView != null) return;
