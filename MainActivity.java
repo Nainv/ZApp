@@ -56,12 +56,18 @@ public class MainActivity extends Activity {
     };
     private void deliverAdhanState(String key,boolean active){if(webView==null||!pageReady)return;try{org.json.JSONObject data=new org.json.JSONObject().put("key",key).put("active",active);webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:adhan-native',{detail:"+data+"}));",null);}catch(Exception ignored){}}
     private void adhanNotifications(){
-        if(Build.VERSION.SDK_INT<33||checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED)return;
+        if(Build.VERSION.SDK_INT<33||checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED){
+            if(Build.VERSION.SDK_INT>=24&&!((android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE)).areNotificationsEnabled())openAdhanNotificationSettings();
+            return;
+        }
         android.content.SharedPreferences p=AdhanScheduler.prefs(this);
         if(p.getBoolean("notificationAsked",false)&&!shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)){
-            try{startActivity(new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName()));}catch(Exception ignored){}return;
+            openAdhanNotificationSettings();return;
         }
         p.edit().putBoolean("notificationAsked",true).apply();requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},4104);
+    }
+    private void openAdhanNotificationSettings(){
+        try{if(Build.VERSION.SDK_INT>=26)startActivity(new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName()));else startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:"+getPackageName())));}catch(Exception ignored){}
     }
     private String adhanStatus(){org.json.JSONObject s=new org.json.JSONObject();try{s.put("exact",AdhanScheduler.exact(this));s.put("notifications",(Build.VERSION.SDK_INT<24||((android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE)).areNotificationsEnabled()));s.put("scheduled",AdhanScheduler.pendingCount(this));s.put("active",AdhanService.activePrayer);}catch(Exception ignored){}return s.toString();}
 

@@ -56,3 +56,6 @@ Build 221 — Quran, clock and background adhan:
 - Speed: cached focus scope, bounded text-fit cache, reused formatters/native version lookup, short transform transitions without animated shadows. A 100-arrow browser scenario reduced candidates 293 to 6 and offset reads 2,934 to 65, with 24 ayahs rendered. Mean handler time was 0.579ms before / 0.593ms after (P95 1.1 / 1.6ms). These measurements do not establish lower input latency or FPS on a TV.
 - Validation: 25 Node tests; browser Quran 109, remembrance 60, tasbih 48, update/source labels 73, clock/countdown 11, background bridge/permissions 31. Browser media/native actions are simulated. Java updater, clock and alarm policies run in CI alongside APK compilation. Actual TV audio, standby/reboot delivery, permissions and input latency still need device testing.
 - Audit: no duplicate file contents or unreferenced runtime assets. Dead/overridden CSS and obsolete UI code were removed rather than stacked. Local Quran text is intentional new content, so package size is not claimed to shrink.
+
+Build 222 compatibility follow-up:
+- The prayer notification permission action also opens the appropriate system settings on Android 7–12 when notifications were disabled; Android 13+ retains its runtime-permission flow. No browser UI or playback changes.
