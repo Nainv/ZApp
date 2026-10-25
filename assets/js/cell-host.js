@@ -4,8 +4,8 @@
   const routes={settings:'cells/settings/index.html?cell=1',weather:'cells/weather/index.html',prayer:'cells/prayer/index.html',zikra:'cells/zikra/index.html'};
   const frames=new Map();let overlay=null,frame=null,returnFocus=null;
   const read=(key,fallback)=>localStorage.getItem(key)??fallback;
-  function preferences(){let prayers={};try{prayers=JSON.parse(read('zikra_adhan_settings_v1','{}'))}catch(_){}return {...ZikraLocation.read(),language:read('zikra_language','ar'),prayers}}
-  function context(){return {preferences:preferences(),prayer:window.zikraPrayerSnapshot?.()||{zone:prayerTimeZone,date:prayerDataDate,timings:prayerTimesObj,schedule:prayerSchedule},weather:weatherData}}
+  function preferences(){let prayers={};try{prayers=JSON.parse(read('zikra_adhan_settings_v1','{}'))}catch(_){}return {...ZikraLocation.read(),language:read('zikra_language','ar'),autostart:read('zikra_autostart',String(window.ZikraRuntime?.state.autostart??false))==='true',prayers}}
+  function context(){return {preferences:preferences(),prayer:window.zikraPrayerSnapshot?.()||{zone:prayerTimeZone,date:prayerDataDate,timings:prayerTimesObj,schedule:prayerSchedule},weather:weatherData,runtime:{...window.ZikraRuntime?.state,timeEpoch:window.ZikraClock?.now(),clockSynced:window.ZikraClock?.synced},adhanActive:window.zikraAdhanActive||null}}
   function send(target,type='zikra:context'){target?.contentWindow?.postMessage({type,...context()},'*')}
   window.zikraBroadcastContext=()=>frames.forEach(target=>send(target));
   window.addEventListener('zikra:app-update',event=>frames.get('settings')?.contentWindow?.postMessage({type:'zikra:app-update-state',state:event.detail},'*'));
@@ -28,6 +28,7 @@
     if(frame.dataset.ready==='true'){send(frame,'zikra:session-start');frame.contentWindow?.postMessage({type:'zikra:cell-active',active:true},'*');frame.contentWindow?.focus()}
   }
   function closeCell(){
+    window.zikraPreviewAdhan?.(null);
     if(!overlay||overlay.hidden)return false;frame.contentWindow?.postMessage({type:'zikra:cell-active',active:false},'*');frame.hidden=true;overlay.hidden=true;
     document.querySelector('.app').inert=false;document.body.classList.remove('cell-open');document.body.classList.add('remote-focus-active');
     returnFocus?.isConnected&&returnFocus.focus({preventScroll:true});returnFocus=null;return true;
@@ -38,13 +39,14 @@
   function savePreferences(data){
     if(!data||!['ar','de','en'].includes(data.language)||typeof data.city!=='string'||!data.city.trim())throw Error('إعدادات الموقع غير صالحة.');
     const voices=['makkah','madinah','alafasy','syria'];const prayers={};for(const key of ['Fajr','Dhuhr','Asr','Maghrib','Isha']){const item=data.prayers?.[key];prayers[key]={enabled:item?.enabled!==false,voice:voices.includes(item?.voice)?item.voice:'makkah'}}
-    ZikraLocation.save(data);localStorage.setItem('zikra_language',data.language);localStorage.setItem('zikra_adhan_settings_v1',JSON.stringify(prayers));
+    ZikraLocation.save(data);localStorage.setItem('zikra_autostart',String(data.autostart));window.AndroidTV?.setStartup?.(!!data.autostart,data.language);localStorage.setItem('zikra_language',data.language);localStorage.setItem('zikra_adhan_settings_v1',JSON.stringify(prayers));
     window.zikraApplySavedSettings?.();window.zikraBroadcastContext();
   }
   window.addEventListener('message',event=>{
     if(!frame||event.source!==frame.contentWindow||!event.data||overlay.hidden)return;
     const message=event.data;
     if(message.type==='zikra:cell-close')closeCell();
+    else if(message.type==='zikra:adhan-preview'&&frame.dataset.cell==='settings')window.zikraPreviewAdhan?.(message.voice||null);
     else if(message.type==='zikra:context-request')send(frame);
     else if(message.type==='zikra:settings-save'&&frame.dataset.cell==='settings'){
       try{savePreferences(message.preferences);frame.contentWindow?.postMessage({type:'zikra:settings-saved',requestId:message.requestId},'*')}catch(error){frame.contentWindow?.postMessage({type:'zikra:settings-error',requestId:message.requestId,message:error.message},'*')}

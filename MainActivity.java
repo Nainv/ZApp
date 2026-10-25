@@ -48,11 +48,14 @@ public class MainActivity extends Activity {
     private boolean pageReady = false;
     private static final int LOCATION_PERMISSION_REQUEST = 4101;
     private AppUpdater appUpdater;
+    private RuntimeSupport runtimeSupport;
     private long keyboardRequest;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appUpdater = new AppUpdater(this);
+        runtimeSupport = new RuntimeSupport(this); runtimeSupport.check();
+        ((android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(217);
         if (Build.VERSION.SDK_INT >= 33) getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::sendBackToWeb);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         hideSystemBars();
@@ -118,6 +121,7 @@ public class MainActivity extends Activity {
                 if (!"appassets.androidplatform.net".equals(uri.getHost())) return null;
                 String file = uri.getPath();
                 if ("https".equals(uri.getScheme()) && "/assets/_api/mosques".equals(file)) return nearbyMosques(uri);
+                if ("https".equals(uri.getScheme()) && "/assets/_api/erfurt-timetable".equals(file)) return erfurtTimetable();
                 if (!"https".equals(uri.getScheme()) || file == null || !file.startsWith("/assets/") || file.contains("..") || file.indexOf('\\') >= 0) return response("text/plain", "Not found");
                 file = file.substring(8);
                 try {
@@ -165,6 +169,21 @@ public class MainActivity extends Activity {
     private WebResourceResponse response(String mime, String text) {
         return new WebResourceResponse(mime, "UTF-8", new ByteArrayInputStream(text.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
     }
+    private WebResourceResponse erfurtTimetable() {
+        HttpURLConnection c=null;
+        try {
+            c=(HttpURLConnection)new URL("https://mawaqit.net/en/erfurter-moschee-erfurt-99085-germany").openConnection();
+            c.setConnectTimeout(10000);c.setReadTimeout(10000);c.setRequestProperty("User-Agent","Zikra-TV");
+            if(c.getResponseCode()!=200)throw new java.io.IOException();
+            long server=c.getHeaderFieldDate("Date",0);runtimeSupport.sync(server);
+            try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){
+                byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){out.write(b,0,n);if(out.size()>1048576)throw new java.io.IOException();}
+                java.util.regex.Matcher match=java.util.regex.Pattern.compile("let confData = (\\{[^\\r\\n]+\\});").matcher(out.toString("UTF-8"));
+                if(!match.find())throw new java.io.IOException();org.json.JSONObject data=new org.json.JSONObject(match.group(1));
+                org.json.JSONObject result=new org.json.JSONObject();result.put("name",data.getString("name"));result.put("zone",data.getString("timezone"));result.put("calendar",data.getJSONArray("calendar"));result.put("serverEpoch",server);return response("application/json",result.toString());
+            }
+        }catch(Exception ignored){return response("application/json","{\"error\":true}");}finally{if(c!=null)c.disconnect();}
+    }
     private WebResourceResponse nearbyMosques(Uri request) {
         HttpURLConnection connection = null;
         try {
@@ -193,6 +212,12 @@ public class MainActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
     }
     private class AndroidBridge {
+        @JavascriptInterface public String getRuntimeState() { return runtimeSupport.state(); }
+        @JavascriptInterface public void checkForUpdate() { runtimeSupport.check(); }
+        @JavascriptInterface public void setStartup(boolean enabled, String language) {
+            getSharedPreferences("zikra_runtime",0).edit().putBoolean("autostart",enabled).putString("language",language).apply();
+            if(enabled && Build.VERSION.SDK_INT>=33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)runOnUiThread(()->requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},4103));
+        }
         @JavascriptInterface public void showKeyboard() { runOnUiThread(() -> { final long request = ++keyboardRequest; if (webView != null) webView.postDelayed(() -> { if (request == keyboardRequest && webView != null && webView.hasFocus()) ((android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).showSoftInput(webView, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT); }, 80); }); }
         @JavascriptInterface public void hideKeyboard() { runOnUiThread(() -> { ++keyboardRequest; if (webView != null) ((android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(webView.getWindowToken(), 0); }); }
         @JavascriptInterface public void updateApp() { if (appUpdater != null) appUpdater.start(); }
@@ -374,5 +399,5 @@ public class MainActivity extends Activity {
         // The bundled page is loaded on creation; don't restore a stale remote page state.
         super.onSaveInstanceState(outState);
     }
-    @Override protected void onDestroy() { if (appUpdater != null) appUpdater.close(); if (webView != null) { webView.stopLoading(); webView.destroy(); webView = null; } super.onDestroy(); }
+    @Override protected void onDestroy() { if (runtimeSupport != null) runtimeSupport.close(); if (appUpdater != null) appUpdater.close(); if (webView != null) { webView.stopLoading(); webView.destroy(); webView = null; } super.onDestroy(); }
 }

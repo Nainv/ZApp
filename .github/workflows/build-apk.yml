@@ -110,7 +110,7 @@ jobs:
           fi
 
           test -s "app/src/main/java/com/zikra/tv/MainActivity.java"
-          for SOURCE in AppUpdater UpdatePolicy UpdateFileProvider UpdateRestartReceiver; do
+          for SOURCE in AppUpdater UpdatePolicy UpdateFileProvider UpdateRestartReceiver RuntimeSupport BootReceiver; do
             cp "./$SOURCE.java" "app/src/main/java/com/zikra/tv/$SOURCE.java"
           done
           test -s "app/src/main/AndroidManifest.xml"

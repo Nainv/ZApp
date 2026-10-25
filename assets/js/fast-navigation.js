@@ -2,7 +2,6 @@
 (() => {
   'use strict';
   const selector='button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])';
-  const arrows={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};
   let cache=null,dirty=true;
   const invalidate=()=>{dirty=true};
   function scope(){
@@ -19,7 +18,10 @@
   function rebuild(root){
     const list=[...root.querySelectorAll(selector)].filter(e=>!e.closest('[hidden],[aria-hidden="true"]')&&e.offsetWidth&&e.offsetHeight);
     const points=list.map(layoutPoint),edges=new Map();
-    for(const from of points){
+    if(points.length>60){
+      const rows=[];for(const point of points.slice().sort((a,b)=>a.y-b.y||a.x-b.x)){let row=rows[rows.length-1];if(!row||Math.abs(row[0].y-point.y)>8){row=[];rows.push(row)}row.push(point)}
+      rows.forEach(row=>row.sort((a,b)=>a.x-b.x));rows.forEach((row,i)=>row.forEach((point,j)=>{const nearest=items=>items?.reduce((best,p)=>!best||Math.abs(p.x-point.x)<Math.abs(best.x-point.x)?p:best,null)?.element;edges.set(point.element,{left:row[j-1]?.element,right:row[j+1]?.element,up:nearest(rows[i-1]),down:nearest(rows[i+1])})}));
+    }else for(const from of points){
       const links={};
       for(const [direction,dx,dy] of [['left',-1,0],['right',1,0],['up',0,-1],['down',0,1]]){
         const candidates=[];
@@ -41,7 +43,7 @@
       const byId=id=>root.querySelector('#'+id),link=(id,values)=>{const node=byId(id);if(!edges.has(node))return;for(const [direction,target] of Object.entries(values))edges.get(node)[direction]=target?byId(target):null};
       // Explicit lanes for nested controls keep the large weather/memory tiles from stealing focus.
       link('homeRefreshBtn',{left:null,right:'settingsBtn',down:'homeTasbeehCount'});
-      link('settingsBtn',{left:'homeRefreshBtn',right:null,down:'homeTasbeehCount'});
+      link('settingsBtn',{left:'homeRefreshBtn',right:byId('updateNotice')&&!byId('updateNotice').hidden?'updateNotice':null,down:'homeTasbeehCount'});link('updateNotice',{left:'settingsBtn',right:null,down:'datePanel'});
       link('homeTasbeehCount',{left:null,right:'datePanel',up:'settingsBtn',down:'homeTasbeehReset'});
       link('homeTasbeehReset',{left:null,right:'datePanel',up:'homeTasbeehCount',down:'box-Isha'});
       link('datePanel',{left:'homeTasbeehCount',right:null,up:'settingsBtn',down:'box-Fajr'});

@@ -1,5 +1,0 @@
-OpenDua dataset 0.0.4 — https://opendua.org/v0.0.4/catalogue.json
-Based on Hisn al-Muslim by Sa'id ibn Ali ibn Wahf al-Qahtani. Dataset by Ihsan Labs at the Human Development Fund.
-Data licence: https://opendua.org/licence/data
-Underlying religious texts remain the texts of their original sources.
-Re-fetched 2026-10-24. 241 unique Arabic texts; entries requiring a personal placeholder were omitted.

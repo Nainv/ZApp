@@ -37,7 +37,7 @@ public final class AppUpdater {
     private final Context context;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final AtomicBoolean busy = new AtomicBoolean(false);
-    private volatile String state = "{\"phase\":\"idle\",\"message\":\"البحث عن أحدث نسخة على GitHub\"}";
+    private volatile String state = "{\"phase\":\"idle\",\"message\":\"البحث عن أحدث نسخة على ذكرى\"}";
     private volatile boolean closed;
     private boolean resumed;
     private volatile String deferredInstall;
@@ -236,7 +236,7 @@ public final class AppUpdater {
             connection.setRequestProperty("User-Agent", "Zikra-Android-Updater");connection.setRequestProperty("Accept", new URL(address).getHost().equals("api.github.com") ? "application/vnd.github+json" : "application/octet-stream");connection.setRequestProperty("Cache-Control", "no-cache");
             int status = connection.getResponseCode();
             if (status >= 300 && status <= 399) {String next = connection.getHeaderField("Location");connection.disconnect();if (next == null) break;address = new URL(new URL(address), next).toString();continue;}
-            if (status != 200) {connection.disconnect();throw new Exception(status == 403 || status == 429 ? "وصل البحث إلى حد GitHub المؤقت. حاول لاحقًا." : "تعذّر الوصول إلى الإصدار المنشور. تحقق من الإنترنت.");}
+            if (status != 200) {connection.disconnect();throw new Exception(status == 403 || status == 429 ? "وصل البحث إلى حد ذكرى المؤقت. حاول لاحقًا." : "تعذّر الوصول إلى الإصدار المنشور. تحقق من الإنترنت.");}
             return connection;
         }
         throw new Exception("تعذّر الوصول إلى ملف التحديث.");

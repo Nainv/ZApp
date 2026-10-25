@@ -1,7 +1,7 @@
 /* One input owner per document. Native keys, keyboard keys and forwarded keys share this route. */
 (() => {
   'use strict';
-  const directions={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'},keys={left:'ArrowLeft',right:'ArrowRight',up:'ArrowUp',down:'ArrowDown'};
+  const directions={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};
   const delegate=()=>window.zikraRemoteDelegate||{};
   function activeFrame(){const overlay=document.getElementById('zikraCellOverlay');return overlay&&!overlay.hidden?document.getElementById('zikraCellFrame'):null}
   function forward(type,extra={}){const frame=activeFrame();if(!frame)return false;frame.contentWindow?.postMessage({type,...extra},'*');return true}
@@ -18,7 +18,7 @@
   function first(){const list=window.ZikraNavigation?.list()||[];if(list.length&&!list.includes(document.activeElement))list[0].focus({preventScroll:true})}
   document.addEventListener('keydown',event=>{
     if(event.defaultPrevented)return;
-    const direction=directions[event.key];
+    const direction=directions[event.key]||({37:'left',38:'up',39:'right',40:'down'})[event.keyCode];
     if(direction){if(move(direction)){event.preventDefault();event.stopImmediatePropagation()}return}
     if(['Enter','Select','OK',' '].includes(event.key)){
       if(event.key===' '&&document.activeElement?.matches('input:not([readonly]),textarea'))return;
@@ -30,6 +30,7 @@
       event.preventDefault();event.stopImmediatePropagation();back();return;
     }
     if(event.key==='Tab'){
+      if(forward('zikra:cell-tab',{reverse:event.shiftKey})){event.preventDefault();event.stopImmediatePropagation();return}
       const list=window.ZikraNavigation?.list()||[];if(!list.length)return;const i=list.indexOf(document.activeElement),next=(i+(event.shiftKey?-1:1)+list.length)%list.length;
       event.preventDefault();list[next].focus({preventScroll:true});
     }
@@ -38,7 +39,7 @@
   },true);
   window.addEventListener('message',event=>{
     if(event.source!==parent)return;const m=event.data;
-    if(m?.type==='zikra:cell-dpad')move(m.direction);else if(m?.type==='zikra:cell-ok')ok();else if(m?.type==='zikra:cell-back'||m?.type==='zikra:settings-back')back();else if(m?.type==='zikra:cell-focus')first();
+    if(m?.type==='zikra:cell-dpad')move(m.direction);else if(m?.type==='zikra:cell-ok')ok();else if(m?.type==='zikra:cell-back'||m?.type==='zikra:settings-back')back();else if(m?.type==='zikra:cell-focus')first();else if(m?.type==='zikra:cell-tab'){const list=window.ZikraNavigation?.list()||[],i=list.indexOf(document.activeElement);list[(i+(m.reverse?-1:1)+list.length)%list.length]?.focus({preventScroll:true})}
   });
   window.closeZikraCell=close;window.handleAndroidDpad=direction=>move(String(direction).toLowerCase());window.handleAndroidOk=ok;window.handleAndroidBack=back;
   const closeButton=document.getElementById('cellHomeButton');if(closeButton)closeButton.addEventListener('click',()=>delegate().back?delegate().back():close());
