@@ -18,8 +18,8 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v4
 
-      - name: Check prayer calendar and mosque timetable boundaries
-        run: node --test tests/prayer-model.test.cjs
+      - name: Check prayer calendar, mosque timetable and update notice
+        run: node --test tests/*.test.cjs
 
       - name: Set up Java 17
         uses: actions/setup-java@v4

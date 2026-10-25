@@ -87,7 +87,7 @@ public final class AppUpdater {
         if (manifestAsset != null) {
             String manifestUrl = manifestAsset.optString("browser_download_url");
             if (!UpdatePolicy.isReleaseAsset(manifestUrl)) throw new Exception("بيانات الإصدار غير صالحة.");
-            JSONObject manifest = json(manifestUrl);
+            JSONObject manifest = json(manifestUrl + (manifestUrl.contains("?") ? "&" : "?") + "check=" + System.currentTimeMillis());
             if (!context.getPackageName().equals(manifest.optString("packageName")) || !"app-release.apk".equals(manifest.optString("apkName"))) throw new Exception("بيانات الإصدار ليست لتطبيق ذِكرى.");
             expectedVersion = manifest.optLong("versionCode", 0);
             String manifestDigest = manifest.optString("sha256");
@@ -102,7 +102,7 @@ public final class AppUpdater {
         boolean cached = target.isFile() && !expectedDigest.isEmpty() && UpdatePolicy.digestMatches(expectedDigest, digest(target));
         if (!cached) {
             if (directory.getUsableSpace() < publishedSize * 2 + 5 * 1024 * 1024) throw new Exception("المساحة المتاحة لا تكفي للتحديث.");
-            download(apkUrl, part, publishedSize);
+            download(apkUrl + (apkUrl.contains("?") ? "&" : "?") + "build=" + expectedVersion, part, publishedSize);
         }
         File candidate = cached ? target : part;
         report("verifying", "جارٍ التحقق من النسخة وتوقيعها…", 100);
@@ -232,7 +232,7 @@ public final class AppUpdater {
         for (int redirects = 0; redirects < 6; redirects++) {
             if (!UpdatePolicy.isDownloadUrl(address)) throw new Exception("تم رفض رابط تحديث غير موثوق.");
             HttpURLConnection connection = (HttpURLConnection)new URL(address).openConnection();
-            connection.setConnectTimeout(15000); connection.setReadTimeout(20000); connection.setInstanceFollowRedirects(false);
+            connection.setUseCaches(false); connection.setConnectTimeout(15000); connection.setReadTimeout(20000); connection.setInstanceFollowRedirects(false);
             connection.setRequestProperty("User-Agent", "Zikra-Android-Updater");connection.setRequestProperty("Accept", new URL(address).getHost().equals("api.github.com") ? "application/vnd.github+json" : "application/octet-stream");connection.setRequestProperty("Cache-Control", "no-cache");
             int status = connection.getResponseCode();
             if (status >= 300 && status <= 399) {String next = connection.getHeaderField("Location");connection.disconnect();if (next == null) break;address = new URL(new URL(address), next).toString();continue;}

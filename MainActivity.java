@@ -54,7 +54,8 @@ public class MainActivity extends Activity {
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appUpdater = new AppUpdater(this);
-        runtimeSupport = new RuntimeSupport(this); runtimeSupport.check();
+        runtimeSupport = new RuntimeSupport(this);
+        runtimeSupport.setListener(() -> runOnUiThread(this::deliverRuntimeState)); runtimeSupport.check();
         ((android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(217);
         if (Build.VERSION.SDK_INT >= 33) getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::sendBackToWeb);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -148,6 +149,7 @@ public class MainActivity extends Activity {
                     return;
                 }
                 pageReady = true;
+                deliverRuntimeState();
                 view.requestFocus();
             }
             @Override public void onReceivedError(WebView view, WebResourceRequest request, android.webkit.WebResourceError error) {
@@ -389,6 +391,11 @@ public class MainActivity extends Activity {
         hideSystemBars();
         if (webView != null) webView.onResume();
         if (appUpdater != null) appUpdater.onResume();
+        if (runtimeSupport != null) { runtimeSupport.check(); deliverRuntimeState(); }
+    }
+    private void deliverRuntimeState() {
+        if (webView == null || !pageReady || runtimeSupport == null) return;
+        webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:runtime-state',{detail:JSON.parse(" + org.json.JSONObject.quote(runtimeSupport.state()) + ")}));", null);
     }
     public void deliverUpdateState(String json) {
         if (webView == null || !pageReady) return;

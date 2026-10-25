@@ -27,3 +27,5 @@ html[dir=ltr] .choice-option[aria-selected=true]:after{float:right}
 .home-tasbeeh>p,.home-tasbeeh>span{grid-row:auto;grid-column:1}
 @media(max-width:700px){.home-tasbeeh-reset svg{display:none}.home-tasbeeh-reset{padding-inline:4px}}@media(max-width:400px){.tasbeeh-actions{padding:0;gap:6px}.home-tasbeeh-count{width:34px;height:38px;flex-basis:34px}.home-tasbeeh-reset{max-width:calc(100% - 34px - 6px);height:38px}}
 @media(max-width:400px){.home-tasbeeh{grid-column:13/21}.date-panel{grid-column:1/13}}
+
+@media(max-width:700px){.topbar{gap:8px}.topbar .brand,.topbar .brand>div,.tools{min-width:0}.tools #updateNotice{max-width:96px;white-space:normal;line-height:1.25;text-align:center;padding:5px 7px}}

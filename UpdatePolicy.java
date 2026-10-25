@@ -7,7 +7,12 @@ import java.util.Locale;
 public final class UpdatePolicy {
     public static final String REPOSITORY = "koukach91-hash/zikra-android-tv-new";
     public static final long MAX_APK_BYTES = 200L * 1024 * 1024;
+    public static final long NOTICE_CHECK_INTERVAL_MS = 60000L;
     private UpdatePolicy() {}
+    public static boolean shouldShowNotice(long installed, long published) { return installed > 0 && published > installed; }
+    public static boolean shouldCheckNotice(long now, long lastAttempt, boolean busy) {
+        return !busy && (lastAttempt < 0 || now - lastAttempt >= NOTICE_CHECK_INTERVAL_MS);
+    }
 
     public static boolean isReleaseAsset(String value) {
         try {

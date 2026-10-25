@@ -38,3 +38,8 @@ Build 219 updates:
 - Tasbih uses Western digits in every language, bounded grid rows and text fitting on language/content/size changes only. Reset has a transparent outline and the same focus glow as home tools. Counter presses reuse one short opacity/transform pulse without queued effects.
 - Desktop browser workload (100 D-pad moves mixed with 25 seconds of mocked Quran playback; 286 ayahs and 114 index entries): layout offset reads 3560 to 178, DOM mutations 2881 to 136, bookmark writes 20 to 5. This measures work reduction in that scenario; it does not establish frame rate or input latency on a physical TV.
 - Validation includes prayer/DST unit tests, browser settings/reader/remote integration, language direction and ticker spacing, multiple screen sizes, and translated tasbih phrases. Browser media/native bridge behavior is mocked where necessary. Physical TV behavior still needs on-device validation.
+
+Build 220 update notice fix:
+- Quiet manifest checks run at most once per minute while the app is active, and on startup, resume, reconnect and interface refresh subject to the same throttle. Cache-disabled requests include a unique query. No APK downloads run in the quiet checker.
+- Native completion sends an event on the UI thread; the badge updates without waiting for the next home-clock refresh. Unknown, same and older versions stay hidden. A verified newer version shows the translated badge beside settings without stealing focus.
+- Failures retry on the next eligible check; they never manufacture an available update. A previously verified newer version remains known during temporary disconnection. The old APK needs one manual update to acquire this behavior.
