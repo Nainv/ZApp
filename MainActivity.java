@@ -35,6 +35,7 @@ import android.view.Gravity;
 import android.util.Log;
 
 public class MainActivity extends Activity {
+    public static volatile boolean appVisible;
     private WebView webView;
     private FrameLayout root;
     private TextView errorView;
@@ -403,11 +404,11 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onResume() {
-        super.onResume();
+        super.onResume();appVisible=true;
         hideSystemBars();
         if (webView != null) webView.onResume();
         if (appUpdater != null) appUpdater.onResume();
-        AdhanScheduler.reschedule(this);
+        AdhanScheduler.reschedule(this);AdhanScheduler.scheduleJob(this);AdhanScheduler.refreshAsync(this);
         if (runtimeSupport != null) { runtimeSupport.check(); deliverRuntimeState(); }
     }
     private void deliverRuntimeState() {
@@ -419,7 +420,7 @@ public class MainActivity extends Activity {
         webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:app-update',{detail:JSON.parse(" + org.json.JSONObject.quote(json) + ")}));", null);
     }
     @Override public void onBackPressed() { sendBackToWeb(); }
-    @Override protected void onPause() { if (appUpdater != null) appUpdater.onPause(); if (webView != null) webView.onPause(); super.onPause(); }
+    @Override protected void onPause() { appVisible=false;AdhanScheduler.reschedule(this);AdhanScheduler.scheduleJob(this);AdhanService.stopIfDisabled(this); if (appUpdater != null) appUpdater.onPause(); if (webView != null) webView.onPause(); super.onPause(); }
     @Override protected void onSaveInstanceState(Bundle outState) {
         // The bundled page is loaded on creation; don't restore a stale remote page state.
         super.onSaveInstanceState(outState);

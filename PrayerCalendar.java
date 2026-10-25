@@ -12,12 +12,19 @@ import org.json.JSONArray;
 
 /** Fixed provider endpoints; calendars do not supply or change the app clock. */
 public final class PrayerCalendar {
+    private static JSONObject erfurtCache;
+    private static long erfurtFetched=-1,erfurtAttempt=-30000;
+    private static boolean erfurtFailed;
     private static String request(String address) throws Exception {
         HttpURLConnection c=(HttpURLConnection)new URL(address).openConnection();c.setUseCaches(false);c.setConnectTimeout(10000);c.setReadTimeout(10000);c.setRequestProperty("User-Agent","Zikra-TV");
         try{if(c.getResponseCode()!=200)throw new java.io.IOException();try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] bytes=new byte[8192];int count;while((count=in.read(bytes))!=-1){out.write(bytes,0,count);if(out.size()>4194304)throw new java.io.IOException();}return out.toString("UTF-8");}}finally{c.disconnect();}
     }
-    public static JSONObject erfurt() throws Exception {
-        String text=request("https://mawaqit.net/en/erfurter-moschee-erfurt-99085-germany");java.util.regex.Matcher m=java.util.regex.Pattern.compile("let confData = (\\{[^\\r\\n]+\\});").matcher(text);if(!m.find())throw new java.io.IOException();JSONObject data=new JSONObject(m.group(1));return new JSONObject().put("name",data.getString("name")).put("zone",data.getString("timezone")).put("calendar",data.getJSONArray("calendar"));
+    public static synchronized JSONObject erfurt() throws Exception {
+        long elapsed=android.os.SystemClock.elapsedRealtime();
+        if(erfurtCache!=null&&elapsed-erfurtFetched<1800000L)return erfurtCache;
+        if(erfurtFailed&&elapsed-erfurtAttempt<30000L)throw new java.io.IOException();
+        erfurtAttempt=elapsed;erfurtFailed=true;
+        String text=request("https://mawaqit.net/en/erfurter-moschee-erfurt-99085-germany");java.util.regex.Matcher m=java.util.regex.Pattern.compile("let confData = (\\{[^\\r\\n]+\\});").matcher(text);if(!m.find())throw new java.io.IOException();JSONObject data=new JSONObject(m.group(1));erfurtCache=new JSONObject().put("name",data.getString("name")).put("zone",data.getString("timezone")).put("calendar",data.getJSONArray("calendar"));erfurtFetched=android.os.SystemClock.elapsedRealtime();erfurtFailed=false;return erfurtCache;
     }
     private static String day(Calendar c){return String.format(Locale.US,"%04d-%02d-%02d",c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH));}
     private static void append(JSONArray result,String day,JSONObject times,String zone,long now) throws Exception {

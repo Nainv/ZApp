@@ -3,6 +3,7 @@ package com.zikra.tv;
 /** Shared, Android-independent rules for delivery and timetable timestamps. */
 public final class PrayerAlarmPolicy {
     private PrayerAlarmPolicy() {}
+    public static boolean allowed(boolean background,boolean visible){return background||visible;}
     public static boolean prayer(String key) { return "Fajr".equals(key)||"Dhuhr".equals(key)||"Asr".equals(key)||"Maghrib".equals(key)||"Isha".equals(key); }
     public static boolean deliver(long epoch,long now,long played) { return epoch>0&&epoch!=played&&now-epoch>=-2000&&now-epoch<300000; }
     public static long next(long[] epochs,long now) { long result=0;for(long epoch:epochs)if(epoch>now&&(result==0||epoch<result))result=epoch;return result; }

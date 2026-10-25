@@ -4,7 +4,7 @@
   function valid(value,key){return value?.key===key&&value.data?.daily?.time?.[0]===today(value.data.timezone)}
   function normalize(data){const format=new Intl.DateTimeFormat('en-GB',{timeZone:data.timezone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});const iso=seconds=>{const p=Object.fromEntries(format.formatToParts(new Date(seconds*1000)).filter(v=>v.type!=='literal').map(v=>[v.type,v.value]));return p.year+'-'+p.month+'-'+p.day+'T'+p.hour+':'+p.minute};data.hourly.epochs=data.hourly.time.slice();data.hourly.time=data.hourly.time.map(iso);data.daily.time=data.daily.time.map(t=>new Date((t+data.utc_offset_seconds)*1000).toISOString().slice(0,10));data.daily.sunrise=data.daily.sunrise.map(iso);data.daily.sunset=data.daily.sunset.map(iso);data.current.time=iso(data.current.time);return data}
   async function load(p){
-    if(!ZikraLocation.valid(p.lat,p.lon))throw Error('اختر موقعك من الإعدادات لإظهار الطقس.');
+    if(!ZikraLocation.valid(p.lat,p.lon))throw Error('اختر الموقع من الإعدادات لإظهار الطقس.');
     const key=p.lat.toFixed(4)+','+p.lon.toFixed(4);let cached=memory;
     if(!valid(cached,key))try{cached=JSON.parse(localStorage.getItem('zikra_weather_cache_v3')||'null')}catch(_){}
     if(valid(cached,key)&&Date.now()-cached.savedAt<15*60*1000){memory=cached;return cached.data}

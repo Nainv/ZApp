@@ -2,17 +2,17 @@
 (() => {
   'use strict';
   const routes={settings:'cells/settings/index.html?cell=1',weather:'cells/weather/index.html',prayer:'cells/prayer/index.html',zikra:'cells/zikra/index.html'};
-  const frames=new Map();let overlay=null,frame=null,returnFocus=null;
+  const frames=new Map();let overlay=null,frame=null,returnFocus=null,openingMemory=null;
   const read=(key,fallback)=>localStorage.getItem(key)??fallback;
-  function preferences(){let prayers={};try{prayers=JSON.parse(read('zikra_adhan_settings_v1','{}'))}catch(_){}return {...ZikraLocation.read(),language:read('zikra_language','ar'),autostart:read('zikra_autostart',String(window.ZikraRuntime?.state.autostart??false))==='true',prayers}}
+  function preferences(){let prayers={};try{prayers=JSON.parse(read('zikra_adhan_settings_v1','{}'))}catch(_){}return {...ZikraLocation.read(),language:read('zikra_language','ar'),backgroundAdhan:read('zikra_adhan_background',String(window.ZikraRuntime?.state.adhanBackground??true))!=='false',autostart:read('zikra_autostart',String(window.ZikraRuntime?.state.autostart??false))==='true',prayers}}
   function context(){return {preferences:preferences(),prayer:window.zikraPrayerSnapshot?.()||{zone:prayerTimeZone,date:prayerDataDate,timings:prayerTimesObj,schedule:prayerSchedule},weather:weatherData,runtime:{...window.ZikraRuntime?.state,timeEpoch:window.ZikraClock?.now(),clockSynced:window.ZikraClock?.synced},adhanActive:window.zikraAdhanActive||null}}
-  function send(target,type='zikra:context'){target?.contentWindow?.postMessage({type,...context()},'*')}
+  function send(target,type='zikra:context'){const data=context();data.memory=type==='zikra:session-start'&&target?.dataset.cell==='zikra'?openingMemory:window.zikraCurrentMemory?.();target?.contentWindow?.postMessage({type,...data},'*')}
   window.zikraBroadcastContext=()=>frames.forEach(target=>send(target));
   window.addEventListener('zikra:app-update',event=>frames.get('settings')?.contentWindow?.postMessage({type:'zikra:app-update-state',state:event.detail},'*'));
   function ensureOverlay(){if(overlay)return;overlay=document.createElement('div');overlay.id='zikraCellOverlay';overlay.hidden=true;overlay.style.cssText='position:fixed;inset:0;z-index:30000;background:#101b23;overflow:hidden';document.body.append(overlay)}
   function openCell(id,trigger){
     if(id==='quran'){openModal('quranModal');return}
-    if(!routes[id])return;ensureOverlay();
+    if(!routes[id])return;if(id==='zikra')openingMemory=window.zikraCurrentMemory?.();ensureOverlay();
     returnFocus=trigger?.matches('button,[tabindex]')?trigger:trigger?.querySelector('button,[tabindex]')||document.activeElement;
     document.querySelector('.app').inert=true;document.body.classList.remove('remote-focus-active');document.body.classList.add('cell-open');
     overlay.hidden=false;
@@ -40,7 +40,7 @@
   function savePreferences(data){
     if(!data||!['ar','de','en'].includes(data.language)||typeof data.city!=='string'||!data.city.trim())throw Error('إعدادات الموقع غير صالحة.');
     const voices=['makkah','madinah','alafasy','syria'];const prayers={};for(const key of ['Fajr','Dhuhr','Asr','Maghrib','Isha']){const item=data.prayers?.[key];prayers[key]={enabled:item?.enabled!==false,voice:voices.includes(item?.voice)?item.voice:'makkah'}}
-    ZikraLocation.save(data);localStorage.setItem('zikra_autostart',String(data.autostart));window.AndroidTV?.setStartup?.(!!data.autostart,data.language);localStorage.setItem('zikra_language',data.language);localStorage.setItem('zikra_adhan_settings_v1',JSON.stringify(prayers));
+    ZikraLocation.save(data);localStorage.setItem('zikra_adhan_background',String(data.backgroundAdhan!==false));localStorage.setItem('zikra_autostart',String(data.autostart));window.AndroidTV?.setStartup?.(!!data.autostart,data.language);localStorage.setItem('zikra_language',data.language);localStorage.setItem('zikra_adhan_settings_v1',JSON.stringify(prayers));
     window.zikraApplySavedSettings?.();window.zikraBroadcastContext();
   }
   window.addEventListener('message',event=>{

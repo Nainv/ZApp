@@ -3,6 +3,7 @@ package com.zikra.tv;
 public final class PrayerAlarmPolicyTest {
     private static int count;private static void check(boolean value,String text){count++;if(!value)throw new AssertionError(text);}
     public static void main(String[] args){
+        check(PrayerAlarmPolicy.allowed(true,false),"Background On allows closed-app delivery");check(!PrayerAlarmPolicy.allowed(false,false),"Background Off blocks closed-app audio and notification");check(PrayerAlarmPolicy.allowed(false,true),"Background Off retains foreground adhan");check(PrayerAlarmPolicy.allowed(true,true),"On permits foreground delivery");
         long epoch=1792897500000L;
         check(PrayerAlarmPolicy.prayer("Fajr"),"Fajr is an adhan prayer");check(!PrayerAlarmPolicy.prayer("Sunrise"),"Sunrise must not call adhan");check(!PrayerAlarmPolicy.prayer(null),"Reject missing key");
         check(PrayerAlarmPolicy.deliver(epoch,epoch,0),"Deliver on time");check(PrayerAlarmPolicy.deliver(epoch,epoch+120000,0),"Short system delay may deliver");check(!PrayerAlarmPolicy.deliver(epoch,epoch+300000,0),"Never play a stale prayer");check(!PrayerAlarmPolicy.deliver(epoch,epoch-60000,0),"Never call a minute early");check(!PrayerAlarmPolicy.deliver(epoch,epoch,epoch),"Do not duplicate already delivered alarm");check(!PrayerAlarmPolicy.deliver(0,epoch,0),"Reject missing timestamp");

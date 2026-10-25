@@ -51,12 +51,12 @@ public final class AdhanService extends Service {
         if(!fallback){PendingIntent stop=PendingIntent.getService(c,3191,new Intent(c,AdhanService.class).setAction(STOP),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);b.addAction(android.R.drawable.ic_media_pause,text(c,"إيقاف الأذان","Stop adhan","Gebetsruf beenden"),stop);}
         return b.build();
     }
-    public static void notifyFallback(Context c,String key){try{((NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTICE+1,notification(c,key,true));}catch(Exception ignored){}}
-    public static void stopIfDisabled(Context c){if(activePrayer.isEmpty())return;JSONObject s=AdhanScheduler.settings(c,activePrayer);if(s==null||!s.optBoolean("enabled",true))c.stopService(new Intent(c,AdhanService.class));}
+    public static void notifyFallback(Context c,String key){if(!AdhanScheduler.allowed(c))return;try{((NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTICE+1,notification(c,key,true));}catch(Exception ignored){}}
+    public static void stopIfDisabled(Context c){if(activePrayer.isEmpty())return;JSONObject s=AdhanScheduler.settings(c,activePrayer);if(!AdhanScheduler.allowed(c)||s==null||!s.optBoolean("enabled",true))c.stopService(new Intent(c,AdhanService.class));}
     private void state(boolean active){sendBroadcast(new Intent(STATE).setPackage(getPackageName()).putExtra("key",activePrayer).putExtra("active",active));}
     @Override public int onStartCommand(Intent intent,int flags,int id){
         if(intent==null||STOP.equals(intent.getAction())){stopSelf();return START_NOT_STICKY;}
-        String key=intent.getStringExtra("key");JSONObject settings=AdhanScheduler.settings(this,key);if(!PrayerAlarmPolicy.prayer(key)||settings==null||!settings.optBoolean("enabled",true)){stopSelf();return START_NOT_STICKY;}
+        String key=intent.getStringExtra("key");JSONObject settings=AdhanScheduler.settings(this,key);if(!AdhanScheduler.allowed(this)||!PrayerAlarmPolicy.prayer(key)||settings==null||!settings.optBoolean("enabled",true)){stopSelf();return START_NOT_STICKY;}
         activePrayer=key;
         try{startForeground(NOTICE,notification(this,key,false));state(true);wake=((PowerManager)getSystemService(POWER_SERVICE)).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"zikra:adhan");wake.acquire(330000L);audio=(AudioManager)getSystemService(AUDIO_SERVICE);
             AudioAttributes attributes=new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build();int granted;

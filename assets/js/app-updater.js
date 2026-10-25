@@ -6,6 +6,7 @@
   const active=new Set(['saving','checking','downloading','verifying','permission','installing','ready']);let busy=false;
   function render(state){
     if(!state||typeof state.phase!=='string')return;
+    const messages=document.getElementById('updateMessages');if(messages)messages.hidden=state.phase==='idle';label.hidden=state.phase==='idle';
     busy=active.has(state.phase);button.disabled=busy;button.setAttribute('aria-busy',String(busy));
     label.textContent=state.phase==='idle'?'أحدث نسخة متوفرة على ذكرى':state.message||'تحديث التطبيق';
     status.hidden=state.phase==='idle';status.textContent=state.phase==='permission'||state.phase==='installing'?'قد يطلب أندرويد موافقتك. اضغط «فتح» إذا لم يرجع التطبيق تلقائيًا.':state.phase==='downloaded'?'المتصفح ينزّل الملف فقط. افتحه على جهاز أندرويد لتثبيت النسخة الجديدة.':state.phase==='error'?state.message:'التحديث يحافظ على بيانات التطبيق عند تثبيته فوق النسخة الحالية.';

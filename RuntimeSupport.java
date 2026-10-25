@@ -28,7 +28,7 @@ public final class RuntimeSupport {
         JSONObject result = new JSONObject();
         try { boolean synced = utc > 0;
             result.put("timeEpoch", synced ? utc + SystemClock.elapsedRealtime()-anchor : System.currentTimeMillis());
-            result.put("adhanPrayer",AdhanService.activePrayer); result.put("clockSynced", synced); result.put("installedVersion", installedVersion);
+            result.put("adhanBackground",AdhanScheduler.prefs(context).getBoolean("background",true)); result.put("adhanPrayer",AdhanService.activePrayer); result.put("clockSynced", synced); result.put("installedVersion", installedVersion);
             result.put("updateVersion", latest); result.put("updateAvailable", UpdatePolicy.shouldShowNotice(installedVersion, latest));
             result.put("autostart", context.getSharedPreferences("zikra_runtime", 0).getBoolean("autostart", false));
         } catch (Exception ignored) {} return result.toString();
