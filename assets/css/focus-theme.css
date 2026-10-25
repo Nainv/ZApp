@@ -1,0 +1,10 @@
+/* Shared remote/keyboard focus. No timers, layout changes or persistent selection classes. */
+:root{--focus-fill:linear-gradient(140deg,#2b514b,#1a3035);--focus-glow:0 8px 22px #0005,0 0 20px #79c9b240;--focus-text:#f3f4e9}
+body:not([data-active="false"]) button:focus:not(:disabled),
+body:not([data-active="false"]) input:focus:not(:disabled),
+body:not([data-active="false"]) select:focus:not(:disabled),
+body:not([data-active="false"]) a[href]:focus,
+body:not([data-active="false"]) [role="button"]:focus,
+body:not([data-active="false"]) [tabindex="0"]:focus{background:var(--focus-fill)!important;color:var(--focus-text)!important;box-shadow:var(--focus-glow)!important;outline:0!important}
+/* Pressing Save keeps its distinct acknowledgement while focus remains in place. */
+.save.is-saving,.save:active,.settings-footer>#saveSettings.is-saving,.settings-footer>#saveSettings:active{background:#20c77a!important;color:#06271a!important;box-shadow:0 0 20px #20c77a40!important}
