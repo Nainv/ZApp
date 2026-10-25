@@ -18,10 +18,11 @@
     if(forward('zikra:cell-dpad',{direction}))return true;
     if(delegate().move?.(direction))return true;
     const current=document.activeElement;
+    if(current?.remoteMove?.(direction))return true;
     if(current?.matches('input:not([readonly]),textarea,[contenteditable=true]')&&['left','right'].includes(direction))return false;
     return window.ZikraNavigation?.move(direction)!==false;
   }
-  function ok(){if(stopAdhan())return;if(forward('zikra:cell-ok'))return;if(delegate().ok?.())return;const current=document.activeElement;if(current?.matches('button,[role=button],a[href]'))current.click()}
+  function ok(){if(stopAdhan())return;if(forward('zikra:cell-ok'))return;if(delegate().ok?.())return;const current=document.activeElement;if(current?.remoteOK){current.remoteOK();return}if(current?.matches('button,[role=button],a[href]'))current.click()}
   function back(){if(stopAdhan())return;if(window.zikraBackFromRemote){window.zikraBackFromRemote();return}if(delegate().back){delegate().back();return}close()}
   function close(){if(parent!==window){parent.postMessage({type:'zikra:cell-close'},'*');return}location.href='../../index.html'}
   function first(){const list=window.ZikraNavigation?.list()||[];if(list.length&&!list.includes(document.activeElement)){const brand=document.getElementById('brandDuaBtn');(list.includes(brand)?brand:list[0]).focus({preventScroll:true})}}

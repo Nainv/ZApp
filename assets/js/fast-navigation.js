@@ -58,6 +58,7 @@
       for(const p of prayers){let row=rows.find(row=>Math.abs(row[0].y-p.y)<8);if(!row){row=[];rows.push(row)}row.push(p)}rows.sort((a,b)=>a[0].y-b[0].y);rows.forEach(row=>row.sort((a,b)=>a.x-b.x));
       rows.forEach((row,i)=>row.forEach((p,j)=>{const links=edges.get(p.element),nearest=items=>items.slice().sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0].element;links.left=row[j-1]?.element;links.right=row[j+1]?.element;if(rows[i-1])links.up=nearest(rows[i-1]);else links.up=byId((rtl?p.x<root.offsetWidth*.3:p.x>root.offsetWidth*.7)?'homeTasbeehCount':'datePanel');if(rows[i+1])links.down=nearest(rows[i+1]);else links.down=byId(p.x<(root.offsetWidth*.5)?'memoryCard':'openQuranFromPlayer')}));
       const circle=['Fajr','Dhuhr','Asr','Maghrib','Isha'].map(key=>byId('box-'+key)).filter(node=>edges.has(node));circle.forEach((node,i)=>{edges.get(node)[rtl?'left':'right']=circle[(i+1)%circle.length];edges.get(node)[rtl?'right':'left']=circle[(i-1+circle.length)%circle.length]});
+      if(innerHeight>=innerWidth&&!document.documentElement.classList.contains('tv-device')){for(const node of circle)edges.get(node).down=byId('memoryCard');link('memoryCard',{up:'box-Fajr',down:'openQuranFromPlayer',left:null,right:null});link('openQuranFromPlayer',{up:'memoryCard',down:'miniPlay',left:null,right:null});link('miniPrev',{left:null});link('miniNext',{right:null});}
     }
     cache={root,list,edges};dirty=false;
   }

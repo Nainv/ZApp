@@ -2,6 +2,8 @@
 (() => {
  'use strict';let language=['ar','en','de'].includes(localStorage.getItem('zikra_language'))?localStorage.getItem('zikra_language'):'ar';
  const rows=[
+ ['ابحث باسم القارئ','Search reciters','Rezitator suchen'],['لا توجد أسماء مطابقة','No matching reciters','Keine passenden Rezitatoren'],
+ ['المدينة','City','Stadt'],
  ['لا إله إلا الله','There is no god but Allah','Es gibt keinen Gott außer Allah'],['أستغفر الله','I seek Allah’s forgiveness','Ich bitte Allah um Vergebung'],
  ['كتابة اسم مدينة أخرى','Enter another city','Andere Stadt eingeben'],['كتابة اسم المدينة','Enter city name','Stadtnamen eingeben'],
  ['الاستماع إلى البسملة والدعاء','Listen to Basmala and supplication','Basmala und Bittgebet anhören'],['إيقاف الدعاء','Stop supplication','Bittgebet beenden'],

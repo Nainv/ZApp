@@ -15,7 +15,7 @@
     if(id==='quran'){openModal('quranModal');return}
     if(!routes[id])return;if(id==='zikra')openingMemory=window.zikraCurrentMemory?.();ensureOverlay();
     returnFocus=trigger?.matches('button,[tabindex]')?trigger:trigger?.querySelector('button,[tabindex]')||document.activeElement;
-    document.querySelector('.app').inert=true;document.body.classList.remove('remote-focus-active');document.body.classList.add('cell-open');
+    window.zikraSetHomeCovered(true);document.body.classList.remove('remote-focus-active');document.body.classList.add('cell-open');
     overlay.hidden=false;
     if(frame){frame.hidden=true;frame.removeAttribute('id');frame.contentWindow?.postMessage({type:'zikra:cell-active',active:false},'*')}
     frame=frames.get(id);
@@ -31,7 +31,7 @@
   function closeCell(){
     window.zikraPreviewAdhan?.(null);
     if(!overlay||overlay.hidden)return false;frame.contentWindow?.postMessage({type:'zikra:cell-active',active:false},'*');frame.hidden=true;overlay.hidden=true;
-    document.querySelector('.app').inert=false;document.body.classList.remove('cell-open');document.body.classList.add('remote-focus-active');
+    window.zikraSetHomeCovered(false);document.body.classList.remove('cell-open');document.body.classList.add('remote-focus-active');
     const destination=frame.dataset.cell==='settings'?document.getElementById('brandDuaBtn'):returnFocus;destination?.isConnected&&destination.focus({preventScroll:true});returnFocus=null;return true;
   }
   window.zikraCloseCellOverlay=closeCell;
