@@ -1,13 +1,16 @@
 /* Fit the current remembrance only, after content changes or a resize. */
 (() => {
- 'use strict';let pending=0;
- function fit(node,box,max,min){if(!node||!box)return;node.style.fontSize=max+'px';for(let size=max;size>min&&node.scrollHeight>box.clientHeight+1;){size=Math.max(min,size-2);node.style.fontSize=size+'px'}}
+ 'use strict';let pending=0;const verseStates=new WeakMap(),fitCaches=new WeakMap();
+ function fit(node,box,max,min){if(!node||!box)return;const width=box.clientWidth,height=box.clientHeight,key=[width,height,max,min,node.textContent].join('|');let cache=fitCaches.get(node);if(!cache){cache=new Map();fitCaches.set(node,cache)}if(cache.has(key)){node.style.fontSize=cache.get(key)+'px';return}let low=Math.ceil(min),high=Math.floor(max),best=low;while(low<=high){const size=Math.floor((low+high)/2);node.style.fontSize=size+'px';if(node.scrollHeight<=height+1&&node.scrollWidth<=width+1){best=size;low=size+1}else high=size-1}node.style.fontSize=best+'px';cache.set(key,best);if(cache.size>64)cache.delete(cache.keys().next().value)}
+
  function memory(card){if(!card||!card.clientHeight)return;const inner=document.body.classList.contains('cell-zikra'),width=card.clientWidth;
   const text=card.querySelector('.memory-preview-text'),source=card.querySelector('.memory-preview-source'),benefit=card.querySelector('.memory-preview-benefit');
   if(source)source.style.fontSize=(inner?Math.max(13,Math.min(18,width/42)):Math.max(11,Math.min(15,width/36)))+'px';
   if(benefit)benefit.style.fontSize=(inner?Math.max(14,Math.min(20,width/40)):Math.max(11,Math.min(15,width/37)))+'px';
-  fit(text,card.querySelector('.memory-center'),inner?Math.min(38,width/20):Math.min(27,width/22),inner?14:13);
+  fit(text,card.querySelector('.memory-center'),inner?Math.min(38,Math.max(24,width/18)):Math.min(27,width/22),inner?14:13);
  }
- function all(){cancelAnimationFrame(pending);pending=requestAnimationFrame(()=>document.querySelectorAll('.tile-memory').forEach(memory))}
- window.ZikraFit={memory,all};window.addEventListener('resize',all,{passive:true});document.fonts?.ready.then(all);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',all,{once:true});else all();
+ function verseProgress(node,progress){const state=verseStates.get(node);if(!state)return;state.progress=Math.max(0,Math.min(1,Number(progress)||0));const shift=state.overflow>1?Math.round(state.overflow*state.progress):0;if(shift!==state.shift){state.shift=shift;node.style.transform=shift?'translate3d(0,-'+shift+'px,0)':'none'}}
+ function verse(node){const box=node?.closest('.verse-row');if(!box?.clientHeight||!box.clientWidth)return;const old=verseStates.get(node),progress=old?.text===node.textContent?old.progress:0;if(old?.frame)cancelAnimationFrame(old.frame);node.style.transition='none';let low=11,high=innerWidth<=700?20:26,best=low;node.style.fontSize=low+'px';while(low<=high){const size=Math.floor((low+high)/2);node.style.fontSize=size+'px';if(node.scrollHeight<=box.clientHeight+1&&node.scrollWidth<=box.clientWidth+1){best=size;low=size+1}else high=size-1}node.style.fontSize=best+'px';const overflow=Math.max(0,node.scrollHeight-box.clientHeight);box.classList.toggle('is-scrolling-verse',overflow>1);const state={text:node.textContent,overflow,progress,shift:null,frame:0};verseStates.set(node,state);verseProgress(node,progress);if(overflow>1)state.frame=requestAnimationFrame(()=>{state.frame=requestAnimationFrame(()=>{if(verseStates.get(node)===state)node.style.transition='transform 180ms linear';state.frame=0})})}
+ function all(){cancelAnimationFrame(pending);pending=requestAnimationFrame(()=>{document.querySelectorAll('.tile-memory').forEach(memory);verse(document.getElementById('miniVerse'))})}
+ window.ZikraFit={memory,verse,verseProgress,all};window.addEventListener('resize',all,{passive:true});document.fonts?.ready.then(all);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',all,{once:true});else all();
 })();

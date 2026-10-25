@@ -11,6 +11,7 @@ import android.os.Build;
 public final class UpdateRestartReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context, Intent intent) {
         if (!Intent.ACTION_MY_PACKAGE_REPLACED.equals(intent.getAction())) return;
+        AdhanScheduler.restore(context,false);
         SharedPreferences preferences = context.getSharedPreferences(AppUpdater.PREFERENCES, Context.MODE_PRIVATE);
         long target = preferences.getLong("restartVersion", 0), deadline = preferences.getLong("restartDeadline", 0);
         preferences.edit().remove("restartVersion").remove("restartDeadline").apply();

@@ -12,7 +12,9 @@ import android.os.Build;
 /** Opt-in only. Android/OEM background-launch restrictions are respected. */
 public final class BootReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context, Intent event) {
-        if(!Intent.ACTION_BOOT_COMPLETED.equals(event.getAction()) || !context.getSharedPreferences("zikra_runtime",0).getBoolean("autostart",false)) return;
+        if(!Intent.ACTION_BOOT_COMPLETED.equals(event.getAction()))return;
+        AdhanScheduler.restore(context,true);
+        if(!context.getSharedPreferences("zikra_runtime",0).getBoolean("autostart",false))return;
         Intent launch=new Intent(context,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
         try { context.startActivity(launch); } catch(Exception ignored) {}
         try {

@@ -19,6 +19,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.GeolocationPermissions;
 import android.content.Intent;
+import android.content.Context;
 import android.net.Uri;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -50,10 +51,27 @@ public class MainActivity extends Activity {
     private AppUpdater appUpdater;
     private RuntimeSupport runtimeSupport;
     private long keyboardRequest;
+    private final android.content.BroadcastReceiver adhanEvents=new android.content.BroadcastReceiver(){
+        @Override public void onReceive(Context c,Intent i){deliverAdhanState(i.getStringExtra("key"),i.getBooleanExtra("active",false));}
+    };
+    private void deliverAdhanState(String key,boolean active){if(webView==null||!pageReady)return;try{org.json.JSONObject data=new org.json.JSONObject().put("key",key).put("active",active);webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:adhan-native',{detail:"+data+"}));",null);}catch(Exception ignored){}}
+    private void adhanNotifications(){
+        if(Build.VERSION.SDK_INT<33||checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED)return;
+        android.content.SharedPreferences p=AdhanScheduler.prefs(this);
+        if(p.getBoolean("notificationAsked",false)&&!shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)){
+            try{startActivity(new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName()));}catch(Exception ignored){}return;
+        }
+        p.edit().putBoolean("notificationAsked",true).apply();requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},4104);
+    }
+    private String adhanStatus(){org.json.JSONObject s=new org.json.JSONObject();try{s.put("exact",AdhanScheduler.exact(this));s.put("notifications",(Build.VERSION.SDK_INT<24||((android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE)).areNotificationsEnabled()));s.put("scheduled",AdhanScheduler.pendingCount(this));s.put("active",AdhanService.activePrayer);}catch(Exception ignored){}return s.toString();}
+
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appUpdater = new AppUpdater(this);
+        AdhanScheduler.restore(this,false);
+        android.content.IntentFilter adhanFilter=new android.content.IntentFilter(AdhanService.STATE);
+        if(Build.VERSION.SDK_INT>=33)registerReceiver(adhanEvents,adhanFilter,Context.RECEIVER_NOT_EXPORTED);else registerReceiver(adhanEvents,adhanFilter);
         runtimeSupport = new RuntimeSupport(this);
         runtimeSupport.setListener(() -> runOnUiThread(this::deliverRuntimeState)); runtimeSupport.check();
         ((android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(217);
@@ -172,19 +190,7 @@ public class MainActivity extends Activity {
         return new WebResourceResponse(mime, "UTF-8", new ByteArrayInputStream(text.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
     }
     private WebResourceResponse erfurtTimetable() {
-        HttpURLConnection c=null;
-        try {
-            c=(HttpURLConnection)new URL("https://mawaqit.net/en/erfurter-moschee-erfurt-99085-germany").openConnection();
-            c.setConnectTimeout(10000);c.setReadTimeout(10000);c.setRequestProperty("User-Agent","Zikra-TV");
-            if(c.getResponseCode()!=200)throw new java.io.IOException();
-            long server=c.getHeaderFieldDate("Date",0);runtimeSupport.sync(server);
-            try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){
-                byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){out.write(b,0,n);if(out.size()>1048576)throw new java.io.IOException();}
-                java.util.regex.Matcher match=java.util.regex.Pattern.compile("let confData = (\\{[^\\r\\n]+\\});").matcher(out.toString("UTF-8"));
-                if(!match.find())throw new java.io.IOException();org.json.JSONObject data=new org.json.JSONObject(match.group(1));
-                org.json.JSONObject result=new org.json.JSONObject();result.put("name",data.getString("name"));result.put("zone",data.getString("timezone"));result.put("calendar",data.getJSONArray("calendar"));result.put("serverEpoch",server);return response("application/json",result.toString());
-            }
-        }catch(Exception ignored){return response("application/json","{\"error\":true}");}finally{if(c!=null)c.disconnect();}
+        try {return response("application/json",PrayerCalendar.erfurt().toString());}catch(Exception ignored){return response("application/json","{\"error\":true}");}
     }
     private WebResourceResponse nearbyMosques(Uri request) {
         HttpURLConnection connection = null;
@@ -215,6 +221,10 @@ public class MainActivity extends Activity {
     }
     private class AndroidBridge {
         @JavascriptInterface public void refreshInterfaceCache() { runOnUiThread(() -> { if(webView != null) webView.clearCache(true); }); }
+        @JavascriptInterface public void setAdhanSchedule(String payload) { AdhanScheduler.update(MainActivity.this,payload); }
+        @JavascriptInterface public String getAdhanStatus() { return adhanStatus(); }
+        @JavascriptInterface public void requestAdhanNotifications() { runOnUiThread(MainActivity.this::adhanNotifications); }
+        @JavascriptInterface public void requestExactAdhan() { runOnUiThread(()->{if(Build.VERSION.SDK_INT>=31&&!AdhanScheduler.exact(MainActivity.this)){try{startActivity(new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,Uri.parse("package:"+getPackageName())));}catch(Exception ignored){Toast.makeText(MainActivity.this,"اسمح بتنبيهات الأذان من إعدادات النظام",Toast.LENGTH_LONG).show();}}else AdhanScheduler.reschedule(MainActivity.this);}); }
         @JavascriptInterface public String getRuntimeState() { return runtimeSupport.state(); }
         @JavascriptInterface public void checkForUpdate() { runtimeSupport.check(); }
         @JavascriptInterface public void setStartup(boolean enabled, String language) {
@@ -391,6 +401,7 @@ public class MainActivity extends Activity {
         hideSystemBars();
         if (webView != null) webView.onResume();
         if (appUpdater != null) appUpdater.onResume();
+        AdhanScheduler.reschedule(this);
         if (runtimeSupport != null) { runtimeSupport.check(); deliverRuntimeState(); }
     }
     private void deliverRuntimeState() {
@@ -407,5 +418,5 @@ public class MainActivity extends Activity {
         // The bundled page is loaded on creation; don't restore a stale remote page state.
         super.onSaveInstanceState(outState);
     }
-    @Override protected void onDestroy() { if (runtimeSupport != null) runtimeSupport.close(); if (appUpdater != null) appUpdater.close(); if (webView != null) { webView.stopLoading(); webView.destroy(); webView = null; } super.onDestroy(); }
+    @Override protected void onDestroy() { try{unregisterReceiver(adhanEvents);}catch(Exception ignored){} if (runtimeSupport != null) runtimeSupport.close(); if (appUpdater != null) appUpdater.close(); if (webView != null) { webView.stopLoading(); webView.destroy(); webView = null; } super.onDestroy(); }
 }

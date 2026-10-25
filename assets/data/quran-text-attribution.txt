@@ -1,0 +1,6 @@
+Arabic Quran text and verse/page metadata: AlQuran Cloud.
+Edition: quran-uthmani-quran-academy. Retrieved 2026-10-25.
+https://api.alquran.cloud/v1/quran/quran-uthmani-quran-academy
+https://alquran.cloud/api
+Text strings are preserved exactly as supplied. Only unused JSON fields were omitted.
+114 surahs and 6236 ayahs; metadata checked against the surah index.

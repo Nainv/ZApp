@@ -1,0 +1,7 @@
+/* Millisecond verse timings for one continuous surah recording. */
+(function(root){
+ 'use strict';
+ function normalize(records,limit=Infinity){const rows=(Array.isArray(records)?records:[]).map(row=>({ayah:Number(row.ayah),start_time:row.start_time===null||row.start_time===''?NaN:Number(row.start_time),end_time:Number(row.end_time)})).filter(row=>Number.isInteger(row.ayah)&&row.ayah>0&&row.ayah<=limit&&Number.isFinite(row.start_time)&&row.start_time>=0).sort((a,b)=>a.start_time-b.start_time);const out=[];for(const row of rows){if(!Number.isFinite(row.end_time)||row.end_time<=row.start_time)row.end_time=null;const old=out[out.length-1];if(old?.ayah===row.ayah){if(row.end_time!==null)old.end_time=Math.max(old.end_time||0,row.end_time)}else out.push(row)}return out}
+ function position(rows,seconds,duration=0){if(!rows.length)return null;const ms=Math.max(0,Number(seconds)||0)*1000;let low=0,high=rows.length-1;while(low<high){const middle=Math.ceil((low+high)/2);if(rows[middle].start_time<=ms)low=middle;else high=middle-1}const row=rows[low],next=rows[low+1]?.start_time,end=row.end_time||next||(Number.isFinite(duration)&&duration>0?duration*1000:row.start_time);return {ayah:row.ayah,index:low,start:row.start_time,end,progress:end>row.start_time?Math.max(0,Math.min(1,(ms-row.start_time)/(end-row.start_time))):0,next:ms<rows[0].start_time?rows[0].start_time:next??null}}
+ const api={normalize,position};if(typeof module==='object'&&module.exports)module.exports=api;else root.ZikraQuranTimeline=api;
+})(typeof window==='object'?window:globalThis);

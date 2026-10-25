@@ -2,13 +2,14 @@
 (() => {
   'use strict';
   const selector='button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])';
-  let cache=null,dirty=true;
-  const invalidate=()=>{dirty=true};
+  let cache=null,dirty=true,scopeDirty=true,scopeCache=null;
+  const invalidate=()=>{dirty=true;scopeDirty=true};
   function scope(){
+    if(!scopeDirty&&scopeCache?.isConnected)return scopeCache;scopeDirty=false;
     const menus=[...document.querySelectorAll('#quranReaderDialog:not([hidden]),#reciterPickerMenu:not([hidden]),#languageMenu:not([hidden]),.choice-overlay:not([hidden]),.confirm-overlay:not([hidden])')];
-    if(menus.length)return menus[menus.length-1];
+    if(menus.length)return scopeCache=menus[menus.length-1];
     const modals=[...document.querySelectorAll('.modal-backdrop.open')];
-    return modals[modals.length-1]||document.querySelector('.app')||document.body;
+    return scopeCache=modals[modals.length-1]||document.querySelector('.app')||document.body;
   }
   function layoutPoint(element){
     let x=0,y=0,node=element;
@@ -44,8 +45,8 @@
       // Explicit lanes for nested controls keep the large weather/memory tiles from stealing focus.
       link('homeRefreshBtn',{left:null,right:'settingsBtn',down:'datePanel'});
       link('settingsBtn',{left:'homeRefreshBtn',right:byId('updateNotice')&&!byId('updateNotice').hidden?'updateNotice':null,down:'datePanel'});link('updateNotice',{left:'settingsBtn',right:null,down:'datePanel'});
-      link('homeTasbeehCount',{left:null,right:'homeTasbeehReset',up:'settingsBtn',down:'box-Fajr'});
-      link('homeTasbeehReset',{left:'homeTasbeehCount',right:'datePanel',up:'settingsBtn',down:'box-Fajr'});
+      link('homeTasbeehCount',{left:'homeTasbeehReset',right:'datePanel',up:'settingsBtn',down:'box-Fajr'});
+      link('homeTasbeehReset',{left:null,right:'homeTasbeehCount',up:'settingsBtn',down:'box-Fajr'});
       link('datePanel',{left:'homeTasbeehCount',right:null,up:'settingsBtn',down:'box-Fajr'});
       link('memoryCard',{right:'openQuranFromPlayer',left:null,up:'box-Maghrib',down:null});
       link('openQuranFromPlayer',{left:'memoryCard',right:null,up:'box-Fajr',down:'miniPlay'});

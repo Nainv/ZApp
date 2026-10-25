@@ -31,8 +31,10 @@ jobs:
         shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/zikra-update-tests"
-          javac -d "$RUNNER_TEMP/zikra-update-tests" UpdatePolicy.java tests/UpdatePolicyTest.java
+          javac -d "$RUNNER_TEMP/zikra-update-tests" UpdatePolicy.java ClockPolicy.java PrayerAlarmPolicy.java tests/UpdatePolicyTest.java tests/ClockPolicyTest.java tests/PrayerAlarmPolicyTest.java
           java -cp "$RUNNER_TEMP/zikra-update-tests" com.zikra.tv.UpdatePolicyTest
+          java -cp "$RUNNER_TEMP/zikra-update-tests" com.zikra.tv.ClockPolicyTest
+          java -cp "$RUNNER_TEMP/zikra-update-tests" com.zikra.tv.PrayerAlarmPolicyTest
 
       - name: Set up Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
@@ -110,7 +112,7 @@ jobs:
           fi
 
           test -s "app/src/main/java/com/zikra/tv/MainActivity.java"
-          for SOURCE in AppUpdater UpdatePolicy UpdateFileProvider UpdateRestartReceiver RuntimeSupport BootReceiver; do
+          for SOURCE in AppUpdater UpdatePolicy ClockPolicy PrayerAlarmPolicy PrayerCalendar AdhanScheduler AdhanReceiver AdhanService AdhanRefreshJob UpdateFileProvider UpdateRestartReceiver RuntimeSupport BootReceiver; do
             cp "./$SOURCE.java" "app/src/main/java/com/zikra/tv/$SOURCE.java"
           done
           test -s "app/src/main/AndroidManifest.xml"
