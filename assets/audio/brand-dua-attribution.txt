@@ -1,0 +1,10 @@
+Human recitation by Mishary Rashid Alafasy.
+Basmala followed by the supplication in Quran 3:8.
+Excerpted from the same EveryAyah Alafasy recording set; boundary silence trimmed and 0.3 seconds between excerpts. No synthetic speech or voice conversion.
+Basmala: Quran 1:1
+Source: https://everyayah.com/data/Alafasy_128kbps/001001.mp3
+Original SHA-256: 8808f3fc313d9df87b6090ee9efc8c11859da58b0100ad92621c5ee9a93d7280
+Supplication: Quran 3:8
+Source: https://everyayah.com/data/Alafasy_128kbps/003008.mp3
+Original SHA-256: 67b1bc8067ae0ac619e0322f9bb96d741154da9d40591944837409cc8e025583
+Combined clip SHA-256: c5fb7fcfdaccb407614e1908f62cb31840187c195a574702f3f3bacb05dffa7e

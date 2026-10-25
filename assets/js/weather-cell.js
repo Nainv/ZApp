@@ -6,7 +6,7 @@
   const degrees = (value) => Number.isFinite(value) ? Math.round(value) + '°' : '—',time = (value) => value?.slice(11, 16) || '—';
   function metric(label) {const node = document.createElement('div');node.className = 'day-metric';const name = document.createElement('small'),value = document.createElement('strong');name.textContent = t(label);node.append(name, value);$('dayMetrics').append(node);return value;}
   const metrics = ['الشروق', 'الغروب', 'احتمال المطر', 'الرياح', 'الرطوبة', 'الحالة'].map(metric);
-  function focus(node) {node?.focus({ preventScroll: true });node?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });}
+  function focus(node) {node?.focus({ preventScroll: true });const pane=node?.closest('.weather-days,.weather-hours');if(pane){const r=node.getBoundingClientRect(),p=pane.getBoundingClientRect();if(r.left<p.left)pane.scrollLeft+=r.left-p.left;else if(r.right>p.right)pane.scrollLeft+=r.right-p.right;}}
   function selectHour(index, move = false) {if (!hourButtons.length) return;hourIndex = (index + hourButtons.length) % hourButtons.length;const i = hourButtons[hourIndex].dataset.index,h = data.hourly;$('selectedHourInfo').textContent = t(time(h.time[i]) + ' · ' + ZikraWeatherScene.describe(h.weather_code[i]).label + ' · المطر ' + (h.precipitation_probability[i] || 0) + '٪');if (move) focus(hourButtons[hourIndex]);}
   function selectDay(index, move = false) {
     if (!data) return;const old = selected;selected = (index + dayButtons.length) % dayButtons.length;

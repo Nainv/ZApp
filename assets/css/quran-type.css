@@ -1,0 +1,5 @@
+/* Bundled Quran font: no device-font dependency or network font request. See assets/fonts/amiri-OFL.txt. */
+@font-face{font-family:'Zikra Quran';src:url('../fonts/AmiriQuran.ttf') format('truetype');font-weight:400;font-style:normal;font-display:block}
+.mushaf-page-text,.surah-heading,.surah-basmala,#miniVerse{font-family:'Zikra Quran',serif;font-weight:400;font-synthesis:none}
+.surah-opening{text-align:center;padding-bottom:15px;direction:rtl}.surah-heading{font-size:27px;line-height:1.8;color:var(--zikra-gold);margin:0 0 10px}.surah-basmala{display:block;font-size:clamp(19px,2vw,27px);line-height:2.5;white-space:nowrap;color:var(--zikra-gold);padding:4px 0}.surah-basmala.ayah{width:fit-content;max-width:100%;margin-inline:auto}
+@media(max-width:900px){.surah-opening{padding-bottom:12px}.surah-heading{font-size:24px;margin-bottom:7px}.surah-basmala{font-size:clamp(16px,4.6vw,23px);line-height:2.4}}

@@ -43,8 +43,9 @@
     if(root.classList.contains('app')){
       const rtl=document.documentElement.dir!=='ltr';const byId=id=>root.querySelector('#'+id),link=(id,values)=>{const node=byId(id);if(!edges.has(node))return;for(const [direction,target] of Object.entries(values)){const axis=!rtl&&['left','right'].includes(direction)&&!id.startsWith('mini')?(direction==='left'?'right':'left'):direction;edges.get(node)[axis]=target?byId(target):null}};
       // Explicit lanes for nested controls keep the large weather/memory tiles from stealing focus.
-      link('homeRefreshBtn',{left:null,right:'settingsBtn',down:'datePanel'});
-      link('settingsBtn',{left:'homeRefreshBtn',right:byId('updateNotice')&&!byId('updateNotice').hidden?'updateNotice':null,down:'datePanel'});link('updateNotice',{left:'settingsBtn',right:null,down:'datePanel'});
+      link('brandDuaBtn',{left:'homeRefreshBtn',right:null,down:'datePanel'});
+      link('homeRefreshBtn',{left:'settingsBtn',right:'brandDuaBtn',up:'brandDuaBtn',down:'datePanel'});
+      link('settingsBtn',{right:'homeRefreshBtn',left:byId('updateNotice')&&!byId('updateNotice').hidden?'updateNotice':null,up:'brandDuaBtn',down:'datePanel'});link('updateNotice',{right:'settingsBtn',left:null,up:'settingsBtn',down:'datePanel'});
       link('homeTasbeehCount',{left:'homeTasbeehReset',right:'datePanel',up:'settingsBtn',down:'box-Fajr'});
       link('homeTasbeehReset',{left:null,right:'homeTasbeehCount',up:'settingsBtn',down:'box-Fajr'});
       link('datePanel',{left:'homeTasbeehCount',right:null,up:'settingsBtn',down:'box-Fajr'});
@@ -64,7 +65,7 @@
     if(!target)return;
     target.focus({preventScroll:true});
     // Only scroll on small screens or in a scrolling list; never smooth-scroll on a key press.
-    if(innerWidth<=900||target.closest('.surah-grid,.reader-picker-menu,.choice-options,.editor-body,#verses'))target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+    const pane=target.closest('.surah-grid,.reader-picker-menu,.choice-options,.editor-body,.settings-grid');if(pane){const r=target.getBoundingClientRect(),p=pane.getBoundingClientRect();if(r.top<p.top+5)pane.scrollTop+=r.top-p.top-5;else if(r.bottom>p.bottom-5)pane.scrollTop+=r.bottom-p.bottom+5;if(r.left<p.left)pane.scrollLeft+=r.left-p.left;else if(r.right>p.right)pane.scrollLeft+=r.right-p.right;}else if(innerWidth<=900&&target.closest('.app'))target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
   }
   function move(direction){
     if(!['left','right','up','down'].includes(direction))return false;

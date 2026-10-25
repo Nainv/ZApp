@@ -52,6 +52,9 @@ public class MainActivity extends Activity {
     private AppUpdater appUpdater;
     private RuntimeSupport runtimeSupport;
     private long keyboardRequest;
+    private final java.util.HashSet<Integer> adhanKeys=new java.util.HashSet<>();
+    private boolean adhanTouch;
+    private boolean stopActiveAdhan(){if(AdhanService.activePrayer.isEmpty())return false;AdhanService.stop(this);deliverAdhanState("",false);return true;}
     private final android.content.BroadcastReceiver adhanEvents=new android.content.BroadcastReceiver(){
         @Override public void onReceive(Context c,Intent i){deliverAdhanState(i.getStringExtra("key"),i.getBooleanExtra("active",false));}
     };
@@ -154,6 +157,8 @@ public class MainActivity extends Activity {
                     InputStream stream = getAssets().open(file);
                     String mime = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(android.webkit.MimeTypeMap.getFileExtensionFromUrl(file));
                     if (file.endsWith(".js")) mime = "application/javascript";
+                    else if (file.endsWith(".ttf")) mime = "font/ttf";
+                    else if (file.endsWith(".mp3")) mime = "audio/mpeg";
                     if (mime == null) mime = "application/octet-stream";
                     return new WebResourceResponse(mime, "UTF-8", 200, "OK", Collections.singletonMap("Cache-Control", "no-cache"), stream);
                 } catch (java.io.IOException error) { return new WebResourceResponse("text/plain", "UTF-8", 404, "Not Found", Collections.emptyMap(), new ByteArrayInputStream(new byte[0])); }
@@ -229,6 +234,8 @@ public class MainActivity extends Activity {
     private class AndroidBridge {
         @JavascriptInterface public void refreshInterfaceCache() { runOnUiThread(() -> { if(webView != null) webView.clearCache(true); }); }
         @JavascriptInterface public void setAdhanSchedule(String payload) { AdhanScheduler.update(MainActivity.this,payload); }
+        @JavascriptInterface public boolean isTelevision() { return getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK); }
+        @JavascriptInterface public void stopAdhan() { runOnUiThread(()->{AdhanService.stop(MainActivity.this);deliverAdhanState("",false);}); }
         @JavascriptInterface public String getAdhanStatus() { return adhanStatus(); }
         @JavascriptInterface public void requestAdhanNotifications() { runOnUiThread(MainActivity.this::adhanNotifications); }
         @JavascriptInterface public void requestExactAdhan() { runOnUiThread(()->{if(Build.VERSION.SDK_INT>=31&&!AdhanScheduler.exact(MainActivity.this)){try{startActivity(new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,Uri.parse("package:"+getPackageName())));}catch(Exception ignored){Toast.makeText(MainActivity.this,"اسمح بتنبيهات الأذان من إعدادات النظام",Toast.LENGTH_LONG).show();}}else AdhanScheduler.reschedule(MainActivity.this);}); }
@@ -291,6 +298,7 @@ public class MainActivity extends Activity {
     }
 
     private void sendBackToWeb() {
+        if(stopActiveAdhan())return;
         if (webView == null || !pageReady) return;
         webView.evaluateJavascript("(function(){if(typeof window.zikraBackFromRemote==='function'){window.zikraBackFromRemote();return;}if(typeof window.handleAndroidBack==='function'){window.handleAndroidBack();}})();", null);
     }
@@ -307,6 +315,7 @@ public class MainActivity extends Activity {
         pageReady = false; if (webView != null) webView.loadUrl(bundledUrl());
     }
     private void sendMediaCommand(String command) {
+        if(stopActiveAdhan())return;
         if (webView == null || !pageReady) {
             Log.w(TAG, "Ignoring media command " + command + ": WebView page is not ready");
             return;
@@ -336,6 +345,8 @@ public class MainActivity extends Activity {
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
         int code = event.getKeyCode();
+        if(adhanKeys.contains(code)){if(event.getAction()==KeyEvent.ACTION_UP)adhanKeys.remove(code);return true;}
+        if(event.getAction()==KeyEvent.ACTION_DOWN&&code!=KeyEvent.KEYCODE_VOLUME_UP&&code!=KeyEvent.KEYCODE_VOLUME_DOWN&&code!=KeyEvent.KEYCODE_VOLUME_MUTE&&stopActiveAdhan()){adhanKeys.add(code);return true;}
         if (code == KeyEvent.KEYCODE_DPAD_LEFT || code == KeyEvent.KEYCODE_DPAD_RIGHT || code == KeyEvent.KEYCODE_DPAD_UP || code == KeyEvent.KEYCODE_DPAD_DOWN) return super.dispatchKeyEvent(event);
 
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
@@ -419,7 +430,12 @@ public class MainActivity extends Activity {
         if (webView == null || !pageReady) return;
         webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:app-update',{detail:JSON.parse(" + org.json.JSONObject.quote(json) + ")}));", null);
     }
-    @Override public void onBackPressed() { sendBackToWeb(); }
+    @Override public boolean dispatchTouchEvent(android.view.MotionEvent event){
+        if(event.getActionMasked()==android.view.MotionEvent.ACTION_DOWN)adhanTouch=stopActiveAdhan();
+        if(adhanTouch){if(event.getActionMasked()==android.view.MotionEvent.ACTION_UP||event.getActionMasked()==android.view.MotionEvent.ACTION_CANCEL)adhanTouch=false;return true;}
+        return super.dispatchTouchEvent(event);
+    }
+    @Override public void onBackPressed() { if(!stopActiveAdhan())sendBackToWeb(); }
     @Override protected void onPause() { appVisible=false;AdhanScheduler.reschedule(this);AdhanScheduler.scheduleJob(this);AdhanService.stopIfDisabled(this); if (appUpdater != null) appUpdater.onPause(); if (webView != null) webView.onPause(); super.onPause(); }
     @Override protected void onSaveInstanceState(Bundle outState) {
         // The bundled page is loaded on creation; don't restore a stale remote page state.

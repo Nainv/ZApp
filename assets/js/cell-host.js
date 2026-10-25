@@ -11,6 +11,7 @@
   window.addEventListener('zikra:app-update',event=>frames.get('settings')?.contentWindow?.postMessage({type:'zikra:app-update-state',state:event.detail},'*'));
   function ensureOverlay(){if(overlay)return;overlay=document.createElement('div');overlay.id='zikraCellOverlay';overlay.hidden=true;overlay.style.cssText='position:fixed;inset:0;z-index:30000;background:#101b23;overflow:hidden';document.body.append(overlay)}
   function openCell(id,trigger){
+    window.zikraStopBrandDua?.();
     if(id==='quran'){openModal('quranModal');return}
     if(!routes[id])return;if(id==='zikra')openingMemory=window.zikraCurrentMemory?.();ensureOverlay();
     returnFocus=trigger?.matches('button,[tabindex]')?trigger:trigger?.querySelector('button,[tabindex]')||document.activeElement;
@@ -31,7 +32,7 @@
     window.zikraPreviewAdhan?.(null);
     if(!overlay||overlay.hidden)return false;frame.contentWindow?.postMessage({type:'zikra:cell-active',active:false},'*');frame.hidden=true;overlay.hidden=true;
     document.querySelector('.app').inert=false;document.body.classList.remove('cell-open');document.body.classList.add('remote-focus-active');
-    returnFocus?.isConnected&&returnFocus.focus({preventScroll:true});returnFocus=null;return true;
+    const destination=frame.dataset.cell==='settings'?document.getElementById('brandDuaBtn'):returnFocus;destination?.isConnected&&destination.focus({preventScroll:true});returnFocus=null;return true;
   }
   window.zikraCloseCellOverlay=closeCell;
   window.zikraClearInactiveCells=()=>{for(const [id,target] of frames){if(overlay&&!overlay.hidden&&target===frame)continue;target.remove();frames.delete(id);if(target===frame)frame=null}};
@@ -47,6 +48,7 @@
     if(!frame||event.source!==frame.contentWindow||!event.data||overlay.hidden)return;
     const message=event.data;
     if(message.type==='zikra:cell-close')closeCell();
+    else if(message.type==='zikra:adhan-stop')window.zikraStopAdhan?.();
     else if(message.type==='zikra:adhan-preview'&&frame.dataset.cell==='settings')window.zikraPreviewAdhan?.(message.voice||null);
     else if(message.type==='zikra:context-request')send(frame);
     else if(message.type==='zikra:settings-save'&&frame.dataset.cell==='settings'){
