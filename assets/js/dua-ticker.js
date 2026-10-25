@@ -2,11 +2,11 @@
 function mountDuaTicker(content) {
   'use strict';window.zikraDuaTicker?.destroy();
   const track=document.getElementById('duaTrack'),viewport=track?.parentElement;if(!track||!viewport)return;
-  track.replaceChildren();const source=[...new Set((content.map(item=>item.text)).filter(v=>typeof v==='string'&&v.trim()).map(v=>v.trim()))];if(!source.length)return;
+  track.replaceChildren();const mirrored=ZikraI18n.language!=='ar';track.style.transform=mirrored?'scaleX(-1)':'none';const source=[...new Set((content.map(item=>item.text)).filter(v=>typeof v==='string'&&v.trim()).map(v=>v.trim()))];if(!source.length)return;
   const speed=31.5,gap=34;let entries=[],next=0,width=0,stopped=false,paused=false;
   const position=item=>item.start+Number(item.animation.currentTime||0)/1000*speed;
   function append(right){
-    const element=document.createElement('div');element.className='dua-entry';element.setAttribute('aria-hidden','true');const text=document.createElement('span'),mark=document.createElement('span');text.className='dua-item';text.dir=ZikraI18n.language==='ar'?'rtl':'ltr';text.style.direction=text.dir;text.textContent=source[next++%source.length];mark.className='dua-separator';mark.textContent='۞';element.append(text,mark);track.append(element);
+    const element=document.createElement('div');element.className='dua-entry';element.setAttribute('aria-hidden','true');const text=document.createElement('span'),mark=document.createElement('span');text.className='dua-item';text.dir=ZikraI18n.language==='ar'?'rtl':'ltr';text.style.direction=text.dir;text.style.transform=mirrored?'scaleX(-1)':'none';mark.style.transform=mirrored?'scaleX(-1)':'none';text.textContent=source[next++%source.length];mark.className='dua-separator';mark.textContent='۞';element.append(text,mark);track.append(element);
     const size=Math.ceil(element.getBoundingClientRect().width),start=right-size,end=width+gap,duration=(end-start)/speed*1000;
     const animation=element.animate([{transform:'translate3d('+start+'px,-50%,0)'},{transform:'translate3d('+end+'px,-50%,0)'}],{duration,easing:'linear',fill:'forwards'}),item={element,start,animation};entries.push(item);if(paused)animation.pause();
     animation.onfinish=()=>{if(stopped)return;element.remove();entries=entries.filter(e=>e!==item);fill()};return start;

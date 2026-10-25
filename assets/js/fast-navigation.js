@@ -5,7 +5,7 @@
   let cache=null,dirty=true;
   const invalidate=()=>{dirty=true};
   function scope(){
-    const menus=[...document.querySelectorAll('#reciterPickerMenu:not([hidden]),#languageMenu:not([hidden]),.choice-overlay:not([hidden]),.confirm-overlay:not([hidden])')];
+    const menus=[...document.querySelectorAll('#quranReaderDialog:not([hidden]),#reciterPickerMenu:not([hidden]),#languageMenu:not([hidden]),.choice-overlay:not([hidden]),.confirm-overlay:not([hidden])')];
     if(menus.length)return menus[menus.length-1];
     const modals=[...document.querySelectorAll('.modal-backdrop.open')];
     return modals[modals.length-1]||document.querySelector('.app')||document.body;
@@ -40,21 +40,22 @@
       edges.set(from.element,links);
     }
     if(root.classList.contains('app')){
-      const byId=id=>root.querySelector('#'+id),link=(id,values)=>{const node=byId(id);if(!edges.has(node))return;for(const [direction,target] of Object.entries(values))edges.get(node)[direction]=target?byId(target):null};
+      const rtl=document.documentElement.dir!=='ltr';const byId=id=>root.querySelector('#'+id),link=(id,values)=>{const node=byId(id);if(!edges.has(node))return;for(const [direction,target] of Object.entries(values)){const axis=!rtl&&['left','right'].includes(direction)&&!id.startsWith('mini')?(direction==='left'?'right':'left'):direction;edges.get(node)[axis]=target?byId(target):null}};
       // Explicit lanes for nested controls keep the large weather/memory tiles from stealing focus.
-      link('homeRefreshBtn',{left:null,right:'settingsBtn',down:'homeTasbeehCount'});
-      link('settingsBtn',{left:'homeRefreshBtn',right:byId('updateNotice')&&!byId('updateNotice').hidden?'updateNotice':null,down:'homeTasbeehCount'});link('updateNotice',{left:'settingsBtn',right:null,down:'datePanel'});
-      link('homeTasbeehCount',{left:null,right:'datePanel',up:'settingsBtn',down:'homeTasbeehReset'});
-      link('homeTasbeehReset',{left:null,right:'datePanel',up:'homeTasbeehCount',down:'box-Isha'});
+      link('homeRefreshBtn',{left:null,right:'settingsBtn',down:'datePanel'});
+      link('settingsBtn',{left:'homeRefreshBtn',right:byId('updateNotice')&&!byId('updateNotice').hidden?'updateNotice':null,down:'datePanel'});link('updateNotice',{left:'settingsBtn',right:null,down:'datePanel'});
+      link('homeTasbeehCount',{left:null,right:'homeTasbeehReset',up:'settingsBtn',down:'box-Fajr'});
+      link('homeTasbeehReset',{left:'homeTasbeehCount',right:'datePanel',up:'settingsBtn',down:'box-Fajr'});
       link('datePanel',{left:'homeTasbeehCount',right:null,up:'settingsBtn',down:'box-Fajr'});
       link('memoryCard',{right:'openQuranFromPlayer',left:null,up:'box-Maghrib',down:null});
       link('openQuranFromPlayer',{left:'memoryCard',right:null,up:'box-Fajr',down:'miniPlay'});
-      link('miniPrev',{left:'miniPlay',right:null,up:'openQuranFromPlayer',down:null});
-      link('miniPlay',{left:'miniNext',right:'miniPrev',up:'openQuranFromPlayer',down:null});
-      link('miniNext',{left:'memoryCard',right:'miniPlay',up:'openQuranFromPlayer',down:null});
+      link('miniPrev',{right:'miniPlay',left:rtl?'memoryCard':null,up:'openQuranFromPlayer',down:null});
+      link('miniPlay',{right:'miniNext',left:'miniPrev',up:'openQuranFromPlayer',down:null});
+      link('miniNext',{left:'miniPlay',right:rtl?null:'memoryCard',up:'openQuranFromPlayer',down:null});
       const prayers=points.filter(p=>p.element.matches('.prayer-strip .prayer')),rows=[];
       for(const p of prayers){let row=rows.find(row=>Math.abs(row[0].y-p.y)<8);if(!row){row=[];rows.push(row)}row.push(p)}rows.sort((a,b)=>a[0].y-b[0].y);rows.forEach(row=>row.sort((a,b)=>a.x-b.x));
-      rows.forEach((row,i)=>row.forEach((p,j)=>{const links=edges.get(p.element),nearest=items=>items.slice().sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0].element;links.left=row[j-1]?.element;links.right=row[j+1]?.element;if(rows[i-1])links.up=nearest(rows[i-1]);else links.up=byId(p.x<(root.offsetWidth*.3)?'homeTasbeehCount':'datePanel');if(rows[i+1])links.down=nearest(rows[i+1]);else links.down=byId(p.x<(root.offsetWidth*.5)?'memoryCard':'openQuranFromPlayer')}));
+      rows.forEach((row,i)=>row.forEach((p,j)=>{const links=edges.get(p.element),nearest=items=>items.slice().sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0].element;links.left=row[j-1]?.element;links.right=row[j+1]?.element;if(rows[i-1])links.up=nearest(rows[i-1]);else links.up=byId((rtl?p.x<root.offsetWidth*.3:p.x>root.offsetWidth*.7)?'homeTasbeehCount':'datePanel');if(rows[i+1])links.down=nearest(rows[i+1]);else links.down=byId(p.x<(root.offsetWidth*.5)?'memoryCard':'openQuranFromPlayer')}));
+      const circle=['Fajr','Dhuhr','Asr','Maghrib','Isha'].map(key=>byId('box-'+key)).filter(node=>edges.has(node));circle.forEach((node,i)=>{edges.get(node)[rtl?'left':'right']=circle[(i+1)%circle.length];edges.get(node)[rtl?'right':'left']=circle[(i-1+circle.length)%circle.length]});
     }
     cache={root,list,edges};dirty=false;
   }
@@ -77,8 +78,8 @@
   window.addEventListener('resize',invalidate,{passive:true});
   const start=()=>{
     new MutationObserver(records=>{
-      if(records.some(r=>r.type==='attributes'||[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&(n.matches?.(selector)||n.querySelector?.(selector)))))invalidate();
-    }).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','disabled','aria-hidden']});
+      if(records.some(r=>r.type==='attributes'?r.oldValue!==r.target.getAttribute(r.attributeName)&&(r.target.matches('button,a,input,select,textarea,[tabindex]')||r.target.querySelector(selector)):[...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&(n.matches?.(selector)||n.querySelector?.(selector)))))invalidate();
+    }).observe(document.body,{subtree:true,childList:true,attributes:true,attributeOldValue:true,attributeFilter:['hidden','disabled','aria-hidden']});
     // Class changes only matter when a dialog opens, not when a timer updates its highlights.
     document.querySelectorAll('.modal-backdrop,#versesView,#surahIndexGrid').forEach(modal=>new MutationObserver(invalidate).observe(modal,{attributes:true,attributeFilter:['class','style']}));
     document.fonts?.ready.then(invalidate);

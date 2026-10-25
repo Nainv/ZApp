@@ -34,6 +34,7 @@
     returnFocus?.isConnected&&returnFocus.focus({preventScroll:true});returnFocus=null;return true;
   }
   window.zikraCloseCellOverlay=closeCell;
+  window.zikraClearInactiveCells=()=>{for(const [id,target] of frames){if(overlay&&!overlay.hidden&&target===frame)continue;target.remove();frames.delete(id);if(target===frame)frame=null}};
   function back(){if(overlay&&!overlay.hidden){frame.contentWindow?.postMessage({type:'zikra:cell-back'},'*');return}window.zikraHomeBack?.()}
   window.zikraBackFromRemote=back;
   function savePreferences(data){

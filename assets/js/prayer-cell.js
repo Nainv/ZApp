@@ -8,7 +8,7 @@
     if (initial && snapshot.schedule?.length) {initial = false;(cards.find((c) => c.dataset.prayer === next?.key) || cards[0]).focus({ preventScroll: true });}
   }
   function setActive(value) {active = value;clearInterval(timer);timer = null;if (active) {render();timer = setInterval(render, 1000);}}
-  window.zikraRemoteDelegate = { ok() {return document.activeElement !== $('cellHomeButton');} };
+  window.zikraRemoteDelegate = {move(direction){const i=cards.indexOf(document.activeElement);if(i<0||!['left','right'].includes(direction))return false;const forward=document.documentElement.dir==='rtl'?'left':'right';cards[(i+(direction===forward?1:-1)+cards.length)%cards.length].focus({preventScroll:true});return true},ok() {return document.activeElement !== $('cellHomeButton');} };
   window.addEventListener('message', (event) => {if (event.source !== parent) return;const m = event.data;if (m?.type === 'zikra:context' || m?.type === 'zikra:session-start') {if(m.preferences?.language&&m.preferences.language!==ZikraI18n.language)ZikraI18n.set(m.preferences.language);cards.forEach(card=>card.classList.toggle('adhan-active',m.adhanActive===card.dataset.prayer));if (m.prayer) {snapshot = m.prayer;marker = '';render();}if (m.type === 'zikra:session-start') setActive(true);} else if (m?.type === 'zikra:cell-active') setActive(m.active);});
   if (parent !== window) parent.postMessage({ type: 'zikra:context-request' }, '*');else {ZikraPrayer.load(ZikraLocation.read()).then((s) => {snapshot = s;setActive(true);}).catch((error) => {$('status').textContent = t(error.message);});}
 })();

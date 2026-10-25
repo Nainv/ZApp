@@ -212,6 +212,7 @@ public class MainActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
     }
     private class AndroidBridge {
+        @JavascriptInterface public void refreshInterfaceCache() { runOnUiThread(() -> { if(webView != null) webView.clearCache(true); }); }
         @JavascriptInterface public String getRuntimeState() { return runtimeSupport.state(); }
         @JavascriptInterface public void checkForUpdate() { runtimeSupport.check(); }
         @JavascriptInterface public void setStartup(boolean enabled, String language) {

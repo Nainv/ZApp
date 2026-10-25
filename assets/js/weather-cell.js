@@ -34,8 +34,8 @@
   window.zikraRemoteDelegate = { move(direction) {
       const current = document.activeElement,di = dayButtons.indexOf(current),hi = hourButtons.indexOf(current);
       if (current === $('cellHomeButton')) {if (direction === 'down' && dayButtons.length) focus(dayButtons[selected]);return true;}
-      if (di >= 0) {if (direction === 'left') selectDay(selected + 1, true);else if (direction === 'right') selectDay(selected - 1, true);else if (direction === 'up') focus($('cellHomeButton'));else if (direction === 'down') selectHour(hourIndex, true);return true;}
-      if (hi >= 0) {if (direction === 'left') selectHour(hourIndex + 1, true);else if (direction === 'right') selectHour(hourIndex - 1, true);else if (direction === 'up') focus(dayButtons[selected]);return true;}
+      if (di >= 0) {if (direction === (ZikraI18n.language==='ar'?'left':'right')) selectDay(selected + 1, true);else if (direction === (ZikraI18n.language==='ar'?'right':'left')) selectDay(selected - 1, true);else if (direction === 'up') focus($('cellHomeButton'));else if (direction === 'down') selectHour(hourIndex, true);return true;}
+      if (hi >= 0) {if (direction === (ZikraI18n.language==='ar'?'left':'right')) selectHour(hourIndex + 1, true);else if (direction === (ZikraI18n.language==='ar'?'right':'left')) selectHour(hourIndex - 1, true);else if (direction === 'up') focus(dayButtons[selected]);return true;}
       if (direction === 'up') focus($('cellHomeButton'));else if (dayButtons.length) focus(dayButtons[selected]);return true;
     }, ok() {return document.activeElement !== $('cellHomeButton');} };
   window.addEventListener('message', (event) => {if (event.source !== parent) return;const m = event.data;if (m?.type === 'zikra:session-start' || m?.type === 'zikra:context') {

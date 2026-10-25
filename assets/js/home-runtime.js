@@ -14,13 +14,14 @@ let previousFocus = null,readers = [],times = [],read = null,loaded = false,curr
 
 const audio = $("audio"),versesBox = $("verses"),statusBox = $("quranStatus");
 
+let lastBookmarkIdentity='',bookmarkViewSignature='',renderedAyahSignature='',renderedAyahElement=null;const quranNumberFormats=new Map();
 const T = {
-  ar: { title: "ذِكرى", subtitle: "طمأنينةٌ للقلب في كل يوم", city: "المدينة: ", loading: "جارٍ تحميل الطقس…", unavailable: "الطقس غير متاح حالياً", locationPrompt: "اكتب اسم المدينة:", cityNotFound: "لم يتم العثور على المدينة.", cityError: "تعذّر البحث عن المدينة.", details: "تفاصيل الطقس", feels: "الحرارة المحسوسة", humidity: "الرطوبة", wind: "سرعة الرياح", max: "العظمى اليوم", min: "الصغرى اليوم", rain: "احتمال الهطول", uv: "الأشعة فوق البنفسجية", hourly: "توقعات الساعات القادمة", daily: "توقعات الأيام القادمة", today: "اليوم", tomorrow: "غداً", quranTitle: "فهرس القرآن الكريم", reciterLabel: "اختر القارئ:", resumeLabel: "متابعة التلاوة:", noResume: "لا توجد قراءة سابقة", defaultSurah: "اختر سورة وابدأ التلاوة", openPrompt: "اختر سورة وابدأ التلاوة", startPrompt: "اختر سورة وابدأ التلاوة", memoryTitle: "ذِكرى قرآنية ونبوية", sourceLabel: "المصدر: ", rights: "© 2026 ذِكرى — جميع الحقوق محفوظة", conditions: { clear: "سماء صافية", mainly: "صحو غالباً", partly: "غائم جزئياً", cloudy: "غائم", fog: "ضباب", drizzle: "رذاذ", rain: "أمطار", snow: "ثلوج", storm: "عواصف رعدية", other: "حالة جو متغيرة" }, days: ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"], memories: [{ text: "﴿ فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ﴾", source: "سورة الشرح، الآية 5", benefit: "تذكّرنا الآية الكريمة بأن كل عسر وتعب يتبعه يسر من الله تعالى، وأن الضيق لا يدوم." }, { text: "«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ»", source: "صحيح البخاري، حديث 1؛ وصحيح مسلم، حديث 1907", benefit: "النية الخالصة هي أساس قبول الأعمال؛ فاصدق مع الله يصدقك ويصلح لك شأنك." }, { text: "﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾", source: "سورة الرعد، الآية 28", benefit: "ذكر الله تعالى هو الدواء الأعظم لراحة النفوس وسكينة القلوب وطمأنينتها." }, { text: "«مَنْ لَا يَرْحَمُ لَا يُرْحَمُ»", source: "صحيح البخاري، حديث 6013؛ وصحيح مسلم، حديث 2319", benefit: "الرحمة بالخلق سبب لرحمة الخالق؛ فكن رحيماً لمن حولك يرحمك الله." }, { text: "﴿ وَقُلْ رَبِّ زِدْنِي عِلْمًا ﴾", source: "سورة طه، الآية 114", benefit: "اطلب العلم والتدبر واجعل حياتك زاخرة بالتعلم والعمل الصالح الذي ينفعك." }] },
-  en: { title: "Zikra", subtitle: "Peace for the heart, every day", city: "City: ", loading: "Loading weather…", unavailable: "Weather unavailable", locationPrompt: "Enter city:", cityNotFound: "City not found.", cityError: "Could not search for the city.", details: "Weather details", feels: "Feels like", humidity: "Humidity", wind: "Wind speed", max: "Today's high", min: "Today's low", rain: "Precipitation chance", uv: "UV index", hourly: "Hourly forecast", daily: "Next few days", today: "Today", tomorrow: "Tomorrow", quranTitle: "Quran Index", reciterLabel: "Select Reciter:", resumeLabel: "Resume Reading:", noResume: "No previous reading", defaultSurah: "Choose a Surah and start reciting", openPrompt: "Choose a Surah and start reciting", startPrompt: "Choose a Surah and start reciting", memoryTitle: "Quranic & Prophetic Reflection", sourceLabel: "Source: ", rights: "© 2026 Zikra — All rights reserved", conditions: { clear: "Clear sky", mainly: "Mainly clear", partly: "Partly cloudy", cloudy: "Cloudy", fog: "Fog", drizzle: "Drizzle", rain: "Rain", snow: "Snow", storm: "Thunderstorms", other: "Changing conditions" }, days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], memories: [{ text: "Indeed, with hardship is ease.", source: "Surah Ash-Sharh, 94:5", benefit: "Hardship does not last forever; ease follows." }, { text: "Actions are judged by intentions.", source: "Sahih al-Bukhari 1; Sahih Muslim 1907", benefit: "Sincerity of intention is central to good deeds." }, { text: "By the remembrance of God hearts are assured.", source: "Surah Ar-Ra'd, 13:28", benefit: "Remembering God brings inner peace." }, { text: "Whoever does not show mercy will not receive mercy.", source: "Sahih al-Bukhari 6013; Sahih Muslim 2319", benefit: "Compassion to others matters." }, { text: "My Lord, increase me in knowledge.", source: "Surah Ta-Ha, 20:114", benefit: "Seek beneficial knowledge." }] },
-  de: { title: "Zikra", subtitle: "Ruhe für das Herz, jeden Tag", city: "Stadt: ", loading: "Wetter wird geladen…", unavailable: "Wetter nicht verfügbar", locationPrompt: "Stadt eingeben:", cityNotFound: "Stadt nicht gefunden.", cityError: "Stadtsuche fehlgeschlagen.", details: "Wetterdetails", feels: "Gefühlt", humidity: "Luftfeuchtigkeit", wind: "Windgeschwindigkeit", max: "Tageshöchstwert", min: "Tagestiefstwert", rain: "Niederschlagswahrscheinlichkeit", uv: "UV-Index", hourly: "Stündliche Vorhersage", daily: "Vorhersage für die nächsten Tage", today: "Heute", tomorrow: "Morgen", quranTitle: "Koran-Index", reciterLabel: "Rezitator wählen:", resumeLabel: "Fortsetzen:", noResume: "Kein Leseverlauf", defaultSurah: "Sure wählen und Rezitation starten", openPrompt: "Sure wählen und Rezitation starten", startPrompt: "Sure wählen und Rezitation starten", memoryTitle: "Koranische & Prophetische Weisheit", sourceLabel: "Quelle: ", rights: "© 2026 Zikra — Alle Rechte vorbehalten", conditions: { clear: "Klarer Himmel", mainly: "Überwiegend klar", partly: "Teilweise bewölkt", cloudy: "Bewölkt", fog: "Nebel", drizzle: "Nieselregen", rain: "Regen", snow: "Schnee", storm: "Gewitter", other: "Wechselhaft" }, days: ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"], memories: [{ text: "Mit der Erschwernis kommt Erleichterung.", source: "Sure Asch-Scharh, 94:5", benefit: "Schwierigkeiten sind nicht von Dauer." }, { text: "Die Taten werden nach den Absichten bemessen.", source: "Sahih al-Bukhari 1; Sahih Muslim 1907", benefit: "Eine aufrichtige Absicht ist wichtig." }, { text: "Durch Gottes Gedenken kommen die Herzen zur Ruhe.", source: "Sure Ar-Ra'd, 13:28", benefit: "Gedenken an Gott schenkt inneren Frieden." }, { text: "Wer keine Barmherzigkeit zeigt, dem wird keine erwiesen.", source: "Sahih al-Bukhari 6013; Sahih Muslim 2319", benefit: "Sei barmherzig zu anderen." }, { text: "Mein Herr, mehre mein Wissen.", source: "Sure Ta-Ha, 20:114", benefit: "Strebe nach nützlichem Wissen." }] }
+  ar: {title: "ذِكرى",subtitle: "طمأنينةٌ للقلب في كل يوم",quranTitle: "فهرس القرآن الكريم",reciterLabel: "اختر القارئ:",resumeLabel: "متابعة التلاوة:",noResume: "لا توجد قراءة سابقة",defaultSurah: "اختر سورة وابدأ التلاوة",sourceLabel: "المصدر: ",rights: "© 2026 ذِكرى — جميع الحقوق محفوظة",memories: [{ text: "﴿ فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ﴾", source: "سورة الشرح، الآية 5", benefit: "تذكّرنا الآية الكريمة بأن كل عسر وتعب يتبعه يسر من الله تعالى، وأن الضيق لا يدوم." }, { text: "«إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ»", source: "صحيح البخاري، حديث 1؛ وصحيح مسلم، حديث 1907", benefit: "النية الخالصة هي أساس قبول الأعمال؛ فاصدق مع الله يصدقك ويصلح لك شأنك." }, { text: "﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾", source: "سورة الرعد، الآية 28", benefit: "ذكر الله تعالى هو الدواء الأعظم لراحة النفوس وسكينة القلوب وطمأنينتها." }, { text: "«مَنْ لَا يَرْحَمُ لَا يُرْحَمُ»", source: "صحيح البخاري، حديث 6013؛ وصحيح مسلم، حديث 2319", benefit: "الرحمة بالخلق سبب لرحمة الخالق؛ فكن رحيماً لمن حولك يرحمك الله." }, { text: "﴿ وَقُلْ رَبِّ زِدْنِي عِلْمًا ﴾", source: "سورة طه، الآية 114", benefit: "اطلب العلم والتدبر واجعل حياتك زاخرة بالتعلم والعمل الصالح الذي ينفعك." }]},
+  en: {title: "Zikra",subtitle: "Peace for the heart, every day",quranTitle: "Quran Index",reciterLabel: "Select Reciter:",resumeLabel: "Resume Reading:",noResume: "No previous reading",defaultSurah: "Choose a Surah and start reciting",sourceLabel: "Source: ",rights: "© 2026 Zikra — All rights reserved",memories: [{ text: "Indeed, with hardship is ease.", source: "Surah Ash-Sharh, 94:5", benefit: "Hardship does not last forever; ease follows." }, { text: "Actions are judged by intentions.", source: "Sahih al-Bukhari 1; Sahih Muslim 1907", benefit: "Sincerity of intention is central to good deeds." }, { text: "By the remembrance of God hearts are assured.", source: "Surah Ar-Ra'd, 13:28", benefit: "Remembering God brings inner peace." }, { text: "Whoever does not show mercy will not receive mercy.", source: "Sahih al-Bukhari 6013; Sahih Muslim 2319", benefit: "Compassion to others matters." }, { text: "My Lord, increase me in knowledge.", source: "Surah Ta-Ha, 20:114", benefit: "Seek beneficial knowledge." }]},
+  de: {title: "Zikra",subtitle: "Ruhe für das Herz, jeden Tag",quranTitle: "Koran-Index",reciterLabel: "Rezitator wählen:",resumeLabel: "Fortsetzen:",noResume: "Kein Leseverlauf",defaultSurah: "Sure wählen und Rezitation starten",sourceLabel: "Quelle: ",rights: "© 2026 Zikra — Alle Rechte vorbehalten",memories: [{ text: "Mit der Erschwernis kommt Erleichterung.", source: "Sure Asch-Scharh, 94:5", benefit: "Schwierigkeiten sind nicht von Dauer." }, { text: "Die Taten werden nach den Absichten bemessen.", source: "Sahih al-Bukhari 1; Sahih Muslim 1907", benefit: "Eine aufrichtige Absicht ist wichtig." }, { text: "Durch Gottes Gedenken kommen die Herzen zur Ruhe.", source: "Sure Ar-Ra'd, 13:28", benefit: "Gedenken an Gott schenkt inneren Frieden." }, { text: "Wer keine Barmherzigkeit zeigt, dem wird keine erwiesen.", source: "Sahih al-Bukhari 6013; Sahih Muslim 2319", benefit: "Sei barmherzig zu anderen." }, { text: "Mein Herr, mehre mein Wissen.", source: "Sure Ta-Ha, 20:114", benefit: "Strebe nach nützlichem Wissen." }]}
 };
 
-async function fetchJSON(url) {const r = await fetch(url);if (!r.ok) throw Error("HTTP " + r.status);return r.json();}
+async function fetchJSON(url) {const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);try{const r=await fetch(url,{signal:controller.signal});if(!r.ok)throw Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(timer)}}
 
 let prayerSchedule = [],prayerDataDate = '',prayerLoading = false,prayerRequest = 0,lastPrayerLoadAttempt = 0,prayerNextMarker = '',prayerSnapshot = null,prayerConfig = '';
 
@@ -48,13 +49,13 @@ function updatePrayerCountdowns() {
 
 let memoryIndex = 0;
 
-function renderMemory() {const m = T[lang].memories[memoryIndex];$("memoryPreviewText").textContent = ZikraI18n.t(m.text);$("memoryPreviewSource").textContent = ZikraI18n.t(T[lang].sourceLabel + m.source);$("memoryPreviewBenefit").textContent = ZikraI18n.t(m.benefit);}
+function renderMemory() {const m = T[lang].memories[memoryIndex];$("memoryPreviewText").textContent = ZikraI18n.t(m.text);$("memoryPreviewSource").textContent = ZikraI18n.t(T[lang].sourceLabel + m.source);$("memoryPreviewBenefit").textContent = ZikraI18n.t(m.benefit);window.ZikraFit?.memory($('memoryCard'));}
 
 function nextMemory() {memoryIndex = (memoryIndex + 1) % T[lang].memories.length;renderMemory();}
 
 function qmsg(s) {statusBox.textContent = ZikraI18n.t(s);}
 
-function updateMiniAyah(ayah) {const badge = $("miniAyah"),number = Math.max(1, Math.trunc(Number(ayah) || 1));badge.dataset.ayah = String(number);badge.textContent = ZikraI18n.t(new Intl.NumberFormat(lang === "ar" ? "ar-u-nu-arab" : "en", { useGrouping: false }).format(number));badge.setAttribute("aria-label", (lang === "ar" ? "الآية " : "Ayah ") + badge.textContent);badge.hidden = false;}
+function updateMiniAyah(ayah){const badge=$('miniAyah'),number=Math.max(1,Math.trunc(Number(ayah)||1));badge.dataset.ayah=String(number);badge.textContent=quranNumber(number);badge.setAttribute('aria-label',(lang==='ar'?'الآية ':lang==='de'?'Vers ':'Ayah ')+badge.textContent);if(badge.hidden)badge.hidden=false}
 
 function renderQuranPlayIcon(button) {button.innerHTML = audio.paused ? "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M8 5v14l11-7z\"/></svg>" : "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M6 5h4v14H6zM14 5h4v14h-4z\"/></svg>";button.setAttribute("aria-pressed", String(!audio.paused));}
 
@@ -62,7 +63,7 @@ function updatePlayButton() {renderQuranPlayIcon($("miniPlay"));$("miniPlay").se
 
 let currentAyahNum = 1,currentAyahs = [],quranLoadSequence = 0,pendingQuranSeek = false;
 
-function quranNumber(number) {return new Intl.NumberFormat(lang === 'ar' ? 'ar-u-nu-arab' : 'en', { useGrouping: false }).format(number);}
+function quranNumber(number){const key=lang==='ar'?'ar-u-nu-arab':'en';if(!quranNumberFormats.has(key))quranNumberFormats.set(key,new Intl.NumberFormat(key,{useGrouping:false}));return quranNumberFormats.get(key).format(number)}
 
 function getPlayedSurahs() {try {return JSON.parse(localStorage.getItem('played_surahs') || '[]');} catch (_) {return [];}}
 
@@ -76,24 +77,17 @@ function getReadBookmark() {
   } catch (_) {return null;}
 }
 
-function saveReadBookmark(surahNum, readerId, ayahNum, time, force = false) {
-  const now = Date.now(),old = getReadBookmark();
-  if (!force && now - lastBookmarkTime < 1200 && old?.surahNum === surahNum && old?.readerId === readerId && old?.ayahNum === ayahNum) return;
-  const verse = currentAyahs.find((v) => v.numberInSurah === ayahNum);
-  const b = { surahNum, readerId, ayahNum, time: Math.max(0, Number(time) || 0), page: Number(verse?.page) || 1, surahName: $('miniSurah').textContent, readerName: read?.name || '', updated: now };
-  try {localStorage.setItem('quran_bookmark', JSON.stringify(b));lastBookmarkTime = now;} catch (_) {return;}
-  checkResumeBookmark();
-}
+function saveReadBookmark(surahNum,readerId,ayahNum,time,force=false){const now=Date.now(),identity=[surahNum,readerId,ayahNum].join('|');if(!force&&now-lastBookmarkTime<5000&&lastBookmarkIdentity===identity)return;const verse=currentAyahs.find(v=>v.numberInSurah===ayahNum),b={surahNum,readerId,ayahNum,time:Math.max(0,Number(time)||0),page:Number(verse?.page)||1,surahName:$('miniSurah').textContent,readerName:read?.name||'',updated:now};try{localStorage.setItem('quran_bookmark',JSON.stringify(b));lastBookmarkTime=now;lastBookmarkIdentity=identity}catch(_){return}checkResumeBookmark()}
 
 function flushReadBookmark() {if (loaded && !pendingQuranSeek) saveReadBookmark(currentSurahNum, read?.id, currentAyahNum, audio.currentTime, true);}
 
 function checkResumeBookmark() {
-  const b = getReadBookmark(),button = $('resumeLastReadBtn');
+  const b=getReadBookmark(),button=$('resumeLastReadBtn'),signature=[lang,b?.surahNum,b?.readerId,b?.ayahNum,$('surahIndexGrid').childElementCount].join('|');if(signature===bookmarkViewSignature)return;bookmarkViewSignature=signature;
   button.disabled = !b;
   if (!b) {button.textContent = ZikraI18n.t(T[lang].noResume);return;}
-  const name = surahListCache.find((s) => s.number === b.surahNum)?.name || b.surahName || 'سورة ' + quranNumber(b.surahNum);
+  const name=quranSurahLabel(b.surahNum);
   button.textContent = ZikraI18n.t((lang === 'ar' ? 'متابعة ' : lang==='de'?'Fortsetzen ':'Resume ') + name + ' · ' + (lang === 'ar' ? 'الآية ' : lang==='de'?'Vers ':'Ayah ') + quranNumber(b.ayahNum));
-  button.onclick = () => restoreReadBookmark(true, true);
+  button.onclick = () => {if(loaded){showQuranMushaf();audio.play().catch(()=>{})}else restoreReadBookmark(true,true)};
   $('surahIndexGrid').querySelectorAll('.surah-item').forEach((item) => {
     const selected = Number(item.dataset.number) === b.surahNum;
     item.classList.toggle('has-bookmark', selected);
@@ -110,28 +104,30 @@ async function restoreReadBookmark(autoplay, showVerses) {
   await loadSurahAndShow(b.surahNum, b.ayahNum, savedReader ? b.time : null, { autoplay, showVerses });
 }
 
+
+let pendingReaderChange=null;
+function quranSelectableReaders(){const timed=readers.filter(reader=>reader.timingAvailable);if(!timed.length)return readers;const preserved=read?.id||getReadBookmark()?.readerId;return readers.filter(reader=>reader.timingAvailable||reader.id===preserved)}
+function showQuranIndex(){closeReciterPicker();$('versesView').style.display='none';$('surahIndexGrid').style.display='grid';$('reciterPickerButton').focus({preventScroll:true});window.ZikraNavigation?.invalidate()}
+function prepareReadingCenter(){const box=$('verses');box.style.setProperty('--reading-center-pad',Math.max(0,box.clientHeight/2-30)+'px')}
+function centerQuranAyah(element){if(!element||$('versesView').style.display!=='block'||!$('quranModal').classList.contains('open'))return;prepareReadingCenter();element.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})}
+function showQuranMushaf(){closeReciterPicker();$('surahIndexGrid').style.display='none';$('versesView').style.display='block';prepareReadingCenter();centerQuranAyah($('a'+currentAyahNum));$('modalPlay').focus({preventScroll:true});window.ZikraNavigation?.invalidate()}
+function chooseQuranReader(reader){closeReciterPicker();if(!loaded){$('reciter').value=String(reader.id);renderReciterPicker();renderSurahIndex();showQuranIndex();return}if(Number(read?.id)===reader.id){showQuranIndex();return}pendingReaderChange={reader,previous:$('reciter').value};$('readerChoiceName').textContent=quranReaderLabel(reader).name;$('readerChoiceStatus').textContent='';$('quranReaderDialog').hidden=false;$('quranModal').inert=true;document.body.classList.add('reader-confirm-open');ZikraI18n.apply($('quranReaderDialog'));$('readerResume').focus({preventScroll:true});window.ZikraNavigation?.invalidate()}
+function hideReaderChange(){pendingReaderChange=null;$('quranReaderDialog').hidden=true;$('quranModal').inert=false;document.body.classList.remove('reader-confirm-open');window.ZikraNavigation?.invalidate()}
+function cancelReaderChange(){if(!pendingReaderChange)return;$('reciter').value=pendingReaderChange.previous;hideReaderChange();$('reciterPickerButton').focus({preventScroll:true})}
+async function applyReaderChange(index){if(!pendingReaderChange)return;const request=pendingReaderChange,choice=request.reader,surah=currentSurahNum;$('readerResume').disabled=true;$('readerIndex').disabled=true;$('readerChoiceStatus').textContent=ZikraI18n.t('جارٍ تجهيز الاستئناف…');try{const timing=await fetchJSON(API+'/ayat_timing?surah='+surah+'&read='+choice.id);if(pendingReaderChange!==request)return;const target=currentAyahNum;if(currentSurahNum!==surah||!Array.isArray(timing)||!timing.some(value=>Number(value.ayah)===target))throw Error('timing');const data={...surahListCache.find(value=>value.number===surah),ayahs:currentAyahs};$('reciter').value=String(choice.id);hideReaderChange();renderReciterPicker();renderSurahIndex();if(index)showQuranIndex();await loadSurahAndShow(surah,target,null,{autoplay:true,showVerses:!index,timingRecords:timing,surahData:data});if(index)showQuranIndex();else showQuranMushaf()}catch(_){if(pendingReaderChange===request)$('readerChoiceStatus').textContent=ZikraI18n.t('تعذّر تجهيز توقيت الآيات للقارئ المختار. جرّب مجددًا أو أغلق للمتابعة بالقارئ الحالي.')}finally{$('readerResume').disabled=false;$('readerIndex').disabled=false}}
+$('readerResume').addEventListener('click',()=>applyReaderChange(false));$('readerIndex').addEventListener('click',()=>applyReaderChange(true));$('readerCancel').addEventListener('click',cancelReaderChange);window.addEventListener('resize',()=>{if($('versesView').style.display==='block')centerQuranAyah($('a'+currentAyahNum))},{passive:true});
+function quranReaderLabel(reader){if(!reader)return {name:'',rewaya:''};return window.ZIKRA_QURAN_LABELS?.[lang]?.readers[reader.id]||reader}
+function quranSurahLabel(number){return window.ZIKRA_QURAN_LABELS?.[lang]?.surahs[number]||surahListCache.find(item=>item.number===number)?.[lang==='ar'?'name':'englishName']||String(number)}
+function renderQuranLabels(){if(loaded){$('miniReader').textContent=quranReaderLabel(read).name;$('miniSurah').textContent=quranSurahLabel(currentSurahNum);setCurrentAyah(currentAyahNum);checkResumeBookmark();updatePlayButton()}if(readers.length)renderReciterPicker()}
 function renderReaderOptions() {
   const select = $('reciter'),old = select.value;select.replaceChildren();
-  readers.forEach((reader) => {const option = document.createElement('option');option.value = String(reader.id);option.textContent = ZikraI18n.t(reader.name + (reader.rewaya ? ' — ' + reader.rewaya : ''));select.append(option);});
+  quranSelectableReaders().forEach((reader) => {const option = document.createElement('option');option.value = String(reader.id);option.textContent = ZikraI18n.t(quranReaderLabel(reader).name + (quranReaderLabel(reader).rewaya ? ' — ' + quranReaderLabel(reader).rewaya : ''));select.append(option);});
   const preferred = readers.find((r) => /ماهر.*المعيقلي/.test(r.name) && r.timingAvailable) || readers.find((r) => /ماهر.*المعيقلي/.test(r.name)) || readers[0];
   select.value = readers.some((r) => String(r.id) === old) ? old : String(preferred?.id || '');
   renderReciterPicker();
 }
 
-function renderReciterPicker() {
-  const menu = $('reciterPickerMenu'),button = $('reciterPickerButton'),select = $('reciter');menu.replaceChildren();
-  readers.forEach((reader) => {
-    const item = document.createElement('button');item.type = 'button';item.className = 'reader-option';item.setAttribute('role', 'option');item.dataset.readerId = String(reader.id);
-    item.setAttribute('aria-selected', String(String(reader.id) === select.value));
-    const name = document.createElement('strong');name.textContent = ZikraI18n.t(reader.name);
-    const detail = document.createElement('small');detail.textContent = ZikraI18n.t(reader.rewaya || '');
-    item.append(name, detail);item.setAttribute('aria-label', reader.name + (reader.rewaya ? ' — ' + reader.rewaya : ''));
-    item.addEventListener('click', () => {select.value = String(reader.id);closeReciterPicker();renderReciterPicker();renderSurahIndex();qmsg('اختر السورة لبدء التلاوة.');$('surahIndexGrid').querySelector('.surah-item:not(:disabled)')?.focus({ preventScroll: true });});
-    menu.append(item);
-  });
-  const selected = readers.find((r) => String(r.id) === select.value);
-  button.textContent = ZikraI18n.t(selected ? selected.name + ' · ' + selected.rewaya : 'اختر القارئ');
-}
+function renderReciterPicker(){const menu=$('reciterPickerMenu'),button=$('reciterPickerButton'),select=$('reciter');menu.replaceChildren();quranSelectableReaders().forEach(reader=>{const item=document.createElement('button');item.type='button';item.className='reader-option';item.setAttribute('role','option');item.dataset.readerId=String(reader.id);item.setAttribute('aria-selected',String(String(reader.id)===select.value));const name=document.createElement('strong'),detail=document.createElement('small');name.textContent=quranReaderLabel(reader).name;detail.textContent=quranReaderLabel(reader).rewaya||'';item.append(name,detail);item.addEventListener('click',()=>chooseQuranReader(reader));menu.append(item)});const selected=readers.find(reader=>String(reader.id)===select.value);button.textContent=ZikraI18n.t(selected?quranReaderLabel(selected).name+' · '+quranReaderLabel(selected).rewaya:'اختر القارئ')}
 
 function closeReciterPicker() {$('reciterPickerMenu').hidden = true;$('reciterPickerButton').setAttribute('aria-expanded', 'false');}
 
@@ -163,20 +159,20 @@ async function loadReaders() {
     const priority = (r) => /ماهر.*المعيقلي/.test(r.name) ? r.timingAvailable ? 0 : 1 : 2;
     readers.sort((a, b) => priority(a) - priority(b) || a.name.localeCompare(b.name, 'ar') || Number(!!b.timingAvailable) - Number(!!a.timingAvailable));
     renderReaderOptions();await fetchSurahsIndex();qmsg('اختر القارئ ثم السورة، أو تابع من آخر آية.');
-    if (getReadBookmark()) await restoreReadBookmark(false, false);
+    if(!loaded&&quranLoadSequence===0&&getReadBookmark())await restoreReadBookmark(false,false);
   } catch (_) {$('reciterPickerButton').textContent = ZikraI18n.t('تعذّر تحميل القرّاء');qmsg('تعذّر تحميل فهرس القرآن. تحقق من اتصال الإنترنت.');}
 }
 
 async function fetchSurahsIndex() {const result = await fetchJSON('https://api.alquran.cloud/v1/surah');surahListCache = result.data;renderSurahIndex();checkResumeBookmark();}
 
-function renderSurahIndex() {
+function renderSurahIndex() {bookmarkViewSignature='';
   const grid = $('surahIndexGrid'),selected = readers.find((r) => String(r.id) === $('reciter').value),available = selected?.surah_list ? new Set(selected.surah_list.split(',')) : null;
   grid.replaceChildren();
   surahListCache.forEach((surah) => {
     const item = document.createElement('button');item.type = 'button';item.className = 'surah-item';item.dataset.number = String(surah.number);item.disabled = !!available && !available.has(String(surah.number));
     const number = document.createElement('span');number.className = 'surah-num';number.textContent = ZikraI18n.t(quranNumber(surah.number));
     const copy = document.createElement('span');copy.className = 'surah-info';
-    const title = document.createElement('strong');title.className = 'surah-title';title.textContent = ZikraI18n.t(lang === 'ar' ? surah.name : surah.englishName);
+    const title = document.createElement('strong');title.className = 'surah-title';title.textContent = quranSurahLabel(surah.number);
     const detail = document.createElement('small');detail.className = 'surah-meta';detail.textContent = ZikraI18n.t((surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية') + ' · ' + quranNumber(surah.numberOfAyahs) + ' آية');
     const progress = document.createElement('small');progress.className = 'surah-last-position';progress.hidden = true;
     copy.append(title, detail, progress);item.append(number, copy);
@@ -196,34 +192,27 @@ function renderVerses(ayahs) {
   });
 }
 
-function setCurrentAyah(number, scroll = false) {
-  const verse = currentAyahs.find((v) => v.numberInSurah === Number(number));if (!verse) return;
-  currentAyahNum = verse.numberInSurah;
-  const old = versesBox.querySelector('.ayah.active'),element = $('a' + currentAyahNum);
-  if (old !== element) {old?.classList.remove('active');old?.removeAttribute('aria-current');element?.classList.add('active');element?.setAttribute('aria-current', 'true');if (scroll && $('quranModal').classList.contains('open') && $('versesView').style.display === 'block') element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });}
-  updateMiniAyah(currentAyahNum);$('miniPage').textContent = ZikraI18n.t('⦅ ' + (lang === 'ar' ? 'صـ' : 'p.') + ' ' + quranNumber(verse.page || 1) + ' ⦆');$('miniPage').hidden = false;$('miniVerse').textContent = ZikraI18n.t(verse.text);
-  $('modalTrack').textContent = ZikraI18n.t($('miniSurah').textContent + ' · ' + $('miniReader').textContent + ' · الآية ' + quranNumber(currentAyahNum));
-}
+function setCurrentAyah(number,scroll=false){const verse=currentAyahs[Number(number)-1];if(!verse||verse.numberInSurah!==Number(number))return;currentAyahNum=verse.numberInSurah;const element=$('a'+currentAyahNum),signature=[currentSurahNum,read?.id,lang,currentAyahNum].join('|');if(renderedAyahSignature===signature&&renderedAyahElement===element&&element?.isConnected)return;renderedAyahSignature=signature;renderedAyahElement=element;const old=versesBox.querySelector('.ayah.active');if(old!==element){old?.classList.remove('active');old?.removeAttribute('aria-current');element?.classList.add('active');element?.setAttribute('aria-current','true');if(scroll&&$('quranModal').classList.contains('open')&&$('versesView').style.display==='block')centerQuranAyah(element)}updateMiniAyah(currentAyahNum);$('miniPage').textContent=ZikraI18n.t('⦅ '+(lang==='ar'?'صـ':'p.')+' '+quranNumber(verse.page||1)+' ⦆');if($('miniPage').hidden)$('miniPage').hidden=false;$('miniVerse').textContent=verse.text;$('modalTrack').textContent=$('miniSurah').textContent+' · '+$('miniReader').textContent+' · '+(lang==='ar'?'الآية ':lang==='de'?'Vers ':'Ayah ')+quranNumber(currentAyahNum)}
 
 async function loadSurahAndShow(surahNum, targetAyah = 1, targetTime = null, options = {}) {
   const reader = readers.find((r) => String(r.id) === $('reciter').value);if (!reader) {qmsg('اختر القارئ أولًا.');return;}
   if (reader.surah_list && !reader.surah_list.split(',').includes(String(surahNum))) {qmsg('هذه السورة غير متوفرة لهذا القارئ.');return;}
-  const sequence = ++quranLoadSequence;flushReadBookmark();loaded = false;pendingQuranSeek = true;audio.pause();audio.onloadedmetadata = null;read = reader;currentSurahNum = Number(surahNum);times = [];closeReciterPicker();
+  const sequence = ++quranLoadSequence;flushReadBookmark();loaded = false;pendingQuranSeek = true;$('progressFill').style.transform='scaleX(0)';audio.pause();audio.onloadedmetadata = null;read = reader;currentSurahNum = Number(surahNum);times = [];closeReciterPicker();
   if (options.showVerses !== false) {$('surahIndexGrid').style.display = 'none';$('versesView').style.display = 'block';}
   versesBox.textContent = ZikraI18n.t('جارٍ تحميل السورة…');qmsg('جارٍ تحميل السورة…');updatePlayButton();
   try {
-    const [timing, result] = await Promise.all([reader.timingAvailable ? fetchJSON(API + '/ayat_timing?surah=' + surahNum + '&read=' + reader.id).catch(() => []) : Promise.resolve([]), fetchJSON('https://api.alquran.cloud/v1/surah/' + surahNum)]);
+    const [timing, result] = await Promise.all([options.timingRecords?Promise.resolve(options.timingRecords):reader.timingAvailable ? fetchJSON(API + '/ayat_timing?surah=' + surahNum + '&read=' + reader.id).catch(() => []) : Promise.resolve([]),options.surahData?Promise.resolve({data:options.surahData}):fetchJSON('https://api.alquran.cloud/v1/surah/' + surahNum)]);
     if (sequence !== quranLoadSequence) return;
     times = (Array.isArray(timing) ? timing : []).filter((t) => Number(t.ayah) > 0 && Number.isFinite(Number(t.start_time))).sort((a, b) => Number(a.start_time) - Number(b.start_time));
     currentAyahs = result.data.ayahs;renderVerses(currentAyahs);currentAyahNum = Math.max(1, Math.min(currentAyahs.length, Number(targetAyah) || 1));
-    $('miniSurah').textContent = ZikraI18n.t(lang==='ar'?result.data.name:(result.data.englishName||result.data.name));$('miniReader').textContent = ZikraI18n.t(reader.name);loaded = true;setCurrentAyah(currentAyahNum);renderReciterPicker();updatePlayButton();
+    $('miniSurah').textContent = quranSurahLabel(surahNum);$('miniReader').textContent = quranReaderLabel(reader).name;loaded = true;setCurrentAyah(currentAyahNum);if(options.showVerses!==false)prepareReadingCenter();renderReciterPicker();updatePlayButton();
     if (options.showVerses !== false && $('quranModal').classList.contains('open')) $('modalPlay').focus({ preventScroll: true });
     const timingForAyah = times.find((t) => Number(t.ayah) === currentAyahNum);
     const seekTime = targetTime !== null ? Math.max(0, Number(targetTime) || 0) : currentAyahNum > 1 && timingForAyah ? Number(timingForAyah.start_time) / 1000 : 0;
     audio.onloadedmetadata = () => {
       if (sequence !== quranLoadSequence) return;
       audio.currentTime = Number.isFinite(audio.duration) ? Math.min(seekTime, Math.max(0, audio.duration - .1)) : seekTime;
-      pendingQuranSeek = false;setCurrentAyah(currentAyahNum);flushReadBookmark();
+      pendingQuranSeek = false;setCurrentAyah(currentAyahNum);if(options.showVerses!==false)centerQuranAyah($('a'+currentAyahNum));flushReadBookmark();
       if (options.autoplay !== false) audio.play().catch(() => qmsg('اضغط زر التشغيل لبدء التلاوة.'));
     };
     audio.preload = 'metadata';audio.src = String(reader.folder_url || reader.server).replace(/\/?$/, '/') + String(surahNum).padStart(3, '0') + '.mp3';audio.load();
@@ -232,12 +221,7 @@ async function loadSurahAndShow(surahNum, targetAyah = 1, targetTime = null, opt
   } catch (_) {if (sequence !== quranLoadSequence) return;loaded = false;pendingQuranSeek = false;versesBox.textContent = ZikraI18n.t('تعذّر تحميل السورة. تحقق من اتصال الإنترنت.');qmsg('تعذّر تحميل السورة. جرّب مرة أخرى.');updatePlayButton();}
 }
 
-function mark() {
-  if (!loaded || pendingQuranSeek) return;
-  if (Number.isFinite(audio.duration) && audio.duration > 0) $('progressFill').style.width = Math.min(100, audio.currentTime / audio.duration * 100) + '%';
-  if (times.length) {const ms = audio.currentTime * 1000;let timing = times[0];for (const candidate of times) {if (Number(candidate.start_time) > ms) break;timing = candidate;}setCurrentAyah(Number(timing.ayah), true);}
-  saveReadBookmark(currentSurahNum, read?.id, currentAyahNum, audio.currentTime);
-}
+function mark(){if(!loaded||pendingQuranSeek)return;if(Number.isFinite(audio.duration)&&audio.duration>0){const progress='scaleX('+Math.min(1,audio.currentTime/audio.duration).toFixed(4)+')';if($('progressFill').style.transform!==progress)$('progressFill').style.transform=progress}if(times.length){const ms=audio.currentTime*1000;let low=0,high=times.length-1;while(low<high){const middle=Math.ceil((low+high)/2);if(Number(times[middle].start_time)<=ms)low=middle;else high=middle-1}setCurrentAyah(Number(times[low].ayah),true)}saveReadBookmark(currentSurahNum,read?.id,currentAyahNum,audio.currentTime)}
 
 function seekToAyah(number, play) {
   if (pendingQuranSeek) {qmsg("جارٍ تجهيز التسجيل…");return;}
@@ -261,7 +245,7 @@ $('miniPrev').addEventListener('click', () => loaded ? jump(-1) : openModal('qur
 
 $('miniNext').addEventListener('click', () => loaded ? jump(1) : openModal('quranModal'));
 
-$('backToIndex').addEventListener('click', () => {$('versesView').style.display = 'none';$('surahIndexGrid').style.display = 'grid';$('surahIndexGrid').querySelector('[data-number="' + currentSurahNum + '"]')?.focus({ preventScroll: true });});
+$('backToIndex').addEventListener('click', showQuranIndex);
 
 audio.addEventListener('timeupdate', mark);
 
@@ -344,7 +328,6 @@ function loadAdhanSettings() {
 
 function checkAutomaticAdhan() {const now = appNow();for (const entry of prayerSchedule) {if (now - entry.epoch < 0 || now - entry.epoch >= 60000) continue;const marker = "zikra_adhan_played_" + entry.date + "_" + entry.key;if (localStorage.getItem(marker) === "1") continue;localStorage.setItem(marker, "1");const cfg = adhanSettings[entry.key];if (cfg?.enabled) {audio.pause();flushReadBookmark();window.zikraPreviewAdhan?.(null, false);window.zikraAdhanActive = entry.key;$('box-' + entry.key)?.classList.add('adhan-active');window.zikraBroadcastContext?.();adhanAudio.pause();adhanAudio = new Audio(ADHAN_AUDIO_URLS[cfg.voice] || ADHAN_AUDIO_URLS.makkah);const stopGlow = () => {if (window.zikraAdhanActive === entry.key) {window.zikraAdhanActive = null;$('box-' + entry.key)?.classList.remove('adhan-active');window.zikraBroadcastContext?.();}};adhanAudio.addEventListener('ended', stopGlow, { once: true });adhanAudio.addEventListener('error', stopGlow, { once: true });setTimeout(stopGlow, 240000);adhanAudio.play().catch(stopGlow);}}}
 
-$('homeRefreshBtn').addEventListener('click', () => {if(window.zikraUpdateBusy){$('settingsBtn').click();return}if (window.AndroidTV?.updateApp) window.AndroidTV.updateApp();else $('settingsBtn').click();});
 let adhanSettings = loadAdhanSettings(),adhanAudio = new Audio();
 const clockFormats = new Map();let clockStamp = '',quranPromise = null;
 function updateClock() {
@@ -354,16 +337,17 @@ function updateClock() {
 }
 function updateCityLabel() {$('cityLabel').textContent = ZikraI18n.t(city.name);}
 function ensureQuranData() {if (!quranPromise) quranPromise = loadReaders().finally(() => {if (!readers.length) quranPromise = null;});return quranPromise;}
-function openModal(id) {previousFocus = document.activeElement;$(id).classList.add('open');document.querySelector('.app').inert = true;if (id === 'quranModal') {ensureQuranData();if (!loaded) {$('surahIndexGrid').style.display = 'grid';$('versesView').style.display = 'none';}$('reciterPickerButton').focus({ preventScroll: true });} else $(id).querySelector('button')?.focus({ preventScroll: true });}
+function openModal(id){previousFocus=document.activeElement;$(id).classList.add('open');document.querySelector('.app').inert=true;if(id==='quranModal'){ensureQuranData();showQuranIndex()}else $(id).querySelector('button')?.focus({preventScroll:true})}
 function closeModal(id) {if (id === 'quranModal') closeReciterPicker();$(id).classList.remove('open');document.querySelector('.app').inert = false;if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });}
 function renderWeather() {if (!weatherData) return;const d = weatherData,c = d.current,info = ZikraWeatherScene.describe(c.weather_code, c.is_day);$('weatherIcon').innerHTML = ZikraWeatherScene.icon(c.weather_code, c.is_day);$('weatherTemp').textContent = ZikraI18n.t(Math.round(c.temperature_2m) + '°');$('weatherCondition').textContent = ZikraI18n.t(info.label);$('weatherExtra').textContent = ZikraI18n.t('↑ ' + Math.round(d.daily.temperature_2m_max[0]) + '°  ↓ ' + Math.round(d.daily.temperature_2m_min[0]) + '° · ' + Math.round(c.apparent_temperature) + '° ' + (lang === 'ar' ? 'محسوسة' : lang === 'de' ? 'gefühlt' : 'feels like'));ZikraWeatherScene.mount($('weatherTileEffects'), c.weather_code, c.is_day);}
 let weatherRequest = 0,lastWeatherLoad = 0;
 async function loadWeather() {lastWeatherLoad = appNow();const id = ++weatherRequest;try {const d = await ZikraWeatherData.load(ZikraLocation.read());if (id !== weatherRequest) return;weatherData = d;renderWeather();window.zikraBroadcastContext?.();} catch (error) {if (id === weatherRequest) $('weatherCondition').textContent = ZikraI18n.t(ZikraI18n.t(error.message));}}
 let appliedLanguage = null;
-function changeLanguage(value) {if (appliedLanguage === value) return;appliedLanguage = value;if (!['ar', 'de', 'en'].includes(value)) value = 'ar';lang = value;localStorage.setItem('zikra_language', value);document.documentElement.lang = value;ZikraI18n.set(value);const t = T[value];$('appTitle').textContent = ZikraI18n.t(t.title);$('subtitle').textContent = ZikraI18n.t(t.subtitle);$('quranTitle').textContent = ZikraI18n.t(t.quranTitle);$('reciterLabel').textContent = ZikraI18n.t(t.reciterLabel);$('resumeLabel').textContent = ZikraI18n.t(t.resumeLabel);$('footerRights').textContent = ZikraI18n.t(t.rights);$('settingsBtnLabel').textContent = ZikraI18n.t(value === 'ar' ? 'الإعدادات' : value === 'de' ? 'Einstellungen' : 'Settings');document.querySelectorAll('.p-name').forEach((node) => {node.textContent = ZikraI18n.t(node.dataset[value] || node.dataset.ar);});if (!loaded) {$('miniSurah').textContent = ZikraI18n.t(t.defaultSurah);$('miniVerse').textContent = ZikraI18n.t('');}renderMemory();updateClock();if (surahListCache.length) renderSurahIndex();renderWeather();ZikraI18n.apply();}
-window.zikraHomeBack = () => {
+function changeLanguage(value) {if (appliedLanguage === value) return;appliedLanguage = value;if (!['ar', 'de', 'en'].includes(value)) value = 'ar';lang = value;localStorage.setItem('zikra_language', value);document.documentElement.lang = value;ZikraI18n.set(value);const t = T[value];$('appTitle').textContent = ZikraI18n.t(t.title);$('subtitle').textContent = ZikraI18n.t(t.subtitle);$('quranTitle').textContent = ZikraI18n.t(t.quranTitle);$('reciterLabel').textContent = ZikraI18n.t(t.reciterLabel);$('resumeLabel').textContent = ZikraI18n.t(t.resumeLabel);$('footerRights').textContent = ZikraI18n.t(t.rights);$('settingsBtnLabel').textContent = ZikraI18n.t(value === 'ar' ? 'الإعدادات' : value === 'de' ? 'Einstellungen' : 'Settings');document.querySelectorAll('.p-name').forEach((node) => {node.textContent = ZikraI18n.t(node.dataset[value] || node.dataset.ar);});if (!loaded) {$('miniSurah').textContent = ZikraI18n.t(t.defaultSurah);$('miniVerse').textContent = ZikraI18n.t('');}renderMemory();updateClock();if (surahListCache.length) renderSurahIndex();renderQuranLabels();renderWeather();if(prayerSnapshot){$('prayerSource').textContent=ZikraI18n.t(prayerSnapshot.error||prayerSnapshot.source||'');prayerNextMarker='';updatePrayerCountdowns()}ZikraI18n.apply();}
+window.zikraHomeBack = () => {if(pendingReaderChange){cancelReaderChange();return}
   if (!$('reciterPickerMenu').hidden) {closeReciterPicker();$('reciterPickerButton').focus({ preventScroll: true });return;}
-  if ($('quranModal').classList.contains('open')) {if ($('versesView').style.display === 'block') {$('versesView').style.display = 'none';$('surahIndexGrid').style.display = 'grid';$('surahIndexGrid').querySelector('[data-number="' + currentSurahNum + '"]')?.focus({ preventScroll: true });} else closeModal('quranModal');return;}
+  if($('quranModal').classList.contains('open')){if($('versesView').style.display==='block')showQuranIndex();else closeModal('quranModal');return}
+
   if (exitPromptOpen) {hideExitPrompt();return;}const now = Date.now();if (now - lastHomeBackAt < 2200) {lastHomeBackAt = 0;showExitPrompt();} else lastHomeBackAt = now;
 };
 window.zikraApplySavedSettings = () => {const p = ZikraLocation.read(),changed = city.latitude !== p.lat || city.longitude !== p.lon;city = { name: p.city, latitude: p.lat, longitude: p.lon };updateCityLabel();adhanSettings = loadAdhanSettings();changeLanguage(localStorage.getItem('zikra_language') || lang);loadPrayerTimes();if (changed) {weatherData = null;loadWeather();}};
@@ -382,3 +366,5 @@ let previewAudio = new Audio(),previewWasPlaying = false;window.zikraPreviewAdha
 window.addEventListener('zikra:clock-sync', () => {clockStamp = '';updateClock();updatePrayerCountdowns();});
 window.addEventListener('zikra:runtime', () => {clockStamp = '';updateClock();updatePrayerCountdowns();window.zikraBroadcastContext?.();});
 audio.addEventListener('play',()=>{if(window.zikraAdhanActive)audio.pause()});
+
+window.zikraRenderInterface=()=>{clockStamp='';updateClock();renderWeather();renderMemory();updatePlayButton();updatePrayerCountdowns();window.ZikraFit?.all()};

@@ -1,0 +1,8 @@
+Reader and surah display names: mp3quran.net API v3, retrieved 2026-10-25.
+Locales: ar, eng, de. Keys use recording (moshaf) IDs and surah numbers.
+https://mp3quran.net/api/v3/reciters?language=ar
+https://mp3quran.net/api/v3/reciters?language=eng
+https://mp3quran.net/api/v3/reciters?language=de
+https://mp3quran.net/api/v3/suwar?language=ar
+https://mp3quran.net/api/v3/suwar?language=eng
+https://mp3quran.net/api/v3/suwar?language=de
