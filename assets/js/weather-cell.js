@@ -24,7 +24,7 @@
     if (move) focus(dayButtons[selected]);
   }
   function apply(result, p, session = false) {
-    if (!result?.current || !result.daily?.time) return;const nextVersion = p.lat + ',' + p.lon + '|' + result.current.time + '|' + result.daily.time[0] + '|' + ZikraI18n.language;
+    if (!result?.current || !result.daily?.time) return;const nextVersion = p.lat + ',' + p.lon + '|' + result.current.time + '|' + result.daily.time[0] + '|' + result.current.weather_code + '|' + result.current.is_day + '|' + result.current.temperature_2m + '|' + ZikraI18n.language;
     $('place').textContent = t(p.city);locationKey = p.lat + ',' + p.lon;
     if (nextVersion === version) {if (session) focus(dayButtons[selected]);return;}
     version = nextVersion;data = result;strip.replaceChildren();dayButtons = [];

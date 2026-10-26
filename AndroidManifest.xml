@@ -27,7 +27,7 @@
         android:label="ذِكْرَىٰ"
         android:icon="@drawable/zikra_icon"
         android:banner="@drawable/zikra_banner"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="false"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:theme="@style/ZikraTheme">

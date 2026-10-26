@@ -37,7 +37,7 @@
     if (!cityChosen || !ZikraLocation.valid(draft.lat, draft.lon)) {toast('حدد موقعك أو اختر المدينة أولًا.');return;}
     const status = $('locationStatus');if (status) status.textContent = t('جارٍ البحث حول ' + draft.city + '…');
     try {
-      const found = await ZikraMosques.nearby(draft.lat, draft.lon);
+      const found = await ZikraMosques.nearby(draft.lat, draft.lon);if(found.some(item=>item.directory==='osm')){let credit=$('mosqueDirectoryCredit');if(!credit){credit=document.createElement('a');credit.id='mosqueDirectoryCredit';credit.href='https://www.openstreetmap.org/copyright';credit.target='_blank';credit.rel='noopener';credit.className='location-source';credit.setAttribute('data-no-translate','');credit.textContent='© OpenStreetMap';body.append(credit)}}
       if (!found.length) {if (status) status.textContent = t('لا يوجد مسجد مسجّل في الدليل ضمن 25 كم. مواقيت موقعك تبقى ظاهرة.');return;}
       choices('المساجد حول ' + draft.city, found.map((m, i) => [String(i), m.title + ' · ' + m.distance.toFixed(1) + ' كم']), String(found.findIndex((m) => m.id === draft.mosque?.id)), (value) => {
         const mosque = found[Number(value)];draft = { ...draft, lat: mosque.lat, lon: mosque.lon, city: mosque.city || draft.city, mosque, locationMode: 'mosque' };cityChosen=true;

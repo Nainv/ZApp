@@ -1,14 +1,15 @@
 /* Compositor animations; no animation-frame script or per-frame layout reads. */
 function mountDuaTicker(content) {
   'use strict';window.zikraDuaTicker?.destroy();
-  const track=document.getElementById('duaTrack'),viewport=track?.parentElement;if(!track||!viewport)return;
+  const track=document.getElementById('duaTrack'),viewport=track?.parentElement;if(!track||!viewport||!document.body||!track.isConnected)return;
   track.replaceChildren();const mirrored=ZikraI18n.language!=='ar';track.style.transform=mirrored?'scaleX(-1)':'none';const source=[...new Set((content.map(item=>item.text)).filter(v=>typeof v==='string'&&v.trim()).map(v=>v.trim()))];if(!source.length)return;
+  function animate(element,start,end,duration){if(typeof element.animate==='function')return element.animate([{transform:'translate3d('+start+'px,-50%,0)'},{transform:'translate3d('+end+'px,-50%,0)'}],{duration,easing:'linear',fill:'forwards'});element.classList.add('uses-css-motion');element.style.setProperty('--dua-start',start+'px');element.style.setProperty('--dua-end',end+'px');element.style.setProperty('--dua-duration',duration+'ms');let elapsed=0,anchor=performance.now(),running=true;const animation={get currentTime(){return elapsed+(running?performance.now()-anchor:0)},pause(){elapsed=this.currentTime;running=false;element.style.animationPlayState='paused'},play(){if(running)return;anchor=performance.now();running=true;element.style.animationPlayState='running'},cancel(){element.style.animation='none'},onfinish:null};element.addEventListener('animationend',()=>animation.onfinish?.(),{once:true});return animation}
   const speed=31.5,gap=34;let entries=[],next=0,width=0,stopped=false,paused=false;
   const position=item=>item.start+Number(item.animation.currentTime||0)/1000*speed;
   function append(right){
-    const element=document.createElement('div');element.className='dua-entry';element.setAttribute('aria-hidden','true');const text=document.createElement('span'),mark=document.createElement('img');text.className='dua-item';text.dir=ZikraI18n.language==='ar'?'rtl':'ltr';text.style.direction=text.dir;text.style.transform=mirrored?'scaleX(-1)':'none';mark.style.transform=mirrored?'scaleX(-1)':'none';text.textContent=source[next++%source.length];mark.className='dua-separator';mark.src='assets/images/zikra-dome.png?v=227';mark.alt='';mark.width=21;mark.height=21;element.append(text,mark);track.append(element);
+    const element=document.createElement('div');element.className='dua-entry';element.setAttribute('aria-hidden','true');const text=document.createElement('span'),mark=document.createElement('img');text.className='dua-item';text.dir=ZikraI18n.language==='ar'?'rtl':'ltr';text.style.direction=text.dir;text.style.transform=mirrored?'scaleX(-1)':'none';mark.style.transform=mirrored?'scaleX(-1)':'none';text.textContent=source[next++%source.length];mark.className='dua-separator';mark.src='assets/images/zikra-dome.png?v=228';mark.alt='';mark.width=21;mark.height=21;element.append(text,mark);track.append(element);
     const size=Math.ceil(element.getBoundingClientRect().width),start=right-size,end=width+gap,duration=(end-start)/speed*1000;
-    const animation=element.animate([{transform:'translate3d('+start+'px,-50%,0)'},{transform:'translate3d('+end+'px,-50%,0)'}],{duration,easing:'linear',fill:'forwards'}),item={element,start,animation};entries.push(item);if(paused)animation.pause();
+    const animation=animate(element,start,end,duration),item={element,start,animation};entries.push(item);if(paused)animation.pause();
     animation.onfinish=()=>{if(stopped)return;element.remove();entries=entries.filter(e=>e!==item);fill()};return start;
   }
   function fill(){if(stopped||!width)return;let left=entries.length?Math.min(...entries.map(position)):width;while(left>-width&&entries.length<60)left=append(left-gap)}
@@ -19,4 +20,4 @@ function mountDuaTicker(content) {
   window.zikraDuaTicker={destroy(){stopped=true;entries.forEach(item=>item.animation.cancel());resize?.disconnect();state.disconnect();document.removeEventListener('visibilitychange',suspend);window.removeEventListener('resize',layout);track.replaceChildren()}};
   Promise.resolve(document.fonts?.ready).then(()=>{if(!stopped){layout();suspend()}});
 }
-let tickerRequest=0;async function refreshDuaTicker(){const id=++tickerRequest;try{const content=await ZikraContent.load();if(id===tickerRequest)mountDuaTicker(content)}catch(_){}}window.addEventListener('zikra:language',refreshDuaTicker);refreshDuaTicker();
+let tickerRequest=0;async function refreshDuaTicker(){const id=++tickerRequest;try{const content=await ZikraContent.load();if(id===tickerRequest)mountDuaTicker(content) }catch(_){if(id===tickerRequest)mountDuaTicker([{text:window.zikraCurrentMemory?.().text||'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ'}])}}window.addEventListener('zikra:language',refreshDuaTicker);window.addEventListener('online',refreshDuaTicker);refreshDuaTicker();

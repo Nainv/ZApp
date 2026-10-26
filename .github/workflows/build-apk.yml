@@ -85,7 +85,7 @@ jobs:
                   android:label="ذِكْرَىٰ"
                   android:icon="@drawable/zikra_icon"
                   android:banner="@drawable/zikra_banner"
-                  android:usesCleartextTraffic="true"
+                  android:usesCleartextTraffic="false"
                   android:allowBackup="false"
                   android:hardwareAccelerated="true"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
@@ -312,7 +312,7 @@ jobs:
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
           test -n "$APKSIGNER"
 
-          "$APKSIGNER" verify --verbose "$APK"
+          "$APKSIGNER" verify --verbose --print-certs "$APK"
           echo 'APK signature verified.'
           python3 - <<'PY'
           import hashlib, json, os
