@@ -75,10 +75,12 @@ html.standalone-device:not(.tv-device){--ui-safe-top:max(28px,env(safe-area-inse
 @media(min-width:600px) and (max-width:1400px) and (min-height:600px) and (max-height:899px) and (orientation:landscape){
  html:not(.tv-device) .app{grid-template-rows:44px minmax(148px,.85fr) minmax(88px,.5fr) minmax(160px,1.1fr) 26px 12px}
 }
-/* Keep phone ticker and credit visible while the content above can scroll. */
+/* Phone content scrolls inside a viewport ending above the ticker, so controls never sit behind it. */
 @media(max-width:599px),(max-height:599px){
- html:not(.tv-device) .app{padding-bottom:calc(68px + var(--ui-safe-bottom))}
+ html:not(.tv-device).home-document,html:not(.tv-device) body.home-screen{height:100%;min-height:0;overflow:hidden}
+ html:not(.tv-device) .app{height:calc(var(--ui-height,100dvh) - 56px - var(--ui-safe-bottom));min-height:0;overflow-y:auto;overflow-x:hidden;align-content:start;padding-bottom:12px;grid-template-rows:minmax(44px,auto) 158px 88px minmax(200px,auto) 196px}
  html:not(.tv-device) .app>.dua-bar{position:fixed;inset-inline:12px;bottom:calc(22px + var(--ui-safe-bottom));height:28px;z-index:6;background:var(--zikra-bg)}
  html:not(.tv-device) .app>.footer{position:fixed;inset-inline:12px;bottom:var(--ui-safe-bottom);height:18px;z-index:6;background:var(--zikra-bg)}
  .home-covered .app>.dua-bar,.home-covered .app>.footer{visibility:hidden}
 }
+@media(max-height:599px) and (orientation:landscape){html:not(.tv-device) .app{grid-template-rows:minmax(44px,auto) 142px 84px 196px}}
