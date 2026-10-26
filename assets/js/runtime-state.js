@@ -1,7 +1,7 @@
 /* Monotonic app time. Synchronization never changes Android's system settings. */
 (() => {
  'use strict';
- try{if(window.AndroidTV?.isTelevision?.())document.documentElement.classList.add('tv-device')}catch(_){}let state={},anchor=Date.now(),monotonic=performance.now(),synced=false,lastRead=0;
+ try{if(window.AndroidTV?.isTelevision?.())document.documentElement.classList.add('tv-device');if(window.navigator?.standalone===true)document.documentElement.classList.add('standalone-device')}catch(_){}let state={},anchor=Date.now(),monotonic=performance.now(),synced=false,lastRead=0;
  function apply(value){if(!value)return;state=value;if(value.clockSynced===true&&Number.isFinite(value.timeEpoch)&&value.timeEpoch>1577836800000){anchor=value.timeEpoch;monotonic=performance.now();synced=true}const badge=document.getElementById('updateNotice');if(badge){const hadFocus=document.activeElement===badge;const available=value.updateAvailable===true&&Number(value.installedVersion)>0&&Number(value.updateVersion)>Number(value.installedVersion);if(badge.hidden===available)badge.hidden=!available;const label=ZikraI18n.t('يتوفر تحديث جديد');if(badge.textContent!==label)badge.textContent=label;if(!available&&hadFocus)document.getElementById('settingsBtn')?.focus({preventScroll:true})}window.dispatchEvent(new CustomEvent('zikra:runtime',{detail:value}))}
  function refresh(){try{if(window.AndroidTV?.getRuntimeState)apply(JSON.parse(window.AndroidTV.getRuntimeState()));else if(parent!==window)parent.postMessage({type:'zikra:context-request'},'*')}catch(_){}lastRead=Date.now()}
  window.ZikraClock={now:()=>synced?anchor+performance.now()-monotonic:Date.now(),get synced(){return synced}};

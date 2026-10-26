@@ -37,7 +37,7 @@ public final class AppUpdater {
     private final Context context;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final AtomicBoolean busy = new AtomicBoolean(false);
-    private volatile String state = "{\"phase\":\"idle\",\"message\":\"البحث عن أحدث نسخة على ذكرى\"}";
+    private volatile String state = "{\"phase\":\"idle\",\"message\":\"البحث عن أحدث نسخة على ذِكْرَىٰ\"}";
     private volatile boolean closed;
     private boolean resumed;
     private volatile String deferredInstall;
@@ -78,7 +78,7 @@ public final class AppUpdater {
         }
         if (apk == null) throw new Exception("الإصدار المنشور لا يحتوي ملف التثبيت app-release.apk.");
         String apkUrl = apk.optString("browser_download_url");
-        if (!UpdatePolicy.isReleaseAsset(apkUrl)) throw new Exception("رابط التحديث لا يعود إلى مشروع ذِكرى.");
+        if (!UpdatePolicy.isReleaseAsset(apkUrl)) throw new Exception("رابط التحديث لا يعود إلى مشروع ذِكْرَىٰ.");
         long publishedSize = apk.optLong("size", 0);
         if (publishedSize <= 0 || publishedSize > UpdatePolicy.MAX_APK_BYTES) throw new Exception("حجم ملف التحديث غير صالح.");
         long installed = version(installedInfo());
@@ -88,7 +88,7 @@ public final class AppUpdater {
             String manifestUrl = manifestAsset.optString("browser_download_url");
             if (!UpdatePolicy.isReleaseAsset(manifestUrl)) throw new Exception("بيانات الإصدار غير صالحة.");
             JSONObject manifest = json(manifestUrl + (manifestUrl.contains("?") ? "&" : "?") + "check=" + System.currentTimeMillis());
-            if (!context.getPackageName().equals(manifest.optString("packageName")) || !"app-release.apk".equals(manifest.optString("apkName"))) throw new Exception("بيانات الإصدار ليست لتطبيق ذِكرى.");
+            if (!context.getPackageName().equals(manifest.optString("packageName")) || !"app-release.apk".equals(manifest.optString("apkName"))) throw new Exception("بيانات الإصدار ليست لتطبيق ذِكْرَىٰ.");
             expectedVersion = manifest.optLong("versionCode", 0);
             String manifestDigest = manifest.optString("sha256");
             if (expectedVersion <= 0 || !manifestDigest.matches("(?i)[0-9a-f]{64}")) throw new Exception("بيانات التحديث غير مكتملة. حاول بعد قليل.");
@@ -141,11 +141,11 @@ public final class AppUpdater {
 
     private void prepareInstall(String verifiedDigest) {
         if (closed) return;
-        if (!resumed) { deferredInstall = verifiedDigest; report("ready", "اكتمل التنزيل. ارجع إلى ذِكرى لمتابعة التثبيت.", 100); return; }
+        if (!resumed) { deferredInstall = verifiedDigest; report("ready", "اكتمل التنزيل. ارجع إلى ذِكْرَىٰ لمتابعة التثبيت.", 100); return; }
         preferences().edit().putString("candidateDigest", verifiedDigest).apply();
         MainActivity owner = activity.get(); if (owner == null) return;
         if (Build.VERSION.SDK_INT >= 26 && !context.getPackageManager().canRequestPackageInstalls()) {
-            report("permission", "اسمح لذِكرى بتثبيت التحديث، ثم ارجع لإكماله.", 100);
+            report("permission", "اسمح لذِكْرَىٰ بتثبيت التحديث، ثم ارجع لإكماله.", 100);
             preferences().edit().putBoolean("permissionPending", true).apply();
             try { owner.startActivityForResult(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + context.getPackageName())), PERMISSION_REQUEST); }
             catch (Exception error) { preferences().edit().putBoolean("permissionPending", false).apply(); report("error", "هذا الجهاز لا يتيح فتح إذن تثبيت التحديث. راجع إعدادات التطبيقات.", -1); }
@@ -165,7 +165,7 @@ public final class AppUpdater {
                 if (targetVersion <= version(installedInfo())) { report("current", "أنت تستخدم أحدث نسخة متاحة.", 100); return; }
                 MainActivity owner = activity.get();
                 if (owner != null && !closed) owner.runOnUiThread(() -> {
-                    if (!resumed) { deferredInstall = expectedDigest; report("ready", "ارجع إلى ذِكرى لمتابعة التثبيت.", 100); return; }
+                    if (!resumed) { deferredInstall = expectedDigest; report("ready", "ارجع إلى ذِكْرَىٰ لمتابعة التثبيت.", 100); return; }
                     Uri uri = UpdateFileProvider.uri(context);
                     Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE).setDataAndType(uri, "application/vnd.android.package-archive")
                             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION).putExtra(Intent.EXTRA_RETURN_RESULT, true);
@@ -191,13 +191,13 @@ public final class AppUpdater {
     }
     private void continueDeferredInstall() {
         if (closed || deferredInstall == null || busy.get()) return;
-        if (!resumed) { report("ready", "اكتمل التنزيل. ارجع إلى ذِكرى لمتابعة التثبيت.", 100); return; }
+        if (!resumed) { report("ready", "اكتمل التنزيل. ارجع إلى ذِكْرَىٰ لمتابعة التثبيت.", 100); return; }
         String value = deferredInstall; deferredInstall = null; prepareInstall(value);
     }
     public void onPause() { resumed = false; }
     public void onInstallResult(int result) {
         clearRestart();
-        report(result == Activity.RESULT_OK ? "installed" : "cancelled", result == Activity.RESULT_OK ? "اكتمل تحديث ذِكرى." : "لم يكتمل التثبيت. يمكنك المحاولة مجددًا.", -1);
+        report(result == Activity.RESULT_OK ? "installed" : "cancelled", result == Activity.RESULT_OK ? "اكتمل تحديث ذِكْرَىٰ." : "لم يكتمل التثبيت. يمكنك المحاولة مجددًا.", -1);
     }
     private void clearRestart() { preferences().edit().remove("restartVersion").remove("restartDeadline").apply(); }
     public void close() { closed = true; worker.shutdownNow(); }
@@ -211,7 +211,7 @@ public final class AppUpdater {
     private static long version(PackageInfo info) { return Build.VERSION.SDK_INT >= 28 ? info.getLongVersionCode() : info.versionCode; }
     private long validate(File file) throws Exception {
         PackageInfo archive = context.getPackageManager().getPackageArchiveInfo(file.getAbsolutePath(), signatureFlags()), installed = installedInfo();
-        if (archive == null || !context.getPackageName().equals(archive.packageName)) throw new Exception("الملف ليس تحديثًا صالحًا لتطبيق ذِكرى.");
+        if (archive == null || !context.getPackageName().equals(archive.packageName)) throw new Exception("الملف ليس تحديثًا صالحًا لتطبيق ذِكْرَىٰ.");
         if (!signers(installed).equals(signers(archive)) || signers(archive).isEmpty()) throw new Exception("توقيع التحديث لا يطابق النسخة المثبتة. لن يتم تثبيته.");
         return version(archive);
     }
@@ -236,7 +236,7 @@ public final class AppUpdater {
             connection.setRequestProperty("User-Agent", "Zikra-Android-Updater");connection.setRequestProperty("Accept", new URL(address).getHost().equals("api.github.com") ? "application/vnd.github+json" : "application/octet-stream");connection.setRequestProperty("Cache-Control", "no-cache");
             int status = connection.getResponseCode();
             if (status >= 300 && status <= 399) {String next = connection.getHeaderField("Location");connection.disconnect();if (next == null) break;address = new URL(new URL(address), next).toString();continue;}
-            if (status != 200) {connection.disconnect();throw new Exception(status == 403 || status == 429 ? "وصل البحث إلى حد ذكرى المؤقت. حاول لاحقًا." : "تعذّر الوصول إلى الإصدار المنشور. تحقق من الإنترنت.");}
+            if (status != 200) {connection.disconnect();throw new Exception(status == 403 || status == 429 ? "وصل البحث إلى حد ذِكْرَىٰ المؤقت. حاول لاحقًا." : "تعذّر الوصول إلى الإصدار المنشور. تحقق من الإنترنت.");}
             return connection;
         }
         throw new Exception("تعذّر الوصول إلى ملف التحديث.");

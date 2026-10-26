@@ -1,5 +1,5 @@
 /* Shared current-weather scene. At most ten particles; compositor transforms only. */
-.weather-backdrop{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:inherit;background:linear-gradient(150deg,#254148,#122730);z-index:0}
+.weather-backdrop{contain:strict;position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:inherit;background:linear-gradient(150deg,#254148,#122730);z-index:0}
 .weather-backdrop[data-scene=night]{background:radial-gradient(ellipse at 80% 15%,#253c64,#101c30 75%)}
 .weather-backdrop[data-scene=sun]{background:radial-gradient(ellipse at 70% 0,#57684c99,#1c3741 70%)}
 .weather-backdrop[data-scene=rain],.weather-backdrop[data-scene=storm]{background:linear-gradient(145deg,#344d64,#152735)}

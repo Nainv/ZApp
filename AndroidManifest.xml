@@ -24,7 +24,7 @@
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
     <application
-        android:label="ذِكرى"
+        android:label="ذِكْرَىٰ"
         android:icon="@drawable/zikra_icon"
         android:banner="@drawable/zikra_banner"
         android:usesCleartextTraffic="true"

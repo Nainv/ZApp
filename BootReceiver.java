@@ -20,7 +20,7 @@ public final class BootReceiver extends BroadcastReceiver {
         try {
             NotificationManager manager=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
             String lang=context.getSharedPreferences("zikra_runtime",0).getString("language","ar");
-            String title=lang.equals("de")?"Zikra öffnen":lang.equals("en")?"Open Zikra":"افتح ذِكرى";
+            String title=lang.equals("de")?"Zikra öffnen":lang.equals("en")?"Open Zikra":"افتح ذِكْرَىٰ";
             if(Build.VERSION.SDK_INT>=26)manager.createNotificationChannel(new NotificationChannel("zikra_start",title,NotificationManager.IMPORTANCE_DEFAULT));
             PendingIntent intent=PendingIntent.getActivity(context,0,launch,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
             Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,"zikra_start"):new Notification.Builder(context);

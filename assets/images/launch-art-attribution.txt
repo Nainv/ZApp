@@ -1,8 +1,5 @@
-Launch artwork: generated with the built-in imagegen tool, selected by the owner.
-Final selection: dome/arch and crescent only, no text, for every external app/website icon.
-Source: exec-4d622546-2147-4ad5-9395-8877ff8f3b24.png.
-Prompt: reproduce option 3 from the approved comparison board: sculptural ivory architectural arch, gold inner arch and crescent, two white finial dots, midnight teal; square full bleed, no writing, ample safe margins.
-The previous book mark and text-bearing banner drafts are not shipped.
-Production exports replace the existing files: Android 320x320, TV launcher tile 320x180 with a centered 160px no-text mark, website 512/192, Apple touch 180 and ICO 32/256. These are launch resources, not application background images.
-
-Header cutout: exec-18bcb916-e9c0-42e9-906e-fa11a8dea3da.png. Built-in imagegen edit prompt: remove the teal background and the arch interior to true transparent alpha, retain the approved ivory arch/gold crescent shape and shading, no text or square tile. Exported to assets/images/zikra-dome.png at 128x128, displayed within the existing header button.
+Launch artwork generated with the built-in imagegen tool and approved by the owner on 2026-10-26.
+External square icon: exec-72ef8ae4-db20-460b-a8f6-26aacdad99ba.png. Ivory and gold dome/crescent, ornamental ذِكْرَىٰ inside the arch, low word position approved by the owner.
+External TV banner: exec-10ba8ef2-bf6a-4b36-83a7-bf6b1b23e207.png. Wide arch and internal lettering fill the landscape tile; continuous dark teal background.
+Exports replace the existing launch resources: Android320x320, TV320x180, website512/192, Apple180, ICO32/256. No unselected drafts are shipped.
+Internal transparent dome stays without writing: exec-18bcb916-e9c0-42e9-906e-fa11a8dea3da.png, assets/images/zikra-dome.png128x128.
