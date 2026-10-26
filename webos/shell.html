@@ -1,0 +1,29 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ذكرى</title><style>html,body,iframe{margin:0;border:0;width:100%;height:100%;background:#101b23;color:white}iframe{position:fixed;inset:0}#status{position:fixed;inset:0;display:grid;place-items:center;font:28px sans-serif}</style><script src="config.js"></script></head><body><div id="status">جارٍ فتح ذكرى…</div><iframe id="app" title="ذكرى" allow="autoplay; geolocation"></iframe><script>
+(() => {
+ 'use strict';
+ const config=window.ZIKRA_CONFIG,frame=document.getElementById('app'),status=document.getElementById('status');
+ const remote=new URL(config.hosted),stateKey='zikra-lg-state-v1';
+ let saved={},source='bundled',watchdog;
+ try{saved=JSON.parse(localStorage.getItem(stateKey)||'{}')}catch(_){}
+ function fit(){frame.style.width='1280px';frame.style.height='720px';frame.style.transformOrigin='0 0';frame.style.transform='scale('+(innerWidth/1280)+','+(innerHeight/720)+')';frame.style.right='auto';frame.style.bottom='auto';frame.style.left='0';frame.style.top='0';}fit();window.addEventListener('resize',fit);
+ function open(which){source=which;clearTimeout(watchdog);status.hidden=false;frame.src=which==='remote'?new URL('index.html?lg-shell=1&lg='+Date.now(),remote).href:'bundled/index.html?lg-shell=1';if(which==='remote')watchdog=setTimeout(()=>open('bundled'),20000);}
+ async function choose(){const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),4000);try{const response=await fetch(new URL('webos-build.json?t='+Date.now(),remote),{cache:'no-store',signal:controller.signal});if(!response.ok)throw Error();const build=await response.json();if(!Number.isSafeInteger(build.build)||build.build<config.build)throw Error();open('remote');}catch(_){open('bundled');}finally{clearTimeout(timeout);}}
+ window.addEventListener('message',event=>{
+  if(event.source!==frame.contentWindow||event.data?.type!=='zikra-lg')return;
+  const expected=source==='remote'?remote.origin:location.origin;
+  if(event.origin!==expected)return;
+  const message=event.data;
+  if(message.command==='state-request'){frame.contentWindow.postMessage({type:'zikra-lg-state',values:saved},expected==='null'?'*':expected);}
+  else if(message.command==='ready'){clearTimeout(watchdog);status.hidden=true;frame.focus();}
+  else if(message.command==='storage'&&message.values&&typeof message.values==='object'){
+   const entries=Object.entries(message.values);if(entries.length>500||entries.some(([key,value])=>typeof value!=='string'||key.length>500)||JSON.stringify(message.values).length>2000000)return;
+   try{localStorage.setItem(stateKey,JSON.stringify(message.values));saved=message.values;}catch(_){}
+  }else if(message.command==='refresh')choose();
+  else if(message.command==='exit'){if(window.PalmSystem?.close)PalmSystem.close();else window.close();}
+ });
+ document.addEventListener('visibilitychange',()=>{try{frame.contentWindow.postMessage({type:'zikra-lg-visibility',hidden:document.hidden},source==='remote'?remote.origin:'*');}catch(_){}});
+ // The foreground frame owns the remote; focus it after each successful load.
+ frame.addEventListener('load',()=>frame.focus());
+ choose();
+})();
+</script></body></html>
