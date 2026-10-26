@@ -352,3 +352,57 @@ jobs:
             --clobber
 
           echo 'Updated app-release.apk in the existing v1.0.5 release.'
+
+  build-lg:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    concurrency:
+      group: zikra-lg-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install official LG packaging tools
+        run: npm install --global @webos-tools/cli@3.2.6
+      - name: Build the same interface for LG
+        run: |
+          node webos/build.cjs "$RUNNER_TEMP/zikra-lg"
+          mkdir -p "$RUNNER_TEMP/zikra-ipk"
+          ares-package "$RUNNER_TEMP/zikra-lg/app" -o "$RUNNER_TEMP/zikra-ipk"
+      - name: Publish matching IPK alongside the Android release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload v1.0.5 "$RUNNER_TEMP"/zikra-ipk/*.ipk --repo "$GITHUB_REPOSITORY" --clobber
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zikra-lg-ipk
+          path: ${{ runner.temp }}/zikra-ipk/*.ipk
+          if-no-files-found: error
+      - name: Preserve the existing browser site and publish the LG app under lg/
+        run: |
+          node - <<'JS'
+          const fs=require('node:fs'),path=require('node:path');
+          const out=path.join(process.env.RUNNER_TEMP,'zikra-pages');
+          fs.mkdirSync(out,{recursive:true});
+          for(const name of ['index.html','assets','cells','favicon.ico','favicon.png','apple-touch-icon.png','site.webmanifest','web-app-icon-192.png'])fs.cpSync(name,path.join(out,name),{recursive:true});
+          fs.cpSync(path.join(process.env.RUNNER_TEMP,'zikra-lg/site'),path.join(out,'lg'),{recursive:true});
+          fs.writeFileSync(path.join(out,'.nojekyll'),'');
+          JS
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/zikra-pages
+      - name: Publish LG interface after the Android release succeeds
+        id: deployment
+        uses: actions/deploy-pages@v4
