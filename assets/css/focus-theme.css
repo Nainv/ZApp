@@ -1,13 +1,18 @@
 /* Shared remote/keyboard focus. No timers, layout changes or persistent selection classes. */
 :root{--focus-fill:linear-gradient(140deg,#2b514b,#1a3035);--focus-glow:0 8px 22px #0005,0 0 20px #79c9b240;--focus-text:#f3f4e9}
-html:not([data-input-mode="touch"]) body:not([data-active="false"]) button:focus:not(:disabled),
-html:not([data-input-mode="touch"]) body:not([data-active="false"]) input:focus:not(:disabled),
-html:not([data-input-mode="touch"]) body:not([data-active="false"]) select:focus:not(:disabled),
-html:not([data-input-mode="touch"]) body:not([data-active="false"]) a[href]:focus,
-html:not([data-input-mode="touch"]) body:not([data-active="false"]) [role="button"]:focus,
-html:not([data-input-mode="touch"]) body:not([data-active="false"]) [tabindex="0"]:focus{background:var(--focus-fill)!important;color:var(--focus-text)!important;box-shadow:var(--focus-glow)!important;outline:0!important}
+html:not([data-input-mode="touch"]):not([data-focus-idle="true"]) body:not([data-active="false"]) button:focus:not(:disabled):not([data-press-released]),
+html:not([data-input-mode="touch"]):not([data-focus-idle="true"]) body:not([data-active="false"]) input:focus:not(:disabled):not([data-press-released]),
+html:not([data-input-mode="touch"]):not([data-focus-idle="true"]) body:not([data-active="false"]) select:focus:not(:disabled):not([data-press-released]),
+html:not([data-input-mode="touch"]):not([data-focus-idle="true"]) body:not([data-active="false"]) a[href]:focus:not([data-press-released]),
+html:not([data-input-mode="touch"]):not([data-focus-idle="true"]) body:not([data-active="false"]) [role="button"]:focus:not([data-press-released]),
+html:not([data-input-mode="touch"]):not([data-focus-idle="true"]) body:not([data-active="false"]) [tabindex="0"]:focus:not([data-press-released]){background:var(--focus-fill)!important;color:var(--focus-text)!important;box-shadow:var(--focus-glow)!important;outline:0!important}
 /* Pressing Save keeps its distinct acknowledgement while focus remains in place. */
-.save.is-saving,.save:active,.settings-footer>#saveSettings.is-saving,.settings-footer>#saveSettings:active{background:#20c77a!important;color:#06271a!important;box-shadow:0 0 20px #20c77a40!important}
+.save.is-saving,.save:active:not([data-press-released]),.settings-footer>#saveSettings.is-saving,.settings-footer>#saveSettings:active:not([data-press-released]){background:#20c77a!important;color:#06271a!important;box-shadow:0 0 20px #20c77a40!important}
 
 /* The transparent header symbol glows along its own silhouette. */
-.brand-symbol-image{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}html:not([data-input-mode="touch"]) body:not([data-active="false"]) button.brand-mark:focus:not(:disabled){background:transparent!important;box-shadow:none!important}
+.brand-symbol-image{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}html:not([data-input-mode="touch"]):not([data-focus-idle="true"]) body:not([data-active="false"]) button.brand-mark:focus:not(:disabled):not([data-press-released]){background:transparent!important;box-shadow:none!important}
+
+/* Activation ends immediately; a fresh focus movement restores its navigation highlight. */
+[data-press-released]{transform:none!important;filter:none!important;box-shadow:none!important;transition:none!important}.memory-edge[data-press-released] svg{transform:none!important}html[dir=ltr] .memory-edge[data-press-released] svg{transform:scaleX(-1)!important}
+
+html[data-focus-idle="true"] :focus:not([data-press-released]){outline:none!important;transform:none!important;filter:none!important;box-shadow:none!important;transition:none!important}

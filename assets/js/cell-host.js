@@ -1,11 +1,11 @@
 /* One home document owns preferences and prayer data. Cached cells receive snapshots. */
 (() => {
   'use strict';
-  const routes={settings:'cells/settings/index.html?cell=1',weather:'cells/weather/index.html',prayer:'cells/prayer/index.html',zikra:'cells/zikra/index.html'};
+  const routes={mushaf:'cells/mushaf/index.html',settings:'cells/settings/index.html?cell=1',weather:'cells/weather/index.html',prayer:'cells/prayer/index.html',zikra:'cells/zikra/index.html'};
   const frames=new Map();let overlay=null,frame=null,returnFocus=null,openingMemory=null;
   const read=(key,fallback)=>localStorage.getItem(key)??fallback;
-  function preferences(){let prayers={};try{prayers=JSON.parse(read('zikra_adhan_settings_v1','{}'))}catch(_){}return {...ZikraLocation.read(),language:read('zikra_language','ar'),backgroundAdhan:read('zikra_adhan_background',String(window.ZikraRuntime?.state.adhanBackground??true))!=='false',autostart:read('zikra_autostart',String(window.ZikraRuntime?.state.autostart??false))==='true',prayers}}
-  function context(){return {preferences:preferences(),prayer:window.zikraPrayerSnapshot?.()||{zone:prayerTimeZone,date:prayerDataDate,timings:prayerTimesObj,schedule:prayerSchedule},weather:weatherData,runtime:{...window.ZikraRuntime?.state,timeEpoch:window.ZikraClock?.now(),clockSynced:window.ZikraClock?.synced},adhanActive:window.zikraAdhanActive||null}}
+  function preferences(){let prayers={};try{prayers=JSON.parse(read('zikra_adhan_settings_v1','{}'))}catch(_){}return {...ZikraLocation.read(),language:read('zikra_language','ar'),tickerMode:read('zikra_ticker_mode','rotate'),backgroundAdhan:read('zikra_adhan_background',String(window.ZikraRuntime?.state.adhanBackground??true))!=='false',autostart:read('zikra_autostart',String(window.ZikraRuntime?.state.autostart??false))==='true',prayers}}
+  function context(){return {inputMode:document.documentElement.dataset.inputMode,preferences:preferences(),prayer:window.zikraPrayerSnapshot?.()||{zone:prayerTimeZone,date:prayerDataDate,timings:prayerTimesObj,schedule:prayerSchedule},weather:weatherData,runtime:{...window.ZikraRuntime?.state,timeEpoch:window.ZikraClock?.now(),clockSynced:window.ZikraClock?.synced},adhanActive:window.zikraAdhanActive||null}}
   function send(target,type='zikra:context'){const data=context();data.memory=type==='zikra:session-start'&&target?.dataset.cell==='zikra'?openingMemory:window.zikraCurrentMemory?.();target?.contentWindow?.postMessage({type,...data},'*')}
   window.zikraBroadcastContext=()=>frames.forEach(target=>send(target));
   window.addEventListener('zikra:app-update',event=>frames.get('settings')?.contentWindow?.postMessage({type:'zikra:app-update-state',state:event.detail},'*'));
@@ -20,7 +20,7 @@
     if(frame){frame.hidden=true;frame.removeAttribute('id');frame.contentWindow?.postMessage({type:'zikra:cell-active',active:false},'*')}
     frame=frames.get(id);
     if(!frame){
-      frame=document.createElement('iframe');frames.set(id,frame);frame.dataset.cell=id;frame.title=({settings:'الإعدادات',weather:'الطقس',prayer:'مواقيت الصلاة',zikra:'الأذكار'})[id];frame.setAttribute('allow','geolocation');frame.style.cssText='display:block;width:100%;height:100%;border:0;background:#101b23;';
+      frame=document.createElement('iframe');frames.set(id,frame);frame.dataset.cell=id;frame.title=({settings:'الإعدادات',weather:'الطقس',prayer:'مواقيت الصلاة',mushaf:'المصحف للقراءة',zikra:'الأذكار'})[id];frame.setAttribute('allow','geolocation');frame.style.cssText='display:block;width:100%;height:100%;border:0;background:#101b23;';
       const target=frame;target.addEventListener('load',()=>{target.dataset.ready='true';if(target===frame&&!overlay.hidden){send(target,'zikra:session-start');target.contentWindow?.postMessage({type:'zikra:cell-active',active:true},'*');target.contentWindow?.focus();target.contentWindow?.postMessage({type:'zikra:cell-focus'},'*')}});
       frame.src=routes[id];overlay.append(frame);
     }
@@ -31,7 +31,7 @@
   function closeCell(){
     window.zikraPreviewAdhan?.(null);
     if(!overlay||overlay.hidden)return false;frame.contentWindow?.postMessage({type:'zikra:cell-active',active:false},'*');frame.hidden=true;overlay.hidden=true;
-    window.zikraSetHomeCovered(false);document.body.classList.remove('cell-open');document.body.classList.add('remote-focus-active');
+    window.zikraSetHomeCovered(false);if(document.documentElement.dataset.inputMode==='remote')window.zikraUseRemoteFocus?.();document.body.classList.remove('cell-open');document.body.classList.add('remote-focus-active');
     const destination=frame.dataset.cell==='settings'?document.getElementById('brandDuaBtn'):returnFocus;destination?.isConnected&&destination.focus({preventScroll:true});returnFocus=null;return true;
   }
   window.zikraCloseCellOverlay=closeCell;
@@ -41,7 +41,7 @@
   function savePreferences(data){
     if(!data||!['ar','de','en'].includes(data.language)||typeof data.city!=='string'||!data.city.trim())throw Error('إعدادات الموقع غير صالحة.');
     const voices=['makkah','madinah','alafasy','syria'];const prayers={};for(const key of ['Fajr','Dhuhr','Asr','Maghrib','Isha']){const item=data.prayers?.[key];prayers[key]={enabled:item?.enabled!==false,voice:voices.includes(item?.voice)?item.voice:'makkah'}}
-    ZikraLocation.save(data);localStorage.setItem('zikra_adhan_background',String(data.backgroundAdhan!==false));localStorage.setItem('zikra_autostart',String(data.autostart));window.AndroidTV?.setStartup?.(!!data.autostart,data.language);localStorage.setItem('zikra_language',data.language);localStorage.setItem('zikra_adhan_settings_v1',JSON.stringify(prayers));
+    ZikraLocation.save(data);localStorage.setItem('zikra_adhan_background',String(data.backgroundAdhan!==false));localStorage.setItem('zikra_autostart',String(data.autostart));window.AndroidTV?.setStartup?.(!!data.autostart,data.language);localStorage.setItem('zikra_language',data.language);localStorage.setItem('zikra_ticker_mode',data.tickerMode==='moving'?'moving':'rotate');window.refreshDuaTicker?.();localStorage.setItem('zikra_adhan_settings_v1',JSON.stringify(prayers));
     window.zikraApplySavedSettings?.();window.zikraBroadcastContext();
   }
   window.addEventListener('message',event=>{
@@ -51,12 +51,16 @@
     else if(message.type==='zikra:adhan-stop')window.zikraStopAdhan?.();
     else if(message.type==='zikra:adhan-preview'&&frame.dataset.cell==='settings')window.zikraPreviewAdhan?.(message.voice||null);
     else if(message.type==='zikra:context-request')send(frame);
+    else if(message.type==='zikra:reset-data'&&frame.dataset.cell==='settings'){
+      try{const result=ZikraAppData.reset(message.kind);frame.contentWindow?.postMessage({type:'zikra:reset-done',requestId:message.requestId},'*');if(result.reload)setTimeout(()=>location.reload(),100)}catch(error){frame.contentWindow?.postMessage({type:'zikra:reset-error',requestId:message.requestId,message:error.message},'*')}
+    }
     else if(message.type==='zikra:settings-save'&&frame.dataset.cell==='settings'){
       try{savePreferences(message.preferences);frame.contentWindow?.postMessage({type:'zikra:settings-saved',requestId:message.requestId},'*')}catch(error){frame.contentWindow?.postMessage({type:'zikra:settings-error',requestId:message.requestId,message:error.message},'*')}
     }
   });
+  document.getElementById('openMushafReader')?.addEventListener('click',event=>{document.getElementById('audio')?.pause();openCell('mushaf',event.currentTarget)});
   document.addEventListener('click',event=>{
-    if(event.target.closest('#miniPrev,#miniPlay,#miniNext'))return;
+    if(event.target.closest('#miniPrev,#miniPlay,#miniNext,#openMushafReader'))return;
     const target=event.target.closest('[data-cell],#settingsBtn,#datePanel,.date-weather-widget,.prayer-strip,.prayer-strip .prayer,#memoryCard,.player,#openQuranFromPlayer');if(!target)return;
     const id=target.dataset.cell||(target.matches('#settingsBtn')?'settings':target.matches('#datePanel,.date-weather-widget')?'weather':target.matches('.prayer-strip,.prayer-strip .prayer')?'prayer':target.matches('#memoryCard')?'zikra':'quran');
     event.preventDefault();event.stopImmediatePropagation();openCell(id,target);

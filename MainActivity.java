@@ -237,6 +237,7 @@ public class MainActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
     }
     private class AndroidBridge {
+        @JavascriptInterface public boolean resetLocalData(String kind) {try{if(!"location".equals(kind)&&!"factory".equals(kind))return false;AdhanScheduler.resetLocalData(MainActivity.this,"factory".equals(kind));if("factory".equals(kind)){getSharedPreferences("zikra_runtime",0).edit().clear().commit();getPreferences(MODE_PRIVATE).edit().remove("legacyStorage").putBoolean("storageCaptured",true).commit();}return true;}catch(Exception error){return false;}}
         @JavascriptInterface public void refreshInterfaceCache() { runOnUiThread(() -> { if(webView != null) webView.clearCache(true); }); }
         @JavascriptInterface public void setAdhanSchedule(String payload) { AdhanScheduler.update(MainActivity.this,payload); }
         @JavascriptInterface public boolean isTelevision() { return getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK); }

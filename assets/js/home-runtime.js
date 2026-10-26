@@ -274,7 +274,7 @@ audio.addEventListener('waiting',stopQuranClock);audio.addEventListener('seeking
 
 window.addEventListener('pagehide',()=>{stopQuranClock();flushReadBookmark()});
 
-document.addEventListener('visibilitychange', () => {if (document.hidden) flushReadBookmark();});
+document.addEventListener('visibilitychange', () => {if (document.hidden) flushReadBookmark();else if(appNow()-lastWeatherLoad>=5*60*1000)loadWeather();});
 
 let autoNextInProgress = false;
 
@@ -384,7 +384,8 @@ window.zikraApplySavedSettings = () => {const p = ZikraLocation.read(),changed =
 window.zikraPrayerSnapshot = () => prayerSnapshot;
 $('closeQuran').addEventListener('click', () => closeModal('quranModal'));
 window.addEventListener('blur', () => document.body.dataset.active = 'false');window.addEventListener('focus', () => document.body.dataset.active = 'true');document.body.dataset.active = 'true';
-let lastMemoryTick = appNow(),lastRuntimeCheck=-Infinity;function tick() {const now = appNow();if (performance.now()-lastRuntimeCheck>=60000) {lastRuntimeCheck=performance.now();ZikraRuntime.refresh();window.AndroidTV?.checkForUpdate?.();}const homeVisible=!document.hidden&&!document.body.classList.contains('home-covered');if(homeVisible)updateClock();updatePrayerCountdowns(homeVisible);checkAutomaticAdhan();if(!homeVisible)lastMemoryTick=now;if (homeVisible&&now - lastMemoryTick >= 30000) {lastMemoryTick = now;nextMemory();}if (now - lastWeatherLoad >= 15 * 60 * 1000) loadWeather();if (prayerSnapshot?.error && !prayerLoading && now - lastPrayerLoadAttempt > 60000 && ZikraLocation.valid(city.latitude, city.longitude)) loadPrayerTimes();}
+window.zikraAfterDataReset=kind=>{if(kind==='listening'){checkResumeBookmark();if(surahListCache.length)renderSurahIndex()}};window.zikraResetRuntime=kind=>{if(kind==='listening'||kind==='factory'){quranLoadSequence++;loaded=false;audio.pause();stopQuranClock();audio.removeAttribute('src');audio.load();currentAyahs=[];times=[];lastBookmarkIdentity='';lastBookmarkTime=0;$('miniReader').textContent='';$('miniSurah').textContent=ZikraI18n.t('اختر سورة وابدأ التلاوة');$('miniVerse').textContent='';$('miniPage').hidden=true;$('miniAyah').hidden=true;$('progressFill').style.transform='scaleX(0)';updatePlayButton();}if(kind==='factory'){window.zikraStopBrandDua?.();window.zikraResetCounters?.()}if(kind==='factory'||kind==='location')window.zikraStopAdhan?.()};
+let lastMemoryTick = appNow(),lastRuntimeCheck=-Infinity;function tick() {const now = appNow();if (performance.now()-lastRuntimeCheck>=60000) {lastRuntimeCheck=performance.now();ZikraRuntime.refresh();window.AndroidTV?.checkForUpdate?.();}const homeVisible=!document.hidden&&!document.body.classList.contains('home-covered');if(homeVisible)updateClock();updatePrayerCountdowns(homeVisible);checkAutomaticAdhan();if(!homeVisible)lastMemoryTick=now;if (homeVisible&&now - lastMemoryTick >= 30000) {lastMemoryTick = now;nextMemory();}if (now - lastWeatherLoad >= 5 * 60 * 1000) loadWeather();if (prayerSnapshot?.error && !prayerLoading && now - lastPrayerLoadAttempt > 60000 && ZikraLocation.valid(city.latitude, city.longitude)) loadPrayerTimes();}
 window.addEventListener('online', () => {loadPrayerTimes();loadWeather();});
 ZikraLocation.save(ZikraLocation.read());localStorage.removeItem('zikraSettings');localStorage.removeItem('zikra_weather_cache_v2');localStorage.removeItem('zikra_preferred_mosque');for (const key of Object.keys(localStorage)) {if (key.startsWith('zikra_adhan_played_') && key.slice(19, 29) < new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)) localStorage.removeItem(key);}
 changeLanguage(lang);checkResumeBookmark();loadPrayerTimes();loadWeather();setInterval(tick, 1000);

@@ -53,5 +53,10 @@ public final class AdhanScheduler {
         }catch(Exception ignored){}finally{JSONObject config=configuration(c);if(config.has("lat")&&!config.isNull("lat"))AdhanService.cacheVoices(c);reschedule(c);}
     }
     public static void scheduleJob(Context c){if(!configuration(c).has("lat")||configuration(c).isNull("lat"))return;try{JobScheduler jobs=(JobScheduler)c.getSystemService(Context.JOB_SCHEDULER_SERVICE);if(!allowed(c)){jobs.cancel(JOB);return;}for(JobInfo job:jobs.getAllPendingJobs())if(job.getId()==JOB)return;jobs.schedule(new JobInfo.Builder(JOB,new ComponentName(c,AdhanRefreshJob.class)).setPersisted(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY).setPeriodic(12*60*60*1000L).build());}catch(Exception ignored){}}
+    public static synchronized void resetLocalData(Context c,boolean factory){
+        AdhanService.stop(c);SharedPreferences p=prefs(c);SharedPreferences.Editor edit=p.edit();if(factory)edit.clear();else{edit.remove("config").remove("schedule").remove("fetched");for(String key:KEYS)edit.remove("played_"+key);}edit.commit();
+        AlarmManager manager=(AlarmManager)c.getSystemService(Context.ALARM_SERVICE);for(int i=0;i<KEYS.length;i++){Intent intent=new Intent(c,AdhanReceiver.class).setAction("com.zikra.tv.PRAYER");PendingIntent pending=PendingIntent.getBroadcast(c,3100+i,intent,PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_IMMUTABLE);if(pending!=null){manager.cancel(pending);pending.cancel();}}
+        ((JobScheduler)c.getSystemService(Context.JOB_SCHEDULER_SERVICE)).cancel(JOB);
+    }
     public static void restore(Context c,boolean reboot){if(reboot)prefs(c).edit().remove("clockElapsed").remove("clockUtc").apply();reschedule(c);scheduleJob(c);refreshAsync(c);}
 }

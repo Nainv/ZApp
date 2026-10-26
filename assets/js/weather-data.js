@@ -7,7 +7,7 @@
     if(!ZikraLocation.valid(p.lat,p.lon))throw Error('اختر الموقع من الإعدادات لإظهار الطقس.');
     const key=p.lat.toFixed(4)+','+p.lon.toFixed(4);let cached=memory;
     if(!valid(cached,key))try{cached=JSON.parse(localStorage.getItem('zikra_weather_cache_v3')||'null')}catch(_){}
-    if(valid(cached,key)&&Date.now()-cached.savedAt<15*60*1000){memory=cached;return cached.data}
+    if(valid(cached,key)&&Date.now()-cached.savedAt<5*60*1000){memory=cached;return cached.data}
     if(inflight?.key===key)return inflight.promise;if(inflight)inflight.controller.abort();
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
     const promise=(async()=>{try{

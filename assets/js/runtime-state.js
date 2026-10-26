@@ -12,6 +12,7 @@
  window.addEventListener('message',event=>{if(event.source!==parent)return;if(event.data?.runtime)apply(event.data.runtime)});
  window.addEventListener('focus',()=>{if(Date.now()-lastRead>60000){window.AndroidTV?.checkForUpdate?.();refresh()}});
  window.addEventListener('zikra:language',()=>{const badge=document.getElementById('updateNotice');if(badge)badge.textContent=ZikraI18n.t('يتوفر تحديث جديد')});
+ const updateNotice=document.getElementById('updateNotice');if(updateNotice)updateNotice.addEventListener('click',()=>{if(!updateNotice.hidden&&!window.zikraUpdateBusy)window.AndroidTV?.updateApp?.()});
  window.AndroidTV?.checkForUpdate?.();refresh();setTimeout(refresh,2500);setTimeout(refresh,12000);
  let messageTimer;window.addEventListener('zikra:app-update',event=>{const node=document.getElementById('homeUpdateStatus');if(!node)return;const update=event.detail||{};window.zikraUpdateBusy=['checking','downloading','verifying','permission','ready','installing'].includes(update.phase);clearTimeout(messageTimer);node.textContent=ZikraI18n.t(update.message||'تحديث التطبيق');node.hidden=update.phase==='idle';if(!window.zikraUpdateBusy)messageTimer=setTimeout(()=>node.hidden=true,8000)});
 })();

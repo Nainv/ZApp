@@ -7,6 +7,7 @@
   function flush(){clearTimeout(timer);timer=0;try{localStorage.setItem(key,String(count))}catch(_){}}
   function render(){const text=formatter.format(count);value.textContent=text;const nextPhrase=ZikraI18n.t(phrases[Math.floor(count/33)%phrases.length]);if(nextPhrase!==lastPhrase){lastPhrase=nextPhrase;phrase.textContent=nextPhrase;scheduleFit()}progress.textContent=formatter.format(count%33)+' / '+formatter.format(33);if(text.length!==lastDigits){lastDigits=text.length;button.style.fontSize=Math.min(width<70?24:29,(width-16)/text.length*1.4)+'px'}button.setAttribute('aria-label',phrase.textContent+'، '+text)}
   function locale(){const lang=document.documentElement.lang||'ar';$('homeTasbeehTitle').textContent=lang==='ar'?'المسبحة':lang==='de'?'Tasbih-Zähler':'Tasbih';$('homeTasbeehResetLabel').textContent=lang==='ar'?'تصفير':lang==='de'?'Zurücksetzen':'Reset';lastDigits=0;render();scheduleFit()}
+  window.zikraResetCounters=()=>{clearTimeout(timer);count=0;render();flush()};
   function change(next){count=next;render();clearTimeout(timer);timer=setTimeout(flush,180)}
   button.addEventListener('click',()=>{change(Math.min(Number.MAX_SAFE_INTEGER,count+1));flashAnimation?.cancel();flashAnimation=flash.animate([{opacity:.95,transform:'scale(.88)'},{opacity:0,transform:'scale(1.18)'}],{duration:220,easing:'ease-out'})});button.addEventListener('blur',()=>flashAnimation?.cancel());reset.addEventListener('click',()=>change(0));
   window.addEventListener('pagehide',flush);document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
