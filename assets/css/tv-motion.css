@@ -1,0 +1,39 @@
+/* TV-only focus motion, based on the launcher's 220/170 ms tile zoom.
+   Only transforms/opacity animate; shadows stay static. Phones use their existing theme. */
+html.tv-device { --tv-focus-ms:220ms; --tv-blur-ms:170ms; --tv-ease:cubic-bezier(.2,.85,.25,1.15); }
+html.tv-device body :is(button,a[href],input,select,textarea,[tabindex="0"]) {
+  transition:transform var(--tv-blur-ms) cubic-bezier(.2,.8,.2,1) !important;
+  transform-origin:center;
+}
+html.tv-device body .tv-motion-focus {
+  position:relative; z-index:3;
+  transform:translateY(-3px) scale(1.04) !important;
+  transition-duration:var(--tv-focus-ms) !important;
+  transition-timing-function:var(--tv-ease) !important;
+  outline:2px solid #79c9b2 !important; outline-offset:2px;
+  box-shadow:0 8px 20px #0005,0 0 14px #79c9b230 !important;
+}
+html.tv-device body :is(.settings-tile,.surah-item,.forecast-day,.prayer,.tile-memory).tv-motion-focus {
+  transform:translateY(-4px) scale(1.10) !important;
+}
+/* A pressed control stays visibly selected on a TV, including after the idle timeout. */
+html.tv-device body .tv-motion-focus[data-press-released],
+html.tv-device[data-focus-idle="true"] body .tv-motion-focus {
+  transform:translateY(-3px) scale(1.04) !important;
+  transition:transform var(--tv-focus-ms) var(--tv-ease) !important;
+  outline:2px solid #79c9b2 !important;
+  box-shadow:0 8px 20px #0005,0 0 14px #79c9b230 !important;
+}
+html.tv-device body button.brand-mark.tv-motion-focus { outline:0 !important;box-shadow:none !important; }
+/* Large blurred backdrops are costly on TV GPUs; use the existing opaque panels instead. */
+html.tv-device :is(.modal-backdrop,.choice-overlay,.confirm-overlay,.editor,.choice-panel,.confirm-panel) {
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+@media(prefers-reduced-motion:reduce) {
+  html.tv-device { --tv-focus-ms:70ms;--tv-blur-ms:60ms; }
+  html.tv-device body .tv-motion-focus,
+  html.tv-device body .tv-motion-focus[data-press-released],
+  html.tv-device[data-focus-idle="true"] body .tv-motion-focus {
+    transform:scale(1.015) !important;
+  }
+}
