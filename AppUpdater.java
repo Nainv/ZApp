@@ -39,7 +39,7 @@ public final class AppUpdater {
     private final AtomicBoolean busy = new AtomicBoolean(false);
     private volatile String state = "{\"phase\":\"idle\",\"message\":\"البحث عن أحدث نسخة على ذِكْرَىٰ\"}";
     private volatile boolean closed;
-    private boolean resumed;
+    private boolean resumed,awaitingInstaller,leftForInstaller;
     private volatile String deferredInstall;
 
     public AppUpdater(MainActivity owner) { activity = new WeakReference<>(owner); context = owner.getApplicationContext(); }
@@ -74,9 +74,9 @@ public final class AppUpdater {
         if (assets != null) for (int i = 0; i < assets.length(); i++) {
             JSONObject asset = assets.getJSONObject(i); String name = asset.optString("name");
             if (name.equals("update.json")) manifestAsset = asset;
-            if (name.equals("app-release.apk")) apk = asset;
+            if (name.equals("Zikratv.apk")) apk = asset;
         }
-        if (apk == null) throw new Exception("الإصدار المنشور لا يحتوي ملف التثبيت app-release.apk.");
+        if (apk == null) throw new Exception("الإصدار المنشور لا يحتوي ملف التثبيت Zikratv.apk.");
         String apkUrl = apk.optString("browser_download_url");
         if (!UpdatePolicy.isReleaseAsset(apkUrl)) throw new Exception("رابط التحديث لا يعود إلى مشروع ذِكْرَىٰ.");
         long publishedSize = apk.optLong("size", 0);
@@ -88,7 +88,7 @@ public final class AppUpdater {
             String manifestUrl = manifestAsset.optString("browser_download_url");
             if (!UpdatePolicy.isReleaseAsset(manifestUrl)) throw new Exception("بيانات الإصدار غير صالحة.");
             JSONObject manifest = json(manifestUrl + (manifestUrl.contains("?") ? "&" : "?") + "check=" + System.currentTimeMillis());
-            if (!context.getPackageName().equals(manifest.optString("packageName")) || !"app-release.apk".equals(manifest.optString("apkName"))) throw new Exception("بيانات الإصدار ليست لتطبيق ذِكْرَىٰ.");
+            if (!context.getPackageName().equals(manifest.optString("packageName")) || !"Zikratv.apk".equals(manifest.optString("apkName"))) throw new Exception("بيانات الإصدار ليست لتطبيق ذِكْرَىٰ.");
             expectedVersion = manifest.optLong("versionCode", 0);
             String manifestDigest = manifest.optString("sha256");
             if (expectedVersion <= 0 || !manifestDigest.matches("(?i)[0-9a-f]{64}")) throw new Exception("بيانات التحديث غير مكتملة. حاول بعد قليل.");
@@ -168,11 +168,11 @@ public final class AppUpdater {
                     if (!resumed) { deferredInstall = expectedDigest; report("ready", "ارجع إلى ذِكْرَىٰ لمتابعة التثبيت.", 100); return; }
                     Uri uri = UpdateFileProvider.uri(context);
                     Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE).setDataAndType(uri, "application/vnd.android.package-archive")
-                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION).putExtra(Intent.EXTRA_RETURN_RESULT, true);
+                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION).putExtra(Intent.EXTRA_RETURN_RESULT, false);
                     intent.setClipData(ClipData.newRawUri("Zikra update", uri));
                     preferences().edit().putLong("restartVersion", targetVersion).putLong("restartDeadline", System.currentTimeMillis() + 30 * 60 * 1000).apply();
-                    report("installing", "وافق على التثبيت. بعدها تُفتح النسخة الجديدة؛ إذا ظهر زر «فتح» اضغطه.", 100);
-                    try { owner.startActivityForResult(intent, INSTALL_REQUEST); }
+                    report("installing", "وافق على التثبيت، ثم اضغط «فتح» لتشغيل النسخة الجديدة.", 100);
+                    try { awaitingInstaller=true;leftForInstaller=false;owner.startActivity(intent); }
                     catch (Exception error) { clearRestart(); report("error", "لم يتم العثور على مثبّت تطبيقات متاح على هذا الجهاز.", -1); }
                 });
             } catch (Exception error) { report("error", friendly(error), -1); }
@@ -182,6 +182,7 @@ public final class AppUpdater {
 
     public void onResume() {
         resumed = true;
+        if(awaitingInstaller&&leftForInstaller){awaitingInstaller=false;leftForInstaller=false;clearRestart();report("idle","يمكنك البحث عن التحديث مجددًا.",-1);}
         if (preferences().getBoolean("permissionPending", false)) {
             preferences().edit().putBoolean("permissionPending", false).apply();
             if (Build.VERSION.SDK_INT < 26 || context.getPackageManager().canRequestPackageInstalls()) deferredInstall = preferences().getString("candidateDigest", "");
@@ -194,7 +195,7 @@ public final class AppUpdater {
         if (!resumed) { report("ready", "اكتمل التنزيل. ارجع إلى ذِكْرَىٰ لمتابعة التثبيت.", 100); return; }
         String value = deferredInstall; deferredInstall = null; prepareInstall(value);
     }
-    public void onPause() { resumed = false; }
+    public void onPause() { resumed = false;if(awaitingInstaller)leftForInstaller=true; }
     public void onInstallResult(int result) {
         clearRestart();
         report(result == Activity.RESULT_OK ? "installed" : "cancelled", result == Activity.RESULT_OK ? "اكتمل تحديث ذِكْرَىٰ." : "لم يكتمل التثبيت. يمكنك المحاولة مجددًا.", -1);
@@ -212,9 +213,11 @@ public final class AppUpdater {
     private long validate(File file) throws Exception {
         PackageInfo archive = context.getPackageManager().getPackageArchiveInfo(file.getAbsolutePath(), signatureFlags()), installed = installedInfo();
         if (archive == null || !context.getPackageName().equals(archive.packageName)) throw new Exception("الملف ليس تحديثًا صالحًا لتطبيق ذِكْرَىٰ.");
-        if (!signers(installed).equals(signers(archive)) || signers(archive).isEmpty()) throw new Exception("توقيع التحديث لا يطابق النسخة المثبتة. لن يتم تثبيته.");
+        Set<String> existing=signers(installed),candidate=signers(archive);
+        if (!existing.equals(candidate) || candidate.isEmpty()) throw new Exception("توقيع التحديث لا يطابق النسخة المثبتة. المثبت: "+shortSigners(existing)+"، الملف: "+shortSigners(candidate)+". احتفظ بالتطبيق المثبت وأرسل نص الرسالة لمراجعة مفتاح التوقيع.");
         return version(archive);
     }
+    private static String shortSigners(Set<String> values){if(values.isEmpty())return "غير متاح";StringBuilder out=new StringBuilder();for(String value:values){if(out.length()>0)out.append(", ");out.append(value.substring(0,Math.min(12,value.length())));}return out.toString();}
     private Set<String> signers(PackageInfo info) throws Exception {
         Signature[] signatures = Build.VERSION.SDK_INT >= 28 ? (info.signingInfo == null ? null : info.signingInfo.getApkContentsSigners()) : info.signatures;
         Set<String> result = new HashSet<>();

@@ -5,7 +5,7 @@ import java.util.Locale;
 
 /** Limits the updater to this project's releases and GitHub's HTTPS asset hosts. */
 public final class UpdatePolicy {
-    public static final String REPOSITORY = "koukach91-hash/zikra-android-tv-new";
+    public static final String REPOSITORY = "Nainv/ZApp";
     public static final long MAX_APK_BYTES = 200L * 1024 * 1024;
     public static final long NOTICE_CHECK_INTERVAL_MS = 60000L;
     private UpdatePolicy() {}

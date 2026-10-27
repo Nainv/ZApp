@@ -3,10 +3,10 @@ package com.zikra.tv;
 public final class UpdatePolicyTest {
     private static void check(boolean value, String label) { if (!value) throw new AssertionError(label); }
     public static void main(String[] args) {
-        String valid = "https://github.com/koukach91-hash/zikra-android-tv-new/releases/download/v1.0.5/app-release.apk";
+        String valid = "https://github.com/Nainv/ZApp/releases/download/v1.0.5/Zikratv.apk";
         check(UpdatePolicy.isReleaseAsset(valid), "Accept own release asset");
         check(UpdatePolicy.isReleaseAsset(valid + "?build=1000220"), "Accept a cache-busted own release asset");
-        check(!UpdatePolicy.isReleaseAsset(valid.replace("zikra-android-tv-new", "other-project")), "Reject other repository");
+        check(!UpdatePolicy.isReleaseAsset(valid.replace("/ZApp/", "/other-project/")), "Reject other repository");
         check(!UpdatePolicy.isReleaseAsset(valid.replace("https:", "http:")), "Reject cleartext");
         check(!UpdatePolicy.isReleaseAsset(valid.replace("github.com/", "github.com.attacker.example/")), "Reject lookalike host");
         check(!UpdatePolicy.isDownloadUrl("https://github.com@attacker.example/file.apk"), "Reject credential/host confusion");

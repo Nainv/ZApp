@@ -29,6 +29,7 @@
         android:banner="@drawable/zikra_banner"
         android:usesCleartextTraffic="false"
         android:allowBackup="false"
+        android:supportsRtl="true"
         android:hardwareAccelerated="true"
         android:theme="@style/ZikraTheme">
 

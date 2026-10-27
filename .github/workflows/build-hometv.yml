@@ -1,0 +1,35 @@
+name: Build HomeTV installer
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/build-hometv.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Nainv/cleanyourtv
+          ref: c9b4270387d081bcb6c1688d41cc995cc093633b
+          path: home
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Test, lint and build HomeTV
+        working-directory: home/launcher
+        run: ./gradlew --no-daemon testReleaseUnitTest lintRelease assembleRelease
+      - name: Verify installer size
+        run: test "$(stat -c %s home/launcher/app/build/outputs/apk/release/app-release.apk)" -lt 589824
+      - name: Export build for signing with the existing HomeTV key
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cp home/launcher/app/build/outputs/apk/release/app-release.apk HomeTV-build.apk
+          gh release upload v1.0.5 HomeTV-build.apk --repo "$GITHUB_REPOSITORY" --clobber
