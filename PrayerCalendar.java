@@ -28,7 +28,7 @@ public final class PrayerCalendar {
     }
     private static String day(Calendar c){return String.format(Locale.US,"%04d-%02d-%02d",c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH));}
     private static void append(JSONArray result,String day,JSONObject times,String zone,long now) throws Exception {
-        for(String key:AdhanScheduler.KEYS){String time=times.optString(key,"");if(time.isEmpty())continue;try{long epoch=PrayerAlarmPolicy.epoch(day,time,zone);if(epoch>now)result.put(new JSONObject().put("key",key).put("epoch",epoch).put("date",day));}catch(IllegalArgumentException ignored){}}
+        for(String key:AdhanScheduler.KEYS){String time=times.optString(key,"");if(time.isEmpty())continue;try{long epoch=PrayerAlarmPolicy.epoch(day,time,zone);result.put(new JSONObject().put("key",key).put("epoch",epoch).put("date",day));}catch(IllegalArgumentException ignored){}}
     }
     public static JSONArray load(JSONObject config,long now) throws Exception {
         String zone=config.optString("zone","UTC");Calendar current=Calendar.getInstance(TimeZone.getTimeZone(zone));current.setTimeInMillis(now);JSONArray result=new JSONArray();

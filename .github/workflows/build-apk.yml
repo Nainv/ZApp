@@ -113,7 +113,7 @@ jobs:
           fi
 
           test -s "app/src/main/java/com/zikra/tv/MainActivity.java"
-          for SOURCE in NativeTvPolicy NativeTvUi NativeTvMotion TvSky TvSkyView AppUpdater UpdatePolicy ClockPolicy PrayerAlarmPolicy PrayerCalendar AdhanScheduler AdhanReceiver AdhanService AdhanRefreshJob UpdateFileProvider UpdateRestartReceiver RuntimeSupport BootReceiver; do
+          for SOURCE in NativeTvHome NativeTvPolicy NativeTvUi NativeTvMotion TvSky TvSkyView AppUpdater UpdatePolicy ClockPolicy PrayerAlarmPolicy PrayerCalendar AdhanScheduler AdhanReceiver AdhanService AdhanRefreshJob UpdateFileProvider UpdateRestartReceiver RuntimeSupport BootReceiver; do
             cp "./$SOURCE.java" "app/src/main/java/com/zikra/tv/$SOURCE.java"
           done
           test -s "app/src/main/AndroidManifest.xml"
