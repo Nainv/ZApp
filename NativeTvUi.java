@@ -82,6 +82,17 @@ final class NativeTvUi {
     private boolean weatherLoading;
 
     private ScrollView bodyScroll;
+    private LinearLayout pageActions;
+    private NativeWeatherView weatherPage;
+    private int weatherDay;
+    private long lastBackAt,nextMemoryAt=android.os.SystemClock.elapsedRealtime()+15000;
+    private android.graphics.Bitmap brandBitmap;
+    private android.app.Dialog choicesDialog;
+    private MediaPlayer previewPlayer;
+    private boolean resumeAfterPreview,seekingVerse,previewSession;
+    private int pendingVerse;
+    private long seekTargetMs;
+
     private String page="home";
     private int selected,readPage=1,currentSurah=1,memoryIndex;
     private JSONArray surahs,memories,readers=new JSONArray();
@@ -98,18 +109,19 @@ final class NativeTvUi {
     private long lastBookmark;
     private final Runnable audioTick=new Runnable(){public void run(){
         if(closed||!resumed||!prepared||player==null)return;
-        try{int at=player.getCurrentPosition();int verse=NativeTvPolicy.ayahAt(verseStarts,verseNumbers,at);
-            if(verse>0&&verse!=currentVerse){currentVerse=verse;if(page.equals("player"))drawPlayerText();refreshDashboard();}
+        try{if(seekingVerse){main.postDelayed(this,200);return;}int at=player.getCurrentPosition();int verse=NativeTvPolicy.ayahAt(verseStarts,verseNumbers,at);
+            if(pendingVerse==0&&verse>0&&verse!=currentVerse){currentVerse=verse;if(page.equals("player"))drawPlayerText();refreshDashboard();}
             if(android.os.SystemClock.elapsedRealtime()-lastBookmark>=5000){savePlayback();lastBookmark=android.os.SystemClock.elapsedRealtime();}
         }catch(Exception ignored){}main.postDelayed(this,200);
     }};
     private WebView migration;
     private LocationListener gps;
     private long requestId;
-    private final Runnable tick=new Runnable(){public void run(){if(closed||!resumed)return;clock.setText(format("HH:mm",AdhanScheduler.now(owner)));sky.update();refreshDashboard();main.postDelayed(this,1000);}};
+    private final Runnable tick=new Runnable(){public void run(){if(closed||!resumed)return;clock.setText(format("HH:mm",AdhanScheduler.now(owner)));sky.update();long elapsed=android.os.SystemClock.elapsedRealtime();if(page.equals("home")&&memories!=null&&memories.length()>1&&elapsed>=nextMemoryAt){memoryIndex=(memoryIndex+1)%memories.length();nextMemoryAt=elapsed+15000;}refreshDashboard();main.postDelayed(this,1000);}};
     private static final class Tile {final String icon,title,detail;final Runnable run;Tile(String i,String t,String d,Runnable r){icon=i;title=t;detail=d;run=r;}}
     NativeTvUi(MainActivity value) {
         owner=value;data=owner.getSharedPreferences("native_tv_data",0);
+        try(InputStream image=owner.getAssets().open("assets/images/zikra-dome.png")){brandBitmap=android.graphics.BitmapFactory.decodeStream(image);}catch(Exception ignored){}
         uiFont=owner.getResources().getFont(R.font.outfit);
         root=new FrameLayout(owner);root.setBackgroundColor(Color.BLACK);root.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         sky=new TvSkyView(owner,null);root.addView(sky,new FrameLayout.LayoutParams(-1,-1));sky.setIntensity(65);
@@ -128,20 +140,29 @@ final class NativeTvUi {
     private void put(String key,String value){data.edit().putString(key,value).apply();}
     private String format(String pattern,long time){SimpleDateFormat f=new SimpleDateFormat(pattern,new Locale.Builder().setLocale(Locale.forLanguageTag(pref("zikra_language","ar"))).setUnicodeLocaleKeyword("nu","latn").build());f.setTimeZone(TimeZone.getTimeZone(AdhanScheduler.configuration(owner).optString("zone",TimeZone.getDefault().getID())));return f.format(new Date(time));}
     private String tr(String ar){String language=pref("zikra_language","ar");if(language.equals("ar"))return ar;JSONArray translated=translations.optJSONArray(ar);if(translated!=null)return translated.optString(language.equals("de")?1:0,ar);String[][] labels={{"الرئيسية","Home","Startseite"},{"الإعدادات","Settings","Einstellungen"},{"القرآن الكريم","Quran","Koran"},{"المصحف","Read Quran","Koran lesen"},{"الأذكار","Remembrance","Gedenken"},{"مواقيت الصلاة","Prayer times","Gebetszeiten"},{"الطقس","Weather","Wetter"},{"القبلة","Qibla","Qibla"},{"الموقع والمسجد","Location & mosque","Standort & Moschee"},{"اللغة","Language","Sprache"},{"تحديث التطبيق","Update app","App aktualisieren"},{"رجوع","Back","Zurück"},{"التسبيح","Tasbih","Tasbih"},{"تشغيل / إيقاف","Play / Pause","Wiedergabe / Pause"}};for(String[] row:labels)if(row[0].equals(ar))return row[language.equals("de")?2:1];return ar;}
-    private Button button(String label,Runnable action){Button v=new Button(owner);v.setText(tr(label));v.setTextSize(15);v.setTypeface(uiFont);v.setTextColor(TEXT);v.setAllCaps(false);v.setBackground(shape(0x88233138,18));v.setPadding(dp(12),0,dp(12),0);v.setOnFocusChangeListener((view,on)->motion.focus(view,on,false));v.setOnClickListener(view->{motion.press(view);action.run();});return v;}
-    private void route(String target){rememberSelection();history.push(page);page=target;render(false);}
+    private Button button(String label,Runnable action){Button v=new Button(owner);v.setDefaultFocusHighlightEnabled(false);v.setText(tr(label));v.setTextSize(15);v.setTypeface(uiFont);v.setTextColor(TEXT);v.setAllCaps(false);v.setBackground(shape(0x88233138,18));v.setPadding(dp(12),0,dp(12),0);v.setOnFocusChangeListener((view,on)->motion.focus(view,on,false));v.setOnClickListener(view->{motion.press(view);action.run();});return v;}
+    private void route(String target){lastBackAt=0;rememberSelection();history.push(page);page=target;render(false);}
     private void rememberSelection(){if(homeDashboard!=null){View focused=homeDashboard.findFocus();if(focused!=null&&focused.getId()!=View.NO_ID)homeFocusId=focused.getId();}if(grid!=null){View v=grid.findFocus();if(v!=null){View row=grid.findContainingItemView(v);if(row!=null)selections.put(page,grid.getChildAdapterPosition(row));}}}
-    void back(){if(!AdhanService.activePrayer.isEmpty()){AdhanService.stop(owner);return;}rememberSelection();if(history.isEmpty()){new AlertDialog.Builder(owner).setTitle("ذِكرى").setMessage("إغلاق ذِكرى؟").setPositiveButton("إغلاق",(d,w)->owner.finish()).setNegativeButton("رجوع",null).show();return;}page=history.pop();render(true);}
+    private boolean rtl(){return pref("zikra_language","ar").equals("ar");}
+    void back(){
+        if(!AdhanService.activePrayer.isEmpty()){AdhanService.stop(owner);return;}
+        long now=android.os.SystemClock.elapsedRealtime();if(NativeTvPolicy.exitOnBack(lastBackAt,now)){owner.finish();return;}lastBackAt=now;
+        rememberSelection();if(!history.isEmpty()){page=history.pop();render(true);}
+    }
     private void render(boolean returning){
-        if(closed)return;requestId++;motion.hide();content.removeAllViews();grid=null;homeDashboard=null;
+        if(closed)return;requestId++;motion.hide();content.removeAllViews();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;
         content.setLayoutDirection(pref("zikra_language","ar").equals("ar")?View.LAYOUT_DIRECTION_RTL:View.LAYOUT_DIRECTION_LTR);
-        LinearLayout header=new LinearLayout(owner);header.setGravity(Gravity.CENTER_VERTICAL);content.addView(header,new LinearLayout.LayoutParams(-1,dp(50)));
-        TextView name=text(page.equals("home")?"ذِكْرَىٰ":tr(title(page)),29,TEXT);header.addView(name,new LinearLayout.LayoutParams(0,-2,1));
-        if(clock.getParent()!=null)((ViewGroup)clock.getParent()).removeView(clock);header.addView(clock,new LinearLayout.LayoutParams(dp(90),-2));
-        Button home=button(page.equals("home")?"الإعدادات":"رجوع",()->{if(page.equals("home"))route("settings");else back();});header.addView(home,new LinearLayout.LayoutParams(dp(110),dp(40)));
-        TextView subtitle=text(pref("zikra_city","طمأنينة للقلب في كل يوم")+"  ·  "+format("EEE, dd MMM yyyy",AdhanScheduler.now(owner)),14,MUTED);subtitle.setPadding(0,dp(4),0,dp(10));content.addView(subtitle);
+        LinearLayout header=new LinearLayout(owner);header.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);header.setGravity(Gravity.CENTER_VERTICAL);content.addView(header,new LinearLayout.LayoutParams(-1,dp(50)));
+        Button settings=button("⚙",()->route("settings"));settings.setContentDescription("الإعدادات");header.addView(settings,new LinearLayout.LayoutParams(dp(48),dp(40)));
+        if(clock.getParent()!=null)((ViewGroup)clock.getParent()).removeView(clock);clock.setGravity(Gravity.CENTER);header.addView(clock,new LinearLayout.LayoutParams(dp(92),-2));
+        Button mushaf=button("المصحف",()->route("mushaf"));header.addView(mushaf,new LinearLayout.LayoutParams(dp(90),dp(40)));
+        if(!page.equals("home")){Button back=button("رجوع",this::back);header.addView(back,new LinearLayout.LayoutParams(dp(74),dp(40)));}
+        View space=new View(owner);header.addView(space,new LinearLayout.LayoutParams(0,1,1));
+        TextView name=text("ذِكْرَىٰ",27,TEXT);header.addView(name,new LinearLayout.LayoutParams(-2,-2));
+        android.widget.ImageView logo=new android.widget.ImageView(owner);if(brandBitmap!=null)logo.setImageBitmap(brandBitmap);logo.setContentDescription("ذِكرى");logo.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);LinearLayout.LayoutParams logoSize=new LinearLayout.LayoutParams(dp(46),dp(44));logoSize.leftMargin=dp(10);header.addView(logo,logoSize);
+        TextView subtitle=text(page.equals("home")?format("EEE, dd MMM yyyy",AdhanScheduler.now(owner)):tr(title(page)),14,MUTED);subtitle.setPadding(0,dp(4),0,dp(10));content.addView(subtitle);
         if(page.equals("home")){
-            homeDashboard=new NativeTvHome(owner,motion,uiFont,this::homeAction,this::tr);
+            homeDashboard=new NativeTvHome(owner,motion,uiFont,this::homeAction,this::tr,rtl());
             content.addView(homeDashboard,new LinearLayout.LayoutParams(-1,0,1));homeMinute=-1;homeSchedule="";refreshDashboard();
             NativeTvHome dashboard=homeDashboard;dashboard.post(()->{if(dashboard==homeDashboard)dashboard.restoreFocus(homeFocusId);});
         }
@@ -155,7 +176,7 @@ final class NativeTvUi {
     }
     private String title(String key){switch(key){case "home":return "الرئيسية";case "settings":return "الإعدادات";case "surahs":case "player":return "القرآن الكريم";case "mushaf":case "reading":return "المصحف";case "memory":return "الأذكار";case "prayer":return "مواقيت الصلاة";case "weather":return "الطقس";case "qibla":return "القبلة";case "readers":return "اختيار القارئ";case "location":return "الموقع والمسجد";case "adhan":return "الأذان والتنبيهات";default:return key;}}
     private void grid(List<Tile> tiles,int columns){
-        grid=new RecyclerView(owner);grid.setLayoutManager(new GridLayoutManager(owner,columns));grid.setHasFixedSize(true);grid.setItemAnimator(null);grid.setClipChildren(false);grid.setClipToPadding(false);grid.setPadding(dp(12),dp(14),dp(12),dp(18));
+        grid=new RecyclerView(owner);grid.setLayoutDirection(rtl()?View.LAYOUT_DIRECTION_RTL:View.LAYOUT_DIRECTION_LTR);grid.setDefaultFocusHighlightEnabled(false);grid.setLayoutManager(new GridLayoutManager(owner,columns));grid.setHasFixedSize(true);grid.setItemAnimator(null);grid.setClipChildren(false);grid.setClipToPadding(false);grid.setPadding(dp(12),dp(14),dp(12),dp(18));
         content.addView(grid,new LinearLayout.LayoutParams(-1,0,1));grid.setAdapter(new Cards(tiles));
         grid.addOnScrollListener(new RecyclerView.OnScrollListener(){public void onScrolled(RecyclerView rv,int dx,int dy){View v=rv.findFocus();if(v!=null)motion.position(v);}});
         int wanted=Math.min(Math.max(0,selections.getOrDefault(page,0)),tiles.size()-1);
@@ -164,7 +185,7 @@ final class NativeTvUi {
     private final class Cards extends RecyclerView.Adapter<Cards.Holder>{
         final List<Tile> items;Cards(List<Tile> rows){items=rows;setHasStableIds(true);}public long getItemId(int p){return p;}public int getItemCount(){return items.size();}
         class Holder extends RecyclerView.ViewHolder{final TextView icon,label,detail;Holder(LinearLayout v,TextView i,TextView t,TextView d){super(v);icon=i;label=t;detail=d;}}
-        public Holder onCreateViewHolder(ViewGroup parent,int type){LinearLayout row=new LinearLayout(owner);row.setOrientation(LinearLayout.VERTICAL);row.setGravity(Gravity.CENTER_VERTICAL);row.setPadding(dp(18),dp(12),dp(18),dp(12));row.setFocusable(true);row.setClickable(true);row.setBackground(shape(0xe619282e,16));
+        public Holder onCreateViewHolder(ViewGroup parent,int type){LinearLayout row=new LinearLayout(owner);row.setOrientation(LinearLayout.VERTICAL);row.setGravity(Gravity.CENTER_VERTICAL);row.setPadding(dp(18),dp(12),dp(18),dp(12));row.setFocusable(true);row.setClickable(true);row.setDefaultFocusHighlightEnabled(false);row.setBackground(shape(0xe619282e,16));
             RecyclerView.LayoutParams size=new RecyclerView.LayoutParams(-1,dp(page.equals("home")?122:92));size.setMargins(dp(7),dp(7),dp(7),dp(7));row.setLayoutParams(size);
             TextView icon=text("",23,ACCENT),label=text("",20,TEXT),detail=text("",13,MUTED);label.setMaxLines(1);detail.setMaxLines(2);row.addView(icon);row.addView(label);row.addView(detail);
             row.setOnFocusChangeListener((v,on)->{motion.focus(v,on,true);if(on){v.setBackground(shape(0xf0254147,16));}else v.setBackground(shape(0xe619282e,16));});return new Holder(row,icon,label,detail);}
@@ -180,10 +201,10 @@ final class NativeTvUi {
             list.add(new Tile("文","اللغة",pref("zikra_language","ar"),()->choose("اللغة",new String[]{"العربية","English","Deutsch"},index->{put("zikra_language",new String[]{"ar","en","de"}[index]);loadContent();render(false);} )));
             list.add(new Tile("⏻","البدء تلقائياً عند التشغيل",owner.getSharedPreferences("zikra_runtime",0).getBoolean("autostart",false)?"On":"Off",()->{SharedPreferences p=owner.getSharedPreferences("zikra_runtime",0);p.edit().putBoolean("autostart",!p.getBoolean("autostart",false)).apply();render(false);}));
             list.add(new Tile("↻","تحديث التطبيق","تنزيل التحديث وتثبيته",owner::startNativeUpdate));
-            list.add(new Tile("☼","المؤثرات والخلفية","حركة CleanYourTV الأصلية · أرقام 0–9",()->choose("سطوع الخلفية",new String[]{"هادئة","متوسطة","ساطعة"},i->{int value=new int[]{35,65,90}[i];put("tv_sky",String.valueOf(value));sky.setIntensity(value);} )));
+            list.add(new Tile("☼","الخلفية","تغيير سطوع الخلفية",()->choose("سطوع الخلفية",new String[]{"هادئة","متوسطة","ساطعة"},i->{int value=new int[]{35,65,90}[i];put("tv_sky",String.valueOf(value));sky.setIntensity(value);} )));
             list.add(new Tile("⌫","إدارة بيانات التطبيق","مسح سجلات محددة أو إعادة الضبط",this::resetMenu));
             list.add(new Tile("♡","تبرّع لذِكرى","دعم استمرار التطبيق",()->message("دعم ذِكرى","لم تُضف وسيلة التبرع بعد.")));
-            list.add(new Tile("ⓘ","حول ذِكرى","النسخة الأصلية للتلفزيون · التراخيص",()->message("ذِكرى للتلفزيون","واجهة Java أصلية. حركة التحديد والخلفية مبنية على CleanYourTV — Gathin 2026، MIT. خط Outfit: SIL OFL. نصوص التراخيص في assets/licenses داخل التطبيق. بيانات الطقس: Open-Meteo؛ المدن والمساجد: OpenStreetMap contributors، ODbL 1.0؛ التلاوة: mp3quran.net.")));break;
+            list.add(new Tile("ⓘ","حول ذِكرى","النسخة الأصلية للتلفزيون · التراخيص",()->message("ذِكرى للتلفزيون","ذِكرى للتلفزيون. تراخيص البرامج: CleanYourTV — Gathin 2026، MIT. خط Outfit: SIL OFL. بيانات الطقس: Open-Meteo؛ المدن والمساجد: OpenStreetMap contributors، ODbL 1.0؛ التلاوة: mp3quran.net.")));break;
         case "surahs":case "mushaf":
             if(page.equals("surahs")){list.add(new Tile("♫","اختيار القارئ",pref("tv_reader_name","اختر القارئ"),()->route("readers")));list.add(new Tile("▶","متابعة الاستماع",pref("tv_last_name","لا يوجد سجل بعد"),this::resumePlayback));}
             else list.add(new Tile("▤","متابعة القراءة","الصفحة "+number("tv_read_page",savedReadPage()),()->{readPage=number("tv_read_page",savedReadPage());route("reading");}));
@@ -197,30 +218,47 @@ final class NativeTvUi {
             for(int i=0;i<AdhanScheduler.KEYS.length;i++){String key=AdhanScheduler.KEYS[i];list.add(new Tile("◷",PRAYERS[i],prayerTime(key),()->adhanChoice(key)));}
             list.add(new Tile("↻","تحديث المواقيت",pref("zikra_city","اختر المدينة من الإعدادات"),()->{AdhanScheduler.refreshAsync(owner);notice("جارٍ تحديث مواقيت الصلاة…");}));break;
         case "location":
-            list.add(new Tile("⌕","اختيار المدينة",pref("zikra_city","بحث باسم المدينة"),this::searchCity));
+            list.add(new Tile("⌕",pref("zikra_city","اختيار المدينة"),"اختيار المدينة",this::searchCity));
             list.add(new Tile("⌖","موقعي الحالي","باستخدام موقع الجهاز بعد الإذن",this::locate));
-            list.add(new Tile("⌂","اختيار المسجد","المساجد القريبة من الموقع المحدد",this::mosques));
+            list.add(new Tile("⌂",mosqueName().isEmpty()?"اختيار المسجد":mosqueName(),"اختيار المسجد",this::mosques));
             list.add(new Tile("◷","طريقة حساب الصلاة",AdhanScheduler.configuration(owner).optInt("method",3)+"",()->choose("طريقة الحساب",new String[]{"رابطة العالم الإسلامي","أم القرى","مصر","أمريكا الشمالية","كراتشي","تركيا"},i->saveConfig("method",new int[]{3,4,5,2,1,13}[i]))));break;
         case "adhan":
             for(int i=0;i<AdhanScheduler.KEYS.length;i++){String key=AdhanScheduler.KEYS[i];JSONObject setting=AdhanScheduler.settings(owner,key);list.add(new Tile("♫",PRAYERS[i],setting!=null&&!setting.optBoolean("enabled",true)?"صامت":setting==null?"makkah":setting.optString("voice","makkah"),()->adhanChoice(key)));}
-            list.add(new Tile("♫","معاينة صوت الأذان","توقّف عند الرجوع",()->choose("الصوت",new String[]{"مكة","المدينة","العفاسي","سوريا"},i->playUrl(AdhanService.voiceUrl(new String[]{"makkah","madinah","alafasy","syria"}[i]),"معاينة الأذان",false))));
+            list.add(new Tile("♫","معاينة صوت الأذان","توقّف عند الرجوع",()->choose("الصوت",new String[]{"مكة","المدينة","العفاسي","سوريا"},i->{},this::previewAdhan)));
             list.add(new Tile("◉","الأذان في الخلفية",AdhanScheduler.prefs(owner).getBoolean("background",true)?"On":"Off",()->{boolean on=!AdhanScheduler.prefs(owner).getBoolean("background",true);saveConfig("backgroundEnabled",on);AdhanScheduler.prefs(owner).edit().putBoolean("background",on).apply();AdhanScheduler.reschedule(owner);AdhanScheduler.scheduleJob(owner);AdhanService.stopIfDisabled(owner);render(false);}));
             list.add(new Tile("!","أذونات التنبيه","إشعارات ومواعيد دقيقة",()->{if(android.os.Build.VERSION.SDK_INT>=33&&owner.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)owner.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},4202);else if(android.os.Build.VERSION.SDK_INT>=31)owner.startActivity(new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,android.net.Uri.parse("package:"+owner.getPackageName())));}));break;
         }
         return list;
     }
     private interface Choice{void picked(int index);}
-    private void choose(String title,String[] values,Choice action){String[] labels=new String[values.length];for(int i=0;i<values.length;i++)labels[i]=tr(values[i]);new AlertDialog.Builder(owner).setTitle(tr(title)).setItems(labels,(d,index)->action.picked(index)).setNegativeButton("رجوع",null).show();}
+    private void choose(String title,String[] values,Choice action){choose(title,values,action,null);}
+    private void choose(String title,String[] values,Choice action,Choice preview){
+        String[] labels=new String[values.length];for(int i=0;i<labels.length;i++)labels[i]=tr(values[i]);
+        choicesDialog=NativeTvChoices.show(owner,uiFont,rtl(),tr(title),labels,action::picked,preview==null?null:preview::picked,()->{choicesDialog=null;stopPreview(true);});
+    }
+    private void previewAdhan(int index){
+        if(index<0||index>3){if(previewPlayer!=null){previewPlayer.release();previewPlayer=null;}return;}
+        if(!previewSession){previewSession=true;resumeAfterPreview=player!=null&&prepared&&!paused;if(resumeAfterPreview){try{player.pause();paused=true;}catch(Exception ignored){}}}
+        if(previewPlayer!=null){previewPlayer.release();previewPlayer=null;}
+        String voice=new String[]{"makkah","madinah","alafasy","syria"}[index];MediaPlayer preview=new MediaPlayer();previewPlayer=preview;
+        preview.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
+        try{java.io.File local=new java.io.File(owner.getFilesDir(),"adhan/"+voice+".mp3");preview.setDataSource(local.length()>1024?local.getAbsolutePath():AdhanService.voiceUrl(voice));preview.setOnPreparedListener(p->{if(previewPlayer==p&&resumed)p.start();});preview.setOnErrorListener((p,w,e)->{if(previewPlayer==p){p.release();previewPlayer=null;}return true;});preview.prepareAsync();}catch(Exception ignored){preview.release();previewPlayer=null;}
+    }
+    private void stopPreview(boolean resume){
+        if(previewPlayer!=null){previewPlayer.release();previewPlayer=null;}
+        boolean restore=resumeAfterPreview;resumeAfterPreview=false;previewSession=false;
+        if(resume&&restore&&resumed&&player!=null&&prepared&&AdhanService.activePrayer.isEmpty()){try{player.start();paused=false;refreshDashboard();}catch(Exception ignored){}}
+    }
     private void message(String title,String value){new AlertDialog.Builder(owner).setTitle(title).setMessage(value).setPositiveButton("موافق",null).show();}
-    private void notice(String value){if(closed)return;status.setText(tr(value));status.setVisibility(View.VISIBLE);}
-    private void error(){notice("تعذّر الاتصال. تحقق من الإنترنت وأعد المحاولة.");}
-    private void body(String value,int size,Typeface face){ScrollView scroll=new ScrollView(owner);scroll.setClipToPadding(false);TextView label=text(value,size,TEXT);label.setTextIsSelectable(false);label.setPadding(dp(26),dp(18),dp(26),dp(18));label.setLineSpacing(dp(7),1.3f);if(face!=null)label.setTypeface(face);scroll.addView(label);scroll.setBackground(shape(0xd916272d,18));content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));scroll.setFocusable(true);bodyScroll=scroll;scroll.requestFocus();}
-    private void actions(String[] labels,Runnable[] actions){LinearLayout row=new LinearLayout(owner);row.setGravity(Gravity.CENTER);for(int i=0;i<labels.length;i++){Button b=button(labels[i],actions[i]);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(44),1);p.setMargins(dp(6),dp(10),dp(6),0);row.addView(b,p);}content.addView(row);}
+    private void notice(String value){status.setVisibility(View.GONE);}
+    private void error(){if(!closed)message("تعذّر الاتصال","تحقق من الإنترنت وأعد المحاولة.");}
+    private void body(String value,int size,Typeface face){ScrollView scroll=new ScrollView(owner);scroll.setClipToPadding(false);TextView label=text(value,size,TEXT);label.setTextIsSelectable(false);label.setPadding(dp(26),dp(18),dp(26),dp(18));label.setLineSpacing(dp(7),1.3f);if(face!=null)label.setTypeface(face);scroll.addView(label);scroll.setBackground(shape(0xd916272d,18));content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));scroll.setDefaultFocusHighlightEnabled(false);scroll.setFocusable(true);bodyScroll=scroll;scroll.requestFocus();}
+    private void actions(String[] labels,Runnable[] actions){LinearLayout row=new LinearLayout(owner);pageActions=row;row.setGravity(Gravity.CENTER);for(int i=0;i<labels.length;i++){Button b=button(labels[i],actions[i]);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(44),1);p.setMargins(dp(6),dp(10),dp(6),0);row.addView(b,p);}content.addView(row);}
     private void playerPage(){
         ScrollView scroll=new ScrollView(owner);playerText=text("",28,TEXT);try{playerText.setTypeface(Typeface.createFromAsset(owner.getAssets(),"assets/fonts/AmiriQuran.ttf"));}catch(Exception ignored){}
         playerText.setPadding(dp(28),dp(16),dp(28),dp(16));playerText.setLineSpacing(dp(8),1.3f);scroll.addView(playerText);scroll.setBackground(shape(0xd916272d,18));scroll.setFocusable(true);content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         renderedVerse=-1;drawPlayerText();
-        actions(new String[]{"السورة السابقة","تشغيل / إيقاف","السورة التالية","اختيار القارئ"},new Runnable[]{()->playSurah(Math.max(1,currentSurah-1)),this::togglePlayback,()->playSurah(Math.min(114,currentSurah+1)),()->route("readers")});
+        actions(new String[]{"سورة −","آية −","تشغيل / إيقاف","آية +","سورة +"},new Runnable[]{()->playSurah(Math.max(1,currentSurah-1)),()->seekVerse(-1),this::togglePlayback,()->seekVerse(1),()->playSurah(Math.min(114,currentSurah+1))});
         if(verseStarts.length==0)notice("هذا التسجيل بلا توقيت آيات متاح حاليًا؛ نص السورة والتلاوة يعملان.");
     }
     private void drawPlayerText(){
@@ -235,7 +273,7 @@ final class NativeTvUi {
     }
     private void loadTimings(JSONObject reader,int surah,long sequence){
         if(!reader.optBoolean("timing",false))return;
-        io.execute(()->{try{JSONArray rows=new JSONArray(requestText("https://mp3quran.net/api/v3/ayat_timing?surah="+surah+"&read="+reader.optInt("id")));List<long[]> valid=new ArrayList<>();for(int i=0;i<rows.length();i++){JSONObject r=rows.optJSONObject(i);if(r==null||r.isNull("start_time"))continue;long start=r.optLong("start_time",-1);int verse=r.optInt("ayah",0);if(start>=0&&verse>0&&verse<=286)valid.add(new long[]{start,verse});}java.util.Collections.sort(valid,(a,b)->Long.compare(a[0],b[0]));main.post(()->{if(closed||sequence!=playbackSequence)return;verseStarts=new long[valid.size()];verseNumbers=new int[valid.size()];for(int i=0;i<valid.size();i++){verseStarts[i]=valid.get(i)[0];verseNumbers[i]=(int)valid.get(i)[1];}renderedVerse=-1;if(page.equals("player"))drawPlayerText();});}catch(Exception ignored){}});
+        io.execute(()->{try{JSONArray rows=new JSONArray(requestText("https://mp3quran.net/api/v3/ayat_timing?surah="+surah+"&read="+reader.optInt("id")));List<long[]> valid=new ArrayList<>();for(int i=0;i<rows.length();i++){JSONObject r=rows.optJSONObject(i);if(r==null||r.isNull("start_time"))continue;long start=r.optLong("start_time",-1);int verse=r.optInt("ayah",0);if(start>=0&&verse>0&&verse<=286)valid.add(new long[]{start,verse});}java.util.Collections.sort(valid,(a,b)->Long.compare(a[0],b[0]));main.post(()->{if(closed||sequence!=playbackSequence)return;verseStarts=new long[valid.size()];verseNumbers=new int[valid.size()];for(int i=0;i<valid.size();i++){verseStarts[i]=valid.get(i)[0];verseNumbers[i]=(int)valid.get(i)[1];}renderedVerse=-1;if(page.equals("player"))drawPlayerText();if(verseStarts.length==0&&pendingVerse>0){pendingVerse=0;message("التنقل بين الآيات","لا يتوفر توقيت للآيات في هذا التسجيل.");}applyVerseSeek();refreshDashboard();});}catch(Exception ignored){main.post(()->{if(sequence==playbackSequence&&pendingVerse>0){pendingVerse=0;message("التنقل بين الآيات","تعذّر تحميل توقيت الآيات لهذا التسجيل. أعد المحاولة أو اختر تسجيلًا آخر من الفهرس.");}});}});
     }
     private void reading(){
         String value=pages.get(readPage);if(value==null)value="جارٍ تجهيز المصحف…";
@@ -260,13 +298,34 @@ final class NativeTvUi {
     private String nextPrayer(){try{JSONArray rows=new JSONArray(AdhanScheduler.prefs(owner).getString("schedule","[]"));long now=AdhanScheduler.now(owner),next=Long.MAX_VALUE;String key="";for(int i=0;i<rows.length();i++){JSONObject r=rows.getJSONObject(i);long t=r.optLong("epoch");if(t>now&&t<next){next=t;key=r.optString("key");}}if(!key.isEmpty())return prayerName(key)+"  "+format("HH:mm",next);}catch(Exception ignored){}return "حدد الموقع لإظهار المواقيت";}
     private String prayerName(String key){for(int i=0;i<AdhanScheduler.KEYS.length;i++)if(key.equals(AdhanScheduler.KEYS[i]))return PRAYERS[i];return key;}
     private String prayerTime(String key){try{JSONArray rows=new JSONArray(AdhanScheduler.prefs(owner).getString("schedule","[]"));long today=AdhanScheduler.now(owner);String date=format("yyyy-MM-dd",today);for(int i=0;i<rows.length();i++){JSONObject r=rows.getJSONObject(i);if(key.equals(r.optString("key"))&&date.equals(r.optString("date")))return format("HH:mm",r.optLong("epoch"));}}catch(Exception ignored){}return "—";}
-    private void adhanChoice(String key){choose("أذان "+prayerName(key),new String[]{"مكة","المدينة","العفاسي","سوريا","صامت"},i->{try{JSONObject settings=new JSONObject(AdhanScheduler.prefs(owner).getString("settings","{}"));settings.put(key,new JSONObject().put("enabled",i!=4).put("voice",new String[]{"makkah","madinah","alafasy","syria","makkah"}[i]));saveSchedule(AdhanScheduler.configuration(owner),settings);render(false);}catch(Exception e){error();}});}
+    private void adhanChoice(String key){choose("أذان "+prayerName(key),new String[]{"مكة","المدينة","العفاسي","سوريا","صامت"},i->{try{JSONObject settings=new JSONObject(AdhanScheduler.prefs(owner).getString("settings","{}"));settings.put(key,new JSONObject().put("enabled",i!=4).put("voice",new String[]{"makkah","madinah","alafasy","syria","makkah"}[i]));saveSchedule(AdhanScheduler.configuration(owner),settings);render(false);}catch(Exception e){error();}},this::previewAdhan);}
     private void saveSchedule(JSONObject config,JSONObject settings)throws Exception{for(String key:AdhanScheduler.KEYS)if(!settings.has(key))settings.put(key,new JSONObject().put("enabled",true).put("voice","makkah"));AdhanScheduler.update(owner,new JSONObject().put("config",config).put("settings",settings).toString());}
     private void saveConfig(String key,Object value){try{JSONObject c=AdhanScheduler.configuration(owner);c.put(key,value);saveSchedule(c,new JSONObject(AdhanScheduler.prefs(owner).getString("settings","{}")));}catch(Exception e){error();}}
     private void searchCity(){EditText input=new EditText(owner);input.setText(pref("zikra_city",""));input.setSingleLine(true);input.setHint("اكتب اسم المدينة");new AlertDialog.Builder(owner).setTitle("اختيار المدينة").setView(input).setPositiveButton("بحث",(d,w)->findCities(input.getText().toString())).setNegativeButton("رجوع",null).show();}
     private void findCities(String query){if(query.trim().length()<2)return;notice("جارٍ البحث عن المدينة…");io.execute(()->{try{JSONArray results=request("https://geocoding-api.open-meteo.com/v1/search?name="+URLEncoder.encode(query,"UTF-8")+"&count=10&language="+pref("zikra_language","ar")+"&format=json").optJSONArray("results");main.post(()->{if(closed)return;if(results==null||results.length()==0){notice("لا توجد نتائج. جرّب اسمًا آخر.");return;}String[] names=new String[results.length()];for(int i=0;i<names.length;i++){JSONObject r=results.optJSONObject(i);names[i]=r.optString("name")+" · "+r.optString("admin1")+" · "+r.optString("country");}choose("نتائج البحث",names,i->{JSONObject r=results.optJSONObject(i);location(r.optDouble("latitude"),r.optDouble("longitude"),r.optString("name"),r.optString("timezone",TimeZone.getDefault().getID()),"");});});}catch(Exception e){main.post(this::error);}});}
-    private void location(double lat,double lon,String city,String zone,String mosque){if(!Double.isFinite(lat)||!Double.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return;try{JSONObject c=AdhanScheduler.configuration(owner);c.put("lat",lat).put("lon",lon).put("zone",zone).put("mosque",mosque).put("kind",mosque.isEmpty()?"city":"mosque");put("zikra_lat",String.valueOf(lat));put("zikra_lon",String.valueOf(lon));put("zikra_city",city);put("zikra_timezone",zone);saveSchedule(c,new JSONObject(AdhanScheduler.prefs(owner).getString("settings","{}")));weather=null;data.edit().remove("tv_weather").apply();render(false);notice("تم حفظ "+city+". جارٍ تجهيز المواقيت.");loadWeather(true);}catch(Exception e){error();}}
-    private void locate(){if(owner.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)!=PackageManager.PERMISSION_GRANTED&&owner.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED){owner.requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION},4201);return;}LocationManager manager=owner.getSystemService(LocationManager.class);if(manager==null){notice("استخدم البحث عن المدينة على هذا الجهاز.");return;}try{for(String provider:manager.getProviders(true)){Location last=manager.getLastKnownLocation(provider);if(last!=null&&System.currentTimeMillis()-last.getTime()<3600000){location(last.getLatitude(),last.getLongitude(),"موقعي الحالي",TimeZone.getDefault().getID(),"");return;}}gps=new LocationListener(){public void onLocationChanged(Location l){manager.removeUpdates(this);gps=null;location(l.getLatitude(),l.getLongitude(),"موقعي الحالي",TimeZone.getDefault().getID(),"");}public void onProviderEnabled(String p){}public void onProviderDisabled(String p){}public void onStatusChanged(String p,int s,Bundle b){}};String provider=manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)?LocationManager.NETWORK_PROVIDER:LocationManager.GPS_PROVIDER;manager.requestLocationUpdates(provider,0,0,gps,Looper.getMainLooper());notice("بانتظار موقع الجهاز… يمكنك اختيار المدينة يدويًا.");main.postDelayed(()->{if(gps!=null){try{manager.removeUpdates(gps);}catch(Exception ignored){}gps=null;notice("لم يصل موقع الجهاز. اختر المدينة يدويًا.");}},15000);}catch(Exception e){notice("هذا الجهاز لا يوفر الموقع. اختر المدينة يدويًا.");}}
+    private String mosqueName(){
+        String name=pref("tv_mosque_name","");if(!name.isEmpty())return name;
+        try{JSONObject old=new JSONObject(pref("zikra_mosque","{}"));if(!old.optString("title").isEmpty())return old.optString("title");}catch(Exception ignored){}
+        return AdhanScheduler.configuration(owner).optString("mosque").isEmpty()?"":pref("zikra_city","");
+    }
+    private void location(double lat,double lon,String city,String zone,String mosque){
+        if(!Double.isFinite(lat)||!Double.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return;
+        try{JSONObject config=AdhanScheduler.configuration(owner);config.put("lat",lat).put("lon",lon).put("zone",zone).put("mosque",mosque).put("kind",mosque.isEmpty()?"city":"mosque");
+            put("zikra_lat",String.valueOf(lat));put("zikra_lon",String.valueOf(lon));put("zikra_timezone",zone);
+            if(mosque.isEmpty()){put("zikra_city",city);data.edit().remove("tv_mosque_name").remove("zikra_mosque").apply();}else put("tv_mosque_name",city);
+            saveSchedule(config,new JSONObject(AdhanScheduler.prefs(owner).getString("settings","{}")));weather=null;data.edit().remove("tv_weather").apply();render(false);loadWeather(true);
+        }catch(Exception e){error();}
+    }
+    private void resolveLocation(Location fix){
+        final double lat=fix.getLatitude(),lon=fix.getLongitude();
+        io.execute(()->{String city="";
+            try{JSONObject result=request("https://photon.komoot.io/reverse?lat="+lat+"&lon="+lon+"&lang="+(pref("zikra_language","ar").equals("de")?"de":"en")+"&limit=1");JSONObject properties=result.getJSONArray("features").getJSONObject(0).getJSONObject("properties");for(String key:new String[]{"city","town","village","municipality","name"})if(!properties.optString(key).isEmpty()){city=properties.getString(key);break;}}catch(Exception ignored){}
+            if(city.isEmpty())try{android.location.Geocoder geocoder=new android.location.Geocoder(owner,Locale.forLanguageTag(pref("zikra_language","ar")));java.util.List<android.location.Address> addresses=geocoder.getFromLocation(lat,lon,1);if(addresses!=null&&!addresses.isEmpty()){android.location.Address address=addresses.get(0);city=address.getLocality();if(city==null||city.isEmpty())city=address.getSubAdminArea();}}catch(Exception ignored){}
+            final String found=city==null||city.isEmpty()?String.format(Locale.US,"%.3f, %.3f",lat,lon):city;
+            main.post(()->{if(!closed)location(lat,lon,found,TimeZone.getDefault().getID(),"");});
+        });
+    }
+    private void locate(){if(owner.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)!=PackageManager.PERMISSION_GRANTED&&owner.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED){owner.requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION},4201);return;}LocationManager manager=owner.getSystemService(LocationManager.class);if(manager==null){notice("استخدم البحث عن المدينة على هذا الجهاز.");return;}try{for(String provider:manager.getProviders(true)){Location last=manager.getLastKnownLocation(provider);if(last!=null&&System.currentTimeMillis()-last.getTime()<3600000){resolveLocation(last);return;}}gps=new LocationListener(){public void onLocationChanged(Location l){manager.removeUpdates(this);gps=null;resolveLocation(l);}public void onProviderEnabled(String p){}public void onProviderDisabled(String p){}public void onStatusChanged(String p,int s,Bundle b){}};String provider=manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)?LocationManager.NETWORK_PROVIDER:LocationManager.GPS_PROVIDER;manager.requestLocationUpdates(provider,0,0,gps,Looper.getMainLooper());notice("بانتظار موقع الجهاز… يمكنك اختيار المدينة يدويًا.");main.postDelayed(()->{if(gps!=null){try{manager.removeUpdates(gps);}catch(Exception ignored){}gps=null;notice("لم يصل موقع الجهاز. اختر المدينة يدويًا.");}},15000);}catch(Exception e){notice("هذا الجهاز لا يوفر الموقع. اختر المدينة يدويًا.");}}
     void permissionResult(int requestCode,int[] grants){if(requestCode==4201){if(grants.length>0&&grants[0]==PackageManager.PERMISSION_GRANTED)locate();else notice("لم يُمنح إذن الموقع. اختر المدينة يدويًا.");}}
     private void mosques(){
         JSONObject config=AdhanScheduler.configuration(owner);if(!config.has("lat")){searchCity();return;}
@@ -311,6 +370,8 @@ final class NativeTvUi {
             case "readers":route("readers");break;
             case "memory":route("memory");break;
             case "play":togglePlayback();break;
+            case "verse-previous":seekVerse(-1);break;
+            case "verse-next":seekVerse(1);break;
             case "previous":playSurah(Math.max(1,currentSurah-1));break;
             case "next":playSurah(Math.min(114,currentSurah+1));break;
             case "tasbeeh-add":put("zikra_tasbeeh_count",String.valueOf(number("zikra_tasbeeh_count",0)+1));refreshDashboard();break;
@@ -330,15 +391,18 @@ final class NativeTvUi {
         JSONObject current=weather==null?null:weather.optJSONObject("current");
         String temp="— °C",detail="اختر الموقع لإظهار الطقس";
         if(current!=null){temp=String.format(Locale.US,"%.0f °C",current.optDouble("temperature_2m"));detail=weatherName(current.optInt("weather_code"))+"  ·  "+current.optInt("relative_humidity_2m")+"% رطوبة  ·  "+String.format(Locale.US,"%.0f km/h",current.optDouble("wind_speed_10m"));}
-        homeDashboard.weather(pref("zikra_city","حدد الموقع"),temp,detail);
+        homeDashboard.weather(mosqueName().isEmpty()?pref("zikra_city","حدد الموقع"):mosqueName(),temp,detail);
         if(memories!=null&&memories.length()>0){JSONObject item=memories.optJSONObject(Math.floorMod(memoryIndex,memories.length()));homeDashboard.remembrance(item.optString("text"));}
         int displaySurah=currentSurah,displayVerse=currentVerse;String name=playingName.isEmpty()?pref("tv_last_name",""):playingName;
         if(player==null)try{JSONObject saved=new JSONObject(pref("quran_bookmark","{}"));displaySurah=saved.optInt("surahNum",1);displayVerse=saved.optInt("ayahNum",1);}catch(Exception ignored){}
-        String ayah="";if(surahs!=null&&displaySurah>=1&&displaySurah<=surahs.length()){JSONObject item=surahs.optJSONObject(displaySurah-1);if(name.isEmpty())name=item.optString("name");JSONArray verses=item.optJSONArray("ayahs");if(verses!=null&&displayVerse>=1&&displayVerse<=verses.length())ayah=verses.optJSONObject(displayVerse-1).optString("text");}
-        homeDashboard.player(name,pref("tv_reader_name",""),ayah,prepared&&!paused);
+        int displayPage=1;String ayah="";if(surahs!=null&&displaySurah>=1&&displaySurah<=surahs.length()){JSONObject item=surahs.optJSONObject(displaySurah-1);if(name.isEmpty())name=item.optString("name");JSONArray verses=item.optJSONArray("ayahs");if(verses!=null&&displayVerse>=1&&displayVerse<=verses.length()){JSONObject selectedAyah=verses.optJSONObject(displayVerse-1);ayah=selectedAyah.optString("text");displayPage=selectedAyah.optInt("page",1);}}
+        homeDashboard.player(name,prepared?playbackReader.optString("name",pref("tv_reader_name","")):pref("tv_reader_name",""),ayah,prepared&&!paused,displayPage,displayVerse);
     }
     private String weatherName(int code){if(code==0)return "سماء صافية";if(code<=3)return "غائم جزئيًا";if(code<=48)return "ضباب";if(code>=95)return "عواصف رعدية";if(code>=71&&code<=77||code==85||code==86)return "ثلوج";return "أمطار";}
-    private void weather(){if(weather==null)try{weather=new JSONObject(pref("tv_weather","{}"));}catch(Exception ignored){}JSONObject current=weather==null?null:weather.optJSONObject("current");StringBuilder value=new StringBuilder();if(current!=null)value.append(pref("zikra_city","")).append("\n\n").append(current.optDouble("temperature_2m")).append(" °C\n").append("الرطوبة ").append(current.optInt("relative_humidity_2m")).append("%  ·  الرياح ").append(current.optDouble("wind_speed_10m")).append(" km/h\n\n");JSONObject daily=weather==null?null:weather.optJSONObject("daily");if(daily!=null){JSONArray dates=daily.optJSONArray("time");if(dates!=null)for(int i=0;i<dates.length();i++)value.append(dates.optString(i)).append("   ").append(daily.optJSONArray("temperature_2m_min").optDouble(i)).append("° / ").append(daily.optJSONArray("temperature_2m_max").optDouble(i)).append("°   مطر ").append(daily.optJSONArray("precipitation_probability_max").optInt(i)).append("%\n\n");}body(value.length()==0?"اختر الموقع ثم اضغط تحديث الطقس.":value.toString(),23,null);actions(new String[]{"تحديث الطقس","رجوع"},new Runnable[]{this::loadWeather,this::back});}
+    private void weather(){
+        if(weather==null)try{weather=new JSONObject(pref("tv_weather","{}"));}catch(Exception ignored){}
+        weatherPage=new NativeWeatherView(owner,uiFont,motion,weather,mosqueName().isEmpty()?pref("zikra_city",""):mosqueName(),rtl(),weatherDay,value->weatherDay=value,this::loadWeather,()->route("location"));content.addView(weatherPage,new LinearLayout.LayoutParams(-1,0,1));
+    }
     private void loadContent(){final String language=pref("zikra_language","ar");io.execute(()->{try{JSONObject translated=new JSONObject(asset("assets/data/native-translations.json"));String source=asset("assets/data/quran-text.js");JSONObject q=new JSONObject(source.substring(source.indexOf('{'),source.lastIndexOf('}')+1));JSONArray all=q.getJSONArray("surahs");HashMap<Integer,StringBuilder> chunks=new HashMap<>();for(int i=0;i<all.length();i++){JSONObject s=all.getJSONObject(i);JSONArray ayahs=s.getJSONArray("ayahs");for(int j=0;j<ayahs.length();j++){JSONObject a=ayahs.getJSONObject(j);int page=a.getInt("page");StringBuilder chunk=chunks.get(page);if(chunk==null){chunk=new StringBuilder();chunks.put(page,chunk);}if(j==0)chunk.append("\n").append(s.getString("name")).append("\n\n");chunk.append(a.getString("text")).append(" ﴿").append(a.getInt("numberInSurah")).append("﴾ ");}}String memory=asset("assets/data/remembrance-"+language+".js");JSONArray items=new JSONArray(memory.substring(memory.indexOf('['),memory.lastIndexOf(']')+1));main.post(()->{if(closed||!language.equals(pref("zikra_language","ar")))return;translations=translated;surahs=all;memories=items;for(Integer p:chunks.keySet())pages.put(p,chunks.get(p).toString());if(page.equals("mushaf")||page.equals("surahs")||page.equals("reading")||page.equals("memory")||!language.equals("ar"))render(false);refreshDashboard();});}catch(Exception e){main.post(()->notice("تعذّر قراءة المحتوى المحلي."));}});}
     private String asset(String path)throws Exception{try(InputStream input=owner.getAssets().open(path);ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=input.read(b))!=-1)out.write(b,0,n);return out.toString("UTF-8");}}
     private String requestText(String address)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL(address).openConnection();c.setConnectTimeout(12000);c.setReadTimeout(15000);c.setRequestProperty("User-Agent","Zikra-Native-TV");try{if(c.getResponseCode()!=200)throw new java.io.IOException();try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){if(closed||Thread.currentThread().isInterrupted())throw new java.io.IOException();if(out.size()+n>4194304)throw new java.io.IOException();out.write(b,0,n);}return out.toString("UTF-8");}}finally{c.disconnect();}}
@@ -357,19 +421,45 @@ final class NativeTvUi {
         }catch(Exception ignored){}
     }
     private void playSurah(int number){try{JSONObject reader=new JSONObject(pref("tv_reader","{}"));if(!reader.has("server")){notice("اختر القارئ أولًا.");route("readers");return;}String available=","+reader.optString("surah_list")+",";if(!available.equals(",,")&&!available.contains(","+number+",")){notice("هذه السورة غير متوفرة لهذا القارئ.");return;}savePlayback();String title=surahs.getJSONObject(number-1).optString("name");String url=NativeTvPolicy.audioUrl(reader.getString("server"),number);playUrl(url,title,true);playbackReader=reader;currentSurah=number;currentVerse=1;verseStarts=new long[0];verseNumbers=new int[0];if(page.equals("home"))refreshDashboard();else if(!page.equals("player"))route("player");else render(false);loadTimings(reader,number,playbackSequence);}catch(Exception e){error();}}
-    private void playUrl(String url,String title,boolean remember){if(!url.startsWith("https://")){notice("رابط الصوت غير صالح.");return;}savePlayback();releasePlayer();playbackSequence++;playingUrl=url;playingName=title;prepared=false;paused=true;player=new MediaPlayer();player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());final MediaPlayer active=player;try{active.setDataSource(url);active.setOnPreparedListener(p->{if(player!=active)return;prepared=true;int offset=number("tv_resume_ms",0);if(remember&&url.equals(pref("tv_last_url",""))&&offset>0)p.seekTo(offset);p.start();paused=false;main.removeCallbacks(audioTick);main.post(audioTick);if(remember){put("tv_last_url",url);put("tv_last_name",title);}notice("يعمل الآن: "+title);refreshDashboard();});active.setOnCompletionListener(p->{paused=true;put("tv_resume_ms","0");if(remember)markCompleted("played_surahs",currentSurah);notice("اكتملت التلاوة");refreshDashboard();});active.setOnErrorListener((p,w,e)->{if(player==active){releasePlayer();notice("تعذّر تشغيل الصوت. تحقق من الإنترنت وأعد المحاولة.");}return true;});active.prepareAsync();notice("جارٍ تجهيز "+title+"…");}catch(Exception e){releasePlayer();error();}}
+    private void playUrl(String url,String title,boolean remember){if(!url.startsWith("https://")){notice("رابط الصوت غير صالح.");return;}savePlayback();releasePlayer();playbackSequence++;pendingVerse=0;seekingVerse=false;playingUrl=url;playingName=title;prepared=false;paused=true;player=new MediaPlayer();player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());final MediaPlayer active=player;try{active.setDataSource(url);active.setOnPreparedListener(p->{if(player!=active)return;prepared=true;int offset=number("tv_resume_ms",0);if(pendingVerse==0&&remember&&url.equals(pref("tv_last_url",""))&&offset>0)p.seekTo(offset);p.start();paused=false;applyVerseSeek();main.removeCallbacks(audioTick);main.post(audioTick);if(remember){put("tv_last_url",url);put("tv_last_name",title);}notice("يعمل الآن: "+title);refreshDashboard();});active.setOnSeekCompleteListener(p->{if(player==p&&seekingVerse){if(Math.abs(p.getCurrentPosition()-seekTargetMs)>1000)return;currentVerse=pendingVerse;pendingVerse=0;seekingVerse=false;renderedVerse=-1;if(page.equals("player"))drawPlayerText();refreshDashboard();savePlayback();}});active.setOnCompletionListener(p->{paused=true;put("tv_resume_ms","0");if(remember)markCompleted("played_surahs",currentSurah);notice("اكتملت التلاوة");refreshDashboard();});active.setOnErrorListener((p,w,e)->{if(player==active){releasePlayer();notice("تعذّر تشغيل الصوت. تحقق من الإنترنت وأعد المحاولة.");}return true;});active.prepareAsync();notice("جارٍ تجهيز "+title+"…");}catch(Exception e){releasePlayer();error();}}
     private void togglePlayback(){if(player==null){resumePlayback();return;}if(!prepared)return;try{if(player.isPlaying()){player.pause();paused=true;}else{player.start();paused=false;}notice(paused?"تم إيقاف التلاوة مؤقتًا":"يعمل الآن: "+playingName);refreshDashboard();}catch(Exception e){releasePlayer();}}
-    private void resumePlayback(){savePlayback();releasePlayer();String url=pref("tv_last_url","");if(url.isEmpty()){route("surahs");return;}try{JSONObject bookmark=new JSONObject(pref("quran_bookmark","{}"));currentSurah=bookmark.optInt("surahNum",currentSurah);currentVerse=bookmark.optInt("ayahNum",1);JSONObject reader=new JSONObject(pref("tv_reader","{}"));for(int i=0;i<readers.length();i++)if(readers.optJSONObject(i).optInt("id")==bookmark.optInt("readerId")){reader=readers.optJSONObject(i);break;}playbackReader=reader;playUrl(url,pref("tv_last_name","القرآن الكريم"),true);if(!page.equals("player")&&!page.equals("home"))route("player");refreshDashboard();loadTimings(reader,currentSurah,playbackSequence);}catch(Exception e){playUrl(url,pref("tv_last_name","القرآن الكريم"),true);}}
+    private void resumePlayback(){savePlayback();releasePlayer();verseStarts=new long[0];verseNumbers=new int[0];String url=pref("tv_last_url","");if(url.isEmpty()){route("surahs");return;}try{JSONObject bookmark=new JSONObject(pref("quran_bookmark","{}"));currentSurah=bookmark.optInt("surahNum",currentSurah);currentVerse=bookmark.optInt("ayahNum",1);JSONObject reader=new JSONObject(pref("tv_reader","{}"));for(int i=0;i<readers.length();i++)if(readers.optJSONObject(i).optInt("id")==bookmark.optInt("readerId")){reader=readers.optJSONObject(i);break;}playbackReader=reader;playUrl(url,pref("tv_last_name","القرآن الكريم"),true);if(!page.equals("player")&&!page.equals("home"))route("player");refreshDashboard();loadTimings(reader,currentSurah,playbackSequence);}catch(Exception e){playUrl(url,pref("tv_last_name","القرآن الكريم"),true);}}
     private void savePlayback(){if(player==null||!prepared||!playingUrl.equals(pref("tv_last_url","")))return;try{int position=player.getCurrentPosition();put("tv_resume_ms",String.valueOf(position));
         JSONObject reader=playbackReader;put("quran_bookmark",new JSONObject().put("surahNum",currentSurah).put("readerId",reader.optInt("id")).put("ayahNum",currentVerse).put("time",position/1000d).put("surahName",playingName).put("readerName",pref("tv_reader_name","")).put("updated",System.currentTimeMillis()).toString());}catch(Exception ignored){}}
     private void releasePlayer(){main.removeCallbacks(audioTick);prepared=false;paused=true;if(player!=null){player.release();player=null;}}
-    boolean key(KeyEvent event){int code=event.getKeyCode();if(code==KeyEvent.KEYCODE_BACK||code==KeyEvent.KEYCODE_ESCAPE){if(event.getAction()==KeyEvent.ACTION_UP)back();return true;}if(event.getAction()!=KeyEvent.ACTION_DOWN)return false;if(code==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE||code==KeyEvent.KEYCODE_MEDIA_PLAY||code==KeyEvent.KEYCODE_MEDIA_PAUSE){if(event.getRepeatCount()==0)togglePlayback();return true;}if(code==KeyEvent.KEYCODE_MEDIA_STOP){savePlayback();releasePlayer();return true;}if(code==KeyEvent.KEYCODE_MEDIA_NEXT||code==KeyEvent.KEYCODE_MEDIA_PREVIOUS){playSurah(Math.max(1,Math.min(114,currentSurah+(code==KeyEvent.KEYCODE_MEDIA_NEXT?1:-1))));return true;}if(page.equals("reading")&&root.findFocus()==bodyScroll&&(code==KeyEvent.KEYCODE_DPAD_LEFT||code==KeyEvent.KEYCODE_DPAD_RIGHT)){turn(code==KeyEvent.KEYCODE_DPAD_LEFT?1:-1);return true;}return false;}
-    void updateState(String json){try{JSONObject state=new JSONObject(json);notice(state.optString("message"));}catch(Exception ignored){}}
+    private void seekVerse(int delta){
+        if(surahs==null)return;
+        if(player==null)resumePlayback();
+        if(player==null)return;
+        JSONObject surah=surahs.optJSONObject(Math.max(0,Math.min(surahs.length()-1,currentSurah-1)));JSONArray verses=surah==null?null:surah.optJSONArray("ayahs");if(verses==null)return;
+        pendingVerse=NativeTvPolicy.stepVerse(pendingVerse>0?pendingVerse:currentVerse,delta,verses.length());
+        if(verseStarts.length==0){if(!playbackReader.optBoolean("timing",false)){pendingVerse=0;message("التنقل بين الآيات","هذا التسجيل لا يوفّر توقيت الآيات. اختر تسجيلًا آخر من الفهرس للتنقل بدقة.");}return;}
+        applyVerseSeek();
+    }
+    private void applyVerseSeek(){
+        if(pendingVerse<=0||!prepared||player==null||verseStarts.length==0)return;
+        for(int i=0;i<verseNumbers.length;i++)if(verseNumbers[i]==pendingVerse){seekingVerse=true;seekTargetMs=verseStarts[i];player.seekTo(seekTargetMs,MediaPlayer.SEEK_CLOSEST);return;}
+        pendingVerse=0;
+    }
+    boolean key(KeyEvent event){
+        int code=event.getKeyCode();if(code==KeyEvent.KEYCODE_BACK||code==KeyEvent.KEYCODE_ESCAPE){if(event.getAction()==KeyEvent.ACTION_UP)back();return true;}
+        if(event.getAction()!=KeyEvent.ACTION_DOWN)return false;lastBackAt=0;
+        if(code==KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE||code==KeyEvent.KEYCODE_MEDIA_PLAY||code==KeyEvent.KEYCODE_MEDIA_PAUSE){if(event.getRepeatCount()==0)togglePlayback();return true;}
+        if(code==KeyEvent.KEYCODE_MEDIA_STOP){savePlayback();releasePlayer();return true;}
+        if(code==KeyEvent.KEYCODE_MEDIA_NEXT||code==KeyEvent.KEYCODE_MEDIA_PREVIOUS){seekVerse(code==KeyEvent.KEYCODE_MEDIA_NEXT?1:-1);return true;}
+        boolean horizontal=code==KeyEvent.KEYCODE_DPAD_LEFT||code==KeyEvent.KEYCODE_DPAD_RIGHT;
+        int delta=NativeTvPolicy.horizontalStep(rtl(),code==KeyEvent.KEYCODE_DPAD_LEFT);
+        if(horizontal&&page.equals("memory")&&((bodyScroll!=null&&bodyScroll.hasFocus())||(pageActions!=null&&pageActions.hasFocus()))){if(event.getRepeatCount()==0){memoryIndex+=delta;nextMemoryAt=android.os.SystemClock.elapsedRealtime()+15000;render(delta<0);}return true;}
+        if(horizontal&&page.equals("weather")&&weatherPage!=null&&weatherPage.hasFocus())return weatherPage.move(delta);
+        if(horizontal&&page.equals("reading")&&root.findFocus()==bodyScroll){turn(delta);return true;}
+        return false;
+    }
+    void updateState(String json){try{JSONObject state=new JSONObject(json);if(state.optString("phase").equals("error"))message("تعذّر التحديث",state.optString("message"));}catch(Exception ignored){}}
     void runtimeState(String json){clock.setText(format("HH:mm",AdhanScheduler.now(owner)));refreshDashboard();}
     void adhan(boolean active){if(active&&player!=null&&prepared){try{player.pause();paused=true;}catch(Exception ignored){}}if(active)notice("الأذان · اضغط أي زر للإيقاف");}
     void resume(){resumed=true;sky.setIntensity(number("tv_sky",65));main.removeCallbacks(tick);main.post(tick);if(System.currentTimeMillis()-weatherFetched>900000)loadWeather(true);if(prepared){main.removeCallbacks(audioTick);main.post(audioTick);}}
-    void pause(){resumed=false;savePlayback();main.removeCallbacks(tick);if(player!=null&&prepared){try{player.pause();paused=true;}catch(Exception ignored){}}}
-    void close(){closed=true;pause();requestId++;io.shutdownNow();main.removeCallbacksAndMessages(null);releasePlayer();if(migration!=null){migration.destroy();migration=null;}if(gps!=null)try{owner.getSystemService(LocationManager.class).removeUpdates(gps);}catch(Exception ignored){}motion.close();}
+    void pause(){resumed=false;stopPreview(false);savePlayback();main.removeCallbacks(tick);if(player!=null&&prepared){try{player.pause();paused=true;}catch(Exception ignored){}}}
+    void close(){closed=true;pause();if(choicesDialog!=null)choicesDialog.dismiss();requestId++;io.shutdownNow();main.removeCallbacksAndMessages(null);releasePlayer();if(migration!=null){migration.destroy();migration=null;}if(gps!=null)try{owner.getSystemService(LocationManager.class).removeUpdates(gps);}catch(Exception ignored){}motion.close();}
     private void resetMenu(){choose("إدارة البيانات",new String[]{"مسح سجل القراءة","مسح سجل الاستماع","مسح الموقع والمواقيت","إعادة الضبط الكامل"},i->new AlertDialog.Builder(owner).setTitle("تأكيد المسح").setMessage("حذف البيانات المحددة؟").setNegativeButton("رجوع",null).setPositiveButton("حذف",(d,w)->{if(i==0){data.edit().remove("tv_read_page").remove("zikra_mushaf_page_v1").apply();}if(i==1){savePlayback();releasePlayer();data.edit().remove("tv_last_url").remove("tv_last_name").remove("tv_resume_ms").remove("quran_bookmark").apply();}if(i==2||i==3){AdhanScheduler.resetLocalData(owner,i==3);data.edit().remove("zikra_city").remove("zikra_lat").remove("zikra_lon").remove("tv_weather").apply();weather=null;}if(i==3){releasePlayer();android.webkit.WebStorage.getInstance().deleteOrigin("https://appassets.androidplatform.net");owner.getPreferences(0).edit().remove("legacyStorage").apply();data.edit().clear().putBoolean("web_migrated",true).apply();owner.getSharedPreferences("zikra_runtime",0).edit().clear().apply();}page="home";history.clear();render(true);}).show());}
     /** One-time import reads only old same-origin storage. It never loads the old UI or network. */
     private void migrateOnce(){if(data.getBoolean("web_migrated",false))return;

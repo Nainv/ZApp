@@ -21,7 +21,7 @@ final class NativeTvMotion {
     private final SpringAnimation x,y;
     NativeTvMotion(FrameLayout root) {
         this.root=root;glass=new View(root.getContext());
-        GradientDrawable shape=new GradientDrawable();shape.setColor(0x1079c9b2);shape.setCornerRadius(dp(17));shape.setStroke(dp(2),0x9979c9b2);
+        GradientDrawable shape=new GradientDrawable();shape.setColor(Color.TRANSPARENT);shape.setCornerRadius(dp(17));
         glass.setBackground(shape);glass.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         root.addView(glass,new FrameLayout.LayoutParams(1,1));glass.setVisibility(View.INVISIBLE);
         x=new SpringAnimation(glass,SpringAnimation.TRANSLATION_X);
