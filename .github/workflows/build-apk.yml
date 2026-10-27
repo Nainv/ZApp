@@ -324,11 +324,12 @@ jobs:
 
           "$APKSIGNER" verify --verbose --print-certs "$APK" | tee "$RUNNER_TEMP/zikra-apk-signature.txt"
           python3 - <<'PY_SIGNER'
-          import os
+          import os, re
           from pathlib import Path
           certificate = "d73500da98b7280d7906d3fa828d1857088ff811c623e385e1213ada4f03d4ce"
           output = (Path(os.environ["RUNNER_TEMP"]) / "zikra-apk-signature.txt").read_text().lower()
-          assert "signer #1 certificate sha-256 digest: " + certificate in output, "APK signing identity changed; refusing to publish"
+          found = re.findall(r"certificate sha-256 digest: ([0-9a-f]{64})", output)
+          assert found and set(found) == {certificate}, "APK signing identity changed; refusing to publish"
           PY_SIGNER
           echo 'APK signature verified.'
           python3 - <<'PY'
