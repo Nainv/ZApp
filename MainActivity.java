@@ -37,6 +37,7 @@ import android.util.Log;
 public class MainActivity extends Activity {
     public static volatile boolean appVisible;
     private WebView webView;
+    private NativeTvUi nativeTv;
     private FrameLayout root;
     private TextView errorView;
     // Load the bundled interface first so the app can open without internet.
@@ -58,7 +59,7 @@ public class MainActivity extends Activity {
     private final android.content.BroadcastReceiver adhanEvents=new android.content.BroadcastReceiver(){
         @Override public void onReceive(Context c,Intent i){deliverAdhanState(i.getStringExtra("key"),i.getBooleanExtra("active",false));}
     };
-    private void deliverAdhanState(String key,boolean active){if(webView==null||!pageReady)return;try{org.json.JSONObject data=new org.json.JSONObject().put("key",key).put("active",active);webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:adhan-native',{detail:"+data+"}));",null);}catch(Exception ignored){}}
+    private void deliverAdhanState(String key,boolean active){if(Build.VERSION.SDK_INT>=26&&nativeTv!=null){nativeTv.adhan(active);return;}if(webView==null||!pageReady)return;try{org.json.JSONObject data=new org.json.JSONObject().put("key",key).put("active",active);webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:adhan-native',{detail:"+data+"}));",null);}catch(Exception ignored){}}
     private void adhanNotifications(){
         if(Build.VERSION.SDK_INT<33||checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED){
             if(Build.VERSION.SDK_INT>=24&&!((android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE)).areNotificationsEnabled())openAdhanNotificationSettings();
@@ -76,6 +77,7 @@ public class MainActivity extends Activity {
     private String adhanStatus(){org.json.JSONObject s=new org.json.JSONObject();try{s.put("exact",AdhanScheduler.exact(this));s.put("notifications",(Build.VERSION.SDK_INT<24||((android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE)).areNotificationsEnabled()));s.put("scheduled",AdhanScheduler.pendingCount(this));s.put("active",AdhanService.activePrayer);}catch(Exception ignored){}return s.toString();}
 
 
+    @android.annotation.SuppressLint("UnspecifiedRegisterReceiverFlag")
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         appUpdater = new AppUpdater(this);
@@ -93,6 +95,11 @@ public class MainActivity extends Activity {
         setRequestedOrientation(isTv
                 ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 : ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        if (isTv && Build.VERSION.SDK_INT >= 26) {
+            nativeTv = new NativeTvUi(this);
+            nativeTv.show();
+            return;
+        }
         root = new FrameLayout(this);
         webView = new WebView(this);
         root.setBackgroundColor(Color.rgb(16, 27, 35));
@@ -289,6 +296,7 @@ public class MainActivity extends Activity {
 
     @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(Build.VERSION.SDK_INT>=26&&nativeTv!=null){nativeTv.permissionResult(requestCode,grantResults);return;}
         if (requestCode == LOCATION_PERMISSION_REQUEST) {
             boolean granted = checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                     checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
@@ -304,6 +312,7 @@ public class MainActivity extends Activity {
     }
 
     private void sendBackToWeb() {
+        if(Build.VERSION.SDK_INT>=26&&nativeTv!=null){nativeTv.back();return;}
         if(stopActiveAdhan())return;
         if (webView == null || !pageReady) return;
         webView.evaluateJavascript("(function(){if(typeof window.zikraBackFromRemote==='function'){window.zikraBackFromRemote();return;}if(typeof window.handleAndroidBack==='function'){window.handleAndroidBack();}})();", null);
@@ -353,6 +362,7 @@ public class MainActivity extends Activity {
         int code = event.getKeyCode();
         if(adhanKeys.contains(code)){if(event.getAction()==KeyEvent.ACTION_UP)adhanKeys.remove(code);return true;}
         if(event.getAction()==KeyEvent.ACTION_DOWN&&code!=KeyEvent.KEYCODE_VOLUME_UP&&code!=KeyEvent.KEYCODE_VOLUME_DOWN&&code!=KeyEvent.KEYCODE_VOLUME_MUTE&&stopActiveAdhan()){adhanKeys.add(code);return true;}
+        if(Build.VERSION.SDK_INT>=26&&nativeTv!=null)return nativeTv.key(event)||super.dispatchKeyEvent(event);
         if (code == KeyEvent.KEYCODE_DPAD_LEFT || code == KeyEvent.KEYCODE_DPAD_RIGHT || code == KeyEvent.KEYCODE_DPAD_UP || code == KeyEvent.KEYCODE_DPAD_DOWN) return super.dispatchKeyEvent(event);
 
         if (event.getAction() != KeyEvent.ACTION_DOWN) {
@@ -423,16 +433,20 @@ public class MainActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();appVisible=true;
         hideSystemBars();
+        if(Build.VERSION.SDK_INT>=26&&nativeTv!=null)nativeTv.resume();
         if (webView != null) webView.onResume();
         if (appUpdater != null) appUpdater.onResume();
         AdhanScheduler.reschedule(this);AdhanScheduler.scheduleJob(this);AdhanScheduler.refreshAsync(this);
         if (runtimeSupport != null) { runtimeSupport.check(); deliverRuntimeState(); }
     }
     private void deliverRuntimeState() {
+        if(Build.VERSION.SDK_INT>=26&&nativeTv!=null&&runtimeSupport!=null){nativeTv.runtimeState(runtimeSupport.state());return;}
         if (webView == null || !pageReady || runtimeSupport == null) return;
         webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:runtime-state',{detail:JSON.parse(" + org.json.JSONObject.quote(runtimeSupport.state()) + ")}));", null);
     }
+    void startNativeUpdate(){if(appUpdater!=null)appUpdater.start();}
     public void deliverUpdateState(String json) {
+        if(Build.VERSION.SDK_INT>=26&&nativeTv!=null){nativeTv.updateState(json);return;}
         if (webView == null || !pageReady) return;
         webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:app-update',{detail:JSON.parse(" + org.json.JSONObject.quote(json) + ")}));", null);
     }
@@ -442,10 +456,10 @@ public class MainActivity extends Activity {
         return super.dispatchTouchEvent(event);
     }
     @Override public void onBackPressed() { if(!stopActiveAdhan())sendBackToWeb(); }
-    @Override protected void onPause() { appVisible=false;AdhanScheduler.reschedule(this);AdhanScheduler.scheduleJob(this);AdhanService.stopIfDisabled(this); if (appUpdater != null) appUpdater.onPause(); if (webView != null) webView.onPause(); super.onPause(); }
+    @Override protected void onPause() { if(Build.VERSION.SDK_INT>=26&&nativeTv!=null)nativeTv.pause();appVisible=false;AdhanScheduler.reschedule(this);AdhanScheduler.scheduleJob(this);AdhanService.stopIfDisabled(this); if (appUpdater != null) appUpdater.onPause(); if (webView != null) webView.onPause(); super.onPause(); }
     @Override protected void onSaveInstanceState(Bundle outState) {
         // The bundled page is loaded on creation; don't restore a stale remote page state.
         super.onSaveInstanceState(outState);
     }
-    @Override protected void onDestroy() { try{unregisterReceiver(adhanEvents);}catch(Exception ignored){} if (runtimeSupport != null) runtimeSupport.close(); if (appUpdater != null) appUpdater.close(); if (webView != null) { webView.stopLoading(); webView.destroy(); webView = null; } super.onDestroy(); }
+    @Override protected void onDestroy() { if(Build.VERSION.SDK_INT>=26&&nativeTv!=null)nativeTv.close();try{unregisterReceiver(adhanEvents);}catch(Exception ignored){} if (runtimeSupport != null) runtimeSupport.close(); if (appUpdater != null) appUpdater.close(); if (webView != null) { webView.stopLoading(); webView.destroy(); webView = null; } super.onDestroy(); }
 }

@@ -31,10 +31,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/zikra-update-tests"
-          javac -d "$RUNNER_TEMP/zikra-update-tests" UpdatePolicy.java ClockPolicy.java PrayerAlarmPolicy.java tests/UpdatePolicyTest.java tests/ClockPolicyTest.java tests/PrayerAlarmPolicyTest.java
+          javac -d "$RUNNER_TEMP/zikra-update-tests" NativeTvPolicy.java tests/NativeTvPolicyTest.java UpdatePolicy.java ClockPolicy.java PrayerAlarmPolicy.java tests/UpdatePolicyTest.java tests/ClockPolicyTest.java tests/PrayerAlarmPolicyTest.java
           java -cp "$RUNNER_TEMP/zikra-update-tests" com.zikra.tv.UpdatePolicyTest
           java -cp "$RUNNER_TEMP/zikra-update-tests" com.zikra.tv.ClockPolicyTest
           java -cp "$RUNNER_TEMP/zikra-update-tests" com.zikra.tv.PrayerAlarmPolicyTest
+          java -cp "$RUNNER_TEMP/zikra-update-tests" com.zikra.tv.NativeTvPolicyTest
 
       - name: Set up Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
@@ -112,7 +113,7 @@ jobs:
           fi
 
           test -s "app/src/main/java/com/zikra/tv/MainActivity.java"
-          for SOURCE in AppUpdater UpdatePolicy ClockPolicy PrayerAlarmPolicy PrayerCalendar AdhanScheduler AdhanReceiver AdhanService AdhanRefreshJob UpdateFileProvider UpdateRestartReceiver RuntimeSupport BootReceiver; do
+          for SOURCE in NativeTvPolicy NativeTvUi NativeTvMotion TvSky TvSkyView AppUpdater UpdatePolicy ClockPolicy PrayerAlarmPolicy PrayerCalendar AdhanScheduler AdhanReceiver AdhanService AdhanRefreshJob UpdateFileProvider UpdateRestartReceiver RuntimeSupport BootReceiver; do
             cp "./$SOURCE.java" "app/src/main/java/com/zikra/tv/$SOURCE.java"
           done
           test -s "app/src/main/AndroidManifest.xml"
@@ -147,6 +148,10 @@ jobs:
           if [[ -d "./assets" ]]; then
             cp -R "./assets" "app/src/main/assets/"
           fi
+
+          # Keep the CleanYourTV font with its bundled OFL notice.
+          mkdir -p app/src/main/res/font
+          cp ./outfit.ttf app/src/main/res/font/outfit.ttf
 
           # Copy files referenced directly from the home page.
           for file in favicon.ico favicon.png apple-touch-icon.png site.webmanifest web-app-icon-192.png; do
@@ -207,7 +212,7 @@ jobs:
                   minSdk 23
                   targetSdk 35
                   versionCode generatedVersionCode
-                  versionName '1.0.5'
+                  versionName '1.1.0'
               }
 
               signingConfigs {
@@ -237,10 +242,14 @@ jobs:
                   }
               }
           }
+          dependencies {
+              implementation 'androidx.recyclerview:recyclerview:1.3.2'
+              implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
+          }
           EOF_APP
 
           echo "Android project prepared."
-          echo "Release name: 1.0.5"
+          echo "Release name: 1.1.0"
           echo "Generated versionCode: $((1000000 + GITHUB_RUN_NUMBER))"
 
       - name: Validate Android Manifest
@@ -318,7 +327,7 @@ jobs:
           import hashlib, json, os
           from pathlib import Path
           apk = Path('app/build/outputs/apk/release/app-release.apk')
-          manifest = dict(packageName='com.zikra.tv', versionCode=1000000 + int(os.environ['GITHUB_RUN_NUMBER']), versionName='1.0.5', apkName=apk.name, sha256=hashlib.sha256(apk.read_bytes()).hexdigest())
+          manifest = dict(packageName='com.zikra.tv', versionCode=1000000 + int(os.environ['GITHUB_RUN_NUMBER']), versionName='1.1.0', apkName=apk.name, sha256=hashlib.sha256(apk.read_bytes()).hexdigest())
           apk.with_name('update.json').write_text(json.dumps(manifest), encoding='utf-8')
           PY
 
