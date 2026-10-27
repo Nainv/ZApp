@@ -62,7 +62,7 @@ final class NativeTvMotion {
         float left=viewBounds.left-rootBounds.left-dp(4)-glass.getLeft(),top=viewBounds.top-rootBounds.top-dp(4)-glass.getTop();
         if(glass.getVisibility()!=View.VISIBLE||reduced()){x.cancel();y.cancel();glass.setTranslationX(left);glass.setTranslationY(top);targetX=left;targetY=top;}
         else{if(left!=targetX){targetX=left;x.animateToFinalPosition(left);}if(top!=targetY){targetY=top;y.animateToFinalPosition(top);}}
-        glass.setVisibility(View.VISIBLE);glass.bringToFront();
+        glass.setVisibility(View.VISIBLE);if(root.getChildAt(root.getChildCount()-1)!=glass)glass.bringToFront();
     }
     void hide(){target=null;x.cancel();y.cancel();targetX=Float.NaN;targetY=Float.NaN;glass.setVisibility(View.INVISIBLE);}
     void enter(View panel,boolean back){
