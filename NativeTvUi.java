@@ -97,7 +97,6 @@ final class NativeTvUi {
     private int selected,readPage=1,currentSurah=1,memoryIndex;
     private JSONArray surahs,memories,readers=new JSONArray();
     private JSONObject weather,translations=new JSONObject(),playbackReader=new JSONObject();
-    private final HashMap<Integer,String> pages=new HashMap<>();
     private MediaPlayer player;
     private boolean prepared,paused=true,closed,resumed;
     private String playingUrl="",playingName="",readerQuery="";
@@ -105,12 +104,15 @@ final class NativeTvUi {
     private long[] verseStarts=new long[0];
     private int[] verseNumbers=new int[0];
     private long playbackSequence;
-    private TextView playerText;
+    private NativeQuranCard quranCard;
+    private NativeQuranBook quranBook;
+    private boolean followReadingPlayback;
+
     private long lastBookmark;
     private final Runnable audioTick=new Runnable(){public void run(){
         if(closed||!resumed||!prepared||player==null)return;
         try{if(seekingVerse){main.postDelayed(this,200);return;}int at=player.getCurrentPosition();int verse=NativeTvPolicy.ayahAt(verseStarts,verseNumbers,at);
-            if(pendingVerse==0&&verse>0&&verse!=currentVerse){currentVerse=verse;if(page.equals("player"))drawPlayerText();refreshDashboard();}
+            if(pendingVerse==0&&verse>0&&verse!=currentVerse){currentVerse=verse;if(page.equals("player")||page.equals("reading"))drawPlayerText();refreshDashboard();}
             if(android.os.SystemClock.elapsedRealtime()-lastBookmark>=5000){savePlayback();lastBookmark=android.os.SystemClock.elapsedRealtime();}
         }catch(Exception ignored){}main.postDelayed(this,200);
     }};
@@ -150,7 +152,7 @@ final class NativeTvUi {
         rememberSelection();if(!history.isEmpty()){page=history.pop();render(true);}
     }
     private void render(boolean returning){
-        if(closed)return;requestId++;motion.hide();content.removeAllViews();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;
+        if(closed)return;requestId++;motion.hide();content.removeAllViews();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;quranCard=null;
         content.setLayoutDirection(pref("zikra_language","ar").equals("ar")?View.LAYOUT_DIRECTION_RTL:View.LAYOUT_DIRECTION_LTR);
         LinearLayout header=new LinearLayout(owner);header.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);header.setGravity(Gravity.CENTER_VERTICAL);content.addView(header,new LinearLayout.LayoutParams(-1,dp(50)));
         Button settings=button("⚙",()->route("settings"));settings.setContentDescription("الإعدادات");header.addView(settings,new LinearLayout.LayoutParams(dp(48),dp(40)));
@@ -254,35 +256,61 @@ final class NativeTvUi {
     private void error(){if(!closed)message("تعذّر الاتصال","تحقق من الإنترنت وأعد المحاولة.");}
     private void body(String value,int size,Typeface face){ScrollView scroll=new ScrollView(owner);scroll.setClipToPadding(false);TextView label=text(value,size,TEXT);label.setTextIsSelectable(false);label.setPadding(dp(26),dp(18),dp(26),dp(18));label.setLineSpacing(dp(7),1.3f);if(face!=null)label.setTypeface(face);scroll.addView(label);scroll.setBackground(shape(0xd916272d,18));content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));scroll.setDefaultFocusHighlightEnabled(false);scroll.setFocusable(true);bodyScroll=scroll;scroll.requestFocus();}
     private void actions(String[] labels,Runnable[] actions){LinearLayout row=new LinearLayout(owner);pageActions=row;row.setGravity(Gravity.CENTER);for(int i=0;i<labels.length;i++){Button b=button(labels[i],actions[i]);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(44),1);p.setMargins(dp(6),dp(10),dp(6),0);row.addView(b,p);}content.addView(row);}
+    private void quranToolbar(boolean reading){
+        LinearLayout tools=new LinearLayout(owner);tools.setGravity(Gravity.CENTER_VERTICAL);tools.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+        TextView label=text("حجم الخط",14,MUTED);tools.addView(label,new LinearLayout.LayoutParams(dp(86),dp(36)));
+        Button smaller=button("−",()->styleQuran(-2,false));Button larger=button("+",()->styleQuran(2,false));Button background=button("فاتح / داكن",()->styleQuran(0,true));
+        tools.addView(smaller,new LinearLayout.LayoutParams(dp(46),dp(34)));tools.addView(larger,new LinearLayout.LayoutParams(dp(46),dp(34)));tools.addView(background,new LinearLayout.LayoutParams(dp(132),dp(34)));
+        View space=new View(owner);tools.addView(space,new LinearLayout.LayoutParams(0,1,1));
+        Button index=button("فهرس السور",()->route(reading?"mushaf":"surahs"));tools.addView(index,new LinearLayout.LayoutParams(dp(128),dp(34)));
+        if(reading){Button follow=button("متابعة التلاوة",()->{followReadingPlayback=true;drawPlayerText();});tools.addView(follow,new LinearLayout.LayoutParams(dp(132),dp(34)));}
+        LinearLayout.LayoutParams size=new LinearLayout.LayoutParams(-1,dp(40));size.bottomMargin=dp(6);content.addView(tools,size);
+    }
+    private void styleQuran(int delta,boolean toggle){
+        int size=Math.max(22,Math.min(48,number("tv_quran_font",30)+delta));put("tv_quran_font",String.valueOf(size));
+        if(toggle)put("tv_quran_light",String.valueOf(!pref("tv_quran_light","false").equals("true")));
+        if(quranCard!=null)quranCard.style(size,pref("tv_quran_light","false").equals("true"));
+    }
+    private void createQuranCard(){
+        quranCard=new NativeQuranCard(owner,uiFont,quranBook,number("tv_quran_font",30),pref("tv_quran_light","false").equals("true"));content.addView(quranCard,new LinearLayout.LayoutParams(-1,0,1));bodyScroll=quranCard.scroller();
+    }
     private void playerPage(){
-        ScrollView scroll=new ScrollView(owner);playerText=text("",28,TEXT);try{playerText.setTypeface(Typeface.createFromAsset(owner.getAssets(),"assets/fonts/AmiriQuran.ttf"));}catch(Exception ignored){}
-        playerText.setPadding(dp(28),dp(16),dp(28),dp(16));playerText.setLineSpacing(dp(8),1.3f);scroll.addView(playerText);scroll.setBackground(shape(0xd916272d,18));scroll.setFocusable(true);content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
-        renderedVerse=-1;drawPlayerText();
+        quranToolbar(false);createQuranCard();drawPlayerText();
         actions(new String[]{"سورة −","آية −","تشغيل / إيقاف","آية +","سورة +"},new Runnable[]{()->playSurah(Math.max(1,currentSurah-1)),()->seekVerse(-1),this::togglePlayback,()->seekVerse(1),()->playSurah(Math.min(114,currentSurah+1))});
-        if(verseStarts.length==0)notice("هذا التسجيل بلا توقيت آيات متاح حاليًا؛ نص السورة والتلاوة يعملان.");
     }
     private void drawPlayerText(){
-        if(playerText==null||surahs==null||currentSurah<1||currentSurah>surahs.length())return;
-        if(renderedVerse==currentVerse)return;renderedVerse=currentVerse;
-        JSONObject surah=surahs.optJSONObject(currentSurah-1);JSONArray ayahs=surah.optJSONArray("ayahs");if(ayahs==null)return;
-        int focusedPage=ayahs.optJSONObject(Math.min(ayahs.length()-1,Math.max(0,currentVerse-1))).optInt("page",1);
-        android.text.SpannableStringBuilder text=new android.text.SpannableStringBuilder(surah.optString("name")+"\n\n");
-        for(int i=0;i<ayahs.length();i++){JSONObject ayah=ayahs.optJSONObject(i);if(ayah.optInt("page")!=focusedPage)continue;int start=text.length();text.append(ayah.optString("text")).append(" ﴿").append(String.valueOf(ayah.optInt("numberInSurah"))).append("﴾ ");
-            if(ayah.optInt("numberInSurah")==currentVerse&&verseStarts.length>0)text.setSpan(new android.text.style.ForegroundColorSpan(ACCENT),start,text.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }playerText.setText(text);
+        if(quranCard==null||quranBook==null)return;
+        boolean timed=player!=null&&prepared&&verseStarts.length>0;
+        int activePage=quranBook.pageOf(currentSurah,currentVerse);
+        int displayPage=activePage;
+        if(page.equals("reading")){
+            if(followReadingPlayback&&timed&&pendingVerse==0&&readPage!=activePage){readPage=activePage;rememberReadPage();}
+            displayPage=readPage;
+        }
+        quranCard.show(displayPage,currentSurah,currentVerse,timed,playbackReader.optString("name",pref("tv_reader_name","")));
     }
     private void loadTimings(JSONObject reader,int surah,long sequence){
         if(!reader.optBoolean("timing",false))return;
-        io.execute(()->{try{JSONArray rows=new JSONArray(requestText("https://mp3quran.net/api/v3/ayat_timing?surah="+surah+"&read="+reader.optInt("id")));List<long[]> valid=new ArrayList<>();for(int i=0;i<rows.length();i++){JSONObject r=rows.optJSONObject(i);if(r==null||r.isNull("start_time"))continue;long start=r.optLong("start_time",-1);int verse=r.optInt("ayah",0);if(start>=0&&verse>0&&verse<=286)valid.add(new long[]{start,verse});}java.util.Collections.sort(valid,(a,b)->Long.compare(a[0],b[0]));main.post(()->{if(closed||sequence!=playbackSequence)return;verseStarts=new long[valid.size()];verseNumbers=new int[valid.size()];for(int i=0;i<valid.size();i++){verseStarts[i]=valid.get(i)[0];verseNumbers[i]=(int)valid.get(i)[1];}renderedVerse=-1;if(page.equals("player"))drawPlayerText();if(verseStarts.length==0&&pendingVerse>0){pendingVerse=0;message("التنقل بين الآيات","لا يتوفر توقيت للآيات في هذا التسجيل.");}applyVerseSeek();refreshDashboard();});}catch(Exception ignored){main.post(()->{if(sequence==playbackSequence&&pendingVerse>0){pendingVerse=0;message("التنقل بين الآيات","تعذّر تحميل توقيت الآيات لهذا التسجيل. أعد المحاولة أو اختر تسجيلًا آخر من الفهرس.");}});}});
+        io.execute(()->{try{JSONArray rows=new JSONArray(requestText("https://mp3quran.net/api/v3/ayat_timing?surah="+surah+"&read="+reader.optInt("id")));List<long[]> valid=new ArrayList<>();for(int i=0;i<rows.length();i++){JSONObject r=rows.optJSONObject(i);if(r==null||r.isNull("start_time"))continue;long start=r.optLong("start_time",-1);int verse=r.optInt("ayah",0);if(start>=0&&verse>0&&verse<=286)valid.add(new long[]{start,verse});}java.util.Collections.sort(valid,(a,b)->Long.compare(a[0],b[0]));main.post(()->{if(closed||sequence!=playbackSequence)return;verseStarts=new long[valid.size()];verseNumbers=new int[valid.size()];for(int i=0;i<valid.size();i++){verseStarts[i]=valid.get(i)[0];verseNumbers[i]=(int)valid.get(i)[1];}renderedVerse=-1;if(page.equals("player")||page.equals("reading"))drawPlayerText();if(verseStarts.length==0&&pendingVerse>0){pendingVerse=0;message("التنقل بين الآيات","لا يتوفر توقيت للآيات في هذا التسجيل.");}applyVerseSeek();refreshDashboard();});}catch(Exception ignored){main.post(()->{if(sequence==playbackSequence&&pendingVerse>0){pendingVerse=0;message("التنقل بين الآيات","تعذّر تحميل توقيت الآيات لهذا التسجيل. أعد المحاولة أو اختر تسجيلًا آخر من الفهرس.");}});}});
     }
     private void reading(){
-        String value=pages.get(readPage);if(value==null)value="جارٍ تجهيز المصحف…";
-        Typeface face=null;try{face=Typeface.createFromAsset(owner.getAssets(),"assets/fonts/AmiriQuran.ttf");}catch(Exception ignored){}
-        body(value,30,face);put("tv_read_page",String.valueOf(readPage));try{put("zikra_mushaf_page_v1",new JSONObject().put("page",readPage).put("scrollTop",0).toString());}catch(Exception ignored){}
-        TextView label=text("الصفحة "+readPage+" / 604",15,ACCENT);label.setGravity(Gravity.CENTER);content.addView(label);
-        actions(new String[]{"الصفحة السابقة","فهرس السور","الصفحة التالية"},new Runnable[]{()->turn(-1),()->{page="mushaf";render(true);},()->turn(1)});
+        followReadingPlayback=prepared&&quranBook!=null&&quranBook.pageOf(currentSurah,currentVerse)==readPage;
+        quranToolbar(true);createQuranCard();drawPlayerText();rememberReadPage();
+        actions(new String[]{"الصفحة السابقة","آية −","تشغيل / إيقاف","آية +","الصفحة التالية"},new Runnable[]{()->turn(-1),()->seekVerse(-1),this::playReading,()->seekVerse(1),()->turn(1)});
+        ScrollView sheet=bodyScroll;sheet.post(()->{if(sheet==bodyScroll)sheet.requestFocus();});
+    }
+    private void rememberReadPage(){
+        put("tv_read_page",String.valueOf(readPage));try{put("zikra_mushaf_page_v1",new JSONObject().put("page",readPage).put("scrollTop",0).toString());}catch(Exception ignored){}
+    }
+    private void playReading(){
+        if(quranBook==null)return;
+        if(player!=null&&prepared&&quranBook.pageOf(currentSurah,currentVerse)==readPage){followReadingPlayback=true;togglePlayback();return;}
+        java.util.List<NativeQuranBook.Verse> verses=quranBook.page(readPage);if(verses.isEmpty())return;NativeQuranBook.Verse first=verses.get(0);
+        try{JSONObject reader=new JSONObject(pref("tv_reader","{}"));if(first.number>1&&!reader.optBoolean("timing",false)){message("تشغيل الصفحة","اختر تسجيلًا يوفّر توقيت الآيات لتشغيل الصفحة من موضعها الصحيح.");return;}}catch(Exception ignored){}
+        followReadingPlayback=false;long sequence=playbackSequence;playSurah(first.surah);if(page.equals("reading")&&player!=null&&playbackSequence!=sequence){pendingVerse=first.number>1?first.number:0;followReadingPlayback=true;applyVerseSeek();drawPlayerText();}
     }
     private void turn(int delta){
+        followReadingPlayback=false;
         if(delta>0&&surahs!=null)for(int i=0;i<surahs.length();i++){JSONObject surah=surahs.optJSONObject(i);JSONArray verses=surah.optJSONArray("ayahs");if(verses!=null&&verses.length()>0&&verses.optJSONObject(verses.length()-1).optInt("page")==readPage)markCompleted("zikra_mushaf_read_surahs_v1",surah.optInt("number"));}
         readPage=NativeTvPolicy.page(readPage+delta);render(delta<0);
     }
@@ -403,7 +431,7 @@ final class NativeTvUi {
         if(weather==null)try{weather=new JSONObject(pref("tv_weather","{}"));}catch(Exception ignored){}
         weatherPage=new NativeWeatherView(owner,uiFont,motion,weather,mosqueName().isEmpty()?pref("zikra_city",""):mosqueName(),rtl(),weatherDay,value->weatherDay=value,this::loadWeather,()->route("location"));content.addView(weatherPage,new LinearLayout.LayoutParams(-1,0,1));
     }
-    private void loadContent(){final String language=pref("zikra_language","ar");io.execute(()->{try{JSONObject translated=new JSONObject(asset("assets/data/native-translations.json"));String source=asset("assets/data/quran-text.js");JSONObject q=new JSONObject(source.substring(source.indexOf('{'),source.lastIndexOf('}')+1));JSONArray all=q.getJSONArray("surahs");HashMap<Integer,StringBuilder> chunks=new HashMap<>();for(int i=0;i<all.length();i++){JSONObject s=all.getJSONObject(i);JSONArray ayahs=s.getJSONArray("ayahs");for(int j=0;j<ayahs.length();j++){JSONObject a=ayahs.getJSONObject(j);int page=a.getInt("page");StringBuilder chunk=chunks.get(page);if(chunk==null){chunk=new StringBuilder();chunks.put(page,chunk);}if(j==0)chunk.append("\n").append(s.getString("name")).append("\n\n");chunk.append(a.getString("text")).append(" ﴿").append(a.getInt("numberInSurah")).append("﴾ ");}}String memory=asset("assets/data/remembrance-"+language+".js");JSONArray items=new JSONArray(memory.substring(memory.indexOf('['),memory.lastIndexOf(']')+1));main.post(()->{if(closed||!language.equals(pref("zikra_language","ar")))return;translations=translated;surahs=all;memories=items;for(Integer p:chunks.keySet())pages.put(p,chunks.get(p).toString());if(page.equals("mushaf")||page.equals("surahs")||page.equals("reading")||page.equals("memory")||!language.equals("ar"))render(false);refreshDashboard();});}catch(Exception e){main.post(()->notice("تعذّر قراءة المحتوى المحلي."));}});}
+    private void loadContent(){final String language=pref("zikra_language","ar");io.execute(()->{try{JSONObject translated=new JSONObject(asset("assets/data/native-translations.json"));String source=asset("assets/data/quran-text.js");JSONObject q=new JSONObject(source.substring(source.indexOf('{'),source.lastIndexOf('}')+1));JSONArray all=q.getJSONArray("surahs");NativeQuranBook book=new NativeQuranBook(all);String memory=asset("assets/data/remembrance-"+language+".js");JSONArray items=new JSONArray(memory.substring(memory.indexOf('['),memory.lastIndexOf(']')+1));main.post(()->{if(closed||!language.equals(pref("zikra_language","ar")))return;translations=translated;surahs=all;quranBook=book;memories=items;if(page.equals("mushaf")||page.equals("surahs")||page.equals("reading")||page.equals("player")||page.equals("memory")||!language.equals("ar"))render(false);refreshDashboard();});}catch(Exception e){main.post(()->notice("تعذّر قراءة المحتوى المحلي."));}});}
     private String asset(String path)throws Exception{try(InputStream input=owner.getAssets().open(path);ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=input.read(b))!=-1)out.write(b,0,n);return out.toString("UTF-8");}}
     private String requestText(String address)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL(address).openConnection();c.setConnectTimeout(12000);c.setReadTimeout(15000);c.setRequestProperty("User-Agent","Zikra-Native-TV");try{if(c.getResponseCode()!=200)throw new java.io.IOException();try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){if(closed||Thread.currentThread().isInterrupted())throw new java.io.IOException();if(out.size()+n>4194304)throw new java.io.IOException();out.write(b,0,n);}return out.toString("UTF-8");}}finally{c.disconnect();}}
     private JSONObject request(String address)throws Exception{return new JSONObject(requestText(address));}
@@ -420,10 +448,10 @@ final class NativeTvUi {
             }
         }catch(Exception ignored){}
     }
-    private void playSurah(int number){try{JSONObject reader=new JSONObject(pref("tv_reader","{}"));if(!reader.has("server")){notice("اختر القارئ أولًا.");route("readers");return;}String available=","+reader.optString("surah_list")+",";if(!available.equals(",,")&&!available.contains(","+number+",")){notice("هذه السورة غير متوفرة لهذا القارئ.");return;}savePlayback();String title=surahs.getJSONObject(number-1).optString("name");String url=NativeTvPolicy.audioUrl(reader.getString("server"),number);playUrl(url,title,true);playbackReader=reader;currentSurah=number;currentVerse=1;verseStarts=new long[0];verseNumbers=new int[0];if(page.equals("home"))refreshDashboard();else if(!page.equals("player"))route("player");else render(false);loadTimings(reader,number,playbackSequence);}catch(Exception e){error();}}
-    private void playUrl(String url,String title,boolean remember){if(!url.startsWith("https://")){notice("رابط الصوت غير صالح.");return;}savePlayback();releasePlayer();playbackSequence++;pendingVerse=0;seekingVerse=false;playingUrl=url;playingName=title;prepared=false;paused=true;player=new MediaPlayer();player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());final MediaPlayer active=player;try{active.setDataSource(url);active.setOnPreparedListener(p->{if(player!=active)return;prepared=true;int offset=number("tv_resume_ms",0);if(pendingVerse==0&&remember&&url.equals(pref("tv_last_url",""))&&offset>0)p.seekTo(offset);p.start();paused=false;applyVerseSeek();main.removeCallbacks(audioTick);main.post(audioTick);if(remember){put("tv_last_url",url);put("tv_last_name",title);}notice("يعمل الآن: "+title);refreshDashboard();});active.setOnSeekCompleteListener(p->{if(player==p&&seekingVerse){if(Math.abs(p.getCurrentPosition()-seekTargetMs)>1000)return;currentVerse=pendingVerse;pendingVerse=0;seekingVerse=false;renderedVerse=-1;if(page.equals("player"))drawPlayerText();refreshDashboard();savePlayback();}});active.setOnCompletionListener(p->{paused=true;put("tv_resume_ms","0");if(remember)markCompleted("played_surahs",currentSurah);notice("اكتملت التلاوة");refreshDashboard();});active.setOnErrorListener((p,w,e)->{if(player==active){releasePlayer();notice("تعذّر تشغيل الصوت. تحقق من الإنترنت وأعد المحاولة.");}return true;});active.prepareAsync();notice("جارٍ تجهيز "+title+"…");}catch(Exception e){releasePlayer();error();}}
+    private void playSurah(int number){try{JSONObject reader=new JSONObject(pref("tv_reader","{}"));if(!reader.has("server")){notice("اختر القارئ أولًا.");route("readers");return;}String available=","+reader.optString("surah_list")+",";if(!available.equals(",,")&&!available.contains(","+number+",")){notice("هذه السورة غير متوفرة لهذا القارئ.");return;}savePlayback();String title=surahs.getJSONObject(number-1).optString("name");String url=NativeTvPolicy.audioUrl(reader.getString("server"),number);playUrl(url,title,true);playbackReader=reader;currentSurah=number;currentVerse=1;verseStarts=new long[0];verseNumbers=new int[0];if(page.equals("home"))refreshDashboard();else if(page.equals("reading"))drawPlayerText();else if(!page.equals("player"))route("player");else render(false);loadTimings(reader,number,playbackSequence);}catch(Exception e){error();}}
+    private void playUrl(String url,String title,boolean remember){if(!url.startsWith("https://")){notice("رابط الصوت غير صالح.");return;}savePlayback();releasePlayer();playbackSequence++;pendingVerse=0;seekingVerse=false;playingUrl=url;playingName=title;prepared=false;paused=true;player=new MediaPlayer();player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());final MediaPlayer active=player;try{active.setDataSource(url);active.setOnPreparedListener(p->{if(player!=active)return;prepared=true;int offset=number("tv_resume_ms",0);if(pendingVerse==0&&remember&&url.equals(pref("tv_last_url",""))&&offset>0)p.seekTo(offset);p.start();paused=false;applyVerseSeek();main.removeCallbacks(audioTick);main.post(audioTick);if(remember){put("tv_last_url",url);put("tv_last_name",title);}notice("يعمل الآن: "+title);if(page.equals("player")||page.equals("reading"))drawPlayerText();refreshDashboard();});active.setOnSeekCompleteListener(p->{if(player==p&&seekingVerse){if(Math.abs(p.getCurrentPosition()-seekTargetMs)>1000)return;currentVerse=pendingVerse;pendingVerse=0;seekingVerse=false;renderedVerse=-1;if(page.equals("player")||page.equals("reading"))drawPlayerText();refreshDashboard();savePlayback();}});active.setOnCompletionListener(p->{paused=true;put("tv_resume_ms","0");if(remember)markCompleted("played_surahs",currentSurah);notice("اكتملت التلاوة");refreshDashboard();});active.setOnErrorListener((p,w,e)->{if(player==active){releasePlayer();notice("تعذّر تشغيل الصوت. تحقق من الإنترنت وأعد المحاولة.");}return true;});active.prepareAsync();notice("جارٍ تجهيز "+title+"…");}catch(Exception e){releasePlayer();error();}}
     private void togglePlayback(){if(player==null){resumePlayback();return;}if(!prepared)return;try{if(player.isPlaying()){player.pause();paused=true;}else{player.start();paused=false;}notice(paused?"تم إيقاف التلاوة مؤقتًا":"يعمل الآن: "+playingName);refreshDashboard();}catch(Exception e){releasePlayer();}}
-    private void resumePlayback(){savePlayback();releasePlayer();verseStarts=new long[0];verseNumbers=new int[0];String url=pref("tv_last_url","");if(url.isEmpty()){route("surahs");return;}try{JSONObject bookmark=new JSONObject(pref("quran_bookmark","{}"));currentSurah=bookmark.optInt("surahNum",currentSurah);currentVerse=bookmark.optInt("ayahNum",1);JSONObject reader=new JSONObject(pref("tv_reader","{}"));for(int i=0;i<readers.length();i++)if(readers.optJSONObject(i).optInt("id")==bookmark.optInt("readerId")){reader=readers.optJSONObject(i);break;}playbackReader=reader;playUrl(url,pref("tv_last_name","القرآن الكريم"),true);if(!page.equals("player")&&!page.equals("home"))route("player");refreshDashboard();loadTimings(reader,currentSurah,playbackSequence);}catch(Exception e){playUrl(url,pref("tv_last_name","القرآن الكريم"),true);}}
+    private void resumePlayback(){savePlayback();releasePlayer();verseStarts=new long[0];verseNumbers=new int[0];String url=pref("tv_last_url","");if(url.isEmpty()){route("surahs");return;}try{JSONObject bookmark=new JSONObject(pref("quran_bookmark","{}"));currentSurah=bookmark.optInt("surahNum",currentSurah);currentVerse=bookmark.optInt("ayahNum",1);JSONObject reader=new JSONObject(pref("tv_reader","{}"));for(int i=0;i<readers.length();i++)if(readers.optJSONObject(i).optInt("id")==bookmark.optInt("readerId")){reader=readers.optJSONObject(i);break;}playbackReader=reader;playUrl(url,pref("tv_last_name","القرآن الكريم"),true);if(!page.equals("player")&&!page.equals("home")&&!page.equals("reading"))route("player");refreshDashboard();loadTimings(reader,currentSurah,playbackSequence);}catch(Exception e){playUrl(url,pref("tv_last_name","القرآن الكريم"),true);}}
     private void savePlayback(){if(player==null||!prepared||!playingUrl.equals(pref("tv_last_url","")))return;try{int position=player.getCurrentPosition();put("tv_resume_ms",String.valueOf(position));
         JSONObject reader=playbackReader;put("quran_bookmark",new JSONObject().put("surahNum",currentSurah).put("readerId",reader.optInt("id")).put("ayahNum",currentVerse).put("time",position/1000d).put("surahName",playingName).put("readerName",pref("tv_reader_name","")).put("updated",System.currentTimeMillis()).toString());}catch(Exception ignored){}}
     private void releasePlayer(){main.removeCallbacks(audioTick);prepared=false;paused=true;if(player!=null){player.release();player=null;}}
