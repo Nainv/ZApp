@@ -213,7 +213,7 @@ jobs:
                   minSdk 23
                   targetSdk 35
                   versionCode generatedVersionCode
-                  versionName '1.1.4'
+                  versionName '1.1.5'
               }
 
               signingConfigs {
@@ -336,7 +336,7 @@ jobs:
           import hashlib, json, os
           from pathlib import Path
           apk = Path('app/build/outputs/apk/release/app-release.apk')
-          manifest = dict(packageName='com.zikra.tv', versionCode=1000000 + int(os.environ['GITHUB_RUN_NUMBER']), versionName='1.1.4', apkName='Zikratv.apk', sha256=hashlib.sha256(apk.read_bytes()).hexdigest())
+          manifest = dict(packageName='com.zikra.tv', versionCode=1000000 + int(os.environ['GITHUB_RUN_NUMBER']), versionName='1.1.5', apkName='Zikratv.apk', sha256=hashlib.sha256(apk.read_bytes()).hexdigest())
           apk.with_name('Zikratv.apk').write_bytes(apk.read_bytes())
           apk.with_name('update.json').write_text(json.dumps(manifest), encoding='utf-8')
           PY

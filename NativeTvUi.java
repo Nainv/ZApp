@@ -110,7 +110,6 @@ final class NativeTvUi {
     private long lastUpdateCheck;
     private NativeQuranCard quranCard;
     private NativeQuranBook quranBook;
-    private boolean followReadingPlayback;
 
     private long lastBookmark;
     private final Runnable audioTick=new Runnable(){public void run(){
@@ -131,7 +130,7 @@ final class NativeTvUi {
         uiFont=owner.getResources().getFont(R.font.outfit);
         root=new FrameLayout(owner);root.setBackgroundColor(Color.BLACK);root.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         sky=new TvSkyView(owner,null);root.addView(sky,new FrameLayout.LayoutParams(-1,-1));sky.setIntensity(65);
-        content=new LinearLayout(owner);content.setOrientation(LinearLayout.VERTICAL);content.setPadding(dp(32),dp(20),dp(32),dp(18));root.addView(content,new FrameLayout.LayoutParams(-1,-1));
+        content=new LinearLayout(owner);content.setOrientation(LinearLayout.VERTICAL);content.setClipChildren(false);content.setClipToPadding(false);content.setPadding(dp(32),dp(20),dp(32),dp(18));root.addView(content,new FrameLayout.LayoutParams(-1,-1));
         motion=new NativeTvMotion(root);
         clock=text("",24,MUTED);status=text("",15,ACCENT);
         status.setPadding(dp(12),dp(8),dp(12),dp(8));status.setBackground(shape(0xed102829,12));status.setVisibility(View.GONE);
@@ -146,7 +145,7 @@ final class NativeTvUi {
     private void put(String key,String value){data.edit().putString(key,value).apply();}
     private String format(String pattern,long time){SimpleDateFormat f=new SimpleDateFormat(pattern,new Locale.Builder().setLocale(Locale.forLanguageTag(pref("zikra_language","ar"))).setUnicodeLocaleKeyword("nu","latn").build());f.setTimeZone(TimeZone.getTimeZone(AdhanScheduler.configuration(owner).optString("zone",TimeZone.getDefault().getID())));return f.format(new Date(time));}
     private String tr(String ar){String language=pref("zikra_language","ar");if(language.equals("ar"))return ar;JSONArray translated=translations.optJSONArray(ar);if(translated!=null)return translated.optString(language.equals("de")?1:0,ar);String[][] labels={{"الرئيسية","Home","Startseite"},{"الإعدادات","Settings","Einstellungen"},{"القرآن الكريم","Quran","Koran"},{"المصحف","Read Quran","Koran lesen"},{"الأذكار","Remembrance","Gedenken"},{"مواقيت الصلاة","Prayer times","Gebetszeiten"},{"الطقس","Weather","Wetter"},{"القبلة","Qibla","Qibla"},{"الموقع والمسجد","Location & mosque","Standort & Moschee"},{"اللغة","Language","Sprache"},{"تحديث التطبيق","Update app","App aktualisieren"},{"رجوع","Back","Zurück"},{"التسبيح","Tasbih","Tasbih"},{"تشغيل / إيقاف","Play / Pause","Wiedergabe / Pause"}};for(String[] row:labels)if(row[0].equals(ar))return row[language.equals("de")?2:1];return ar;}
-    private Button button(String label,Runnable action){Button v=new Button(owner);v.setDefaultFocusHighlightEnabled(false);v.setText(tr(label));v.setTextSize(15);v.setTypeface(uiFont);v.setTextColor(TEXT);v.setAllCaps(false);v.setBackground(shape(0x88233138,18));v.setPadding(dp(12),0,dp(12),0);v.setOnFocusChangeListener((view,on)->motion.focus(view,on,false));v.setOnClickListener(view->{motion.press(view);action.run();});return v;}
+    private Button button(String label,Runnable action){Button v=new Button(owner);v.setId(View.generateViewId());v.setFocusable(true);v.setFocusableInTouchMode(true);v.setDefaultFocusHighlightEnabled(false);v.setMinHeight(0);v.setMinimumHeight(0);v.setText(tr(label));v.setTextSize(15);v.setTypeface(uiFont);v.setTextColor(TEXT);v.setAllCaps(false);v.setBackground(shape(0x88233138,18));v.setPadding(dp(12),0,dp(12),0);v.setOnFocusChangeListener((view,on)->{view.setBackground(shape(on?0xff294950:0x88233138,18));motion.focus(view,on,false);});v.setOnClickListener(view->{motion.press(view);action.run();});return v;}
     private void route(String target){lastBackAt=0;rememberSelection();history.push(page);page=target;render(false);}
     private void rememberSelection(){if(homeDashboard!=null){View focused=homeDashboard.findFocus();if(focused!=null&&focused.getId()!=View.NO_ID)homeFocusId=focused.getId();}if(grid!=null){View v=grid.findFocus();if(v!=null){View row=grid.findContainingItemView(v);if(row!=null)selections.put(page,grid.getChildAdapterPosition(row));}}}
     private boolean rtl(){return pref("zikra_language","ar").equals("ar");}
@@ -158,23 +157,24 @@ final class NativeTvUi {
     }
     private void render(boolean returning){
         if(closed)return;requestId++;motion.hide();if(updateBadge!=null)updateBadge.stopPulse();updateBadge=null;content.removeAllViews();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;quranCard=null;
+        content.setPadding(dp(page.equals("reading")?16:32),dp(page.equals("reading")?6:20),dp(page.equals("reading")?16:32),dp(page.equals("reading")?8:18));
         content.setLayoutDirection(pref("zikra_language","ar").equals("ar")?View.LAYOUT_DIRECTION_RTL:View.LAYOUT_DIRECTION_LTR);
-        LinearLayout header=new LinearLayout(owner);header.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);header.setGravity(Gravity.CENTER_VERTICAL);content.addView(header,new LinearLayout.LayoutParams(-1,dp(50)));
+        LinearLayout header=new LinearLayout(owner);header.setClipChildren(false);header.setClipToPadding(false);header.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);header.setGravity(Gravity.CENTER_VERTICAL);content.addView(header,new LinearLayout.LayoutParams(-1,dp(page.equals("reading")?42:50)));
         if(clock.getParent()!=null)((ViewGroup)clock.getParent()).removeView(clock);
         if(page.equals("home")){
-            Button settings=button("⚙",()->route("settings"));settings.setContentDescription("الإعدادات");header.addView(settings,new LinearLayout.LayoutParams(dp(48),dp(40)));
+            Button settings=button("⚙",()->route("settings"));settings.setNextFocusDownId(NativeTvHome.WEATHER);settings.setContentDescription("الإعدادات");header.addView(settings,new LinearLayout.LayoutParams(dp(48),dp(40)));
             clock.setGravity(Gravity.CENTER);header.addView(clock,new LinearLayout.LayoutParams(dp(92),-2));
-            Button mushaf=button("المصحف",()->route("mushaf"));header.addView(mushaf,new LinearLayout.LayoutParams(dp(90),dp(40)));
+            Button mushaf=button("المصحف",()->route("mushaf"));mushaf.setNextFocusDownId(NativeTvHome.WEATHER);settings.setNextFocusRightId(mushaf.getId());mushaf.setNextFocusLeftId(settings.getId());header.addView(mushaf,new LinearLayout.LayoutParams(dp(90),dp(40)));
             updateBadge=new NativeUpdateNotice(owner,uiFont,motion,()->{if(!updateBusy()){updatePhase="checking";updateProgress=-1;refreshUpdateBadge();owner.startNativeUpdate();}});header.addView(updateBadge,new LinearLayout.LayoutParams(dp(142),dp(40)));refreshUpdateBadge();
         }else{Button back=button("رجوع",this::back);header.addView(back,new LinearLayout.LayoutParams(dp(90),dp(40)));}
         View space=new View(owner);header.addView(space,new LinearLayout.LayoutParams(0,1,1));
         TextView name=text("ذِكْرَىٰ",27,TEXT);header.addView(name,new LinearLayout.LayoutParams(-2,-2));
         android.widget.ImageView logo=new android.widget.ImageView(owner);if(brandBitmap!=null)logo.setImageBitmap(brandBitmap);logo.setContentDescription("ذِكرى");logo.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);LinearLayout.LayoutParams logoSize=new LinearLayout.LayoutParams(dp(46),dp(44));logoSize.leftMargin=dp(10);header.addView(logo,logoSize);
-        TextView subtitle=text(page.equals("home")?format("EEE, dd MMM yyyy",AdhanScheduler.now(owner)):tr(title(page)),14,MUTED);subtitle.setPadding(0,dp(4),0,dp(10));content.addView(subtitle);
+        TextView subtitle=text(page.equals("home")?format("EEE, dd MMM yyyy",AdhanScheduler.now(owner)):tr(title(page)),14,MUTED);subtitle.setPadding(0,dp(4),0,dp(10));if(!page.equals("reading"))content.addView(subtitle);
         if(page.equals("home")){
             homeDashboard=new NativeTvHome(owner,motion,uiFont,this::homeAction,this::tr,rtl());
             content.addView(homeDashboard,new LinearLayout.LayoutParams(-1,0,1));homeMinute=-1;homeSchedule="";refreshDashboard();
-            NativeTvHome dashboard=homeDashboard;dashboard.post(()->{if(dashboard==homeDashboard)dashboard.restoreFocus(homeFocusId);});
+            NativeTvHome dashboard=homeDashboard;dashboard.setHeaderNavigation(header.getChildAt(0).getId(),header.getChildAt(2).getId());dashboard.post(()->{if(dashboard==homeDashboard)dashboard.restoreFocus(homeFocusId);});
         }
         else if(page.equals("player")){playerPage();}
         else if(page.equals("reading")){reading();}
@@ -272,7 +272,7 @@ final class NativeTvUi {
         tools.addView(smaller,new LinearLayout.LayoutParams(dp(46),dp(34)));tools.addView(larger,new LinearLayout.LayoutParams(dp(46),dp(34)));tools.addView(background,new LinearLayout.LayoutParams(dp(132),dp(34)));
         View space=new View(owner);tools.addView(space,new LinearLayout.LayoutParams(0,1,1));
         Button index=button("فهرس السور",()->route(reading?"mushaf":"surahs"));tools.addView(index,new LinearLayout.LayoutParams(dp(128),dp(34)));
-        if(reading){Button follow=button("متابعة التلاوة",()->{followReadingPlayback=true;drawPlayerText();});tools.addView(follow,new LinearLayout.LayoutParams(dp(132),dp(34)));}
+        if(reading){Button previous=button("◀",()->turn(-1)),next=button("▶",()->turn(1));previous.setContentDescription("الصفحة السابقة");next.setContentDescription("الصفحة التالية");tools.addView(previous,new LinearLayout.LayoutParams(dp(54),dp(34)));tools.addView(next,new LinearLayout.LayoutParams(dp(54),dp(34)));}
         LinearLayout.LayoutParams size=new LinearLayout.LayoutParams(-1,dp(40));size.bottomMargin=dp(6);content.addView(tools,size);
     }
     private void styleQuran(int delta,boolean toggle){
@@ -290,42 +290,23 @@ final class NativeTvUi {
     private void drawPlayerText(){
         if(quranCard==null||quranBook==null)return;
         boolean timed=player!=null&&prepared&&verseStarts.length>0;
+        if(page.equals("reading")){quranCard.show(readPage,0,0,false,"");return;}
         int activePage=quranBook.pageOf(currentSurah,currentVerse);
-        int displayPage=activePage;
-        if(page.equals("reading")){
-            if(followReadingPlayback&&timed&&pendingVerse==0&&readPage!=activePage){readPage=activePage;rememberReadPage();}
-            displayPage=readPage;
-        }
-        quranCard.show(displayPage,currentSurah,currentVerse,timed,playbackReader.optString("name",pref("tv_reader_name","")));
+        quranCard.show(activePage,currentSurah,currentVerse,timed,playbackReader.optString("name",pref("tv_reader_name","")));
     }
+
     private void loadTimings(JSONObject reader,int surah,long sequence){
         if(!reader.optBoolean("timing",false))return;
         io.execute(()->{try{JSONArray rows=new JSONArray(requestText("https://mp3quran.net/api/v3/ayat_timing?surah="+surah+"&read="+reader.optInt("id")));List<long[]> valid=new ArrayList<>();for(int i=0;i<rows.length();i++){JSONObject r=rows.optJSONObject(i);if(r==null||r.isNull("start_time"))continue;long start=r.optLong("start_time",-1);int verse=r.optInt("ayah",0);if(start>=0&&verse>0&&verse<=286)valid.add(new long[]{start,verse});}java.util.Collections.sort(valid,(a,b)->Long.compare(a[0],b[0]));main.post(()->{if(closed||sequence!=playbackSequence)return;verseStarts=new long[valid.size()];verseNumbers=new int[valid.size()];for(int i=0;i<valid.size();i++){verseStarts[i]=valid.get(i)[0];verseNumbers[i]=(int)valid.get(i)[1];}renderedVerse=-1;if(page.equals("player")||page.equals("reading"))drawPlayerText();if(verseStarts.length==0&&pendingVerse>0){pendingVerse=0;message("التنقل بين الآيات","لا يتوفر توقيت للآيات في هذا التسجيل.");}applyVerseSeek();refreshDashboard();});}catch(Exception ignored){main.post(()->{if(sequence==playbackSequence&&pendingVerse>0){pendingVerse=0;message("التنقل بين الآيات","تعذّر تحميل توقيت الآيات لهذا التسجيل. أعد المحاولة أو اختر تسجيلًا آخر من الفهرس.");}});}});
     }
     private void reading(){
-        followReadingPlayback=prepared&&quranBook!=null&&quranBook.pageOf(currentSurah,currentVerse)==readPage;
         quranToolbar(true);createQuranCard();drawPlayerText();rememberReadPage();
-        actions(new String[]{"الصفحة السابقة","آية −","تشغيل / إيقاف","آية +","الصفحة التالية"},new Runnable[]{()->turn(-1),()->seekReadingVerse(-1),this::playReading,()->seekReadingVerse(1),()->turn(1)});
         ScrollView sheet=bodyScroll;sheet.post(()->{if(sheet==bodyScroll)sheet.requestFocus();});
     }
     private void rememberReadPage(){
         put("tv_read_page",String.valueOf(readPage));try{put("zikra_mushaf_page_v1",new JSONObject().put("page",readPage).put("scrollTop",0).toString());}catch(Exception ignored){}
     }
-    private void seekReadingVerse(int delta){
-        if(quranBook==null)return;
-        int planned=quranBook.pageOf(currentSurah,pendingVerse>0?pendingVerse:currentVerse);
-        if(player==null||planned!=readPage){long sequence=playbackSequence;playReading();if(playbackSequence==sequence)return;}
-        followReadingPlayback=true;seekVerse(delta);
-    }
-    private void playReading(){
-        if(quranBook==null)return;
-        if(player!=null&&prepared&&quranBook.pageOf(currentSurah,currentVerse)==readPage){followReadingPlayback=true;togglePlayback();return;}
-        java.util.List<NativeQuranBook.Verse> verses=quranBook.page(readPage);if(verses.isEmpty())return;NativeQuranBook.Verse first=verses.get(0);
-        try{JSONObject reader=new JSONObject(pref("tv_reader","{}"));if(first.number>1&&!reader.optBoolean("timing",false)){message("تشغيل الصفحة","اختر تسجيلًا يوفّر توقيت الآيات لتشغيل الصفحة من موضعها الصحيح.");return;}}catch(Exception ignored){}
-        followReadingPlayback=false;long sequence=playbackSequence;playSurah(first.surah);if(page.equals("reading")&&player!=null&&playbackSequence!=sequence){pendingVerse=first.number>1?first.number:0;followReadingPlayback=true;applyVerseSeek();drawPlayerText();}
-    }
     private void turn(int delta){
-        followReadingPlayback=false;
         if(delta>0&&surahs!=null)for(int i=0;i<surahs.length();i++){JSONObject surah=surahs.optJSONObject(i);JSONArray verses=surah.optJSONArray("ayahs");if(verses!=null&&verses.length()>0&&verses.optJSONObject(verses.length()-1).optInt("page")==readPage)markCompleted("zikra_mushaf_read_surahs_v1",surah.optInt("number"));}
         readPage=NativeTvPolicy.page(readPage+delta);render(delta<0);
     }

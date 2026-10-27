@@ -37,12 +37,12 @@ final class NativeQuranCard extends LinearLayout {
     private final Runnable fit=this::fitPage;
     private String reader="";
     NativeQuranCard(Context context,Typeface uiFont,NativeQuranBook index,int size,boolean lightPage){
-        super(context);book=index;setOrientation(VERTICAL);setLayoutDirection(View.LAYOUT_DIRECTION_RTL);setPadding(dp(22),dp(12),dp(22),dp(12));
-        heading=new TextView(context);heading.setTypeface(uiFont);heading.setTextSize(24);heading.setGravity(Gravity.CENTER);addView(heading,new LayoutParams(-1,dp(34)));
+        super(context);book=index;setOrientation(VERTICAL);setLayoutDirection(View.LAYOUT_DIRECTION_RTL);setPadding(dp(18),dp(8),dp(18),dp(8));setClipToOutline(true);
+        heading=new TextView(context);heading.setTypeface(uiFont);heading.setTextSize(24);heading.setGravity(Gravity.CENTER);addView(heading,new LayoutParams(-1,dp(30)));
         subtitle=new TextView(context);subtitle.setTypeface(uiFont);subtitle.setTextSize(13);subtitle.setGravity(Gravity.CENTER);addView(subtitle,new LayoutParams(-1,dp(24)));
-        scroll=new ScrollView(context);scroll.setFillViewport(true);scroll.setClipToPadding(false);scroll.setDefaultFocusHighlightEnabled(false);scroll.setFocusable(true);scroll.setPadding(0,dp(14),0,dp(10));addView(scroll,new LayoutParams(-1,0,1));
+        scroll=new ScrollView(context);scroll.setFillViewport(true);scroll.setClipToPadding(false);scroll.setDefaultFocusHighlightEnabled(false);scroll.setFocusable(true);scroll.setPadding(0,dp(4),0,dp(4));addView(scroll,new LayoutParams(-1,0,1));
         text=new TextView(context);try{text.setTypeface(Typeface.createFromAsset(context.getAssets(),"assets/fonts/AmiriQuran.ttf"));}catch(Exception ignored){}
-        text.setTextDirection(View.TEXT_DIRECTION_RTL);text.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);text.setGravity(Gravity.CENTER);text.setLineSpacing(dp(2),1.12f);text.setPadding(dp(8),dp(12),dp(8),dp(20));text.setTextIsSelectable(false);text.setIncludeFontPadding(true);scroll.addView(text,new ScrollView.LayoutParams(-1,-2));scroll.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->{if(r-l!=or-ol||b-t!=ob-ot)scheduleFit();});style(size,lightPage);
+        text.setTextDirection(View.TEXT_DIRECTION_RTL);text.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);text.setGravity(Gravity.CENTER);text.setLineSpacing(dp(2),1.12f);text.setPadding(dp(6),dp(4),dp(6),dp(6));text.setTextIsSelectable(false);text.setIncludeFontPadding(true);scroll.addView(text,new ScrollView.LayoutParams(-1,-2));scroll.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->{if(r-l!=or-ol||b-t!=ob-ot)scheduleFit();});style(size,lightPage);
     }
     ScrollView scroller(){return scroll;}
     void style(int size,boolean lightPage){
@@ -63,13 +63,20 @@ final class NativeQuranCard extends LinearLayout {
         heading.setText(verses.isEmpty()?"المصحف الشريف":verses.get(0).name);int previous=-1;
         for(NativeQuranBook.Verse verse:verses){
             if(previous!=-1&&previous!=verse.surah){content.append("\n\n");int titleStart=content.length();content.append(verse.name).append("\n\n");content.setSpan(new ForegroundColorSpan(0xffc9ad70),titleStart,content.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);}
-            if(verse.number==1&&verse.surah!=1&&verse.surah!=9&&!book.basmala.isEmpty())content.append(book.basmala).append("\n");
+            if(NativeQuranPolicy.hasOpening(verse.surah,verse.number)){
+                if(content.length()>0&&content.charAt(content.length()-1)!='\n')content.append("\n\n");
+                int opening=content.length();content.append(NativeQuranPolicy.ORNAMENT);
+                if(verse.surah==1){content.append(" ");appendMarker(content,verse.number);ranges.put(NativeQuranPolicy.key(verse.surah,verse.number),new int[]{opening,content.length()});}
+                content.setSpan(new ForegroundColorSpan(0xffc9ad70),opening,content.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);content.append("\n\n");
+                if(verse.surah==1){previous=verse.surah;continue;}
+            }
             String value=NativeQuranPolicy.displayText(verse.surah,verse.number,verse.text,book.basmala);
-            int start=content.length();content.append(value.replace('\n',' ').trim()).append(" ");int marker=content.length();content.append("\ufffc");content.setSpan(new VerseMark(verse.number),marker,marker+1,Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            int start=content.length();content.append(value.replace('\n',' ').trim()).append(" ");appendMarker(content,verse.number);
             ranges.put(NativeQuranPolicy.key(verse.surah,verse.number),new int[]{start,content.length()});content.append("  ");previous=verse.surah;
         }
         if(content.length()==0)content.append("جارٍ تجهيز نص المصحف…");text.setText(content,TextView.BufferType.SPANNABLE);passage=(Spannable)text.getText();shade=null;ink=null;activeStart=-1;activeEnd=-1;scheduleFit();
     }
+    private void appendMarker(SpannableStringBuilder content,int number){int at=content.length();content.append("\ufffc");content.setSpan(new VerseMark(number),at,at+1,Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);}
     private void paintActive(int start,int end){
         if(passage==null)return;if(shade!=null)passage.removeSpan(shade);if(ink!=null)passage.removeSpan(ink);shade=null;ink=null;
         if(start<0||end<=start)return;
