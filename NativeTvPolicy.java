@@ -6,6 +6,7 @@ import java.util.Locale;
 public final class NativeTvPolicy {
     private NativeTvPolicy(){}
     public static boolean exitOnBack(long last,long now){return last>0&&now>=last&&now-last<=2000;}
+    public static boolean exitOnBack(boolean home,int depth,long last,long now){return home&&depth==0&&exitOnBack(last,now);}
     public static int horizontalStep(boolean rtl,boolean left){return left?(rtl?1:-1):(rtl?-1:1);}
     public static int stepVerse(int current,int delta,int total){return Math.max(1,Math.min(Math.max(1,total),current+delta));}
     public static int page(int value){return Math.max(1,Math.min(604,value));}

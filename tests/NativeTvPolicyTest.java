@@ -12,6 +12,7 @@ public final class NativeTvPolicyTest {
   check(NativeTvPolicy.ayahAt(new long[]{100,200,300},new int[]{1,2,3},99)==1);check(NativeTvPolicy.ayahAt(new long[]{100,200,300},new int[]{1,2,3},200)==2);check(NativeTvPolicy.ayahAt(new long[]{100,200,300},new int[]{1,2,3},999)==3);check(NativeTvPolicy.ayahAt(new long[0],new int[0],100)==0);
   double berlin=NativeTvPolicy.qibla(52.52,13.405);check(berlin>130&&berlin<140);check(NativeTvPolicy.qibla(-33.87,151.2)>=0);
   check(!NativeTvPolicy.exitOnBack(0,100));check(NativeTvPolicy.exitOnBack(100,2100));check(!NativeTvPolicy.exitOnBack(100,2101));check(!NativeTvPolicy.exitOnBack(200,100));
+  check(!NativeTvPolicy.exitOnBack(false,2,100,101));check(!NativeTvPolicy.exitOnBack(true,1,100,101));check(!NativeTvPolicy.exitOnBack(true,0,0,101));check(NativeTvPolicy.exitOnBack(true,0,100,101));
   check(NativeTvPolicy.horizontalStep(true,true)==1);check(NativeTvPolicy.horizontalStep(true,false)==-1);check(NativeTvPolicy.horizontalStep(false,false)==1);
   check(NativeTvPolicy.stepVerse(1,-1,7)==1);check(NativeTvPolicy.stepVerse(7,1,7)==7);check(NativeTvPolicy.stepVerse(3,1,7)==4);
   System.out.println("Native TV: "+count+" checks passed");

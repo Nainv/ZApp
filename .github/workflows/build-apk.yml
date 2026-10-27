@@ -114,7 +114,7 @@ jobs:
           fi
 
           test -s "app/src/main/java/com/zikra/tv/MainActivity.java"
-          for SOURCE in NativeQuranBook NativeQuranCard NativeQuranPolicy NativeAyahMark NativeTvChoices NativeWeatherView NativeTvHome NativeTvPolicy NativeTvUi NativeTvMotion TvSky TvSkyView AppUpdater UpdatePolicy ClockPolicy PrayerAlarmPolicy PrayerCalendar AdhanScheduler AdhanReceiver AdhanService AdhanRefreshJob UpdateFileProvider UpdateRestartReceiver RuntimeSupport BootReceiver; do
+          for SOURCE in NativeUpdateNotice NativeQuranBook NativeQuranCard NativeQuranPolicy NativeAyahMark NativeTvChoices NativeWeatherView NativeTvHome NativeTvPolicy NativeTvUi NativeTvMotion TvSky TvSkyView AppUpdater UpdatePolicy ClockPolicy PrayerAlarmPolicy PrayerCalendar AdhanScheduler AdhanReceiver AdhanService AdhanRefreshJob UpdateFileProvider UpdateRestartReceiver RuntimeSupport BootReceiver; do
             cp "./$SOURCE.java" "app/src/main/java/com/zikra/tv/$SOURCE.java"
           done
           test -s "app/src/main/AndroidManifest.xml"
@@ -213,7 +213,7 @@ jobs:
                   minSdk 23
                   targetSdk 35
                   versionCode generatedVersionCode
-                  versionName '1.1.2'
+                  versionName '1.1.3'
               }
 
               signingConfigs {
@@ -322,13 +322,20 @@ jobs:
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)"
           test -n "$APKSIGNER"
 
-          "$APKSIGNER" verify --verbose --print-certs "$APK"
+          "$APKSIGNER" verify --verbose --print-certs "$APK" | tee "$RUNNER_TEMP/zikra-apk-signature.txt"
+          python3 - <<'PY_SIGNER'
+          import os
+          from pathlib import Path
+          certificate = "d73500da98b7280d7906d3fa828d1857088ff811c623e385e1213ada4f03d4ce"
+          output = (Path(os.environ["RUNNER_TEMP"]) / "zikra-apk-signature.txt").read_text().lower()
+          assert "signer #1 certificate sha-256 digest: " + certificate in output, "APK signing identity changed; refusing to publish"
+          PY_SIGNER
           echo 'APK signature verified.'
           python3 - <<'PY'
           import hashlib, json, os
           from pathlib import Path
           apk = Path('app/build/outputs/apk/release/app-release.apk')
-          manifest = dict(packageName='com.zikra.tv', versionCode=1000000 + int(os.environ['GITHUB_RUN_NUMBER']), versionName='1.1.2', apkName=apk.name, sha256=hashlib.sha256(apk.read_bytes()).hexdigest())
+          manifest = dict(packageName='com.zikra.tv', versionCode=1000000 + int(os.environ['GITHUB_RUN_NUMBER']), versionName='1.1.3', apkName=apk.name, sha256=hashlib.sha256(apk.read_bytes()).hexdigest())
           apk.with_name('update.json').write_text(json.dumps(manifest), encoding='utf-8')
           PY
 

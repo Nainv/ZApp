@@ -50,7 +50,7 @@ final class NativeTvHome extends LinearLayout {
         LinearLayout playerHeading=row();playerHeading.setGravity(Gravity.CENTER_VERTICAL);quran.addView(playerHeading,new LayoutParams(-1,dp(30)));
         track=label("القرآن الكريم",18,TEXT,1);track.setTextDirection(rtl?View.TEXT_DIRECTION_RTL:View.TEXT_DIRECTION_LTR);playerHeading.addView(track,new LayoutParams(0,-1,1));
         reciter=label("",12,MUTED,1);
-        verse=label("افتح فهرس القرآن أو تابع تلاوتك من آخر موضع.",23,TEXT,3);verse.setGravity(Gravity.CENTER_VERTICAL);verse.setAutoSizeTextTypeUniformWithConfiguration(16,23,1,android.util.TypedValue.COMPLEX_UNIT_SP);quran.addView(verse,new LayoutParams(-1,0,1));
+        verse=label("افتح فهرس القرآن أو تابع تلاوتك من آخر موضع.",23,TEXT,3);try{verse.setTypeface(Typeface.createFromAsset(context.getAssets(),"assets/fonts/AmiriQuran.ttf"));}catch(Exception ignored){}verse.setTextDirection(View.TEXT_DIRECTION_RTL);verse.setGravity(Gravity.CENTER_VERTICAL);verse.setAutoSizeTextTypeUniformWithConfiguration(16,23,1,android.util.TypedValue.COMPLEX_UNIT_SP);quran.addView(verse,new LayoutParams(-1,0,1));
         LinearLayout controls=row();controls.setGravity(Gravity.CENTER);quran.addView(controls,new LayoutParams(-1,dp(36)));
         Button previous=control(PREVIOUS,"سورة −","previous"),next=control(NEXT,"سورة +","next");
         Button versePrevious=control(VERSE_PREVIOUS,"آية −","verse-previous"),verseNext=control(VERSE_NEXT,"آية +","verse-next");

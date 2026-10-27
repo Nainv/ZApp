@@ -80,6 +80,7 @@ public class MainActivity extends Activity {
     @android.annotation.SuppressLint("UnspecifiedRegisterReceiverFlag")
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE)).cancel(UpdateRestartReceiver.OPEN_NOTIFICATION);
         appUpdater = new AppUpdater(this);
         AdhanScheduler.restore(this,false);
         android.content.IntentFilter adhanFilter=new android.content.IntentFilter(AdhanService.STATE);
@@ -444,6 +445,7 @@ public class MainActivity extends Activity {
         if (webView == null || !pageReady || runtimeSupport == null) return;
         webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('zikra:runtime-state',{detail:JSON.parse(" + org.json.JSONObject.quote(runtimeSupport.state()) + ")}));", null);
     }
+    void checkNativeUpdate(){if(runtimeSupport!=null){runtimeSupport.check();deliverRuntimeState();}}
     void startNativeUpdate(){if(appUpdater!=null)appUpdater.start();}
     public void deliverUpdateState(String json) {
         if(Build.VERSION.SDK_INT>=26&&nativeTv!=null){nativeTv.updateState(json);return;}
