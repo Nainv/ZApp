@@ -74,9 +74,9 @@ public final class AppUpdater {
         if (assets != null) for (int i = 0; i < assets.length(); i++) {
             JSONObject asset = assets.getJSONObject(i); String name = asset.optString("name");
             if (name.equals("update.json")) manifestAsset = asset;
-            if (name.equals("app-release.apk")) apk = asset;
+            if (name.equals("Zikratv.apk")) apk = asset;
         }
-        if (apk == null) throw new Exception("الإصدار المنشور لا يحتوي ملف التثبيت app-release.apk.");
+        if (apk == null) throw new Exception("الإصدار المنشور لا يحتوي ملف التثبيت Zikratv.apk.");
         String apkUrl = apk.optString("browser_download_url");
         if (!UpdatePolicy.isReleaseAsset(apkUrl)) throw new Exception("رابط التحديث لا يعود إلى مشروع ذِكْرَىٰ.");
         long publishedSize = apk.optLong("size", 0);
@@ -88,7 +88,7 @@ public final class AppUpdater {
             String manifestUrl = manifestAsset.optString("browser_download_url");
             if (!UpdatePolicy.isReleaseAsset(manifestUrl)) throw new Exception("بيانات الإصدار غير صالحة.");
             JSONObject manifest = json(manifestUrl + (manifestUrl.contains("?") ? "&" : "?") + "check=" + System.currentTimeMillis());
-            if (!context.getPackageName().equals(manifest.optString("packageName")) || !"app-release.apk".equals(manifest.optString("apkName"))) throw new Exception("بيانات الإصدار ليست لتطبيق ذِكْرَىٰ.");
+            if (!context.getPackageName().equals(manifest.optString("packageName")) || !"Zikratv.apk".equals(manifest.optString("apkName"))) throw new Exception("بيانات الإصدار ليست لتطبيق ذِكْرَىٰ.");
             expectedVersion = manifest.optLong("versionCode", 0);
             String manifestDigest = manifest.optString("sha256");
             if (expectedVersion <= 0 || !manifestDigest.matches("(?i)[0-9a-f]{64}")) throw new Exception("بيانات التحديث غير مكتملة. حاول بعد قليل.");

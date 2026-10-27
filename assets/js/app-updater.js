@@ -18,12 +18,12 @@
   async function downloadInBrowser(){
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);
     try{
-      const response=await fetch('https://api.github.com/repos/koukach91-hash/zikra-android-tv-new/releases/latest?t='+Date.now(),{headers:{Accept:'application/vnd.github+json'},signal:controller.signal});
+      const response=await fetch('https://api.github.com/repos/Nainv/ZApp/releases/latest?t='+Date.now(),{headers:{Accept:'application/vnd.github+json'},signal:controller.signal});
       if(!response.ok)throw Error(response.status===403||response.status===429?'وصل البحث إلى حد ذِكْرَىٰ المؤقت. حاول لاحقًا.':'تعذّر الوصول إلى آخر إصدار.');
-      const release=await response.json(),apk=release.assets?.find(asset=>asset.name==='app-release.apk');
+      const release=await response.json(),apk=release.assets?.find(asset=>asset.name==='Zikratv.apk');
       if(release.draft||release.prerelease||!apk)throw Error('لا يوجد ملف APK مستقر متاح في الإصدار الأخير.');
       const url=new URL(apk.browser_download_url);
-      if(url.protocol!=='https:'||url.hostname!=='github.com'||!url.pathname.startsWith('/koukach91-hash/zikra-android-tv-new/releases/download/'))throw Error('رابط التحديث غير صالح.');
+      if(url.protocol!=='https:'||url.hostname!=='github.com'||!url.pathname.startsWith('/Nainv/ZApp/releases/download/'))throw Error('رابط التحديث غير صالح.');
       const link=document.createElement('a');link.href=url.href;link.download='zikra-update.apk';link.rel='noopener';document.body.append(link);link.click();link.remove();
       render({phase:'downloaded',message:'تم طلب تنزيل أحدث نسخة من ذِكْرَىٰ.'});
     }finally{clearTimeout(timer)}
