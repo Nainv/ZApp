@@ -380,17 +380,15 @@ jobs:
         run: |
           set -euo pipefail
           gh release view v1.0.5 --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' > "$RUNNER_TEMP/current-release-assets.txt"
-          if rg -Fxq 'HomeTV.apk' "$RUNNER_TEMP/current-release-assets.txt"; then
+          if grep -Fxq 'HomeTV.apk' "$RUNNER_TEMP/current-release-assets.txt"; then
             echo 'HomeTV installer is already published; leaving it in place.'
             exit 0
           fi
+          gh api "repos/$GITHUB_REPOSITORY/git/blobs/7424890f19d11ee9d5c0f82e8d6a12605817e423" --jq '.content' | base64 --decode > "$RUNNER_TEMP/HomeTV.apk"
           python3 - <<'PY_HOME'
-          import hashlib, os, urllib.request
+          import hashlib, os
           from pathlib import Path
-          source = 'https://tvhome-philips.funchair515.chatgpt.site/tv.apk'
-          with urllib.request.urlopen(source, timeout=45) as response:
-              data = response.read(2 * 1024 * 1024)
+          data = (Path(os.environ['RUNNER_TEMP']) / 'HomeTV.apk').read_bytes()
           assert hashlib.sha256(data).hexdigest() == 'bc3e5e89ceaecc46b21bf677d9e9f506692073f4437afa44af9fd091720cafb9', 'HomeTV source differs from the previously verified signed 3.4 APK'
-          (Path(os.environ['RUNNER_TEMP']) / 'HomeTV.apk').write_bytes(data)
           PY_HOME
           gh release upload v1.0.5 "$RUNNER_TEMP/HomeTV.apk" --repo "$GITHUB_REPOSITORY" --clobber
