@@ -81,6 +81,7 @@ final class NativeTvUi {
     private boolean weatherLoading;
 
     private ScrollView bodyScroll;
+    private View navigationCard;
     private LinearLayout pageActions;
     private Button sideLeft,sideRight;
     private NativeWeatherView weatherPage;
@@ -157,7 +158,7 @@ final class NativeTvUi {
         long now=android.os.SystemClock.elapsedRealtime();if(NativeTvPolicy.exitOnBack(page.equals("home"),history.size(),lastBackAt,now)){owner.finish();return;}lastBackAt=now;
     }
     private void render(boolean returning){
-        if(closed)return;requestId++;motion.hide();if(updateBadge!=null)updateBadge.stopPulse();updateBadge=null;content.removeAllViews();removeSideNavigation();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;quranCard=null;
+        if(closed)return;requestId++;motion.hide();if(updateBadge!=null)updateBadge.stopPulse();updateBadge=null;content.removeAllViews();removeSideNavigation();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;navigationCard=null;quranCard=null;
         content.setPadding(dp(page.equals("reading")?16:32),dp(page.equals("reading")?6:20),dp(page.equals("reading")?16:32),dp(page.equals("reading")?8:18));
         content.setLayoutDirection(pref("zikra_language","ar").equals("ar")?View.LAYOUT_DIRECTION_RTL:View.LAYOUT_DIRECTION_LTR);
         LinearLayout header=new LinearLayout(owner);header.setClipChildren(false);header.setClipToPadding(false);header.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);header.setGravity(Gravity.CENTER_VERTICAL);content.addView(header,new LinearLayout.LayoutParams(-1,dp(page.equals("reading")?42:50)));
@@ -270,7 +271,7 @@ final class NativeTvUi {
     private void addSideNavigation(){
         int leftDelta=NativeTvPolicy.horizontalStep(rtl(),true),rightDelta=NativeTvPolicy.horizontalStep(rtl(),false);
         sideLeft=sideArrow("‹",leftDelta,leftDelta>0?"التالي":"السابق");sideRight=sideArrow("›",rightDelta,rightDelta>0?"التالي":"السابق");
-        ScrollView card=bodyScroll;
+        View card=navigationCard;
         if(card==null)return;
         card.post(()->{
             if(card!=bodyScroll||sideLeft==null||sideRight==null)return;
@@ -303,7 +304,7 @@ final class NativeTvUi {
         if(quranCard!=null)quranCard.style(size,pref("tv_quran_light","false").equals("true"));
     }
     private void createQuranCard(){
-        quranCard=new NativeQuranCard(owner,uiFont,quranBook,number("tv_quran_font",30),pref("tv_quran_light","false").equals("true"));content.addView(quranCard,new LinearLayout.LayoutParams(-1,0,1));bodyScroll=quranCard.scroller();NativeQuranCard card=quranCard;bodyScroll.setOnFocusChangeListener((view,on)->motion.focus(card,on,false));
+        quranCard=new NativeQuranCard(owner,uiFont,quranBook,number("tv_quran_font",30),pref("tv_quran_light","false").equals("true"));content.addView(quranCard,new LinearLayout.LayoutParams(-1,0,1));navigationCard=quranCard;bodyScroll=quranCard.scroller();NativeQuranCard card=quranCard;bodyScroll.setOnFocusChangeListener((view,on)->motion.focus(card,on,false));
     }
     private void playerPage(){
         quranToolbar(false);createQuranCard();drawPlayerText();
@@ -340,7 +341,7 @@ final class NativeTvUi {
         memoryBody(item==null?"جارٍ تحميل الأذكار المحفوظة…":item.optString("title")+"\n\n"+item.optString("text")+"\n\n"+item.optString("source")+"\n\n"+item.optString("reflection")+"\n"+item.optString("lesson"));
         actions(new String[]{"السابق","الرئيسية","التالي"},new Runnable[]{()->{memoryIndex--;render(true);},this::back,()->{memoryIndex++;render(false);}});
     }
-    private void memoryBody(String value){ScrollView scroll=new ScrollView(owner);scroll.setFillViewport(true);scroll.setClipToPadding(true);FrameLayout card=new FrameLayout(owner);card.setBackground(shape(0xd916272d,18));card.setClipToPadding(true);card.setClipChildren(true);TextView label=text(value,18,TEXT);label.setGravity(Gravity.CENTER);label.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);label.setPadding(dp(28),dp(22),dp(28),dp(22));label.setLineSpacing(dp(3),1.05f);label.setMaxLines(80);label.setAutoSizeTextTypeUniformWithConfiguration(9,18,1,android.util.TypedValue.COMPLEX_UNIT_SP);card.addView(label,new FrameLayout.LayoutParams(-1,-1));scroll.addView(card,new ScrollView.LayoutParams(-1,-1));content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));bodyScroll=scroll;}
+    private void memoryBody(String value){ScrollView scroll=new ScrollView(owner);scroll.setFillViewport(true);scroll.setClipToPadding(true);FrameLayout card=new FrameLayout(owner);card.setBackground(shape(0xd916272d,18));card.setClipToPadding(true);card.setClipChildren(true);TextView label=text(value,18,TEXT);label.setGravity(Gravity.CENTER);label.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);label.setPadding(dp(28),dp(22),dp(28),dp(22));label.setLineSpacing(dp(3),1.05f);label.setMaxLines(80);label.setAutoSizeTextTypeUniformWithConfiguration(9,18,1,android.util.TypedValue.COMPLEX_UNIT_SP);card.addView(label,new FrameLayout.LayoutParams(-1,-1));scroll.addView(card,new ScrollView.LayoutParams(-1,-1));content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));bodyScroll=scroll;navigationCard=card;}
     private void tasbeeh(){prompt("التسبيح · "+number("zikra_tasbeeh_count",0),"",null,new String[]{"+1","تصفير العداد","رجوع"},i->{if(i==0)put("zikra_tasbeeh_count",String.valueOf(number("zikra_tasbeeh_count",0)+1));else if(i==1)put("zikra_tasbeeh_count","0");refreshDashboard();});}
     private String nextPrayer(){try{JSONArray rows=new JSONArray(AdhanScheduler.prefs(owner).getString("schedule","[]"));long now=AdhanScheduler.now(owner),next=Long.MAX_VALUE;String key="";for(int i=0;i<rows.length();i++){JSONObject r=rows.getJSONObject(i);long t=r.optLong("epoch");if(t>now&&t<next){next=t;key=r.optString("key");}}if(!key.isEmpty())return prayerName(key)+"  "+format("HH:mm",next);}catch(Exception ignored){}return "حدد الموقع لإظهار المواقيت";}
     private String prayerName(String key){for(int i=0;i<AdhanScheduler.KEYS.length;i++)if(key.equals(AdhanScheduler.KEYS[i]))return PRAYERS[i];return key;}
