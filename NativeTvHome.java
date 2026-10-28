@@ -36,11 +36,10 @@ final class NativeTvHome extends LinearLayout {
         setPadding(dp(7),dp(5),dp(7),dp(6));
         LinearLayout top=row();addView(top,new LayoutParams(-1,0,.85f));
         LinearLayout weather=panel(WEATHER,"weather",false);top.addView(weather,weighted(3));
-        LinearLayout weatherLine=row();weatherLine.setGravity(Gravity.CENTER_VERTICAL);weather.addView(weatherLine,new LayoutParams(-1,0,1));
-        LinearLayout description=new LinearLayout(context);description.setOrientation(VERTICAL);weatherLine.addView(description,new LayoutParams(0,-1,1));
-        city=label("حدد الموقع",17,ACCENT,1);description.addView(city);
-        weatherDetail=label("الطقس يظهر هنا مباشرة",14,MUTED,2);description.addView(weatherDetail,new LayoutParams(-1,0,1));
-        temperature=label("— °C",31,TEXT,1);temperature.setGravity(Gravity.CENTER);weatherLine.addView(temperature,new LayoutParams(dp(130),-1));
+        LinearLayout weatherLine=row();weatherLine.setGravity(Gravity.CENTER_VERTICAL);weatherLine.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);weather.addView(weatherLine,new LayoutParams(-1,0,1));
+        weatherDetail=label("الطقس يظهر هنا مباشرة",13,MUTED,1);weatherDetail.setGravity(Gravity.CENTER);weatherDetail.setSingleLine(true);weatherDetail.setEllipsize(TextUtils.TruncateAt.END);weatherLine.addView(weatherDetail,new LayoutParams(0,-1,1.3f));
+        city=label("حدد الموقع",22,ACCENT,1);city.setGravity(Gravity.CENTER);city.setSingleLine(true);city.setEllipsize(TextUtils.TruncateAt.END);weatherLine.addView(city,new LayoutParams(0,-1,2f));
+        temperature=label("— °C",25,TEXT,1);temperature.setGravity(Gravity.CENTER);temperature.setSingleLine(true);weatherLine.addView(temperature,new LayoutParams(0,-1,1.3f));
         LinearLayout tasbeeh=panel(TASBEEH,"tasbeeh-add",false);top.addView(tasbeeh,weighted(1));
         tasbeeh.addView(label("التسبيح",14,ACCENT,1));count=label("0",29,TEXT,1);count.setGravity(Gravity.CENTER);tasbeeh.addView(count,new LayoutParams(-1,0,1));
         LinearLayout prayerRow=row();addView(prayerRow,new LayoutParams(-1,0,.74f));String[] names={"الفجر","الظهر","العصر","المغرب","العشاء"};
