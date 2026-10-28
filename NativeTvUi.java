@@ -419,7 +419,7 @@ final class NativeTvUi {
             case "previous":playSurah(Math.max(1,currentSurah-1));break;
             case "next":playSurah(Math.min(114,currentSurah+1));break;
             case "tasbeeh-add":put("zikra_tasbeeh_count",String.valueOf(number("zikra_tasbeeh_count",0)+1));refreshDashboard();break;
-            case "tasbeeh-reset":choose("تصفير عداد التسبيح؟",new String[]{"تصفير","رجوع"},index->{if(index==0){put("zikra_tasbeeh_count","0");refreshDashboard();}});break;
+            case "tasbeeh-reset":prompt("تصفير عداد التسبيح؟","",null,new String[]{"تصفير","رجوع"},index->{if(index==0){put("zikra_tasbeeh_count","0");refreshDashboard();}});break;
         }
     }
     private void refreshDashboard(){
