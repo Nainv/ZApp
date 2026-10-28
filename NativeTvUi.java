@@ -269,7 +269,7 @@ final class NativeTvUi {
     private void actions(String[] labels,Runnable[] actions){LinearLayout row=new LinearLayout(owner);pageActions=row;row.setGravity(Gravity.CENTER);for(int i=0;i<labels.length;i++){Button b=button(labels[i],actions[i]);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(44),1);p.setMargins(dp(6),dp(10),dp(6),0);row.addView(b,p);}content.addView(row);}
     private void addSideNavigation(){
         int leftDelta=NativeTvPolicy.horizontalStep(rtl(),true),rightDelta=NativeTvPolicy.horizontalStep(rtl(),false);
-        sideLeft=sideArrow("←",leftDelta,leftDelta>0?"التالي":"السابق");sideRight=sideArrow("→",rightDelta,rightDelta>0?"التالي":"السابق");
+        sideLeft=sideArrow("‹",leftDelta,leftDelta>0?"التالي":"السابق");sideRight=sideArrow("›",rightDelta,rightDelta>0?"التالي":"السابق");
         ScrollView card=bodyScroll;
         if(card==null)return;
         card.post(()->{
@@ -282,7 +282,7 @@ final class NativeTvUi {
         });
     }
     private Button sideArrow(String glyph,int delta,String description){
-        Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextDirection(View.TEXT_DIRECTION_LTR);arrow.setTextSize(22);arrow.setPadding(0,0,0,dp(2));arrow.setAlpha(.38f);arrow.setBackground(shape(0x0c79c9b2,16));arrow.setContentDescription(description);
+        Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextDirection(View.TEXT_DIRECTION_LTR);arrow.setTextSize(32);arrow.setPadding(0,0,0,dp(2));arrow.setAlpha(.38f);arrow.setBackground(shape(0x0c79c9b2,16));arrow.setContentDescription(description);
         arrow.setOnFocusChangeListener((view,on)->{view.setAlpha(on?1f:.38f);GradientDrawable bg=shape(on?0x3379c9b2:0x0c79c9b2,16);if(on)bg.setStroke(dp(2),0xff79c9b2);view.setBackground(bg);motion.focus(view,on,false);});return arrow;
     }
     private void removeSideNavigation(){if(sideLeft!=null){root.removeView(sideLeft);sideLeft=null;}if(sideRight!=null){root.removeView(sideRight);sideRight=null;}}
