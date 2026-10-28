@@ -1,4 +1,5 @@
 name: Build and publish Home TV APK
+# Rebuild against the latest cleanyourtv main source when this workflow is updated.
 
 on:
   push:
