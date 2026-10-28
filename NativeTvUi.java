@@ -497,7 +497,7 @@ final class NativeTvUi {
     }
     private void applyVerseSeek(){
         if(pendingVerse<=0||seekingVerse||!prepared||player==null||verseStarts.length==0)return;
-        for(int i=0;i<verseNumbers.length;i++)if(verseNumbers[i]==pendingVerse){seekingVerse=true;seekTargetMs=verseStarts[i];player.seekTo(seekTargetMs,MediaPlayer.SEEK_CLOSEST);return;}
+        for(int i=0;i<verseNumbers.length;i++)if(verseNumbers[i]==pendingVerse){seekingVerse=true;seekTargetMs=verseStarts[i];if(android.os.Build.VERSION.SDK_INT>=26)player.seekTo(seekTargetMs,MediaPlayer.SEEK_CLOSEST);else player.seekTo((int)Math.max(0L,Math.min(Integer.MAX_VALUE,seekTargetMs)));return;}
         pendingVerse=0;
     }
     boolean key(KeyEvent event){
