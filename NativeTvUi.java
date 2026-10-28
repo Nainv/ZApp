@@ -276,10 +276,10 @@ final class NativeTvUi {
         card.post(()->{
             if(card!=navigationCard||sideLeft==null||sideRight==null)return;
             int[] cardAt=new int[2],rootAt=new int[2];card.getLocationOnScreen(cardAt);root.getLocationOnScreen(rootAt);
-            int top=cardAt[1]-rootAt[1]+dp(6),leftX=cardAt[0]-rootAt[0]+dp(6);
+            int top=cardAt[1]-rootAt[1]+dp(6),leftX=cardAt[0]-rootAt[0];
             int barHeight=Math.max(dp(80),card.getHeight()-dp(12)),barWidth=dp(26);
             FrameLayout.LayoutParams left=new FrameLayout.LayoutParams(barWidth,barHeight,Gravity.TOP|Gravity.LEFT);left.leftMargin=leftX;left.topMargin=top;root.addView(sideLeft,left);
-            FrameLayout.LayoutParams right=new FrameLayout.LayoutParams(barWidth,barHeight,Gravity.TOP|Gravity.LEFT);right.leftMargin=leftX+card.getWidth()-barWidth-dp(6);right.topMargin=top;root.addView(sideRight,right);
+            FrameLayout.LayoutParams right=new FrameLayout.LayoutParams(barWidth,barHeight,Gravity.TOP|Gravity.LEFT);right.leftMargin=leftX+card.getWidth()-barWidth;right.topMargin=top;root.addView(sideRight,right);
         });
     }
     private Button sideArrow(String glyph,int delta,String description){
