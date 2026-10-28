@@ -57,7 +57,7 @@ final class NativeTvHome extends LinearLayout {
         play=control(PLAY,"▶","play");
         for(Button control:new Button[]{previous,versePrevious,play,verseNext,next})controls.addView(control,controlSize(1));
         LinearLayout memory=panel(MEMORY,"memory",false);lower.addView(memory,weighted(2));memory.addView(label("ذِكْرَىٰ اليوم",16,ACCENT,1));
-        remembrance=label("جارٍ تجهيز الأذكار المحفوظة…",21,TEXT,4);remembrance.setGravity(Gravity.CENTER_VERTICAL);remembrance.setAutoSizeTextTypeUniformWithConfiguration(15,21,1,android.util.TypedValue.COMPLEX_UNIT_SP);memory.addView(remembrance,new LayoutParams(-1,0,1));memory.addView(label("OK لقراءة الذكر كاملًا",11,MUTED,1));
+        remembrance=label("جارٍ تجهيز الأذكار المحفوظة…",16,TEXT,4);remembrance.setGravity(Gravity.CENTER_VERTICAL);remembrance.setAutoSizeTextTypeUniformWithConfiguration(11,16,1,android.util.TypedValue.COMPLEX_UNIT_SP);memory.addView(remembrance,new LayoutParams(-1,0,1));memory.addView(label("OK لقراءة الذكر كاملًا",11,MUTED,1));
         wire(weather,tasbeeh,quran,memory,previous,versePrevious,verseNext,next);
         tasbeeh.setOnLongClickListener(v->{actions.run("tasbeeh-reset");return true;});
     }
