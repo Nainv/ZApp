@@ -270,8 +270,16 @@ final class NativeTvUi {
     private void addSideNavigation(){
         int leftDelta=NativeTvPolicy.horizontalStep(rtl(),true),rightDelta=NativeTvPolicy.horizontalStep(rtl(),false);
         sideLeft=sideArrow("←",leftDelta,leftDelta>0?"التالي":"السابق");sideRight=sideArrow("→",rightDelta,rightDelta>0?"التالي":"السابق");
-        FrameLayout.LayoutParams left=new FrameLayout.LayoutParams(dp(26),-1,Gravity.LEFT|Gravity.CENTER_VERTICAL);left.leftMargin=dp(10);left.topMargin=dp(96);left.bottomMargin=dp(74);root.addView(sideLeft,left);
-        FrameLayout.LayoutParams right=new FrameLayout.LayoutParams(dp(26),-1,Gravity.RIGHT|Gravity.CENTER_VERTICAL);right.rightMargin=dp(10);right.topMargin=dp(96);right.bottomMargin=dp(74);root.addView(sideRight,right);
+        ScrollView card=bodyScroll;
+        if(card==null)return;
+        card.post(()->{
+            if(card!=bodyScroll||sideLeft==null||sideRight==null)return;
+            int[] cardAt=new int[2],rootAt=new int[2];card.getLocationOnScreen(cardAt);root.getLocationOnScreen(rootAt);
+            int top=cardAt[1]-rootAt[1]+dp(6),leftX=cardAt[0]-rootAt[0]+dp(6);
+            int barHeight=Math.max(dp(80),card.getHeight()-dp(12)),barWidth=dp(26);
+            FrameLayout.LayoutParams left=new FrameLayout.LayoutParams(barWidth,barHeight,Gravity.TOP|Gravity.LEFT);left.leftMargin=leftX;left.topMargin=top;root.addView(sideLeft,left);
+            FrameLayout.LayoutParams right=new FrameLayout.LayoutParams(barWidth,barHeight,Gravity.TOP|Gravity.LEFT);right.leftMargin=leftX+card.getWidth()-barWidth-dp(6);right.topMargin=top;root.addView(sideRight,right);
+        });
     }
     private Button sideArrow(String glyph,int delta,String description){
         Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextDirection(View.TEXT_DIRECTION_LTR);arrow.setTextSize(22);arrow.setPadding(0,0,0,dp(2));arrow.setAlpha(.38f);arrow.setBackground(shape(0x0c79c9b2,16));arrow.setContentDescription(description);
