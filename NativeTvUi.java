@@ -333,7 +333,7 @@ final class NativeTvUi {
         actions(new String[]{"السابق","الرئيسية","التالي"},new Runnable[]{()->{memoryIndex--;render(true);},this::back,()->{memoryIndex++;render(false);}});
     }
     private void memoryBody(String value){FrameLayout card=new FrameLayout(owner);card.setBackground(shape(0xd916272d,18));card.setClipToPadding(true);card.setClipChildren(true);TextView label=text(value,18,TEXT);label.setGravity(Gravity.CENTER);label.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);label.setPadding(dp(28),dp(22),dp(28),dp(22));label.setLineSpacing(dp(3),1.05f);label.setMaxLines(80);label.setAutoSizeTextTypeUniformWithConfiguration(9,18,1,android.util.TypedValue.COMPLEX_UNIT_SP);card.addView(label,new FrameLayout.LayoutParams(-1,-1));content.addView(card,new LinearLayout.LayoutParams(-1,0,1));bodyScroll=null;}
-    private void tasbeeh(){choose("التسبيح · "+number("zikra_tasbeeh_count",0),new String[]{"+1","تصفير العداد"},i->{if(i==0)put("zikra_tasbeeh_count",String.valueOf(number("zikra_tasbeeh_count",0)+1));else put("zikra_tasbeeh_count","0");refreshDashboard();});}
+    private void tasbeeh(){prompt("التسبيح · "+number("zikra_tasbeeh_count",0),"",null,new String[]{"+1","تصفير العداد","رجوع"},i->{if(i==0)put("zikra_tasbeeh_count",String.valueOf(number("zikra_tasbeeh_count",0)+1));else if(i==1)put("zikra_tasbeeh_count","0");refreshDashboard();});}
     private String nextPrayer(){try{JSONArray rows=new JSONArray(AdhanScheduler.prefs(owner).getString("schedule","[]"));long now=AdhanScheduler.now(owner),next=Long.MAX_VALUE;String key="";for(int i=0;i<rows.length();i++){JSONObject r=rows.getJSONObject(i);long t=r.optLong("epoch");if(t>now&&t<next){next=t;key=r.optString("key");}}if(!key.isEmpty())return prayerName(key)+"  "+format("HH:mm",next);}catch(Exception ignored){}return "حدد الموقع لإظهار المواقيت";}
     private String prayerName(String key){for(int i=0;i<AdhanScheduler.KEYS.length;i++)if(key.equals(AdhanScheduler.KEYS[i]))return PRAYERS[i];return key;}
     private String prayerTime(String key){try{JSONArray rows=new JSONArray(AdhanScheduler.prefs(owner).getString("schedule","[]"));long today=AdhanScheduler.now(owner);String date=format("yyyy-MM-dd",today);for(int i=0;i<rows.length();i++){JSONObject r=rows.getJSONObject(i);if(key.equals(r.optString("key"))&&date.equals(r.optString("date")))return format("HH:mm",r.optLong("epoch"));}}catch(Exception ignored){}return "—";}
@@ -499,7 +499,7 @@ final class NativeTvUi {
         if(code==KeyEvent.KEYCODE_MEDIA_NEXT||code==KeyEvent.KEYCODE_MEDIA_PREVIOUS){seekVerse(code==KeyEvent.KEYCODE_MEDIA_NEXT?1:-1);return true;}
         boolean horizontal=code==KeyEvent.KEYCODE_DPAD_LEFT||code==KeyEvent.KEYCODE_DPAD_RIGHT;
         int delta=NativeTvPolicy.horizontalStep(rtl(),code==KeyEvent.KEYCODE_DPAD_LEFT);
-        if(horizontal&&page.equals("memory")&&((bodyScroll!=null&&bodyScroll.hasFocus())||(pageActions!=null&&pageActions.hasFocus())||(sideLeft!=null&&sideLeft.hasFocus())||(sideRight!=null&&sideRight.hasFocus()))){if(event.getRepeatCount()==0)turnOrMemory(delta);return true;}
+        if(horizontal&&page.equals("memory")){if(event.getRepeatCount()==0)turnOrMemory(delta);return true;}
         if(horizontal&&page.equals("weather")&&weatherPage!=null&&weatherPage.hasFocus())return weatherPage.move(delta);
         if(horizontal&&page.equals("reading")&&(root.findFocus()==bodyScroll||(sideLeft!=null&&sideLeft.hasFocus())||(sideRight!=null&&sideRight.hasFocus()))){turn(delta);return true;}
         return false;
