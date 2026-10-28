@@ -331,7 +331,7 @@ final class NativeTvUi {
     }
     private void turn(int delta){
         if(delta>0&&surahs!=null)for(int i=0;i<surahs.length();i++){JSONObject surah=surahs.optJSONObject(i);JSONArray verses=surah.optJSONArray("ayahs");if(verses!=null&&verses.length()>0&&verses.optJSONObject(verses.length()-1).optInt("page")==readPage)markCompleted("zikra_mushaf_read_surahs_v1",surah.optInt("number"));}
-        readPage=NativeTvPolicy.page(readPage+delta);render(delta<0);
+        readPage=NativeTvPolicy.page(readPage+delta);if(quranCard!=null){quranCard.show(readPage,0,0,false,"");rememberReadPage();}else render(delta<0);
     }
     private void markCompleted(String key,int number){try{JSONArray values=new JSONArray(pref(key,"[]"));for(int i=0;i<values.length();i++)if(values.optInt(i)==number)return;values.put(number);put(key,values.toString());}catch(Exception ignored){}}
 
