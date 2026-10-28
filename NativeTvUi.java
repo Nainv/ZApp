@@ -123,7 +123,7 @@ final class NativeTvUi {
     private WebView migration;
     private LocationListener gps;
     private long requestId;
-    private final Runnable tick=new Runnable(){public void run(){if(closed||!resumed)return;clock.setText(format("HH:mm",AdhanScheduler.now(owner)));sky.update();long elapsed=android.os.SystemClock.elapsedRealtime();if(elapsed-lastUpdateCheck>=60000){lastUpdateCheck=elapsed;owner.checkNativeUpdate();}if((page.equals("home")||page.equals("memory"))&&memories!=null&&memories.length()>1&&elapsed>=nextMemoryAt){memoryIndex=(memoryIndex+1)%memories.length();nextMemoryAt=elapsed+15000;if(page.equals("memory"))render(false);}refreshDashboard();main.postDelayed(this,1000);}};
+    private final Runnable tick=new Runnable(){public void run(){if(closed||!resumed)return;clock.setText(format("HH:mm",AdhanScheduler.now(owner)));sky.update();long elapsed=android.os.SystemClock.elapsedRealtime();if(elapsed-lastUpdateCheck>=60000){lastUpdateCheck=elapsed;owner.checkNativeUpdate();}if(page.equals("home")&&memories!=null&&memories.length()>1&&elapsed>=nextMemoryAt){memoryIndex=(memoryIndex+1)%memories.length();nextMemoryAt=elapsed+15000;}refreshDashboard();main.postDelayed(this,1000);}};
     private static final class Tile {final String icon,title,detail;final Runnable run;Tile(String i,String t,String d,Runnable r){icon=i;title=t;detail=d;run=r;}}
     NativeTvUi(MainActivity value) {
         owner=value;data=owner.getSharedPreferences("native_tv_data",0);
