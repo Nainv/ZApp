@@ -499,11 +499,12 @@ final class NativeTvUi {
         if(code==KeyEvent.KEYCODE_MEDIA_NEXT||code==KeyEvent.KEYCODE_MEDIA_PREVIOUS){seekVerse(code==KeyEvent.KEYCODE_MEDIA_NEXT?1:-1);return true;}
         boolean horizontal=code==KeyEvent.KEYCODE_DPAD_LEFT||code==KeyEvent.KEYCODE_DPAD_RIGHT;
         int delta=NativeTvPolicy.horizontalStep(rtl(),code==KeyEvent.KEYCODE_DPAD_LEFT);
-        if(horizontal&&page.equals("memory")){if(event.getRepeatCount()==0)turnOrMemory(delta);return true;}
+        if(horizontal&&page.equals("memory")){if(event.getRepeatCount()==0){flashSideArrow(code==KeyEvent.KEYCODE_DPAD_LEFT);turnOrMemory(delta);}return true;}
         if(horizontal&&page.equals("weather")&&weatherPage!=null&&weatherPage.hasFocus())return weatherPage.move(delta);
-        if(horizontal&&page.equals("reading")&&(root.findFocus()==bodyScroll||(sideLeft!=null&&sideLeft.hasFocus())||(sideRight!=null&&sideRight.hasFocus()))){turn(delta);return true;}
+        if(horizontal&&page.equals("reading")&&(root.findFocus()==bodyScroll||(sideLeft!=null&&sideLeft.hasFocus())||(sideRight!=null&&sideRight.hasFocus()))){flashSideArrow(code==KeyEvent.KEYCODE_DPAD_LEFT);turn(delta);return true;}
         return false;
     }
+    private void flashSideArrow(boolean left){Button arrow=left?sideLeft:sideRight;if(arrow!=null)motion.press(arrow);}
     private boolean updateBusy(){return updatePhase.equals("checking")||updatePhase.equals("downloading")||updatePhase.equals("verifying")||updatePhase.equals("installing");}
     private void refreshUpdateBadge(){
         if(updateBadge==null)return;
