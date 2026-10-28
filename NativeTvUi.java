@@ -270,12 +270,12 @@ final class NativeTvUi {
     private void addSideNavigation(){
         int leftDelta=NativeTvPolicy.horizontalStep(rtl(),true),rightDelta=NativeTvPolicy.horizontalStep(rtl(),false);
         sideLeft=sideArrow("←",leftDelta,leftDelta>0?"التالي":"السابق");sideRight=sideArrow("→",rightDelta,rightDelta>0?"التالي":"السابق");
-        FrameLayout.LayoutParams left=new FrameLayout.LayoutParams(dp(52),dp(76),Gravity.LEFT|Gravity.CENTER_VERTICAL);left.leftMargin=dp(10);root.addView(sideLeft,left);
-        FrameLayout.LayoutParams right=new FrameLayout.LayoutParams(dp(52),dp(76),Gravity.RIGHT|Gravity.CENTER_VERTICAL);right.rightMargin=dp(10);root.addView(sideRight,right);
+        FrameLayout.LayoutParams left=new FrameLayout.LayoutParams(dp(52),-1,Gravity.LEFT|Gravity.CENTER_VERTICAL);left.leftMargin=dp(10);left.topMargin=dp(96);left.bottomMargin=dp(74);root.addView(sideLeft,left);
+        FrameLayout.LayoutParams right=new FrameLayout.LayoutParams(dp(52),-1,Gravity.RIGHT|Gravity.CENTER_VERTICAL);right.rightMargin=dp(10);right.topMargin=dp(96);right.bottomMargin=dp(74);root.addView(sideRight,right);
     }
     private Button sideArrow(String glyph,int delta,String description){
-        Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextDirection(View.TEXT_DIRECTION_LTR);arrow.setTextSize(36);arrow.setPadding(0,0,0,dp(3));arrow.setAlpha(.38f);arrow.setBackground(shape(0x2679c9b2,26));arrow.setContentDescription(description);
-        arrow.setOnFocusChangeListener((view,on)->{view.setAlpha(on?.95f:.38f);view.setBackground(shape(on?0x9979c9b2:0x2679c9b2,26));motion.focus(view,on,false);});return arrow;
+        Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextDirection(View.TEXT_DIRECTION_LTR);arrow.setTextSize(36);arrow.setPadding(0,0,0,dp(3));arrow.setAlpha(.38f);arrow.setBackground(shape(0x0c79c9b2,26));arrow.setContentDescription(description);
+        arrow.setOnFocusChangeListener((view,on)->{view.setAlpha(on?1f:.38f);GradientDrawable bg=shape(on?0x3379c9b2:0x0c79c9b2,26);if(on)bg.setStroke(dp(2),0xff79c9b2);view.setBackground(bg);motion.focus(view,on,false);});return arrow;
     }
     private void removeSideNavigation(){if(sideLeft!=null){root.removeView(sideLeft);sideLeft=null;}if(sideRight!=null){root.removeView(sideRight);sideRight=null;}}
     private void turnOrMemory(int delta){if(page.equals("reading")){turn(delta);return;}if(page.equals("memory")){memoryIndex+=delta;nextMemoryAt=android.os.SystemClock.elapsedRealtime()+15000;render(delta<0);}}
