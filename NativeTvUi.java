@@ -82,6 +82,7 @@ final class NativeTvUi {
 
     private ScrollView bodyScroll;
     private View navigationCard;
+    private TextView memoryTextView;
     private LinearLayout pageActions;
     private Button sideLeft,sideRight;
     private NativeWeatherView weatherPage;
@@ -158,7 +159,7 @@ final class NativeTvUi {
         long now=android.os.SystemClock.elapsedRealtime();if(NativeTvPolicy.exitOnBack(page.equals("home"),history.size(),lastBackAt,now)){owner.finish();return;}lastBackAt=now;
     }
     private void render(boolean returning){
-        if(closed)return;requestId++;motion.hide();if(updateBadge!=null)updateBadge.stopPulse();updateBadge=null;content.removeAllViews();removeSideNavigation();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;navigationCard=null;quranCard=null;
+        if(closed)return;requestId++;motion.hide();if(updateBadge!=null)updateBadge.stopPulse();updateBadge=null;content.removeAllViews();removeSideNavigation();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;navigationCard=null;memoryTextView=null;quranCard=null;
         content.setPadding(dp(page.equals("reading")?16:32),dp(page.equals("reading")?6:20),dp(page.equals("reading")?16:32),dp(page.equals("reading")?8:18));
         content.setLayoutDirection(pref("zikra_language","ar").equals("ar")?View.LAYOUT_DIRECTION_RTL:View.LAYOUT_DIRECTION_LTR);
         LinearLayout header=new LinearLayout(owner);header.setClipChildren(false);header.setClipToPadding(false);header.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);header.setGravity(Gravity.CENTER_VERTICAL);content.addView(header,new LinearLayout.LayoutParams(-1,dp(page.equals("reading")?42:50)));
@@ -286,7 +287,7 @@ final class NativeTvUi {
         Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextDirection(View.TEXT_DIRECTION_LTR);arrow.setTextSize(32);arrow.setPadding(0,0,0,dp(2));arrow.setAlpha(1f);arrow.setTextColor(ACCENT);arrow.setBackgroundColor(Color.TRANSPARENT);arrow.setContentDescription(description);arrow.setFocusable(false);arrow.setFocusableInTouchMode(false);arrow.setVisibility(View.INVISIBLE);arrow.setOnFocusChangeListener((view,on)->{});return arrow;
     }
     private void removeSideNavigation(){if(sideLeft!=null){root.removeView(sideLeft);sideLeft=null;}if(sideRight!=null){root.removeView(sideRight);sideRight=null;}}
-    private void turnOrMemory(int delta){if(page.equals("reading")){turn(delta);return;}if(page.equals("memory")){memoryIndex+=delta;nextMemoryAt=android.os.SystemClock.elapsedRealtime()+15000;render(delta<0);}}
+    private void turnOrMemory(int delta){if(page.equals("reading")){turn(delta);return;}if(page.equals("memory")){memoryIndex=Math.floorMod(memoryIndex+delta,Math.max(1,memories==null?0:memories.length()));nextMemoryAt=android.os.SystemClock.elapsedRealtime()+15000;if(memoryTextView!=null){memoryTextView.setText(currentMemoryText());if(bodyScroll!=null)bodyScroll.scrollTo(0,0);}}}
     private void quranToolbar(boolean reading){
         LinearLayout tools=new LinearLayout(owner);tools.setGravity(Gravity.CENTER_VERTICAL);tools.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         TextView label=text("حجم الخط",14,MUTED);tools.addView(label,new LinearLayout.LayoutParams(dp(86),dp(36)));
@@ -335,12 +336,12 @@ final class NativeTvUi {
     private void markCompleted(String key,int number){try{JSONArray values=new JSONArray(pref(key,"[]"));for(int i=0;i<values.length();i++)if(values.optInt(i)==number)return;values.put(number);put(key,values.toString());}catch(Exception ignored){}}
 
     private int savedReadPage(){try{return NativeTvPolicy.page(new JSONObject(pref("zikra_mushaf_page_v1","{}")).optInt("page",1));}catch(Exception ignored){return 1;}}
+    private String currentMemoryText(){JSONObject item=memories==null?null:memories.optJSONObject(Math.floorMod(memoryIndex,Math.max(1,memories.length())));return item==null?"جارٍ تحميل الأذكار المحفوظة…":item.optString("title")+"\n\n"+item.optString("text")+"\n\n"+item.optString("source")+"\n\n"+item.optString("reflection")+"\n"+item.optString("lesson");}
     private void memory(){
-        JSONObject item=memories==null?null:memories.optJSONObject(Math.floorMod(memoryIndex,Math.max(1,memories.length())));
-        memoryBody(item==null?"جارٍ تحميل الأذكار المحفوظة…":item.optString("title")+"\n\n"+item.optString("text")+"\n\n"+item.optString("source")+"\n\n"+item.optString("reflection")+"\n"+item.optString("lesson"));
-        actions(new String[]{"السابق","الرئيسية","التالي"},new Runnable[]{()->{memoryIndex--;render(true);},this::back,()->{memoryIndex++;render(false);}});
+        memoryBody(currentMemoryText());
+        actions(new String[]{"السابق","الرئيسية","التالي"},new Runnable[]{()->turnOrMemory(-1),this::back,()->turnOrMemory(1)});
     }
-    private void memoryBody(String value){ScrollView scroll=new ScrollView(owner);scroll.setFillViewport(true);scroll.setClipToPadding(true);FrameLayout card=new FrameLayout(owner);card.setBackground(shape(0xd916272d,18));card.setClipToPadding(true);card.setClipChildren(true);TextView label=text(value,18,TEXT);label.setGravity(Gravity.CENTER);label.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);label.setPadding(dp(28),dp(22),dp(28),dp(22));label.setLineSpacing(dp(3),1.05f);label.setMaxLines(80);label.setAutoSizeTextTypeUniformWithConfiguration(9,18,1,android.util.TypedValue.COMPLEX_UNIT_SP);card.addView(label,new FrameLayout.LayoutParams(-1,-1));scroll.addView(card,new ScrollView.LayoutParams(-1,-1));content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));bodyScroll=scroll;navigationCard=card;}
+    private void memoryBody(String value){ScrollView scroll=new ScrollView(owner);scroll.setFillViewport(true);scroll.setClipToPadding(true);FrameLayout card=new FrameLayout(owner);card.setBackground(shape(0xd916272d,18));card.setClipToPadding(true);card.setClipChildren(true);TextView label=text(value,18,TEXT);label.setGravity(Gravity.CENTER);label.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);label.setPadding(dp(28),dp(22),dp(28),dp(22));label.setLineSpacing(dp(3),1.05f);label.setMaxLines(80);label.setAutoSizeTextTypeUniformWithConfiguration(9,18,1,android.util.TypedValue.COMPLEX_UNIT_SP);card.addView(label,new FrameLayout.LayoutParams(-1,-1));scroll.addView(card,new ScrollView.LayoutParams(-1,-1));content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));bodyScroll=scroll;navigationCard=card;memoryTextView=label;}
     private void tasbeeh(){prompt("التسبيح · "+number("zikra_tasbeeh_count",0),"",null,new String[]{"+1","تصفير العداد","رجوع"},i->{if(i==0)put("zikra_tasbeeh_count",String.valueOf(number("zikra_tasbeeh_count",0)+1));else if(i==1)put("zikra_tasbeeh_count","0");refreshDashboard();});}
     private String nextPrayer(){try{JSONArray rows=new JSONArray(AdhanScheduler.prefs(owner).getString("schedule","[]"));long now=AdhanScheduler.now(owner),next=Long.MAX_VALUE;String key="";for(int i=0;i<rows.length();i++){JSONObject r=rows.getJSONObject(i);long t=r.optLong("epoch");if(t>now&&t<next){next=t;key=r.optString("key");}}if(!key.isEmpty())return prayerName(key)+"  "+format("HH:mm",next);}catch(Exception ignored){}return "حدد الموقع لإظهار المواقيت";}
     private String prayerName(String key){for(int i=0;i<AdhanScheduler.KEYS.length;i++)if(key.equals(AdhanScheduler.KEYS[i]))return PRAYERS[i];return key;}
@@ -507,7 +508,7 @@ final class NativeTvUi {
         if(code==KeyEvent.KEYCODE_MEDIA_NEXT||code==KeyEvent.KEYCODE_MEDIA_PREVIOUS){seekVerse(code==KeyEvent.KEYCODE_MEDIA_NEXT?1:-1);return true;}
         boolean horizontal=code==KeyEvent.KEYCODE_DPAD_LEFT||code==KeyEvent.KEYCODE_DPAD_RIGHT;
         int delta=NativeTvPolicy.horizontalStep(rtl(),code==KeyEvent.KEYCODE_DPAD_LEFT);
-        if(horizontal&&page.equals("memory")){if(event.getRepeatCount()==0){turnOrMemory(delta);main.postDelayed(()->flashSideArrow(code==KeyEvent.KEYCODE_DPAD_LEFT),140);}return true;}
+        if(horizontal&&page.equals("memory")){if(event.getRepeatCount()==0){flashSideArrow(code==KeyEvent.KEYCODE_DPAD_LEFT);turnOrMemory(delta);}return true;}
         if(horizontal&&page.equals("weather")&&weatherPage!=null&&weatherPage.hasFocus())return weatherPage.move(delta);
         if(horizontal&&page.equals("reading")&&(root.findFocus()==bodyScroll||(sideLeft!=null&&sideLeft.hasFocus())||(sideRight!=null&&sideRight.hasFocus()))){flashSideArrow(code==KeyEvent.KEYCODE_DPAD_LEFT);turn(delta);return true;}
         return false;
