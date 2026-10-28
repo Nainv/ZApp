@@ -9,7 +9,6 @@ import android.view.Gravity;
 import android.widget.Button;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
@@ -35,7 +34,8 @@ final class NativeTvMotion {
         root.addView(glass,new FrameLayout.LayoutParams(1,1,Gravity.TOP|Gravity.LEFT));glass.setVisibility(View.INVISIBLE);
         x=new SpringAnimation(glass,SpringAnimation.TRANSLATION_X);
         y=new SpringAnimation(glass,SpringAnimation.TRANSLATION_Y);
-        for(SpringAnimation spring:new SpringAnimation[]{x,y})spring.setSpring(new SpringForce().setStiffness(260f).setDampingRatio(.58f));
+        // Keep the focus glass attached to the focused item with almost no spring bounce.
+        for(SpringAnimation spring:new SpringAnimation[]{x,y})spring.setSpring(new SpringForce().setStiffness(520f).setDampingRatio(.98f));
         drawWatch=()->{if(root.hasWindowFocus()&&target!=null&&target.hasFocus())syncBounds(target);return true;};root.getViewTreeObserver().addOnPreDrawListener(drawWatch);
         focusWatch=(previous,current)->{if(current==null){hide();return;}if(current.getOnFocusChangeListener()==null)current.post(()->{if(root.findFocus()==current)position(current);});};
         windowWatch=focused->{if(!focused){hide();return;}View current=target!=null&&target.hasFocus()?target:root.findFocus();if(current!=null)current.post(()->{if(current.hasFocus())position(current);});};
@@ -44,10 +44,11 @@ final class NativeTvMotion {
     private int dp(float value){return Math.round(value*root.getResources().getDisplayMetrics().density);}
     private boolean reduced(){return !ValueAnimator.areAnimatorsEnabled();}
     void focus(View view,boolean focused,boolean tile) {
-        view.animate().cancel();float scale=focused?(view instanceof Button?1.10f:1.04f):1f;
+        view.animate().cancel();float scale=focused?(view instanceof Button?1.025f:1.012f):1f;
         if(reduced()){view.setScaleX(scale);view.setScaleY(scale);}else view.animate().scaleX(scale).scaleY(scale)
-                .setDuration(focused?260:180).setInterpolator(new OvershootInterpolator(focused?1.6f:0f)).withLayer().start();
-        view.setElevation(focused?dp(8):0);
+                .setDuration(focused?145:110).setInterpolator(new DecelerateInterpolator(1.4f)).withLayer().start();
+        // The glass highlight is the focus cue; elevation casts a second shadow that drifts away from tiles.
+        view.setElevation(0f);view.setTranslationZ(0f);
         if(focused){view.post(()->position(view));}
     }
     void position(View view) {
@@ -66,9 +67,9 @@ final class NativeTvMotion {
     }
     void hide(){target=null;x.cancel();y.cancel();targetX=Float.NaN;targetY=Float.NaN;glass.setVisibility(View.INVISIBLE);}
     void enter(View panel,boolean back){
-        hide();if(reduced()){View current=root.findFocus();if(current!=null)current.post(()->position(current));return;}panel.animate().cancel();panel.setAlpha(0f);panel.setTranslationX(dp(back?-28:28));
-        panel.animate().alpha(1f).translationX(0).setDuration(220).setInterpolator(new DecelerateInterpolator(1.6f)).withEndAction(()->{View current=target!=null&&target.hasFocus()?target:root.findFocus();if(current!=null)position(current);}).withLayer().start();
+        hide();if(reduced()){View current=root.findFocus();if(current!=null)current.post(()->position(current));return;}panel.animate().cancel();panel.setAlpha(0f);panel.setTranslationX(dp(back?-12:12));
+        panel.animate().alpha(1f).translationX(0).setDuration(160).setInterpolator(new DecelerateInterpolator(1.4f)).withEndAction(()->{View current=target!=null&&target.hasFocus()?target:root.findFocus();if(current!=null)position(current);}).withLayer().start();
     }
-    void press(View view){if(reduced())return;android.animation.ObjectAnimator flash=android.animation.ObjectAnimator.ofFloat(view,View.ALPHA,.64f,1f);flash.setDuration(160);flash.start();android.animation.ObjectAnimator jump=android.animation.ObjectAnimator.ofFloat(view,View.TRANSLATION_Y,view.getTranslationY(),-dp(3),0);jump.setDuration(220);jump.setInterpolator(new DecelerateInterpolator());jump.start();}
+    void press(View view){if(reduced())return;android.animation.ObjectAnimator flash=android.animation.ObjectAnimator.ofFloat(view,View.ALPHA,.84f,1f);flash.setDuration(120);flash.start();android.animation.ObjectAnimator jump=android.animation.ObjectAnimator.ofFloat(view,View.TRANSLATION_Y,view.getTranslationY(),-dp(1),0);jump.setDuration(130);jump.setInterpolator(new DecelerateInterpolator(1.4f));jump.start();}
     void close(){hide();if(root.getViewTreeObserver().isAlive()){root.getViewTreeObserver().removeOnPreDrawListener(drawWatch);root.getViewTreeObserver().removeOnGlobalFocusChangeListener(focusWatch);root.getViewTreeObserver().removeOnWindowFocusChangeListener(windowWatch);}root.removeView(glass);}
 }
