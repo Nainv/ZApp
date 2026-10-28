@@ -17,7 +17,7 @@ import java.util.Locale;
 import java.util.function.IntConsumer;
 
 /** Forecast cards share the same colors, native motion and remote selection as Home. */
-@androidx.annotation.RequiresApi(26)
+@androidx.annotation.RequiresApi(25)
 final class NativeWeatherView extends LinearLayout {
     private final Typeface font;
     private final NativeTvMotion motion;
@@ -34,7 +34,7 @@ final class NativeWeatherView extends LinearLayout {
         HorizontalScrollView scroller=new HorizontalScrollView(context);scroller.setHorizontalScrollBarEnabled(false);scroller.setClipToPadding(false);scroller.setPadding(dp(8),dp(10),dp(8),dp(10));scroller.setLayoutDirection(rtl?View.LAYOUT_DIRECTION_RTL:View.LAYOUT_DIRECTION_LTR);LinearLayout strip=new LinearLayout(context);strip.setLayoutDirection(rtl?View.LAYOUT_DIRECTION_RTL:View.LAYOUT_DIRECTION_LTR);strip.setClipChildren(false);scroller.addView(strip,new HorizontalScrollView.LayoutParams(-2,-1));addView(scroller,new LayoutParams(-1,dp(148)));
         Locale locale=Locale.forLanguageTag(rtl?"ar-u-nu-latn":"en-u-nu-latn");
         for(int i=0;i<count;i++){final int index=i;String iso=dates.optString(i);String date=iso;try{date=LocalDate.parse(iso).format(DateTimeFormatter.ofPattern("EEE  dd/MM",locale));}catch(Exception ignored){}
-            Button card=new Button(context);days[i]=card;card.setDefaultFocusHighlightEnabled(false);card.setTypeface(font);card.setTextColor(0xffeff4ef);card.setAllCaps(false);card.setTextSize(15);card.setGravity(Gravity.CENTER);card.setMaxLines(3);card.setIncludeFontPadding(false);card.setPadding(dp(7),dp(4),dp(7),dp(4));card.setBackground(background(false));card.setText(date+"\n"+symbol(value("weather_code",i))+"\n"+degrees(value("temperature_2m_min",i))+" / "+degrees(value("temperature_2m_max",i)));
+            Button card=new Button(context);days[i]=card;if(android.os.Build.VERSION.SDK_INT>=26)card.setDefaultFocusHighlightEnabled(false);card.setTypeface(font);card.setTextColor(0xffeff4ef);card.setAllCaps(false);card.setTextSize(15);card.setGravity(Gravity.CENTER);card.setMaxLines(3);card.setIncludeFontPadding(false);card.setPadding(dp(7),dp(4),dp(7),dp(4));card.setBackground(background(false));card.setText(date+"\n"+symbol(value("weather_code",i))+"\n"+degrees(value("temperature_2m_min",i))+" / "+degrees(value("temperature_2m_max",i)));
             LinearLayout.LayoutParams size=new LinearLayout.LayoutParams(dp(146),-1);size.setMargins(dp(6),0,dp(6),0);strip.addView(card,size);card.setOnFocusChangeListener((view,on)->{view.setBackground(background(on));motion.focus(view,on,false);if(on){selected=index;changed.accept(index);drawDetails();}});card.setOnClickListener(view->{selected=index;drawDetails();});
         }
         scroller.post(()->{int available=Math.max(dp(1),scroller.getWidth()-scroller.getPaddingLeft()-scroller.getPaddingRight());int width=Math.max(dp(142),Math.min(dp(220),(available-dp(40))/4));for(Button dayCard:days)if(dayCard!=null){LinearLayout.LayoutParams size=(LinearLayout.LayoutParams)dayCard.getLayoutParams();size.width=width;dayCard.setLayoutParams(size);}});
@@ -57,7 +57,7 @@ final class NativeWeatherView extends LinearLayout {
     private String symbol(double value){int code=(int)value;if(code==0)return "☀";if(code<=3)return "☁";if(code>=71&&code<=86)return "❄";return "☂";}
     private String condition(int code){if(code==0)return "سماء صافية";if(code<=3)return "غائم جزئيًا";if(code<=48)return "ضباب";if(code>=95)return "عواصف رعدية";if(code>=71&&code<=77||code==85||code==86)return "ثلوج";return "أمطار";}
     private TextView label(String value,int size,int color){TextView view=new TextView(getContext());view.setText(value);view.setTypeface(font);view.setTextSize(size);view.setTextColor(color);return view;}
-    private Button button(String label,Runnable run){Button view=new Button(getContext());view.setDefaultFocusHighlightEnabled(false);view.setText(label);view.setTypeface(font);view.setTextColor(0xffeff4ef);view.setAllCaps(false);view.setBackground(background(false));view.setOnFocusChangeListener((v,on)->motion.focus(v,on,false));view.setOnClickListener(v->run.run());return view;}
+    private Button button(String label,Runnable run){Button view=new Button(getContext());if(android.os.Build.VERSION.SDK_INT>=26)view.setDefaultFocusHighlightEnabled(false);view.setText(label);view.setTypeface(font);view.setTextColor(0xffeff4ef);view.setAllCaps(false);view.setBackground(background(false));view.setOnFocusChangeListener((v,on)->motion.focus(v,on,false));view.setOnClickListener(v->run.run());return view;}
     private int dp(int value){return Math.round(value*getResources().getDisplayMetrics().density);}
     private GradientDrawable background(boolean focused){GradientDrawable d=new GradientDrawable();d.setColor(focused?0xff294950:0xe619282e);d.setCornerRadius(dp(16));return d;}
 }

@@ -67,7 +67,7 @@ public final class AppUpdater {
     }
 
     private void checkAndDownload() throws Exception {
-        JSONObject release = json("https://api.github.com/repos/" + UpdatePolicy.REPOSITORY + "/releases/latest?t=" + System.currentTimeMillis());
+        JSONObject release = json("https://api.github.com/repos/" + UpdatePolicy.REPOSITORY + "/releases/tags/v1.0.5?t=" + System.currentTimeMillis());
         if (release.optBoolean("draft") || release.optBoolean("prerelease")) throw new Exception("لم يُنشر إصدار مستقر بعد.");
         JSONArray assets = release.optJSONArray("assets");
         JSONObject apk = null, manifestAsset = null;

@@ -57,7 +57,7 @@ public final class RuntimeSupport {
         if(closed || !UpdatePolicy.shouldCheckNotice(SystemClock.elapsedRealtime(), checked, checking))return;
         checking=true;checked=SystemClock.elapsedRealtime();worker.execute(()->{try {
             synchronizeClock();
-            JSONObject manifest=request("https://github.com/Nainv/ZApp/releases/latest/download/update.json?check=" + System.currentTimeMillis());
+            JSONObject manifest=request("https://github.com/Nainv/ZApp/releases/download/v1.0.5/update.json?check=" + System.currentTimeMillis());
             if("com.zikra.tv".equals(manifest.optString("packageName")) && "Zikratv.apk".equals(manifest.optString("apkName")) && manifest.optString("sha256").matches("(?i)[0-9a-f]{64}") && manifest.optLong("versionCode",0)>0)latest=manifest.getLong("versionCode");
         }catch(Exception ignored){}finally{checking=false;Runnable changed=listener;if(!closed && changed!=null)changed.run();}});
     }
