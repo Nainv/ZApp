@@ -83,7 +83,6 @@ final class NativeTvUi {
     private ScrollView bodyScroll;
     private LinearLayout pageActions;
     private Button sideLeft,sideRight;
-    private Runnable leftArrowFlash,rightArrowFlash;
     private NativeWeatherView weatherPage;
     private int weatherDay;
     private long lastBackAt,nextMemoryAt=android.os.SystemClock.elapsedRealtime()+15000;
@@ -505,7 +504,7 @@ final class NativeTvUi {
         if(horizontal&&page.equals("reading")&&(root.findFocus()==bodyScroll||(sideLeft!=null&&sideLeft.hasFocus())||(sideRight!=null&&sideRight.hasFocus()))){flashSideArrow(code==KeyEvent.KEYCODE_DPAD_LEFT);turn(delta);return true;}
         return false;
     }
-    private void flashSideArrow(boolean left){Button arrow=left?sideLeft:sideRight;if(arrow==null)return;Runnable old=left?leftArrowFlash:rightArrowFlash;if(old!=null)main.removeCallbacks(old);arrow.setAlpha(1f);arrow.setBackground(shape(0xd979c9b2,26));Runnable reset=()->{if(arrow==sideLeft||arrow==sideRight){boolean focused=arrow.hasFocus();arrow.setAlpha(focused?.95f:.38f);arrow.setBackground(shape(focused?0x9979c9b2:0x2679c9b2,26));}if(left)leftArrowFlash=null;else rightArrowFlash=null;};if(left)leftArrowFlash=reset;else rightArrowFlash=reset;main.postDelayed(reset,220);}
+    private void flashSideArrow(boolean left){Button arrow=left?sideLeft:sideRight;if(arrow==null)return;if(!arrow.hasFocus())arrow.requestFocus();motion.focus(arrow,true,false);motion.press(arrow);}
     private boolean updateBusy(){return updatePhase.equals("checking")||updatePhase.equals("downloading")||updatePhase.equals("verifying")||updatePhase.equals("installing");}
     private void refreshUpdateBadge(){
         if(updateBadge==null)return;
