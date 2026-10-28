@@ -1,0 +1,19 @@
+# Generated Android projects and outputs (workflow builds from root sources).
+.gradle/
+build/
+app/
+local.properties
+*.apk
+*.aab
+
+# Signing material belongs outside the source repository.
+*.jks
+*.keystore
+
+# Local crash reports and operating-system metadata.
+*.hprof
+hs_err_pid*.log
+replay_pid*.log
+[Dd]esktop.ini
+Thumbs.db
+.DS_Store
