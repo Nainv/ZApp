@@ -504,7 +504,7 @@ final class NativeTvUi {
         if(horizontal&&page.equals("reading")&&(root.findFocus()==bodyScroll||(sideLeft!=null&&sideLeft.hasFocus())||(sideRight!=null&&sideRight.hasFocus()))){flashSideArrow(code==KeyEvent.KEYCODE_DPAD_LEFT);turn(delta);return true;}
         return false;
     }
-    private void flashSideArrow(boolean left){Button arrow=left?sideLeft:sideRight;if(arrow!=null)motion.press(arrow);}
+    private void flashSideArrow(boolean left){Button arrow=left?sideLeft:sideRight;if(arrow==null)return;arrow.setAlpha(1f);arrow.setBackground(shape(0xd979c9b2,26));main.removeCallbacksAndMessages(null);main.postDelayed(()->{if(arrow==sideLeft||arrow==sideRight){boolean focused=arrow.hasFocus();arrow.setAlpha(focused?.95f:.38f);arrow.setBackground(shape(focused?0x9979c9b2:0x2679c9b2,26));}},220);}
     private boolean updateBusy(){return updatePhase.equals("checking")||updatePhase.equals("downloading")||updatePhase.equals("verifying")||updatePhase.equals("installing");}
     private void refreshUpdateBadge(){
         if(updateBadge==null)return;
