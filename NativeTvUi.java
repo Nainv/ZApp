@@ -82,6 +82,7 @@ final class NativeTvUi {
 
     private ScrollView bodyScroll;
     private LinearLayout pageActions;
+    private Button sideLeft,sideRight;
     private NativeWeatherView weatherPage;
     private int weatherDay;
     private long lastBackAt,nextMemoryAt=android.os.SystemClock.elapsedRealtime()+15000;
@@ -122,7 +123,7 @@ final class NativeTvUi {
     private WebView migration;
     private LocationListener gps;
     private long requestId;
-    private final Runnable tick=new Runnable(){public void run(){if(closed||!resumed)return;clock.setText(format("HH:mm",AdhanScheduler.now(owner)));sky.update();long elapsed=android.os.SystemClock.elapsedRealtime();if(elapsed-lastUpdateCheck>=60000){lastUpdateCheck=elapsed;owner.checkNativeUpdate();}if(page.equals("home")&&memories!=null&&memories.length()>1&&elapsed>=nextMemoryAt){memoryIndex=(memoryIndex+1)%memories.length();nextMemoryAt=elapsed+15000;}refreshDashboard();main.postDelayed(this,1000);}};
+    private final Runnable tick=new Runnable(){public void run(){if(closed||!resumed)return;clock.setText(format("HH:mm",AdhanScheduler.now(owner)));sky.update();long elapsed=android.os.SystemClock.elapsedRealtime();if(elapsed-lastUpdateCheck>=60000){lastUpdateCheck=elapsed;owner.checkNativeUpdate();}if((page.equals("home")||page.equals("memory"))&&memories!=null&&memories.length()>1&&elapsed>=nextMemoryAt){memoryIndex=(memoryIndex+1)%memories.length();nextMemoryAt=elapsed+15000;if(page.equals("memory"))render(false);}refreshDashboard();main.postDelayed(this,1000);}};
     private static final class Tile {final String icon,title,detail;final Runnable run;Tile(String i,String t,String d,Runnable r){icon=i;title=t;detail=d;run=r;}}
     NativeTvUi(MainActivity value) {
         owner=value;data=owner.getSharedPreferences("native_tv_data",0);
@@ -156,7 +157,7 @@ final class NativeTvUi {
         long now=android.os.SystemClock.elapsedRealtime();if(NativeTvPolicy.exitOnBack(page.equals("home"),history.size(),lastBackAt,now)){owner.finish();return;}lastBackAt=now;
     }
     private void render(boolean returning){
-        if(closed)return;requestId++;motion.hide();if(updateBadge!=null)updateBadge.stopPulse();updateBadge=null;content.removeAllViews();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;quranCard=null;
+        if(closed)return;requestId++;motion.hide();if(updateBadge!=null)updateBadge.stopPulse();updateBadge=null;content.removeAllViews();removeSideNavigation();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;quranCard=null;
         content.setPadding(dp(page.equals("reading")?16:32),dp(page.equals("reading")?6:20),dp(page.equals("reading")?16:32),dp(page.equals("reading")?8:18));
         content.setLayoutDirection(pref("zikra_language","ar").equals("ar")?View.LAYOUT_DIRECTION_RTL:View.LAYOUT_DIRECTION_LTR);
         LinearLayout header=new LinearLayout(owner);header.setClipChildren(false);header.setClipToPadding(false);header.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);header.setGravity(Gravity.CENTER_VERTICAL);content.addView(header,new LinearLayout.LayoutParams(-1,dp(page.equals("reading")?42:50)));
@@ -182,6 +183,7 @@ final class NativeTvUi {
         else if(page.equals("qibla")){qibla();}
         else if(page.equals("weather")){weather();}
         else grid(tiles(),page.equals("home")?3:page.equals("surahs")||page.equals("mushaf")?4:2);
+        if(page.equals("reading")||page.equals("memory"))addSideNavigation();
         motion.enter(content,returning);
     }
     private String title(String key){switch(key){case "home":return "الرئيسية";case "settings":return "الإعدادات";case "surahs":case "player":return "القرآن الكريم";case "mushaf":case "reading":return "المصحف";case "memory":return "الأذكار";case "prayer":return "مواقيت الصلاة";case "weather":return "الطقس";case "qibla":return "القبلة";case "readers":return "اختيار القارئ";case "location":return "الموقع والمسجد";case "adhan":return "الأذان والتنبيهات";default:return key;}}
@@ -265,6 +267,18 @@ final class NativeTvUi {
     private void error(){if(!closed)message("تعذّر الاتصال","تحقق من الإنترنت وأعد المحاولة.");}
     private void body(String value,int size,Typeface face){ScrollView scroll=new ScrollView(owner);scroll.setClipToPadding(false);TextView label=text(value,size,TEXT);label.setTextIsSelectable(false);label.setPadding(dp(26),dp(18),dp(26),dp(18));label.setLineSpacing(dp(7),1.3f);if(face!=null)label.setTypeface(face);scroll.addView(label);scroll.setBackground(shape(0xd916272d,18));content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));scroll.setDefaultFocusHighlightEnabled(false);scroll.setFocusable(true);bodyScroll=scroll;scroll.requestFocus();}
     private void actions(String[] labels,Runnable[] actions){LinearLayout row=new LinearLayout(owner);pageActions=row;row.setGravity(Gravity.CENTER);for(int i=0;i<labels.length;i++){Button b=button(labels[i],actions[i]);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(44),1);p.setMargins(dp(6),dp(10),dp(6),0);row.addView(b,p);}content.addView(row);}
+    private void addSideNavigation(){
+        int leftDelta=NativeTvPolicy.horizontalStep(rtl(),true),rightDelta=NativeTvPolicy.horizontalStep(rtl(),false);
+        sideLeft=sideArrow("‹",leftDelta,leftDelta>0?"التالي":"السابق");sideRight=sideArrow("›",rightDelta,rightDelta>0?"التالي":"السابق");
+        FrameLayout.LayoutParams left=new FrameLayout.LayoutParams(dp(52),dp(76),Gravity.LEFT|Gravity.CENTER_VERTICAL);left.leftMargin=dp(10);root.addView(sideLeft,left);
+        FrameLayout.LayoutParams right=new FrameLayout.LayoutParams(dp(52),dp(76),Gravity.RIGHT|Gravity.CENTER_VERTICAL);right.rightMargin=dp(10);root.addView(sideRight,right);
+    }
+    private Button sideArrow(String glyph,int delta,String description){
+        Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextSize(36);arrow.setPadding(0,0,0,dp(3));arrow.setAlpha(.38f);arrow.setBackground(shape(0x2679c9b2,26));arrow.setContentDescription(description);
+        arrow.setOnFocusChangeListener((view,on)->{view.setAlpha(on?.95f:.38f);view.setBackground(shape(on?0x9979c9b2:0x2679c9b2,26));motion.focus(view,on,false);});return arrow;
+    }
+    private void removeSideNavigation(){if(sideLeft!=null){root.removeView(sideLeft);sideLeft=null;}if(sideRight!=null){root.removeView(sideRight);sideRight=null;}}
+    private void turnOrMemory(int delta){if(page.equals("reading")){turn(delta);return;}if(page.equals("memory")){memoryIndex+=delta;nextMemoryAt=android.os.SystemClock.elapsedRealtime()+15000;render(delta<0);}}
     private void quranToolbar(boolean reading){
         LinearLayout tools=new LinearLayout(owner);tools.setGravity(Gravity.CENTER_VERTICAL);tools.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         TextView label=text("حجم الخط",14,MUTED);tools.addView(label,new LinearLayout.LayoutParams(dp(86),dp(36)));
@@ -315,7 +329,7 @@ final class NativeTvUi {
     private int savedReadPage(){try{return NativeTvPolicy.page(new JSONObject(pref("zikra_mushaf_page_v1","{}")).optInt("page",1));}catch(Exception ignored){return 1;}}
     private void memory(){
         JSONObject item=memories==null?null:memories.optJSONObject(Math.floorMod(memoryIndex,Math.max(1,memories.length())));
-        body(item==null?"جارٍ تحميل الأذكار المحفوظة…":item.optString("title")+"\n\n"+item.optString("text")+"\n\n"+item.optString("source")+"\n\n"+item.optString("reflection")+"\n"+item.optString("lesson"),24,null);
+        body(item==null?"جارٍ تحميل الأذكار المحفوظة…":item.optString("title")+"\n\n"+item.optString("text")+"\n\n"+item.optString("source")+"\n\n"+item.optString("reflection")+"\n"+item.optString("lesson"),18,null);
         actions(new String[]{"السابق","الرئيسية","التالي"},new Runnable[]{()->{memoryIndex--;render(true);},this::back,()->{memoryIndex++;render(false);}});
     }
     private void tasbeeh(){choose("التسبيح · "+number("zikra_tasbeeh_count",0),new String[]{"+1","تصفير العداد"},i->{if(i==0){put("zikra_tasbeeh_count",String.valueOf(number("zikra_tasbeeh_count",0)+1));refreshDashboard();tasbeeh();}else prompt("تصفير العداد","تصفير عداد التسبيح؟",null,new String[]{"تصفير","رجوع"},j->{if(j==0){put("zikra_tasbeeh_count","0");refreshDashboard();}});});}
@@ -379,7 +393,7 @@ final class NativeTvUi {
         final String identity=config.optString("lat")+"|"+config.optString("lon");
         if(!quiet)notice("جارٍ تحميل الطقس…");
         io.execute(()->{try{
-            JSONObject result=request("https://api.open-meteo.com/v1/forecast?latitude="+config.optDouble("lat")+"&longitude="+config.optDouble("lon")+"&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&hourly=temperature_2m,precipitation_probability,wind_speed_10m&timezone=auto&forecast_days=10");
+            JSONObject result=request("https://api.open-meteo.com/v1/forecast?latitude="+config.optDouble("lat")+"&longitude="+config.optDouble("lon")+"&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,sunrise,sunset&hourly=temperature_2m,precipitation_probability,wind_speed_10m&timezone=auto&forecast_days=10");
             main.post(()->{weatherLoading=false;if(closed)return;JSONObject current=AdhanScheduler.configuration(owner);if(!identity.equals(current.optString("lat")+"|"+current.optString("lon")))return;
                 weather=result;weatherFetched=System.currentTimeMillis();put("tv_weather",result.toString());refreshDashboard();if(page.equals("weather"))render(false);if(!quiet)status.setVisibility(View.GONE);
             });
@@ -477,9 +491,9 @@ final class NativeTvUi {
         if(code==KeyEvent.KEYCODE_MEDIA_NEXT||code==KeyEvent.KEYCODE_MEDIA_PREVIOUS){seekVerse(code==KeyEvent.KEYCODE_MEDIA_NEXT?1:-1);return true;}
         boolean horizontal=code==KeyEvent.KEYCODE_DPAD_LEFT||code==KeyEvent.KEYCODE_DPAD_RIGHT;
         int delta=NativeTvPolicy.horizontalStep(rtl(),code==KeyEvent.KEYCODE_DPAD_LEFT);
-        if(horizontal&&page.equals("memory")&&((bodyScroll!=null&&bodyScroll.hasFocus())||(pageActions!=null&&pageActions.hasFocus()))){if(event.getRepeatCount()==0){memoryIndex+=delta;nextMemoryAt=android.os.SystemClock.elapsedRealtime()+15000;render(delta<0);}return true;}
+        if(horizontal&&page.equals("memory")&&((bodyScroll!=null&&bodyScroll.hasFocus())||(pageActions!=null&&pageActions.hasFocus())||(sideLeft!=null&&sideLeft.hasFocus())||(sideRight!=null&&sideRight.hasFocus()))){if(event.getRepeatCount()==0)turnOrMemory(delta);return true;}
         if(horizontal&&page.equals("weather")&&weatherPage!=null&&weatherPage.hasFocus())return weatherPage.move(delta);
-        if(horizontal&&page.equals("reading")&&root.findFocus()==bodyScroll){turn(delta);return true;}
+        if(horizontal&&page.equals("reading")&&(root.findFocus()==bodyScroll||(sideLeft!=null&&sideLeft.hasFocus())||(sideRight!=null&&sideRight.hasFocus()))){turn(delta);return true;}
         return false;
     }
     private boolean updateBusy(){return updatePhase.equals("checking")||updatePhase.equals("downloading")||updatePhase.equals("verifying")||updatePhase.equals("installing");}
