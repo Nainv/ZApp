@@ -274,7 +274,7 @@ final class NativeTvUi {
         View card=navigationCard;
         if(card==null)return;
         card.post(()->{
-            if(card!=bodyScroll||sideLeft==null||sideRight==null)return;
+            if(card!=navigationCard||sideLeft==null||sideRight==null)return;
             int[] cardAt=new int[2],rootAt=new int[2];card.getLocationOnScreen(cardAt);root.getLocationOnScreen(rootAt);
             int top=cardAt[1]-rootAt[1]+dp(6),leftX=cardAt[0]-rootAt[0]+dp(6);
             int barHeight=Math.max(dp(80),card.getHeight()-dp(12)),barWidth=dp(26);
