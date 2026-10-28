@@ -283,8 +283,7 @@ final class NativeTvUi {
         });
     }
     private Button sideArrow(String glyph,int delta,String description){
-        Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextDirection(View.TEXT_DIRECTION_LTR);arrow.setTextSize(32);arrow.setPadding(0,0,0,dp(2));arrow.setAlpha(.38f);arrow.setBackground(shape(0x0c79c9b2,16));arrow.setContentDescription(description);
-        arrow.setOnFocusChangeListener((view,on)->{view.setAlpha(on?1f:.38f);GradientDrawable bg=shape(on?0x3379c9b2:0x0c79c9b2,16);if(on)bg.setStroke(dp(2),0xff79c9b2);view.setBackground(bg);motion.focus(view,on,false);});return arrow;
+        Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextDirection(View.TEXT_DIRECTION_LTR);arrow.setTextSize(32);arrow.setPadding(0,0,0,dp(2));arrow.setAlpha(1f);arrow.setTextColor(ACCENT);arrow.setBackgroundColor(Color.TRANSPARENT);arrow.setContentDescription(description);arrow.setFocusable(false);arrow.setFocusableInTouchMode(false);arrow.setVisibility(View.INVISIBLE);arrow.setOnFocusChangeListener((view,on)->{});return arrow;
     }
     private void removeSideNavigation(){if(sideLeft!=null){root.removeView(sideLeft);sideLeft=null;}if(sideRight!=null){root.removeView(sideRight);sideRight=null;}}
     private void turnOrMemory(int delta){if(page.equals("reading")){turn(delta);return;}if(page.equals("memory")){memoryIndex+=delta;nextMemoryAt=android.os.SystemClock.elapsedRealtime()+15000;render(delta<0);}}
@@ -508,12 +507,12 @@ final class NativeTvUi {
         if(code==KeyEvent.KEYCODE_MEDIA_NEXT||code==KeyEvent.KEYCODE_MEDIA_PREVIOUS){seekVerse(code==KeyEvent.KEYCODE_MEDIA_NEXT?1:-1);return true;}
         boolean horizontal=code==KeyEvent.KEYCODE_DPAD_LEFT||code==KeyEvent.KEYCODE_DPAD_RIGHT;
         int delta=NativeTvPolicy.horizontalStep(rtl(),code==KeyEvent.KEYCODE_DPAD_LEFT);
-        if(horizontal&&page.equals("memory")){if(event.getRepeatCount()==0){flashSideArrow(code==KeyEvent.KEYCODE_DPAD_LEFT);turnOrMemory(delta);}return true;}
+        if(horizontal&&page.equals("memory")){if(event.getRepeatCount()==0){turnOrMemory(delta);main.postDelayed(()->flashSideArrow(code==KeyEvent.KEYCODE_DPAD_LEFT),140);}return true;}
         if(horizontal&&page.equals("weather")&&weatherPage!=null&&weatherPage.hasFocus())return weatherPage.move(delta);
         if(horizontal&&page.equals("reading")&&(root.findFocus()==bodyScroll||(sideLeft!=null&&sideLeft.hasFocus())||(sideRight!=null&&sideRight.hasFocus()))){flashSideArrow(code==KeyEvent.KEYCODE_DPAD_LEFT);turn(delta);return true;}
         return false;
     }
-    private void flashSideArrow(boolean left){Button arrow=left?sideLeft:sideRight;if(arrow==null)return;if(!arrow.hasFocus())arrow.requestFocus();motion.focus(arrow,true,false);motion.press(arrow);}
+    private void flashSideArrow(boolean left){Button arrow=left?sideLeft:sideRight;if(arrow==null)return;arrow.setVisibility(View.VISIBLE);arrow.setAlpha(1f);arrow.setTextColor(ACCENT);arrow.setBackgroundColor(Color.TRANSPARENT);arrow.postDelayed(()->{if(arrow==(left?sideLeft:sideRight))arrow.setVisibility(View.INVISIBLE);},180);}
     private boolean updateBusy(){return updatePhase.equals("checking")||updatePhase.equals("downloading")||updatePhase.equals("verifying")||updatePhase.equals("installing");}
     private void refreshUpdateBadge(){
         if(updateBadge==null)return;
