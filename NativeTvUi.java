@@ -130,7 +130,7 @@ final class NativeTvUi {
     NativeTvUi(MainActivity value) {
         owner=value;data=owner.getSharedPreferences("native_tv_data",0);
         try(InputStream image=owner.getAssets().open("assets/images/zikra-dome.png")){brandBitmap=android.graphics.BitmapFactory.decodeStream(image);}catch(Exception ignored){}
-        uiFont=owner.getResources().getFont(R.font.outfit);
+        uiFont=androidx.core.content.res.ResourcesCompat.getFont(owner, R.font.outfit);
         root=new FrameLayout(owner);root.setBackgroundColor(Color.BLACK);root.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         sky=new TvSkyView(owner,null);root.addView(sky,new FrameLayout.LayoutParams(-1,-1));sky.setIntensity(65);
         content=new LinearLayout(owner);content.setOrientation(LinearLayout.VERTICAL);content.setClipChildren(false);content.setClipToPadding(false);content.setPadding(dp(32),dp(20),dp(32),dp(18));root.addView(content,new FrameLayout.LayoutParams(-1,-1));
