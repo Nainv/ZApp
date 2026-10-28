@@ -366,32 +366,10 @@ jobs:
             exit 1
           fi
 
-          gh release upload v1.0.5 "$APK" 'app/build/outputs/apk/release/Zikratv.apk' 'app/build/outputs/apk/release/update.json' \
+          gh release upload v1.0.5 'app/build/outputs/apk/release/Zikratv.apk' 'app/build/outputs/apk/release/update.json' \
             --repo "$GITHUB_REPOSITORY" \
             --clobber
+          gh release delete-asset v1.0.5 app-release.apk --repo "$GITHUB_REPOSITORY" --yes >/dev/null 2>&1 || true
 
-          echo 'Updated app-release.apk in the existing v1.0.5 release.'
+          echo 'Updated Zikratv.apk and removed the generic duplicate asset.'
 
-      - name: Publish the verified signed HomeTV installer
-        if: github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          gh api "repos/$GITHUB_REPOSITORY/releases/tags/v1.0.5" --jq '.assets[] | select(.name == "HomeTV.apk") | .digest' > "$RUNNER_TEMP/current-release-assets.txt"
-          if grep -Fxq 'sha256:805318a592ac3c5c34d08546ee4a91835ef58813df6b3a25809bb9053992a91d' "$RUNNER_TEMP/current-release-assets.txt"; then
-            echo 'HomeTV installer is already published; leaving it in place.'
-            exit 0
-          fi
-          gh api "repos/$GITHUB_REPOSITORY/git/blobs/d91faaa28c9cf343a66f0b9a611f6a479f7a4b33" --jq '.content' | base64 --decode > "$RUNNER_TEMP/HomeTV.apk"
-          python3 - <<'PY_HOME'
-          import hashlib, os, json
-          from pathlib import Path
-          data = (Path(os.environ['RUNNER_TEMP']) / 'HomeTV.apk').read_bytes()
-          assert hashlib.sha256(data).hexdigest() == '805318a592ac3c5c34d08546ee4a91835ef58813df6b3a25809bb9053992a91d', 'HomeTV source differs from the verified signed 3.5 APK'
-          manifest = dict(packageName='com.gathin.tvhome', versionCode=14, versionName='3.5', apkName='HomeTV.apk', url='https://github.com/'+os.environ['GITHUB_REPOSITORY']+'/releases/download/v1.0.5/HomeTV.apk', sha256=hashlib.sha256(data).hexdigest())
-          (Path(os.environ['RUNNER_TEMP']) / 'home-update.json').write_text(json.dumps(manifest))
-          PY_HOME
-          gh release upload v1.0.5 "$RUNNER_TEMP/HomeTV.apk" "$RUNNER_TEMP/home-update.json" --repo "$GITHUB_REPOSITORY" --clobber
-          gh release delete-asset v1.0.5 HomeTV-build.apk --repo "$GITHUB_REPOSITORY" --yes >/dev/null 2>&1 || true
