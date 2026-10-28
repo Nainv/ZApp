@@ -1,5 +1,5 @@
 
-name: Build Zikra Fire OS 6 preview
+name: Build and publish Zikra Fire OS 6
 
 on:
   push:
@@ -216,7 +216,7 @@ jobs:
 
               defaultConfig {
                   applicationId 'com.zikra.tv'
-                  minSdk 23
+                  minSdk 25
                   targetSdk 35
                   versionCode generatedVersionCode
                   versionName '1.1.5-fireos6'
@@ -242,6 +242,11 @@ jobs:
                   }
               }
 
+              lint {
+                  checkOnly 'NewApi'
+                  abortOnError true
+              }
+
               buildTypes {
                   release {
                       signingConfig signingConfigs.release
@@ -251,13 +256,14 @@ jobs:
           }
           dependencies {
               coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+              implementation 'androidx.appcompat:appcompat:1.7.0'
               implementation 'androidx.recyclerview:recyclerview:1.3.2'
               implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
           }
           EOF_APP
 
           echo "Android project prepared."
-          echo "Release name: 1.1.2"
+          echo "Release name: 1.1.5-fireos6"
           echo "Generated versionCode: $((1000000 + GITHUB_RUN_NUMBER))"
 
       - name: Validate Android Manifest
@@ -317,7 +323,7 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          gradle --no-daemon assembleRelease --stacktrace
+          gradle --no-daemon lintRelease assembleRelease --stacktrace
 
       - name: Verify signed APK
         shell: bash
@@ -343,23 +349,23 @@ jobs:
           import hashlib, json, os
           from pathlib import Path
           apk = Path('app/build/outputs/apk/release/app-release.apk')
-          manifest = dict(packageName='com.zikra.tv', versionCode=1000000 + int(os.environ['GITHUB_RUN_NUMBER']), versionName='1.1.5', apkName='Zikratv.apk', sha256=hashlib.sha256(apk.read_bytes()).hexdigest())
-          apk.with_name('Zikratv.apk').write_bytes(apk.read_bytes())
-          apk.with_name('update.json').write_text(json.dumps(manifest), encoding='utf-8')
+          manifest = dict(packageName='com.zikra.tv', versionCode=1000000 + int(os.environ['GITHUB_RUN_NUMBER']), versionName='1.1.5-fireos6', apkName='Zikratv-fireos6.apk', sha256=hashlib.sha256(apk.read_bytes()).hexdigest())
+          apk.with_name('Zikratv-fireos6.apk').write_bytes(apk.read_bytes())
+          apk.with_name('update-fireos6.json').write_text(json.dumps(manifest), encoding='utf-8')
           PY
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zikra-android-tv-apk
+          name: zikra-fireos6-apk
           path: |
-            app/build/outputs/apk/release/Zikratv.apk
-            app/build/outputs/apk/release/update.json
+            app/build/outputs/apk/release/Zikratv-fireos6.apk
+            app/build/outputs/apk/release/update-fireos6.json
           if-no-files-found: error
           retention-days: 7
 
       - name: Update APK in existing v1.0.5 release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/fireos6-native-tv'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
@@ -373,10 +379,9 @@ jobs:
             exit 1
           fi
 
-          gh release upload v1.0.5 'app/build/outputs/apk/release/Zikratv.apk' 'app/build/outputs/apk/release/update.json' \
+          gh release upload v1.0.5 'app/build/outputs/apk/release/Zikratv-fireos6.apk' 'app/build/outputs/apk/release/update-fireos6.json' \
             --repo "$GITHUB_REPOSITORY" \
             --clobber
-          gh release delete-asset v1.0.5 app-release.apk --repo "$GITHUB_REPOSITORY" --yes >/dev/null 2>&1 || true
 
-          echo 'Updated Zikratv.apk and removed the generic duplicate asset.'
+          echo 'Updated only the dedicated Fire OS 6 APK and update manifest.'
 

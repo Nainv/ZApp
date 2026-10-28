@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /** Continuous Quran text in one card; only the active verse's paint spans change during playback. */
-@androidx.annotation.RequiresApi(26)
+@androidx.annotation.RequiresApi(25)
 final class NativeQuranCard extends LinearLayout {
     private final TextView heading,subtitle,text;
     private final ScrollView scroll;
@@ -40,7 +40,7 @@ final class NativeQuranCard extends LinearLayout {
         super(context);book=index;setOrientation(VERTICAL);setLayoutDirection(View.LAYOUT_DIRECTION_RTL);setPadding(dp(18),dp(8),dp(18),dp(8));setClipToOutline(true);
         heading=new TextView(context);heading.setTypeface(uiFont);heading.setTextSize(24);heading.setGravity(Gravity.CENTER);addView(heading,new LayoutParams(-1,dp(30)));
         subtitle=new TextView(context);subtitle.setTypeface(uiFont);subtitle.setTextSize(13);subtitle.setGravity(Gravity.CENTER);addView(subtitle,new LayoutParams(-1,dp(24)));
-        scroll=new ScrollView(context);scroll.setFillViewport(true);scroll.setClipToPadding(false);scroll.setDefaultFocusHighlightEnabled(false);scroll.setFocusable(true);scroll.setPadding(0,dp(4),0,dp(4));addView(scroll,new LayoutParams(-1,0,1));
+        scroll=new ScrollView(context);scroll.setFillViewport(true);scroll.setClipToPadding(false);if(android.os.Build.VERSION.SDK_INT>=26)scroll.setDefaultFocusHighlightEnabled(false);scroll.setFocusable(true);scroll.setPadding(0,dp(4),0,dp(4));addView(scroll,new LayoutParams(-1,0,1));
         text=new TextView(context);try{text.setTypeface(Typeface.createFromAsset(context.getAssets(),"assets/fonts/AmiriQuran.ttf"));}catch(Exception ignored){}
         text.setTextDirection(View.TEXT_DIRECTION_RTL);text.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);text.setGravity(Gravity.CENTER);text.setLineSpacing(dp(2),1.12f);text.setPadding(dp(6),dp(4),dp(6),dp(6));text.setTextIsSelectable(false);text.setIncludeFontPadding(true);scroll.addView(text,new ScrollView.LayoutParams(-1,-2));scroll.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob)->{if(r-l!=or-ol||b-t!=ob-ot)scheduleFit();});style(size,lightPage);
     }

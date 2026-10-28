@@ -12,7 +12,7 @@ import android.widget.TextView;
 import java.util.Locale;
 
 /** Live dashboard: summaries stay on Home; OK opens their full native screens. */
-@androidx.annotation.RequiresApi(26)
+@androidx.annotation.RequiresApi(25)
 final class NativeTvHome extends LinearLayout {
     interface Actions { void run(String action); }
     static final int WEATHER=0x00ea001,TASBEEH=0x00ea002,QURAN=0x00ea003,MEMORY=0x00ea004;
@@ -49,14 +49,14 @@ final class NativeTvHome extends LinearLayout {
         LinearLayout playerHeading=row();playerHeading.setGravity(Gravity.CENTER_VERTICAL);quran.addView(playerHeading,new LayoutParams(-1,dp(30)));
         track=label("القرآن الكريم",18,TEXT,1);track.setTextDirection(rtl?View.TEXT_DIRECTION_RTL:View.TEXT_DIRECTION_LTR);playerHeading.addView(track,new LayoutParams(0,-1,1));
         reciter=label("",12,MUTED,1);
-        verse=label("افتح فهرس القرآن أو تابع تلاوتك من آخر موضع.",23,TEXT,3);try{verse.setTypeface(Typeface.createFromAsset(context.getAssets(),"assets/fonts/AmiriQuran.ttf"));}catch(Exception ignored){}verse.setTextDirection(View.TEXT_DIRECTION_RTL);verse.setGravity(Gravity.CENTER_VERTICAL);verse.setAutoSizeTextTypeUniformWithConfiguration(16,23,1,android.util.TypedValue.COMPLEX_UNIT_SP);quran.addView(verse,new LayoutParams(-1,0,1));
+        verse=label("افتح فهرس القرآن أو تابع تلاوتك من آخر موضع.",23,TEXT,3);try{verse.setTypeface(Typeface.createFromAsset(context.getAssets(),"assets/fonts/AmiriQuran.ttf"));}catch(Exception ignored){}verse.setTextDirection(View.TEXT_DIRECTION_RTL);verse.setGravity(Gravity.CENTER_VERTICAL);androidx.core.widget.TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(verse,16,23,1,android.util.TypedValue.COMPLEX_UNIT_SP);quran.addView(verse,new LayoutParams(-1,0,1));
         LinearLayout controls=row();controls.setGravity(Gravity.CENTER);quran.addView(controls,new LayoutParams(-1,dp(36)));
         Button previous=control(PREVIOUS,"سورة −","previous"),next=control(NEXT,"سورة +","next");
         Button versePrevious=control(VERSE_PREVIOUS,"آية −","verse-previous"),verseNext=control(VERSE_NEXT,"آية +","verse-next");
         play=control(PLAY,"▶","play");
         for(Button control:new Button[]{previous,versePrevious,play,verseNext,next})controls.addView(control,controlSize(1));
         LinearLayout memory=panel(MEMORY,"memory",false);lower.addView(memory,weighted(2));memory.addView(label("ذِكْرَىٰ اليوم",16,ACCENT,1));
-        remembrance=label("جارٍ تجهيز الأذكار المحفوظة…",16,TEXT,4);remembrance.setGravity(Gravity.CENTER_VERTICAL);remembrance.setAutoSizeTextTypeUniformWithConfiguration(11,16,1,android.util.TypedValue.COMPLEX_UNIT_SP);memory.addView(remembrance,new LayoutParams(-1,0,1));memory.addView(label("OK لقراءة الذكر كاملًا",11,MUTED,1));
+        remembrance=label("جارٍ تجهيز الأذكار المحفوظة…",16,TEXT,4);remembrance.setGravity(Gravity.CENTER_VERTICAL);androidx.core.widget.TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(remembrance,11,16,1,android.util.TypedValue.COMPLEX_UNIT_SP);memory.addView(remembrance,new LayoutParams(-1,0,1));memory.addView(label("OK لقراءة الذكر كاملًا",11,MUTED,1));
         wire(weather,tasbeeh,quran,memory,previous,versePrevious,verseNext,next);
         tasbeeh.setOnLongClickListener(v->{actions.run("tasbeeh-reset");return true;});
     }
@@ -65,9 +65,9 @@ final class NativeTvHome extends LinearLayout {
     private LayoutParams weighted(float weight){LayoutParams p=new LayoutParams(0,-1,weight);p.setMargins(dp(5),dp(4),dp(5),dp(4));return p;}
     private LayoutParams controlSize(float weight){LayoutParams p=new LayoutParams(0,-1,weight);p.setMargins(dp(3),0,dp(3),0);return p;}
     private GradientDrawable background(boolean focused){GradientDrawable d=new GradientDrawable();d.setColor(focused?0xf0254147:0xe619282e);d.setCornerRadius(dp(16));return d;}
-    private TextView label(String value,int size,int color,int lines){TextView v=new TextView(getContext());v.setText(translate.apply(value));v.setTextSize(size);v.setTextColor(color);v.setTypeface(font);v.setFontFeatureSettings("tnum");v.setMaxLines(lines);v.setEllipsize(TextUtils.TruncateAt.END);v.setIncludeFontPadding(false);return v;}
-    private LinearLayout panel(int id,String action,boolean tile){LinearLayout v=new LinearLayout(getContext());v.setId(id);v.setOrientation(VERTICAL);v.setPadding(dp(16),dp(9),dp(16),dp(9));v.setBackground(background(false));v.setFocusable(true);v.setClickable(true);v.setDefaultFocusHighlightEnabled(false);v.setClipChildren(false);v.setClipToPadding(false);v.setOnFocusChangeListener((view,on)->{view.setBackground(background(tile?view.getId()==FIRST_PRAYER+nextPrayerIndex:on));motion.focus(view,on,tile);});v.setOnClickListener(view->{motion.press(view);actions.run(action);});return v;}
-    private Button control(int id,String title,String action){Button v=new Button(getContext());v.setId(id);v.setDefaultFocusHighlightEnabled(false);v.setText(translate.apply(title));v.setTextSize(13);v.setTypeface(font);v.setAllCaps(false);v.setTextColor(TEXT);v.setPadding(0,0,0,0);v.setMinimumHeight(0);v.setMinimumWidth(0);v.setMinHeight(0);v.setMinWidth(0);v.setBackground(background(false));v.setOnFocusChangeListener((view,on)->motion.focus(view,on,false));v.setOnClickListener(view->{motion.press(view);actions.run(action);});return v;}
+    private TextView label(String value,int size,int color,int lines){TextView v=new androidx.appcompat.widget.AppCompatTextView(getContext());v.setText(translate.apply(value));v.setTextSize(size);v.setTextColor(color);v.setTypeface(font);v.setFontFeatureSettings("tnum");v.setMaxLines(lines);v.setEllipsize(TextUtils.TruncateAt.END);v.setIncludeFontPadding(false);return v;}
+    private LinearLayout panel(int id,String action,boolean tile){LinearLayout v=new LinearLayout(getContext());v.setId(id);v.setOrientation(VERTICAL);v.setPadding(dp(16),dp(9),dp(16),dp(9));v.setBackground(background(false));v.setFocusable(true);v.setClickable(true);if(android.os.Build.VERSION.SDK_INT>=26)v.setDefaultFocusHighlightEnabled(false);v.setClipChildren(false);v.setClipToPadding(false);v.setOnFocusChangeListener((view,on)->{view.setBackground(background(tile?view.getId()==FIRST_PRAYER+nextPrayerIndex:on));motion.focus(view,on,tile);});v.setOnClickListener(view->{motion.press(view);actions.run(action);});return v;}
+    private Button control(int id,String title,String action){Button v=new Button(getContext());v.setId(id);if(android.os.Build.VERSION.SDK_INT>=26)v.setDefaultFocusHighlightEnabled(false);v.setText(translate.apply(title));v.setTextSize(13);v.setTypeface(font);v.setAllCaps(false);v.setTextColor(TEXT);v.setPadding(0,0,0,0);v.setMinimumHeight(0);v.setMinimumWidth(0);v.setMinHeight(0);v.setMinWidth(0);v.setBackground(background(false));v.setOnFocusChangeListener((view,on)->motion.focus(view,on,false));v.setOnClickListener(view->{motion.press(view);actions.run(action);});return v;}
     void setHeaderNavigation(int settings,int mushaf){findViewById(WEATHER).setNextFocusUpId(mushaf);findViewById(TASBEEH).setNextFocusUpId(settings);}
     private void wire(View weather,View tasbeeh,View quran,View memory,View previous,View versePrevious,View verseNext,View next){
         // Explicit vertical lanes prevent the large player/weather panels from stealing selection.
@@ -96,7 +96,7 @@ final class NativeTvHome extends LinearLayout {
             lastCaption=key;android.text.SpannableStringBuilder line=new android.text.SpannableStringBuilder(caption+"\ufffc");
             NativeAyahMark mark=new NativeAyahMark(getContext(),ayah);mark.setBounds(0,0,dp(25),dp(25));line.setSpan(new android.text.style.ImageSpan(mark,android.text.style.ImageSpan.ALIGN_BASELINE),line.length()-1,line.length(),android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);track.setText(line);
         }
-        track.setAutoSizeTextTypeUniformWithConfiguration(10,17,1,android.util.TypedValue.COMPLEX_UNIT_SP);
+        androidx.core.widget.TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(track,10,17,1,android.util.TypedValue.COMPLEX_UNIT_SP);
         set(verse,text.isEmpty()?"افتح فهرس القرآن أو تابع تلاوتك من آخر موضع.":text);set(play,playing?"Ⅱ":"▶");
     }
     void remembrance(String value){if(!value.contentEquals(remembrance.getText())){remembrance.animate().cancel();remembrance.setAlpha(.4f);remembrance.setText(value);remembrance.animate().alpha(1f).setDuration(180).start();}}

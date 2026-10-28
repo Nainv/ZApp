@@ -67,16 +67,16 @@ public final class AppUpdater {
     }
 
     private void checkAndDownload() throws Exception {
-        JSONObject release = json("https://api.github.com/repos/" + UpdatePolicy.REPOSITORY + "/releases/latest?t=" + System.currentTimeMillis());
+        JSONObject release = json("https://api.github.com/repos/" + UpdatePolicy.REPOSITORY + "/releases/tags/" + UpdatePolicy.RELEASE_TAG + "?t=" + System.currentTimeMillis());
         if (release.optBoolean("draft") || release.optBoolean("prerelease")) throw new Exception("لم يُنشر إصدار مستقر بعد.");
         JSONArray assets = release.optJSONArray("assets");
         JSONObject apk = null, manifestAsset = null;
         if (assets != null) for (int i = 0; i < assets.length(); i++) {
             JSONObject asset = assets.getJSONObject(i); String name = asset.optString("name");
-            if (name.equals("update.json")) manifestAsset = asset;
-            if (name.equals("Zikratv.apk")) apk = asset;
+            if (name.equals(UpdatePolicy.MANIFEST_NAME)) manifestAsset = asset;
+            if (name.equals(UpdatePolicy.APK_NAME)) apk = asset;
         }
-        if (apk == null) throw new Exception("الإصدار المنشور لا يحتوي ملف التثبيت Zikratv.apk.");
+        if (apk == null) throw new Exception("الإصدار المنشور لا يحتوي ملف التثبيت الخاص بـ Fire OS 6.");
         String apkUrl = apk.optString("browser_download_url");
         if (!UpdatePolicy.isReleaseAsset(apkUrl)) throw new Exception("رابط التحديث لا يعود إلى مشروع ذِكْرَىٰ.");
         long publishedSize = apk.optLong("size", 0);
@@ -88,7 +88,7 @@ public final class AppUpdater {
             String manifestUrl = manifestAsset.optString("browser_download_url");
             if (!UpdatePolicy.isReleaseAsset(manifestUrl)) throw new Exception("بيانات الإصدار غير صالحة.");
             JSONObject manifest = json(manifestUrl + (manifestUrl.contains("?") ? "&" : "?") + "check=" + System.currentTimeMillis());
-            if (!context.getPackageName().equals(manifest.optString("packageName")) || !"Zikratv.apk".equals(manifest.optString("apkName"))) throw new Exception("بيانات الإصدار ليست لتطبيق ذِكْرَىٰ.");
+            if (!context.getPackageName().equals(manifest.optString("packageName")) || !UpdatePolicy.APK_NAME.equals(manifest.optString("apkName"))) throw new Exception("بيانات الإصدار ليست لتطبيق ذِكْرَىٰ.");
             expectedVersion = manifest.optLong("versionCode", 0);
             String manifestDigest = manifest.optString("sha256");
             if (expectedVersion <= 0 || !manifestDigest.matches("(?i)[0-9a-f]{64}")) throw new Exception("بيانات التحديث غير مكتملة. حاول بعد قليل.");

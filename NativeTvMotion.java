@@ -15,7 +15,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 /** CleanYourTV's native tile zoom, glass-position springs and panel entrance.
  * Derived from Gathin's MIT source; see assets/licenses/CleanYourTV-MIT.txt. */
-@androidx.annotation.RequiresApi(26)
+@androidx.annotation.RequiresApi(25)
 final class NativeTvMotion {
     final FrameLayout root;
     private final View glass;
@@ -42,7 +42,7 @@ final class NativeTvMotion {
         root.getViewTreeObserver().addOnGlobalFocusChangeListener(focusWatch);root.getViewTreeObserver().addOnWindowFocusChangeListener(windowWatch);
     }
     private int dp(float value){return Math.round(value*root.getResources().getDisplayMetrics().density);}
-    private boolean reduced(){return !ValueAnimator.areAnimatorsEnabled();}
+    private boolean reduced(){return !(android.os.Build.VERSION.SDK_INT<26||ValueAnimator.areAnimatorsEnabled());}
     void focus(View view,boolean focused,boolean tile) {
         view.animate().cancel();float scale=focused?(view instanceof Button?1.025f:1.012f):1f;
         if(reduced()){view.setScaleX(scale);view.setScaleY(scale);}else view.animate().scaleX(scale).scaleY(scale)
