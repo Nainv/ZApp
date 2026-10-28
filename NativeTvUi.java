@@ -152,7 +152,7 @@ final class NativeTvUi {
     private boolean rtl(){return pref("zikra_language","ar").equals("ar");}
     void back(){
         if(!AdhanService.activePrayer.isEmpty()){AdhanService.stop(owner);return;}
-        if(!history.isEmpty()){lastBackAt=0;rememberSelection();page=history.pop();render(true);return;}
+        if(!history.isEmpty()){lastBackAt=0;rememberSelection();if(page.equals("weather"))weatherDay=0;page=history.pop();render(true);return;}
         if(!page.equals("home")){lastBackAt=0;page="home";render(true);return;}
         long now=android.os.SystemClock.elapsedRealtime();if(NativeTvPolicy.exitOnBack(page.equals("home"),history.size(),lastBackAt,now)){owner.finish();return;}lastBackAt=now;
     }
@@ -228,7 +228,7 @@ final class NativeTvUi {
             for(int i=0;i<readers.length();i++){JSONObject r=readers.optJSONObject(i);if(!NativeTvPolicy.matches(r.optString("name"),readerQuery))continue;list.add(new Tile("♫",r.optString("name"),r.optString("rewaya"),()->{put("tv_reader",r.toString());put("tv_reader_name",r.optString("name"));back();}));}break;
         case "prayer":
             for(int i=0;i<AdhanScheduler.KEYS.length;i++){String key=AdhanScheduler.KEYS[i];list.add(new Tile("◷",PRAYERS[i],prayerTime(key),()->adhanChoice(key)));}
-            list.add(new Tile("↻","تحديث المواقيت",pref("zikra_city","اختر المدينة من الإعدادات"),()->{AdhanScheduler.refreshAsync(owner);notice("جارٍ تحديث مواقيت الصلاة…");}));break;
+            list.add(new Tile("↻","تحديث المواقيت",prayerLocationLabel(),()->{AdhanScheduler.refreshAsync(owner);notice("جارٍ تحديث مواقيت الصلاة…");}));break;
         case "location":
             list.add(new Tile("⌕",pref("zikra_city","اختيار المدينة"),"اختيار المدينة",this::searchCity));
             list.add(new Tile("⌖","موقعي الحالي","باستخدام موقع الجهاز بعد الإذن",this::locate));
@@ -269,12 +269,12 @@ final class NativeTvUi {
     private void actions(String[] labels,Runnable[] actions){LinearLayout row=new LinearLayout(owner);pageActions=row;row.setGravity(Gravity.CENTER);for(int i=0;i<labels.length;i++){Button b=button(labels[i],actions[i]);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(44),1);p.setMargins(dp(6),dp(10),dp(6),0);row.addView(b,p);}content.addView(row);}
     private void addSideNavigation(){
         int leftDelta=NativeTvPolicy.horizontalStep(rtl(),true),rightDelta=NativeTvPolicy.horizontalStep(rtl(),false);
-        sideLeft=sideArrow("‹",leftDelta,leftDelta>0?"التالي":"السابق");sideRight=sideArrow("›",rightDelta,rightDelta>0?"التالي":"السابق");
+        sideLeft=sideArrow("←",leftDelta,leftDelta>0?"التالي":"السابق");sideRight=sideArrow("→",rightDelta,rightDelta>0?"التالي":"السابق");
         FrameLayout.LayoutParams left=new FrameLayout.LayoutParams(dp(52),dp(76),Gravity.LEFT|Gravity.CENTER_VERTICAL);left.leftMargin=dp(10);root.addView(sideLeft,left);
         FrameLayout.LayoutParams right=new FrameLayout.LayoutParams(dp(52),dp(76),Gravity.RIGHT|Gravity.CENTER_VERTICAL);right.rightMargin=dp(10);root.addView(sideRight,right);
     }
     private Button sideArrow(String glyph,int delta,String description){
-        Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextSize(36);arrow.setPadding(0,0,0,dp(3));arrow.setAlpha(.38f);arrow.setBackground(shape(0x2679c9b2,26));arrow.setContentDescription(description);
+        Button arrow=button(glyph,()->turnOrMemory(delta));arrow.setTextDirection(View.TEXT_DIRECTION_LTR);arrow.setTextSize(36);arrow.setPadding(0,0,0,dp(3));arrow.setAlpha(.38f);arrow.setBackground(shape(0x2679c9b2,26));arrow.setContentDescription(description);
         arrow.setOnFocusChangeListener((view,on)->{view.setAlpha(on?.95f:.38f);view.setBackground(shape(on?0x9979c9b2:0x2679c9b2,26));motion.focus(view,on,false);});return arrow;
     }
     private void removeSideNavigation(){if(sideLeft!=null){root.removeView(sideLeft);sideLeft=null;}if(sideRight!=null){root.removeView(sideRight);sideRight=null;}}
@@ -332,7 +332,7 @@ final class NativeTvUi {
         body(item==null?"جارٍ تحميل الأذكار المحفوظة…":item.optString("title")+"\n\n"+item.optString("text")+"\n\n"+item.optString("source")+"\n\n"+item.optString("reflection")+"\n"+item.optString("lesson"),18,null);
         actions(new String[]{"السابق","الرئيسية","التالي"},new Runnable[]{()->{memoryIndex--;render(true);},this::back,()->{memoryIndex++;render(false);}});
     }
-    private void tasbeeh(){choose("التسبيح · "+number("zikra_tasbeeh_count",0),new String[]{"+1","تصفير العداد"},i->{if(i==0){put("zikra_tasbeeh_count",String.valueOf(number("zikra_tasbeeh_count",0)+1));refreshDashboard();tasbeeh();}else prompt("تصفير العداد","تصفير عداد التسبيح؟",null,new String[]{"تصفير","رجوع"},j->{if(j==0){put("zikra_tasbeeh_count","0");refreshDashboard();}});});}
+    private void tasbeeh(){choose("التسبيح · "+number("zikra_tasbeeh_count",0),new String[]{"+1","تصفير العداد"},i->{if(i==0)put("zikra_tasbeeh_count",String.valueOf(number("zikra_tasbeeh_count",0)+1));else put("zikra_tasbeeh_count","0");refreshDashboard();});}
     private String nextPrayer(){try{JSONArray rows=new JSONArray(AdhanScheduler.prefs(owner).getString("schedule","[]"));long now=AdhanScheduler.now(owner),next=Long.MAX_VALUE;String key="";for(int i=0;i<rows.length();i++){JSONObject r=rows.getJSONObject(i);long t=r.optLong("epoch");if(t>now&&t<next){next=t;key=r.optString("key");}}if(!key.isEmpty())return prayerName(key)+"  "+format("HH:mm",next);}catch(Exception ignored){}return "حدد الموقع لإظهار المواقيت";}
     private String prayerName(String key){for(int i=0;i<AdhanScheduler.KEYS.length;i++)if(key.equals(AdhanScheduler.KEYS[i]))return PRAYERS[i];return key;}
     private String prayerTime(String key){try{JSONArray rows=new JSONArray(AdhanScheduler.prefs(owner).getString("schedule","[]"));long today=AdhanScheduler.now(owner);String date=format("yyyy-MM-dd",today);for(int i=0;i<rows.length();i++){JSONObject r=rows.getJSONObject(i);if(key.equals(r.optString("key"))&&date.equals(r.optString("date")))return format("HH:mm",r.optLong("epoch"));}}catch(Exception ignored){}return "—";}
@@ -341,6 +341,11 @@ final class NativeTvUi {
     private void saveConfig(String key,Object value){try{JSONObject c=AdhanScheduler.configuration(owner);c.put(key,value);saveSchedule(c,new JSONObject(AdhanScheduler.prefs(owner).getString("settings","{}")));}catch(Exception e){error();}}
     private void searchCity(){EditText input=new EditText(owner);input.setText(pref("zikra_city",""));input.setSingleLine(true);input.setHint("اكتب اسم المدينة");prompt("اختيار المدينة","",input,new String[]{"بحث","رجوع"},i->{if(i==0)findCities(input.getText().toString());});}
     private void findCities(String query){if(query.trim().length()<2)return;notice("جارٍ البحث عن المدينة…");io.execute(()->{try{JSONArray results=request("https://geocoding-api.open-meteo.com/v1/search?name="+URLEncoder.encode(query,"UTF-8")+"&count=10&language="+pref("zikra_language","ar")+"&format=json").optJSONArray("results");main.post(()->{if(closed)return;if(results==null||results.length()==0){notice("لا توجد نتائج. جرّب اسمًا آخر.");return;}String[] names=new String[results.length()];for(int i=0;i<names.length;i++){JSONObject r=results.optJSONObject(i);names[i]=r.optString("name")+" · "+r.optString("admin1")+" · "+r.optString("country");}choose("نتائج البحث",names,i->{JSONObject r=results.optJSONObject(i);location(r.optDouble("latitude"),r.optDouble("longitude"),r.optString("name"),r.optString("timezone",TimeZone.getDefault().getID()),"");});});}catch(Exception e){main.post(this::error);}});}
+    private String prayerLocationLabel(){
+        String city=pref("zikra_city","اختر المدينة من الإعدادات");String mosque=pref("tv_mosque_name","");
+        if(mosque.isEmpty())try{JSONObject old=new JSONObject(pref("zikra_mosque","{}"));mosque=old.optString("title","");}catch(Exception ignored){}
+        if(mosque.isEmpty()||mosque.equals(city))return city;return city+" - "+mosque;
+    }
     private String mosqueName(){
         String name=pref("tv_mosque_name","");if(!name.isEmpty())return name;
         try{JSONObject old=new JSONObject(pref("zikra_mosque","{}"));if(!old.optString("title").isEmpty())return old.optString("title");}catch(Exception ignored){}
@@ -429,7 +434,7 @@ final class NativeTvUi {
         JSONObject current=weather==null?null:weather.optJSONObject("current");
         String temp="— °C",detail="اختر الموقع لإظهار الطقس";
         if(current!=null){temp=String.format(Locale.US,"%.0f °C",current.optDouble("temperature_2m"));detail=weatherName(current.optInt("weather_code"))+"  ·  "+current.optInt("relative_humidity_2m")+"% رطوبة  ·  "+String.format(Locale.US,"%.0f km/h",current.optDouble("wind_speed_10m"));}
-        homeDashboard.weather(mosqueName().isEmpty()?pref("zikra_city","حدد الموقع"):mosqueName(),temp,detail);
+        homeDashboard.weather(pref("zikra_city","حدد الموقع"),temp,detail);
         if(memories!=null&&memories.length()>0){JSONObject item=memories.optJSONObject(Math.floorMod(memoryIndex,memories.length()));homeDashboard.remembrance(item.optString("text"));}
         refreshHomeQuran();
     }
@@ -442,8 +447,9 @@ final class NativeTvUi {
     }
     private String weatherName(int code){if(code==0)return "سماء صافية";if(code<=3)return "غائم جزئيًا";if(code<=48)return "ضباب";if(code>=95)return "عواصف رعدية";if(code>=71&&code<=77||code==85||code==86)return "ثلوج";return "أمطار";}
     private void weather(){
+        weatherDay=0;
         if(weather==null)try{weather=new JSONObject(pref("tv_weather","{}"));}catch(Exception ignored){}
-        weatherPage=new NativeWeatherView(owner,uiFont,motion,weather,mosqueName().isEmpty()?pref("zikra_city",""):mosqueName(),rtl(),weatherDay,value->weatherDay=value,this::loadWeather,()->route("location"));content.addView(weatherPage,new LinearLayout.LayoutParams(-1,0,1));
+        weatherPage=new NativeWeatherView(owner,uiFont,motion,weather,pref("zikra_city",""),rtl(),weatherDay,value->weatherDay=value,this::loadWeather,()->route("location"));content.addView(weatherPage,new LinearLayout.LayoutParams(-1,0,1));
     }
     private void loadContent(){final String language=pref("zikra_language","ar");io.execute(()->{try{JSONObject translated=new JSONObject(asset("assets/data/native-translations.json"));String source=asset("assets/data/quran-text.js");JSONObject q=new JSONObject(source.substring(source.indexOf('{'),source.lastIndexOf('}')+1));JSONArray all=q.getJSONArray("surahs");NativeQuranBook book=new NativeQuranBook(all);String memory=asset("assets/data/remembrance-"+language+".js");JSONArray items=new JSONArray(memory.substring(memory.indexOf('['),memory.lastIndexOf(']')+1));main.post(()->{if(closed||!language.equals(pref("zikra_language","ar")))return;translations=translated;surahs=all;quranBook=book;memories=items;if(page.equals("mushaf")||page.equals("surahs")||page.equals("reading")||page.equals("player")||page.equals("memory")||!language.equals("ar"))render(false);refreshDashboard();});}catch(Exception e){main.post(()->notice("تعذّر قراءة المحتوى المحلي."));}});}
     private String asset(String path)throws Exception{try(InputStream input=owner.getAssets().open(path);ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=input.read(b))!=-1)out.write(b,0,n);return out.toString("UTF-8");}}
