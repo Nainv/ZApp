@@ -83,7 +83,6 @@ final class NativeTvUi {
     private ScrollView bodyScroll;
     private View navigationCard;
     private TextView memoryTextView;
-    private LinearLayout pageActions;
     private Button sideLeft,sideRight;
     private NativeWeatherView weatherPage;
     private int weatherDay;
@@ -159,7 +158,7 @@ final class NativeTvUi {
         long now=android.os.SystemClock.elapsedRealtime();if(NativeTvPolicy.exitOnBack(page.equals("home"),history.size(),lastBackAt,now)){owner.finish();return;}lastBackAt=now;
     }
     private void render(boolean returning){
-        if(closed)return;requestId++;motion.hide();if(updateBadge!=null)updateBadge.stopPulse();updateBadge=null;content.removeAllViews();removeSideNavigation();grid=null;homeDashboard=null;weatherPage=null;pageActions=null;bodyScroll=null;navigationCard=null;memoryTextView=null;quranCard=null;
+        if(closed)return;requestId++;motion.hide();if(updateBadge!=null)updateBadge.stopPulse();updateBadge=null;content.removeAllViews();removeSideNavigation();grid=null;homeDashboard=null;weatherPage=null;bodyScroll=null;navigationCard=null;memoryTextView=null;quranCard=null;
         content.setPadding(dp(page.equals("reading")?16:32),dp(page.equals("reading")?6:20),dp(page.equals("reading")?16:32),dp(page.equals("reading")?8:18));
         content.setLayoutDirection(pref("zikra_language","ar").equals("ar")?View.LAYOUT_DIRECTION_RTL:View.LAYOUT_DIRECTION_LTR);
         LinearLayout header=new LinearLayout(owner);header.setClipChildren(false);header.setClipToPadding(false);header.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);header.setGravity(Gravity.CENTER_VERTICAL);content.addView(header,new LinearLayout.LayoutParams(-1,dp(page.equals("reading")?42:50)));
@@ -268,7 +267,7 @@ final class NativeTvUi {
     private void notice(String value){status.setVisibility(View.GONE);}
     private void error(){if(!closed)message("تعذّر الاتصال","تحقق من الإنترنت وأعد المحاولة.");}
     private void body(String value,int size,Typeface face){ScrollView scroll=new ScrollView(owner);scroll.setClipToPadding(false);TextView label=text(value,size,TEXT);label.setTextIsSelectable(false);label.setPadding(dp(26),dp(18),dp(26),dp(18));label.setLineSpacing(dp(7),1.3f);if(face!=null)label.setTypeface(face);scroll.addView(label);scroll.setBackground(shape(0xd916272d,18));content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));if(android.os.Build.VERSION.SDK_INT>=26)scroll.setDefaultFocusHighlightEnabled(false);scroll.setFocusable(true);bodyScroll=scroll;scroll.requestFocus();}
-    private void actions(String[] labels,Runnable[] actions){LinearLayout row=new LinearLayout(owner);pageActions=row;row.setGravity(Gravity.CENTER);for(int i=0;i<labels.length;i++){Button b=button(labels[i],actions[i]);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(44),1);p.setMargins(dp(6),dp(10),dp(6),0);row.addView(b,p);}content.addView(row);}
+    private void actions(String[] labels,Runnable[] actions){LinearLayout row=new LinearLayout(owner);row.setGravity(Gravity.CENTER);for(int i=0;i<labels.length;i++){Button b=button(labels[i],actions[i]);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(44),1);p.setMargins(dp(6),dp(10),dp(6),0);row.addView(b,p);}content.addView(row);}
     private void addSideNavigation(){
         int leftDelta=NativeTvPolicy.horizontalStep(rtl(),true),rightDelta=NativeTvPolicy.horizontalStep(rtl(),false);
         sideLeft=sideArrow("‹",leftDelta,leftDelta>0?"التالي":"السابق");sideRight=sideArrow("›",rightDelta,rightDelta>0?"التالي":"السابق");
@@ -343,7 +342,6 @@ final class NativeTvUi {
     }
     private void memoryBody(String value){ScrollView scroll=new ScrollView(owner);scroll.setFillViewport(true);scroll.setClipToPadding(true);FrameLayout card=new FrameLayout(owner);card.setBackground(shape(0xd916272d,18));card.setClipToPadding(true);card.setClipChildren(true);TextView label=text(value,18,TEXT);label.setGravity(Gravity.CENTER);label.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);label.setPadding(dp(28),dp(22),dp(28),dp(22));label.setLineSpacing(dp(3),1.05f);label.setMaxLines(80);androidx.core.widget.TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(label,9,18,1,android.util.TypedValue.COMPLEX_UNIT_SP);card.addView(label,new FrameLayout.LayoutParams(-1,-1));scroll.addView(card,new ScrollView.LayoutParams(-1,-1));content.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));bodyScroll=scroll;navigationCard=card;memoryTextView=label;}
     private void tasbeeh(){prompt("التسبيح · "+number("zikra_tasbeeh_count",0),"",null,new String[]{"+1","تصفير العداد","رجوع"},i->{if(i==0)put("zikra_tasbeeh_count",String.valueOf(number("zikra_tasbeeh_count",0)+1));else if(i==1)put("zikra_tasbeeh_count","0");refreshDashboard();});}
-    private String nextPrayer(){try{JSONArray rows=new JSONArray(AdhanScheduler.prefs(owner).getString("schedule","[]"));long now=AdhanScheduler.now(owner),next=Long.MAX_VALUE;String key="";for(int i=0;i<rows.length();i++){JSONObject r=rows.getJSONObject(i);long t=r.optLong("epoch");if(t>now&&t<next){next=t;key=r.optString("key");}}if(!key.isEmpty())return prayerName(key)+"  "+format("HH:mm",next);}catch(Exception ignored){}return "حدد الموقع لإظهار المواقيت";}
     private String prayerName(String key){for(int i=0;i<AdhanScheduler.KEYS.length;i++)if(key.equals(AdhanScheduler.KEYS[i]))return PRAYERS[i];return key;}
     private String prayerTime(String key){try{JSONArray rows=new JSONArray(AdhanScheduler.prefs(owner).getString("schedule","[]"));long today=AdhanScheduler.now(owner);String date=format("yyyy-MM-dd",today);for(int i=0;i<rows.length();i++){JSONObject r=rows.getJSONObject(i);if(key.equals(r.optString("key"))&&date.equals(r.optString("date")))return format("HH:mm",r.optLong("epoch"));}}catch(Exception ignored){}return "—";}
     private void adhanChoice(String key){choose("أذان "+prayerName(key),new String[]{"مكة","المدينة","العفاسي","سوريا","صامت"},i->{try{JSONObject settings=new JSONObject(AdhanScheduler.prefs(owner).getString("settings","{}"));settings.put(key,new JSONObject().put("enabled",i!=4).put("voice",new String[]{"makkah","madinah","alafasy","syria","makkah"}[i]));saveSchedule(AdhanScheduler.configuration(owner),settings);render(false);}catch(Exception e){error();}},this::previewAdhan);}
